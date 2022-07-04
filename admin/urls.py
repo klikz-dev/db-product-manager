@@ -2,8 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from misc.views import ConfigViewSet
-from mysql.views import AddressViewSet, CustomerViewSet, ImageViewSet
-from shopify.views import LineItemViewSet, OrderViewSet, ProductViewSet, VariantViewSet
+from shopify.views import AddressViewSet, CustomerViewSet, ImageViewSet, LineItemViewSet, OrderViewSet, ProductViewSet, VariantViewSet
 
 from . import views
 
