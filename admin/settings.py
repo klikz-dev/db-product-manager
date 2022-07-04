@@ -76,10 +76,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'main.sqlite3',
     },
-    'monitor': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'monitor.sqlite3',
-    },
     'shopify': {
         'ENGINE': 'django.db.backends.mysql',
         'HOST': env('MYSQL_HOST'),
@@ -98,8 +94,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['monitor.router.MonitorRouter',
-                    'shopify.router.ShopifyRouter', 'mysql.router.MysqlRouter']
+DATABASE_ROUTERS = ['shopify.router.ShopifyRouter', 'mysql.router.MysqlRouter']
 
 AUTH_PASSWORD_VALIDATORS = [
     {
