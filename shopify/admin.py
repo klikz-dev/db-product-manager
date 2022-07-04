@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Product, Variant, Order, Line_Item, Tracking
+from .models import Address, Customer, Product, ProductImage, Variant, Order, Line_Item, Tracking
 from mysql.models import Manufacturer, PendingNewProduct, ProductManufacturer, Type, PendingUpdatePrice, PendingUpdateProduct, PendingUpdatePublish
 
 
@@ -12,6 +12,77 @@ def custom_titled_filter(title):
             instance.title = title
             return instance
     return Wrapper
+
+
+class CustomerAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['customerId', 'email', 'firstName', 'lastName', 'phone', 'defaultAddressId',
+              'orderCount', 'totalSpent', 'state', 'note', 'tags', 'acceptsMarketing']
+
+    ordering = ['-updatedAt']
+
+    list_filter = ['orderCount', 'acceptsMarketing']
+
+    list_display = ('customerId', 'email', 'firstName',
+                    'lastName', 'totalSpent')
+
+    search_fields = ['email', 'firstName', 'lastName', 'customerId', 'phone']
+
+
+class AddressAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['addressId', 'customer', 'firstName', 'lastName', 'phone',
+              'address1', 'address2', 'company', 'city', 'state', 'zip', 'country']
+
+    ordering = ['-updatedAt']
+
+    list_display = ('addressId', 'customer',
+                    'firstName', 'lastName', 'address')
+
+    list_filter = ['state']
+
+    search_fields = ['addressId', 'customer', 'firstName', 'lastName', 'phone',
+                     'address1', 'address2', 'company', 'city', 'state', 'zip', 'country']
+
+
+class ProductImageAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['productId', 'imageIndex', 'imageId', 'imageURL']
+
+    ordering = ['-updatedAt']
+
+    list_display = ('productId', 'imageIndex', 'imageId', 'imageURL')
+
+    list_filter = ['imageIndex']
+
+    search_fields = ['productId', 'imageIndex', 'imageId']
 
 
 class VariantAdmin(admin.ModelAdmin):
@@ -285,3 +356,6 @@ admin.site.register(Variant, VariantAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Tracking, TrackingAdmin)
+admin.site.register(Address, AddressAdmin)
+admin.site.register(Customer, CustomerAdmin)
+admin.site.register(ProductImage, ProductImageAdmin)

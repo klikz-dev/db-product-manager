@@ -26,54 +26,6 @@ class CustomEmail(models.Model):
         db_table = "CustomEmails"
 
 
-class Customer(models.Model):
-    customerId = models.CharField(max_length=200, primary_key=True)
-    email = models.CharField(max_length=200)
-    firstName = models.CharField(max_length=200)
-    lastName = models.TextField(max_length=2000)
-    phone = models.CharField(max_length=200)
-    defaultAddressId = models.CharField(max_length=200)
-    orderCount = models.IntegerField(default=0)
-    totalSpent = models.FloatField(default=0)
-    state = models.CharField(max_length=200)
-    note = models.TextField(max_length=1000)
-    tags = models.CharField(max_length=200)
-    acceptsMarketing = models.BooleanField(default=False)
-
-    createdAt = models.DateTimeField()
-    updatedAt = models.DateTimeField()
-
-    class Meta:
-        managed = True
-        db_table = "Customer"
-
-
-class Address(models.Model):
-    addressId = models.CharField(max_length=200, primary_key=True)
-    customer = models.ForeignKey(
-        Customer, db_column="customerId", related_name='addresses', on_delete=models.CASCADE)
-    firstName = models.CharField(max_length=200)
-    lastName = models.CharField(max_length=200)
-    phone = models.CharField(max_length=200)
-    address1 = models.CharField(max_length=200)
-    address2 = models.CharField(max_length=200)
-    company = models.CharField(max_length=200)
-    city = models.CharField(max_length=200)
-    state = models.CharField(max_length=200)
-    zip = models.CharField(max_length=200)
-    country = models.CharField(max_length=200)
-
-    createdAt = models.DateTimeField()
-    updatedAt = models.DateTimeField()
-
-    def address(self):
-        return "{}, {}, {} {}, {}, {}".format(self.address1, self.city, self.state, self.zip, self.country, self.phone)
-
-    class Meta:
-        managed = True
-        db_table = "Address"
-
-
 class EditCategory(models.Model):
     sku = models.CharField(max_length=200, primary_key=True)
     category = models.CharField(max_length=2000)
@@ -216,19 +168,6 @@ class PORecord(models.Model):
     class Meta:
         managed = True
         db_table = "PORecord"
-
-
-class ProductImage(models.Model):
-    productId = models.CharField(max_length=200)
-    imageIndex = models.IntegerField(default=1)
-    imageId = models.CharField(max_length=200, primary_key=True)
-    imageURL = models.CharField(max_length=200)
-
-    updatedAt = models.DateTimeField()
-
-    class Meta:
-        managed = True
-        db_table = "ProductImage"
 
 
 class ProductInventory(models.Model):

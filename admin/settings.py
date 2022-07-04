@@ -94,7 +94,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['shopify.router.ShopifyRouter', 'mysql.router.MysqlRouter']
+DATABASE_ROUTERS = ['mysql.router.MysqlRouter', 'shopify.router.ShopifyRouter']
 
 AUTH_PASSWORD_VALIDATORS = [
     {

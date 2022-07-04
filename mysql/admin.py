@@ -1,34 +1,8 @@
 from django.contrib import admin
 
-from .models import Manufacturer, Address, Admin, CustomEmail, Customer, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
+from .models import Manufacturer, Admin, CustomEmail, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
 from .models import ProductManufacturer, PendingNewProduct, PendingUpdateProduct, PendingUpdatePublish, PendingUpdatePrice
-from .models import PendingUpdateTag, ProductImage, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, Tag, Type
-
-
-class AddressAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    fields = ['addressId', 'customer', 'firstName', 'lastName', 'phone',
-              'address1', 'address2', 'company', 'city', 'state', 'zip', 'country']
-
-    ordering = ['-updatedAt']
-
-    list_display = ('addressId', 'customer',
-                    'firstName', 'lastName', 'address')
-
-    list_filter = ['state']
-
-    search_fields = ['addressId', 'customer', 'firstName', 'lastName', 'phone',
-                     'address1', 'address2', 'company', 'city', 'state', 'zip', 'country']
+from .models import PendingUpdateTag, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, Tag, Type
 
 
 class AdminAdmin(admin.ModelAdmin):
@@ -73,31 +47,6 @@ class CustomEmailAdmin(admin.ModelAdmin):
     list_display = ('Email', 'cid', 'orderid', 'status', 'flow')
 
     search_fields = ['Email', 'cid', 'orderid', 'md', 'flow']
-
-
-class CustomerAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    fields = ['customerId', 'email', 'firstName', 'lastName', 'phone', 'defaultAddressId',
-              'orderCount', 'totalSpent', 'state', 'note', 'tags', 'acceptsMarketing']
-
-    ordering = ['-updatedAt']
-
-    list_filter = ['orderCount', 'acceptsMarketing']
-
-    list_display = ('customerId', 'email', 'firstName',
-                    'lastName', 'totalSpent')
-
-    search_fields = ['email', 'firstName', 'lastName', 'customerId', 'phone']
 
 
 class EditCategoryAdmin(admin.ModelAdmin):
@@ -353,26 +302,6 @@ class PORecordAdmin(admin.ModelAdmin):
                      'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI']
 
 
-class ProductImageAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    fields = ['productId', 'imageIndex', 'imageId', 'imageURL']
-
-    ordering = ['-updatedAt']
-
-    list_display = ('productId', 'imageIndex', 'imageId', 'imageURL')
-
-    list_filter = ['imageIndex']
-
-    search_fields = ['productId', 'imageIndex', 'imageId']
-
-
 class ProductInventoryAdmin(admin.ModelAdmin):
     actions = None
 
@@ -507,10 +436,8 @@ class TypeAdmin(admin.ModelAdmin):
     search_fields = ['typeId', 'name', 'parentTypeId', 'published']
 
 
-admin.site.register(Address, AddressAdmin)
 admin.site.register(Admin, AdminAdmin)
 admin.site.register(CustomEmail, CustomEmailAdmin)
-admin.site.register(Customer, CustomerAdmin)
 admin.site.register(EditCategory, EditCategoryAdmin)
 admin.site.register(EditColor, EditColorAdmin)
 admin.site.register(EditStyle, EditStyleAdmin)
@@ -523,7 +450,6 @@ admin.site.register(PendingUpdatePublish, PendingUpdatePublishAdmin)
 admin.site.register(PendingUpdatePrice, PendingUpdatePriceAdmin)
 admin.site.register(PendingUpdateTag, PendingUpdateTagAdmin)
 admin.site.register(PORecord, PORecordAdmin)
-admin.site.register(ProductImage, ProductImageAdmin)
 admin.site.register(ProductInventory, ProductInventoryAdmin)
 admin.site.register(ProductSubcategory, ProductSubcategoryAdmin)
 admin.site.register(ProductSubtype, ProductSubtypeAdmin)
