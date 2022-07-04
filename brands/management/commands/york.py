@@ -26,7 +26,7 @@ db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.york
 markup_trade = markup.york_trade  # MSRP

@@ -16,7 +16,7 @@ db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.jffabrics
 markup_trade = markup.jffabrics_trade
@@ -219,6 +219,10 @@ class Command(BaseCommand):
                     usage = "Wallcovering"
 
                 manufacturer = "{} {}".format(brand, ptype)
+
+                # 7/4 from BK. missing performance category
+                if "performance" in description:
+                    categoryList = "Performance Fabric, " + categoryList
 
                 JFFabrics.objects.create(
                     mpn=mpn,
@@ -762,36 +766,33 @@ class Command(BaseCommand):
         for product in products:
             sku = product.sku
 
-            category = product.category + "," + product.style
-            style = product.category + "," + product.style
-            color = product.colors
+            category = product.category
+            style = product.style
+            colors = product.color
 
             if category != None and category != "":
-                cat = str(category).strip()
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
-                    sq(sku), sq(cat)))
+                    sq(sku), sq(category)))
                 con.commit()
 
-                debug("JF Fabrics", 0, "Added Category. SKU: {}, Category: {}".format(
-                    sku, sq(cat)))
+                debug("JFFabrics", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(category)))
 
             if style != None and style != "":
-                sty = str(style).strip()
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
-                    sq(sku), sq(sty)))
+                    sq(sku), sq(style)))
                 con.commit()
 
-                debug("JF Fabrics", 0, "Added Style. SKU: {}, Style: {}".format(
-                    sku, sq(sty)))
+                debug("JFFabrics", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(style)))
 
-            if color != None and color != "":
-                col = str(color).strip()
+            if colors != None and colors != "":
                 csr.execute("CALL AddToEditColor ({}, {})".format(
-                    sq(sku), sq(col)))
+                    sq(sku), sq(colors)))
                 con.commit()
 
-                debug("JF Fabrics", 0,
-                      "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+                debug("JFFabrics", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
 
         csr.close()
         con.close()

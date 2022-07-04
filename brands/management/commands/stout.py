@@ -21,7 +21,7 @@ db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.stout
 markup_trade = markup.stout_trade
@@ -708,11 +708,11 @@ class Command(BaseCommand):
 
             category = product.category
             style = product.style
-            colors = product.colors
+            colors = product.color
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
-                    sq(sku), sq(str(category).strip())))
+                    sq(sku), sq(category)))
                 con.commit()
 
                 debug("Stout", 0, "Added Category. SKU: {}, Category: {}".format(
@@ -720,7 +720,7 @@ class Command(BaseCommand):
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
-                    sq(sku), sq(str(style).strip())))
+                    sq(sku), sq(style)))
                 con.commit()
 
                 debug("Stout", 0, "Added Style. SKU: {}, Style: {}".format(
@@ -728,7 +728,7 @@ class Command(BaseCommand):
 
             if colors != None and colors != "":
                 csr.execute("CALL AddToEditColor ({}, {})".format(
-                    sq(sku), sq(str(colors).strip())))
+                    sq(sku), sq(colors)))
                 con.commit()
 
                 debug("Stout", 0,

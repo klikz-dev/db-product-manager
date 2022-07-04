@@ -19,7 +19,7 @@ db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.premierprints
 markup_trade = markup.premierprints_trade
@@ -643,36 +643,33 @@ class Command(BaseCommand):
         for product in products:
             sku = product.sku
 
-            style = product.style
             category = product.category
-            colors = product.colors
-
-            if style != None and style != "":
-                sty = str(style).strip()
-                csr.execute("CALL AddToEditStyle ({}, {})".format(
-                    sq(sku), sq(sty)))
-                con.commit()
-
-                debug("PremierPrints", 0, "Added Style. SKU: {}, Style: {}".format(
-                    sku, sq(sty)))
+            style = product.style
+            colors = product.color
 
             if category != None and category != "":
-                cat = str(category).strip()
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
-                    sq(sku), sq(cat)))
+                    sq(sku), sq(category)))
                 con.commit()
 
                 debug("PremierPrints", 0, "Added Category. SKU: {}, Category: {}".format(
-                    sku, sq(cat)))
+                    sku, sq(category)))
+
+            if style != None and style != "":
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(style)))
+                con.commit()
+
+                debug("PremierPrints", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(style)))
 
             if colors != None and colors != "":
-                col = str(colors).strip()
                 csr.execute("CALL AddToEditColor ({}, {})".format(
-                    sq(sku), sq(col)))
+                    sq(sku), sq(colors)))
                 con.commit()
 
                 debug("PremierPrints", 0,
-                      "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
 
         csr.close()
         con.close()
