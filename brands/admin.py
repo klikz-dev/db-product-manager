@@ -89,6 +89,7 @@ class MadcapCottageAdmin(admin.ModelAdmin):
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
                     'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+    # list_display = ('productId', 'title')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 

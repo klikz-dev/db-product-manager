@@ -287,6 +287,9 @@ class MadcapCottage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def title(self):
+        return "{} {} {} {}".format(self.brand, self.pattern, self.color, self.ptype)
+
     def __str__(self):
         return self.mpn
 

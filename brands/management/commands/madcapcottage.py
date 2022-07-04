@@ -4,9 +4,7 @@ from brands.models import MadcapCottage
 from shopify.models import Product as ShopifyProduct
 
 import os
-import csv
 import pymysql
-import time
 import xlrd
 from shutil import copyfile
 
@@ -19,7 +17,7 @@ db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.madcapcottage
 markup_trade = markup.madcapcottage_trade
@@ -679,7 +677,7 @@ class Command(BaseCommand):
         con.close()
 
     def updateTags(self):
-        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+        con = pymysql.connect(host=db_host, port=int(db_port), user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
@@ -740,33 +738,17 @@ class Command(BaseCommand):
                 continue
 
     def roomset(self):
-        fnames = os.listdir(FILEDIR + "/files/images/madcapcottage/")
+        products = MadcapCottage.objects.all()
 
-        for fname in fnames:
-            try:
-                if "_" in fname:
-                    mpn = fname.split("_")[0]
-                    roomId = int(fname.split("_")[1].split(".")[0]) + 1
-
-                    product = MadcapCottage.objects.get(mpn=mpn)
-                    productId = product.productId
-
-                    if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/madcapcottage/" + fname, FILEDIR +
-                                 "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
-
-                        debug("MadcapCottage", 0, "Roomset Image {}_{}.jpg".format(
-                            productId, roomId))
-
-                        os.remove(
-                            FILEDIR + "/files/images/madcapcottage/" + fname)
-                    else:
-                        print("No product found with MPN: {}".format(mpn))
-                else:
-                    continue
-
-            except Exception as e:
-                print(e)
+        for product in products:
+            if product.roomset != None and product.roomset != "":
+                try:
+                    common.roomdownload(
+                        product.roomset, "{}_2.jpg".format(product.productId))
+                except Exception as e:
+                    print(e)
+                    pass
+            else:
                 continue
 
     def fixImages(self):

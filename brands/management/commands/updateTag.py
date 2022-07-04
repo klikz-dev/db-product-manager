@@ -7,18 +7,13 @@ import pymysql
 from library import debug, common, shopify
 
 import environ
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env = environ.Env()
 
 db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
 db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
-db_port = env('MYSQL_PORT')
+db_port = int(env('MYSQL_PORT'))
 
 debug = debug.debug
 backup = common.backup
