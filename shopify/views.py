@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from misc.models import Config
 
-from mysql.models import Manufacturer
+from mysql.models import Manufacturer, PORecord
 from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Variant
 from shopify.serializers import AddressDetailSerializer, AddressListSerializer, CustomerDetailSerializer, CustomerListSerializer, ImageDetailSerializer, ImageListSerializer, LineItemDetailSerializer, LineItemListSerializer, OrderDetailSerializer, OrderListSerializer, OrderUpdateSerializer, ProductDetailSerializer, ProductListSerializer, VariantDetailSerializer, VariantListSerializer, VariantUpdateSerializer
 
@@ -123,26 +123,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         if ref is not None:
             orders = orders.filter(referenceNumber=ref)
 
-        brand = self.request.query_params.get('brand')
-        type = self.request.query_params.get('type')
-
-        manufacturers = []
-        for m in Manufacturer.objects.filter(brand=brand):
-            manufacturers.append(m)
-
-        if brand is not None and len(manufacturers) > 0:
-            orders = orders.filter(
-                line_items__orderedProductManufacturer__in=manufacturers)
-
-        type = self.request.query_params.get('type')
-        if type is not None and type == 's':
-            orders = orders.filter(
-                Q(orderType='Sample') | Q(orderType='Order/Sample'))
-
-        if type is not None and type == 'o':
-            lineItems = lineItems.exclude(
-                Q(orderType='Order') | Q(orderType='Order/Sample'))
-
         page = self.paginate_queryset(orders)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -180,31 +160,40 @@ class LineItemViewSet(viewsets.ModelViewSet):
     def list(self, request):
         lineItems = Line_Item.objects.all().order_by('-createdAt')
 
-        order = self.request.query_params.get('order')
-        if order is not None:
-            lineItems = lineItems.filter(order=order)
-
+        # Filter by Brand Name
         brand = self.request.query_params.get('brand')
         manufacturers = []
         for m in Manufacturer.objects.filter(brand=brand):
             manufacturers.append(m)
+
         if brand is not None and len(manufacturers) > 0:
             lineItems = lineItems.filter(
                 orderedProductManufacturer__in=manufacturers)
+        ######################
 
-        config = Config.objects.all()
-        last_processed_order = config[0].last_processed_order
-        last_processed_sample = config[0].last_processed_sample
-
+        # Filtery by Processor Type
         type = self.request.query_params.get('type')
-        if type is not None and type == 's':
+        if type == 's':
             lineItems = lineItems.filter(
                 orderedProductVariantTitle__icontains='Sample -')
-            lineItems = lineItems.filter(order__gte=last_processed_sample)
-        if type is not None and type == 'o':
+        if type == 'o':
             lineItems = lineItems.exclude(
                 orderedProductVariantTitle__icontains='Sample -')
-            lineItems = lineItems.filter(order__gte=last_processed_order)
+        ###########################
+
+        # Filter by Last Processed Order/Sample Ids
+        poRecord = PORecord.objects.all()
+
+        lastPO = None
+        if brand == "Covington":
+            if type == "o":
+                lastPO = poRecord[0].CovingtonOrder
+            else:
+                lastPO = poRecord[0].CovingtonSample
+
+        if lastPO is not None:
+            lineItems = lineItems.filter(order__gte=lastPO)
+        ############################################
 
         page = self.paginate_queryset(lineItems)
         if page is not None:

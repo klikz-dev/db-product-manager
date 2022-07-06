@@ -164,6 +164,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     SchumacherEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    CovingtonOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    CovingtonSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     class Meta:
         managed = True

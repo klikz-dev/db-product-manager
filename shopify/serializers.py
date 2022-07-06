@@ -86,7 +86,17 @@ class LineItemDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class LineItemOrderInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['shopifyOrderId', 'orderNumber', 'email', 'shippingFirstName', 'shippingLastName', 'shippingAddress1',
+                  'shippingAddress2', 'shippingCity', 'shippingState', 'shippingZip', 'shippingCountry', 'shippingPhone',
+                  'status', 'orderType', 'orderTotal', 'manufacturerList', 'referenceNumber', 'orderDate', 'note', 'specialShipping']
+
+
 class LineItemListSerializer(serializers.ModelSerializer):
+    order = LineItemOrderInfoSerializer()
+
     class Meta:
         model = Line_Item
         fields = '__all__'

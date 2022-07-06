@@ -293,13 +293,13 @@ class PORecordAdmin(admin.ModelAdmin):
     #     return False
 
     fields = ['KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-              'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI']
+              'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'CovingtonOrder', 'CovingtonSample']
 
     list_display = ('KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-                    'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI')
+                    'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'CovingtonOrder', 'CovingtonSample')
 
     search_fields = ['KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-                     'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI']
+                     'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'CovingtonOrder', 'CovingtonSample']
 
 
 class ProductInventoryAdmin(admin.ModelAdmin):
