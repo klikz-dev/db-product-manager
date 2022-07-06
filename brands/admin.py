@@ -433,15 +433,17 @@ class YorkAdmin(admin.ModelAdmin):
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'statusText', 'stock']}),
+        ('Availability', {'fields': [
+         'status', 'statusText', 'stock', 'quickship']}),
         ('Image', {'fields': ['thumbnail', 'roomset']}),
         ('Shipify Product', {'fields': ['productId']}),
     ]
 
     list_display = ('mpn', 'sku', 'brand', 'collection_num', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock', 'quickship')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection', 'quickship']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 

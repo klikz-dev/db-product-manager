@@ -72,6 +72,9 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
+        if "quickship" in options['functions']:
+            self.quickship()
+
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -244,6 +247,10 @@ class Command(BaseCommand):
                 status = True
                 statusText = row['SKUStatus']
 
+                quickship = False
+                if row['QuickShip'] == 'Y':
+                    quickship = True
+
                 try:
                     reqStock = requests.get(
                         "{}/stock.php/{}".format(API_BASE_URL, mpn))
@@ -285,7 +292,8 @@ class Command(BaseCommand):
                     increment=increment,
                     stock=stock,
                     status=status,
-                    statusText=statusText
+                    statusText=statusText,
+                    quickship=quickship,
                 )
 
     def getProductIds(self):
@@ -808,3 +816,25 @@ class Command(BaseCommand):
                 os.remove(FILEDIR + "/files/images/york/" + fname)
             except:
                 continue
+
+    def quickship(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = York.objects.all()
+
+        for product in products:
+            if product.quickship:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("Quick Ship")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('York', 0, "Added to Quick Ship. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()

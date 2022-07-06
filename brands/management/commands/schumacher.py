@@ -129,6 +129,7 @@ class Command(BaseCommand):
             collection = str(row[2]).strip()
             if "STAPETER" in collection:
                 collection = "BORASTAPETER"
+                brand = "Borastapeter"
 
             if "FABRIC" == ptype:
                 ptype = "Fabric"

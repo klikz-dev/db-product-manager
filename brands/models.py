@@ -1351,6 +1351,7 @@ class York(models.Model):
     statusText = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     stock = models.IntegerField(default=0)
+    quickship = models.BooleanField(default=False)
 
     thumbnail = models.CharField(
         max_length=200, default=None, null=True, blank=True)
