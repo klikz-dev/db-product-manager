@@ -95,6 +95,7 @@ class LineItemOrderInfoSerializer(serializers.ModelSerializer):
 
 
 class LineItemListSerializer(serializers.ModelSerializer):
+    variant = VariantDetailSerializer()
     order = LineItemOrderInfoSerializer()
 
     class Meta:
