@@ -13,12 +13,7 @@ import requests
 from library import debug, common, shopify, markup
 
 import environ
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env = environ.Env()
 
 db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
@@ -278,7 +273,7 @@ class Command(BaseCommand):
 
         csr.execute("""SELECT P.ProductID, P.SKU 
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'York' AND P.SKU NOT LIKE '%YORK %';""")
+        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Name = 'Borastapeter Wallpaper';""")
 
         total, success, failed = 0, 0, 0
 
