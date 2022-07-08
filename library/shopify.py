@@ -721,7 +721,20 @@ def getProductsByVendor(vendor):
 
     s = requests.Session()
     r = s.get(
-        api_url + "admin/api/{}/products.json?fields=id,vendor&vendor={}".format(api_version, vendor))
+        api_url + "/admin/api/{}/products.json?fields=id,vendor&vendor={}".format(api_version, vendor))
 
     s.close()
     return r
+
+
+def getNewOrders(lastOrderId):
+    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
+        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+
+    s = requests.Session()
+    r = s.get(
+        api_url + "/admin/api/{}/orders.json?since_id={}&statu=any".format(api_version, lastOrderId))
+
+    s.close()
+
+    return json.loads(r.text)

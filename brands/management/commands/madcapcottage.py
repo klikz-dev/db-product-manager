@@ -143,8 +143,9 @@ class Command(BaseCommand):
                     debug("MadcapCottage", 1, "UOM error {}".format(mpn))
                     continue
 
-                minimum = int(str(sh.cell_value(i, 25)).replace(
-                    "roll", "").replace("yd", "").strip())
+                # minimum = int(str(sh.cell_value(i, 25)).replace(
+                #     "roll", "").replace("yd", "").strip())
+                minimum = 2  # 7/8 from BK
                 increment = ''
 
                 usage = str(sh.cell_value(i, 24)).strip()
