@@ -83,6 +83,18 @@ class Command(BaseCommand):
                 elif "STOUT BROTHERS" in row[4]:
                     brand = "Stout"
                     orderNumber = row[1].split("|")[1].split("/")[0]
+                elif "YORK WALLCOVERINGS" in row[4]:
+                    brand = "York"
+                    orderNumber = row[1].split("|")[1]
+                elif "KRAVET" in row[4]:
+                    brand = "Kravet"
+                    orderNumber = row[1].split("|")[0]
+                elif "SCALAMANDRE" in row[4]:
+                    brand = "Scalamandre"
+                    orderNumber = row[1].split("|")[1].split("PO")[1][1:]
+                elif "PREMIER PRINTS" in row[4]:
+                    brand = "Premier Prints"
+                    orderNumber = row[1].split("|")[0]
                 # elif "PINDLER AND PINDLER INC" in row[4]:
                 #     brand = "Pindler"
                 #     orderNumber = row[1].split("/")[2].replace("PO#", "")
