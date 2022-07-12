@@ -65,3 +65,212 @@ def backup():
     except Exception as e:
         print(e)
         debug("Manage", 1, "Database Backup Failed. {}".format(e))
+
+
+def importOrder(order, con):
+    csr = con.cursor()
+
+    customer = order['customer']
+    address = customer['default_address']
+
+    # Import Address
+    csr.execute(
+        "CALL ImportAddress ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+            address['id'],
+            customer['id'],
+            address['last_name'],
+            address['first_name'],
+            address['company'],
+            address['address1'],
+            address['address2'],
+            address['city'],
+            address['province_code'],
+            address['zip'],
+            address['country'],
+            address['phone']
+        )
+    )
+    con.commit()
+
+    # Import Customer
+    csr.execute(
+        "CALL ImportCustomer ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+            customer['id'],
+            customer['email'],
+            customer['first_name'],
+            customer['last_name'],
+            customer['phone'],
+            address['id'],
+            customer['orders_count'],
+            customer['total_spent'],
+            customer['state'],
+            customer['note'],
+            customer['tags'],
+            customer['accepts_marketing'],
+            customer['created_at']
+        )
+    )
+    con.commit()
+
+    # Import Order
+    orderId = order['id']
+
+    specialShipping = ''
+    shippingMethod = ''
+    shippingCost = 0
+
+    if len(order['shipping_lines']) > 0:
+        shipping = order['shipping_lines'][0]
+        shippingCost = float(shipping['price'])
+
+        shippingMethod = shipping['title']
+        if 'UPS Next Day Air' in shippingMethod:
+            shippingMethod = 'UPS Next Day Air'
+        if 'UPS 2nd Day Air' in shippingMethod:
+            shippingMethod = 'UPS 2nd Day Air'
+
+        if order['shipping_address']['country'] != 'United States' and order['shipping_address']['country'] != "US":
+            specialShipping = 'International'
+        elif shippingMethod == 'UPS Next Day Air':
+            specialShipping = 'Overnight'
+        elif shippingMethod == 'UPS 2nd Day Air':
+            specialShipping = '2nd Day'
+        elif '2nd Day Shipping for Samples' in shippingMethod:
+            specialShipping = '2nd Day'
+        elif 'Overnight Shipping for Samples' in shippingMethod:
+            specialShipping = 'Overnight'
+
+    isFraud = 0
+    if 'Fraud' in order['tags']:
+        isFraud = 1
+
+    shipping_last_name = order['billing_address']['last_name']
+    shipping_first_name = order['billing_address']['first_name']
+    shipping_company = order['billing_address']['company']
+    shipping_address1 = order['billing_address']['address1']
+    shipping_address2 = order['billing_address']['address2']
+    shipping_city = order['billing_address']['city']
+    shipping_province_code = order['billing_address']['province_code']
+    shipping_zip = order['billing_address']['zip']
+    shipping_country = order['billing_address']['country']
+    shipping_phone = order['billing_address']['phone']
+
+    if order.get('shipping_address'):
+        shipping_last_name = order['shipping_address']['last_name']
+        shipping_first_name = order['shipping_address']['first_name']
+        shipping_company = order['shipping_address']['company']
+        shipping_address1 = order['shipping_address']['address1']
+        shipping_address2 = order['shipping_address']['address2']
+        shipping_city = order['shipping_address']['city']
+        shipping_province_code = order['shipping_address']['province_code']
+        shipping_zip = order['shipping_address']['zip']
+        shipping_country = order['shipping_address']['country']
+        shipping_phone = order['shipping_address']['phone']
+
+    csr.execute(
+        "CALL ImportOrder ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+            orderId,
+            order['order_number'],
+            order['email'],
+            order['phone'],
+            customer['id'],
+            order['billing_address']['last_name'],
+            order['billing_address']['first_name'],
+            order['billing_address']['company'],
+            order['billing_address']['address1'],
+            order['billing_address']['address2'],
+            order['billing_address']['city'],
+            order['billing_address']['province_code'],
+            order['billing_address']['zip'],
+            order['billing_address']['country'],
+            order['billing_address']['phone'],
+            shipping_last_name,
+            shipping_first_name,
+            shipping_company,
+            shipping_address1,
+            shipping_address2,
+            shipping_city,
+            shipping_province_code,
+            shipping_zip,
+            shipping_country,
+            shipping_phone,
+            shippingMethod,
+            specialShipping,
+            order['note'],
+            order['total_line_items_price'],
+            order['total_discounts'],
+            order['subtotal_price'],
+            order['total_tax'],
+            shippingCost,
+            order['total_price'],
+            float(order['total_weight']) / 453.592,
+            order['created_at'],
+            isFraud
+        )
+    )
+    con.commit()
+
+    # Import Shopping Cart
+    line_items = order['line_items']
+
+    manufacturers = []
+    orderTypes = []
+
+    for line_item in line_items:
+        weight = float(line_item['grams'])
+        if weight == 0:
+            weight = 453.592
+
+        variantTitle = line_item['variant_title'].split('/')[0].strip()
+        if 'Sample -' in variantTitle:
+            if 'Sample' not in orderTypes:
+                orderTypes.append('Sample')
+        else:
+            if 'Order' not in orderTypes:
+                orderTypes.append('Order')
+
+        manufacturer = line_item['vendor']
+        if manufacturer not in manufacturers:
+            manufacturers.append(manufacturer)
+
+        csr.execute("""DELETE FROM Orders_ShoppingCart
+        WHERE ShopifyOrderID = '{}';""".format(orderId))
+        con.commit()
+
+        csr.execute(
+            "CALL ImportOrderShoppingCart ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+                orderId,
+                line_item['product_id'],
+                line_item['variant_id'],
+                line_item['quantity'],
+                line_item['title'],
+                variantTitle,
+                line_item['name'],
+                line_item['sku'],
+                manufacturer,
+                line_item['price'],
+                line_item['total_discount'],
+                weight / 453.592,
+                line_item['taxable']
+            )
+        )
+        con.commit()
+
+    # Update Order Manufacturers and Types
+    manufacturers.sort()
+    orderTypes.sort()
+    manufacturerList = ",".join(manufacturers)
+    orderTypeList = "/".join(orderTypes)
+
+    csr.execute(
+        "UPDATE Orders SET OrderType = '{}', ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
+            orderTypeList,
+            manufacturerList,
+            orderId
+        )
+    )
+    con.commit()
+
+    debug("Order", 0, "Downloaded Order {}".format(orderId))
+
+    csr.close()
