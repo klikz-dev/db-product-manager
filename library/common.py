@@ -75,7 +75,7 @@ def importOrder(order, con):
 
     # Import Address
     csr.execute(
-        "CALL ImportAddress ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+        'CALL ImportAddress ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
             address['id'],
             customer['id'],
             address['last_name'],
@@ -94,7 +94,7 @@ def importOrder(order, con):
 
     # Import Customer
     csr.execute(
-        "CALL ImportCustomer ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+        'CALL ImportCustomer ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
             customer['id'],
             customer['email'],
             customer['first_name'],
@@ -168,7 +168,7 @@ def importOrder(order, con):
         shipping_phone = order['shipping_address']['phone']
 
     csr.execute(
-        "CALL ImportOrder ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+        'CALL ImportOrder ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
             orderId,
             order['order_number'],
             order['email'],
@@ -216,6 +216,10 @@ def importOrder(order, con):
     manufacturers = []
     orderTypes = []
 
+    csr.execute("""DELETE FROM Orders_ShoppingCart
+        WHERE ShopifyOrderID = '{}';""".format(orderId))
+    con.commit()
+
     for line_item in line_items:
         weight = float(line_item['grams'])
         if weight == 0:
@@ -233,12 +237,8 @@ def importOrder(order, con):
         if manufacturer not in manufacturers:
             manufacturers.append(manufacturer)
 
-        csr.execute("""DELETE FROM Orders_ShoppingCart
-        WHERE ShopifyOrderID = '{}';""".format(orderId))
-        con.commit()
-
         csr.execute(
-            "CALL ImportOrderShoppingCart ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+            'CALL ImportOrderShoppingCart ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
                 orderId,
                 line_item['product_id'],
                 line_item['variant_id'],

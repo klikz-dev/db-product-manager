@@ -11,6 +11,18 @@ from shopify.serializers import AddressDetailSerializer, AddressListSerializer, 
 from datetime import datetime, timedelta
 from django.db.models import Q
 
+import pymysql
+from library import common, shopify
+
+import environ
+env = environ.Env()
+
+db_host = env('MYSQL_HOST')
+db_username = env('MYSQL_USER')
+db_password = env('MYSQL_PASSWORD')
+db_name = env('MYSQL_DATABASE')
+db_port = int(env('MYSQL_PORT'))
+
 
 class CustomerViewSet(viewsets.ModelViewSet):
 
@@ -132,6 +144,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        ordersRes = shopify.getOrderById(pk)
+        for order in ordersRes['orders']:
+            common.importOrder(order, con)
+
         orders = Order.objects.all()
         order = get_object_or_404(orders, pk=pk)
         serializer = OrderDetailSerializer(

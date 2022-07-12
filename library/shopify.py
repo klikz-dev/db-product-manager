@@ -10,12 +10,7 @@ from datetime import datetime
 from library import debug
 
 import environ
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env = environ.Env()
 
 db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
@@ -734,6 +729,19 @@ def getNewOrders(lastOrderId):
     s = requests.Session()
     r = s.get(
         api_url + "/admin/api/{}/orders.json?since_id={}&statu=any".format(api_version, lastOrderId))
+
+    s.close()
+
+    return json.loads(r.text)
+
+
+def getOrderById(orderId):
+    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
+        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+
+    s = requests.Session()
+    r = s.get(
+        api_url + "/admin/api/{}/orders.json?ids={}&statu=any".format(api_version, orderId))
 
     s.close()
 
