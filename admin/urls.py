@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from misc.views import ConfigViewSet
-from shopify.views import AddressViewSet, CustomerViewSet, ImageViewSet, LineItemViewSet, OrderViewSet, ProductViewSet, VariantViewSet
+from shopify.views import AddressViewSet, CustomerViewSet, ImageViewSet, LineItemViewSet, OrderViewSet, PORecordViewSet, ProductViewSet, VariantViewSet
 
 from . import views
 
@@ -15,6 +15,7 @@ router.register(r'images', ImageViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'variants', VariantViewSet)
 router.register(r'config', ConfigViewSet)
+router.register(r'pos', PORecordViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),

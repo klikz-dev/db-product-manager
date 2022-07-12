@@ -205,12 +205,12 @@ class LineItemViewSet(viewsets.ModelViewSet):
         lastPO = None
         if brand == "Covington":
             if type == "o":
-                lastPO = poRecord[0].CovingtonOrder
+                lastPO = poRecord[0].CovingtonOrder + 1
             else:
-                lastPO = poRecord[0].CovingtonSample
+                lastPO = poRecord[0].CovingtonSample + 1
 
         if lastPO is not None:
-            lineItems = lineItems.filter(order__gte=lastPO)
+            lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
         ############################################
 
         page = self.paginate_queryset(lineItems)
@@ -296,3 +296,36 @@ class VariantViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class PORecordViewSet(viewsets.ModelViewSet):
+
+    queryset = PORecord.objects.all()
+
+    def update(self, request, pk=None):
+
+        print(request.data)
+
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        if request.data.get('CovingtonOrder'):
+            csr.execute(
+                "UPDATE PORecord SET CovingtonOrder = {}".format(request.data['CovingtonOrder']))
+            con.commit()
+
+        if request.data.get('CovingtonSample'):
+            csr.execute(
+                "UPDATE PORecord SET CovingtonSample = {}".format(request.data['CovingtonSample']))
+            con.commit()
+
+        return Response(status=status.HTTP_200_OK)
+
+        # if serializer.is_valid():
+        #     serializer.update(
+        #         instance=variant, validated_data=serializer.validated_data)
+        #     return Response(status=status.HTTP_200_OK)
+        # else:
+        #     return Response(serializer.errors,
+        #                     status=status.HTTP_400_BAD_REQUEST)
