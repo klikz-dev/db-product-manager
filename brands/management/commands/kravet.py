@@ -74,9 +74,6 @@ class Command(BaseCommand):
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
 
-        if "fixImages" in options['functions']:
-            self.fixImages()
-
         if "bestSeller" in options['functions']:
             self.bestSeller()
 
@@ -880,7 +877,11 @@ class Command(BaseCommand):
                 oldCost = pv1['cost']
                 oldPrice = pv1['price']
                 oldTradePrice = pv2['price']
+            except Exception as e:
+                print(e)
+                continue
 
+            try:
                 product = Kravet.objects.get(
                     productId=shopifyProduct.productId)
                 newCost = product.cost
@@ -1025,34 +1026,12 @@ class Command(BaseCommand):
 
         products = Kravet.objects.all()
         for product in products:
-
-            if product.productId != None and int(product.productId) in hasImage:
+            if product.productId == None:
                 continue
 
-            if product.thumbnail == "":
+            if int(product.productId) in hasImage:
                 continue
 
-            if product.brand == "Winfield Thybony":
-                common.picdownload2(product.thumbnail, str(
-                    product.productId) + ".jpg")
-            else:
-                try:
-                    debug("Kravet", 0, "Downloading {}.".format(product.thumbnail))
-                    urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
-                        product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
-                except Exception as e:
-                    print(e)
-                    continue
-        csr.close()
-        con.close()
-
-    def fixImages(self):
-        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        products = Kravet.objects.filter(collection='GASTON JAPON')
-        for product in products:
             if product.thumbnail == "":
                 continue
 
