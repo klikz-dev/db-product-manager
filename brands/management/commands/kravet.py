@@ -16,12 +16,7 @@ from bs4 import BeautifulSoup
 from library import debug, common, shopify, markup
 
 import environ
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env = environ.Env()
 
 db_host = env('MYSQL_HOST')
 db_username = env('MYSQL_USER')
