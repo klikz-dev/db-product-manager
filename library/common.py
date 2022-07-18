@@ -75,7 +75,8 @@ def importOrder(order, con):
 
     # Import Address
     csr.execute(
-        'CALL ImportAddress ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
+        'CALL ImportAddress (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        (
             address['id'],
             customer['id'],
             address['last_name'],
@@ -94,7 +95,8 @@ def importOrder(order, con):
 
     # Import Customer
     csr.execute(
-        'CALL ImportCustomer ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
+        'CALL ImportCustomer (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        (
             customer['id'],
             customer['email'],
             customer['first_name'],
@@ -168,7 +170,8 @@ def importOrder(order, con):
         shipping_phone = order['shipping_address']['phone']
 
     csr.execute(
-        'CALL ImportOrder ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
+        'CALL ImportOrder (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        (
             orderId,
             order['order_number'],
             order['email'],
@@ -222,6 +225,9 @@ def importOrder(order, con):
 
     for line_item in line_items:
         try:
+            if line_item['variant_title'] == None or line_item['variant_title'] == "" or line_item['vendor'] == None or line_item['vendor'] == "":
+                continue
+
             weight = float(line_item['grams'])
             if weight == 0:
                 weight = 453.592
@@ -239,7 +245,8 @@ def importOrder(order, con):
                 manufacturers.append(manufacturer)
 
             csr.execute(
-                'CALL ImportOrderShoppingCart ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
+                'CALL ImportOrderShoppingCart (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                (
                     orderId,
                     line_item['product_id'],
                     line_item['variant_id'],
@@ -257,7 +264,9 @@ def importOrder(order, con):
             )
             con.commit()
 
-        except:
+        except Exception as e:
+            print(e)
+            debug("Order", 2, "Import Order error: {}".format(e))
             continue
 
     # Update Order Manufacturers and Types
@@ -286,23 +295,40 @@ def importOrder(order, con):
         if attr['value'] != "" and attr['value'] != None:
             if attr['name'] == "Status":
                 status = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET Status = '{}' WHERE ShopifyOrderID = {}".format(
+                        status,
+                        orderId
+                    )
+                )
+                con.commit()
             if attr['name'] == "Initials":
                 initials = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET Initials = '{}' WHERE ShopifyOrderID = {}".format(
+                        initials,
+                        orderId
+                    )
+                )
+                con.commit()
             if attr['name'] == "ManufacturerList":
                 manufacturerList = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
+                        manufacturerList,
+                        orderId
+                    )
+                )
+                con.commit()
             if attr['name'] == "ReferenceNumber":
                 referenceNumber = attr['value']
-
-    csr.execute(
-        "UPDATE Orders SET Status = '{}', Initials = '{}', ManufacturerList = '{}', ReferenceNumber = '{}'  WHERE ShopifyOrderID = {}".format(
-            status,
-            initials,
-            manufacturerList,
-            referenceNumber,
-            orderId
-        )
-    )
-    con.commit()
+                csr.execute(
+                    "UPDATE Orders SET ReferenceNumber = '{}' WHERE ShopifyOrderID = {}".format(
+                        referenceNumber,
+                        orderId
+                    )
+                )
+                con.commit()
 
     debug("Order", 0, "Downloaded Order {}".format(orderId))
 
