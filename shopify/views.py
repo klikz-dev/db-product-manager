@@ -200,16 +200,48 @@ class LineItemViewSet(viewsets.ModelViewSet):
         ###########################
 
         # Filter by Last Processed Order/Sample Ids
-        poRecord = PORecord.objects.all()
-
+        poRecord = PORecord.objects.values()
         lastPO = None
-        if brand == "Covington":
-            if type == "o":
-                lastPO = poRecord[0].CovingtonOrder + 1
-            else:
-                lastPO = poRecord[0].CovingtonSample + 1
+
+        brandName = brand.replace(' ', '')
+        if type == "o":
+            typeName = "Order"
+        else:
+            typeName = "Sample"
+
+        if brandName != "":
+            lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
+
+        # ALTER TABLE `DecoratorsBestDB`.`PORecord`
+        # ADD COLUMN `JFFabricsOrder` INT(11) NULL DEFAULT NULL AFTER `CovingtonSample`,
+        # ADD COLUMN `JFFabricsSample` INT(11) NULL DEFAULT NULL AFTER `JFFabricsOrder`,
+        # ADD COLUMN `KasmirOrder` INT(11) NULL DEFAULT NULL AFTER `JFFabricsSample`,
+        # ADD COLUMN `KasmirSample` INT(11) NULL DEFAULT NULL AFTER `KasmirOrder`,
+        # ADD COLUMN `MadcapCottageOrder` INT(11) NULL DEFAULT NULL AFTER `KasmirSample`,
+        # ADD COLUMN `MadcapCottageSample` INT(11) NULL DEFAULT NULL AFTER `MadcapCottageOrder`,
+        # ADD COLUMN `MaterialworksOrder` INT(11) NULL DEFAULT NULL AFTER `MadcapCottageSample`,
+        # ADD COLUMN `MaterialworksSample` INT(11) NULL DEFAULT NULL AFTER `MaterialworksOrder`,
+        # ADD COLUMN `MaxwellOrder` INT(11) NULL DEFAULT NULL AFTER `MaterialworksSample`,
+        # ADD COLUMN `MaxwellSample` INT(11) NULL DEFAULT NULL AFTER `MaxwellOrder`,
+        # ADD COLUMN `PhillipJeffriesOrder` INT(11) NULL DEFAULT NULL AFTER `MaxwellSample`,
+        # ADD COLUMN `PhillipJeffriesSample` INT(11) NULL DEFAULT NULL AFTER `PhillipJeffriesOrder`,
+        # ADD COLUMN `PindlerOrder` INT(11) NULL DEFAULT NULL AFTER `PhillipJeffriesSample`,
+        # ADD COLUMN `PindlerSample` INT(11) NULL DEFAULT NULL AFTER `PindlerOrder`,
+        # ADD COLUMN `PremierPrintsOrder` INT(11) NULL DEFAULT NULL AFTER `PindlerSample`,
+        # ADD COLUMN `PremierPrintsSample` INT(11) NULL DEFAULT NULL AFTER `PremierPrintsOrder`,
+        # ADD COLUMN `RalphLaurenOrder` INT(11) NULL DEFAULT NULL AFTER `PremierPrintsSample`,
+        # ADD COLUMN `RalphLaurenSample` INT(11) NULL DEFAULT NULL AFTER `RalphLaurenOrder`,
+        # ADD COLUMN `ScalamandreOrder` INT(11) NULL DEFAULT NULL AFTER `RalphLaurenSample`,
+        # ADD COLUMN `ScalamandreSample` INT(11) NULL DEFAULT NULL AFTER `ScalamandreOrder`,
+        # ADD COLUMN `SeabrookOrder` INT(11) NULL DEFAULT NULL AFTER `ScalamandreSample`,
+        # ADD COLUMN `SeabrookSample` INT(11) NULL DEFAULT NULL AFTER `SeabrookOrder`,
+        # ADD COLUMN `StoutOrder` INT(11) NULL DEFAULT NULL AFTER `SeabrookSample`,
+        # ADD COLUMN `StoutSample` INT(11) NULL DEFAULT NULL AFTER `StoutOrder`,
+        # ADD COLUMN `ZoffanyOrder` INT(11) NULL DEFAULT NULL AFTER `StoutSample`,
+        # ADD COLUMN `ZoffanySample` INT(11) NULL DEFAULT NULL AFTER `ZoffanyOrder`;
 
         if lastPO is not None:
+            lastPO = int(lastPO) + 1
             lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
         ############################################
 
@@ -304,28 +336,13 @@ class PORecordViewSet(viewsets.ModelViewSet):
 
     def update(self, request, pk=None):
 
-        print(request.data)
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        if request.data.get('CovingtonOrder'):
+        if request.data.get('field') != None and request.data.get('lastPO') != None:
             csr.execute(
-                "UPDATE PORecord SET CovingtonOrder = {}".format(request.data['CovingtonOrder']))
-            con.commit()
-
-        if request.data.get('CovingtonSample'):
-            csr.execute(
-                "UPDATE PORecord SET CovingtonSample = {}".format(request.data['CovingtonSample']))
+                "UPDATE PORecord SET {} = {}".format(request.data['field'], request.data['lastPO']))
             con.commit()
 
         return Response(status=status.HTTP_200_OK)
-
-        # if serializer.is_valid():
-        #     serializer.update(
-        #         instance=variant, validated_data=serializer.validated_data)
-        #     return Response(status=status.HTTP_200_OK)
-        # else:
-        #     return Response(serializer.errors,
-        #                     status=status.HTTP_400_BAD_REQUEST)

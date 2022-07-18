@@ -271,6 +271,35 @@ def importOrder(order, con):
     )
     con.commit()
 
+    # Import Order Attributes
+    attrs = order['note_attributes']
+    status = ""
+    initials = ""
+    manufacturerList = ""
+    referenceNumber = ""
+
+    for attr in attrs:
+        if attr['value'] != "" and attr['value'] != None:
+            if attr['name'] == "Status":
+                status = attr['value']
+            if attr['name'] == "Initials":
+                initials = attr['value']
+            if attr['name'] == "ManufacturerList":
+                manufacturerList = attr['value']
+            if attr['name'] == "ReferenceNumber":
+                referenceNumber = attr['value']
+
+    csr.execute(
+        "UPDATE Orders SET Status = '{}', Initials = '{}', ManufacturerList = '{}', ReferenceNumber = '{}'  WHERE ShopifyOrderID = {}".format(
+            status,
+            initials,
+            manufacturerList,
+            referenceNumber,
+            orderId
+        )
+    )
+    con.commit()
+
     debug("Order", 0, "Downloaded Order {}".format(orderId))
 
     csr.close()

@@ -1,3 +1,4 @@
+import time
 from django.core.management.base import BaseCommand
 
 import os
@@ -27,7 +28,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if "main" in options['functions']:
-            self.main()
+            while True:
+                self.main()
+                print("Completed process. Waiting for next run.")
+                time.sleep(300)
 
     def main(self):
         con = pymysql.connect(host=db_host, user=db_username,

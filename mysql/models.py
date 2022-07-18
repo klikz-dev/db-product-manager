@@ -164,9 +164,62 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     SchumacherEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+
     CovingtonOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     CovingtonSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    JFFabricsOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    JFFabricsSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    KasmirOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    KasmirSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MadcapCottageOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MadcapCottageSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MaterialworksOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MaterialworksSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MaxwellOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MaxwellSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PhillipJeffriesOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PhillipJeffriesSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PindlerOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PindlerSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PremierPrintsOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PremierPrintsSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    RalphLaurenOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    RalphLaurenSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ScalamandreOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ScalamandreSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    SeabrookOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    SeabrookSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    StoutOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    StoutSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ZoffanyOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ZoffanySample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
 
     class Meta:
