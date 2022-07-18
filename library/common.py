@@ -221,40 +221,44 @@ def importOrder(order, con):
     con.commit()
 
     for line_item in line_items:
-        weight = float(line_item['grams'])
-        if weight == 0:
-            weight = 453.592
+        try:
+            weight = float(line_item['grams'])
+            if weight == 0:
+                weight = 453.592
 
-        variantTitle = line_item['variant_title'].split('/')[0].strip()
-        if 'Sample -' in variantTitle:
-            if 'Sample' not in orderTypes:
-                orderTypes.append('Sample')
-        else:
-            if 'Order' not in orderTypes:
-                orderTypes.append('Order')
+            variantTitle = line_item['variant_title'].split('/')[0].strip()
+            if 'Sample -' in variantTitle:
+                if 'Sample' not in orderTypes:
+                    orderTypes.append('Sample')
+            else:
+                if 'Order' not in orderTypes:
+                    orderTypes.append('Order')
 
-        manufacturer = line_item['vendor']
-        if manufacturer not in manufacturers:
-            manufacturers.append(manufacturer)
+            manufacturer = line_item['vendor']
+            if manufacturer not in manufacturers:
+                manufacturers.append(manufacturer)
 
-        csr.execute(
-            'CALL ImportOrderShoppingCart ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
-                orderId,
-                line_item['product_id'],
-                line_item['variant_id'],
-                line_item['quantity'],
-                line_item['title'],
-                variantTitle,
-                line_item['name'],
-                line_item['sku'],
-                manufacturer,
-                line_item['price'],
-                line_item['total_discount'],
-                weight / 453.592,
-                line_item['taxable']
+            csr.execute(
+                'CALL ImportOrderShoppingCart ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")'.format(
+                    orderId,
+                    line_item['product_id'],
+                    line_item['variant_id'],
+                    line_item['quantity'],
+                    line_item['title'],
+                    variantTitle,
+                    line_item['name'],
+                    line_item['sku'],
+                    manufacturer,
+                    line_item['price'],
+                    line_item['total_discount'],
+                    weight / 453.592,
+                    line_item['taxable']
+                )
             )
-        )
-        con.commit()
+            con.commit()
+
+        except:
+            continue
 
     # Update Order Manufacturers and Types
     manufacturers.sort()
