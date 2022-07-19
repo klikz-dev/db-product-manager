@@ -31,7 +31,7 @@ class Command(BaseCommand):
             while True:
                 self.main()
                 print("Completed process. Waiting for next run.")
-                time.sleep(60)
+                time.sleep(300)
 
     def main(self):
         con = pymysql.connect(host=db_host, user=db_username,
