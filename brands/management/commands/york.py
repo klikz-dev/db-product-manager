@@ -835,6 +835,27 @@ class Command(BaseCommand):
 
         products = York.objects.all()
 
+        # Get Current York QuickShip products and add to pending update tag queue
+        csr.execute("""SELECT ProductID from Product P 
+                    LEFT JOIN ProductTag PT ON P.SKU = PT.SKU
+                    LEFT JOIN ProductManufacturer PM ON PT.SKU = PM.SKU 
+                    LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
+                    WHERE PT.TagID = 31 AND M.Brand = 'York';""")
+        rows = csr.fetchall()
+        for row in rows:
+            productId = row[0]
+            csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                productId))
+            con.commit()
+
+        # Delete All York Quickship products from PT
+        csr.execute("""DELETE from ProductTag PT 
+                    LEFT JOIN ProductManufacturer PM ON PT.SKU = PM.SKU 
+                    LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
+                    WHERE PT.TagID = 31 AND M.Brand = 'York';""")
+        con.commit()
+
+        # Freshly re-add quickship products
         for product in products:
             if product.quickship:
                 csr.execute("CALL AddToProductTag ({}, {})".format(
