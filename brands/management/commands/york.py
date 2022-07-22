@@ -11,6 +11,7 @@ import requests
 import json
 import time
 import sys
+import xlrd
 from shutil import copyfile
 
 import urllib.request
@@ -96,6 +97,16 @@ class Command(BaseCommand):
 
     def getProducts(self):
         York.objects.all().delete()
+
+        wb = xlrd.open_workbook(
+            FILEDIR + "/files/york-quickship-outstock.xlsx")
+        noQuickshipSheet = wb.sheet_by_index(0)
+
+        noQuickship = []
+
+        for i in range(1, noQuickshipSheet.nrows):
+            mpn = noQuickshipSheet.cell_value(i, 0)
+            noQuickship.append(mpn)
 
         try:
             reqCollections = requests.get(
@@ -248,7 +259,7 @@ class Command(BaseCommand):
                 statusText = row['SKUStatus']
 
                 quickship = False
-                if row['QuickShip'] == 'Y':
+                if row['QuickShip'] == 'Y' and mpn not in noQuickship:
                     quickship = True
 
                 try:
