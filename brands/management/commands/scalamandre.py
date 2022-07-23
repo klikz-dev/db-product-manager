@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from brands.models import Scalamandre
 from shopify.models import Product as ShopifyProduct
-from mysql.models import ProductManufacturer
 
 import requests
 import json
@@ -708,20 +707,20 @@ class Command(BaseCommand):
 
         rows = csr.fetchall()
         for row in rows:
+            productId = row[0]
+            shopifyProduct = ShopifyProduct.objects.get(
+                productId=productId)
+
+            pv1 = shopifyProduct.variants.filter(
+                isDefault=1).values('cost', 'price')[0]
+            pv2 = shopifyProduct.variants.filter(
+                name__startswith="Trade - ").values('price')[0]
+
+            oldCost = pv1['cost']
+            oldPrice = pv1['price']
+            oldTradePrice = pv2['price']
+
             try:
-                productId = row[0]
-                shopifyProduct = ShopifyProduct.objects.get(
-                    productId=productId)
-
-                pv1 = shopifyProduct.variants.filter(
-                    isDefault=1).values('cost', 'price')[0]
-                pv2 = shopifyProduct.variants.filter(
-                    name__startswith="Trade - ").values('price')[0]
-
-                oldCost = pv1['cost']
-                oldPrice = pv1['price']
-                oldTradePrice = pv2['price']
-
                 product = Scalamandre.objects.get(
                     productId=shopifyProduct.productId)
                 newCost = product.cost
