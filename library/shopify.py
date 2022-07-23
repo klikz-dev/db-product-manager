@@ -732,7 +732,12 @@ def getNewOrders(lastOrderId):
 
     s.close()
 
-    return json.loads(r.text)
+    try:
+        orders = json.loads(r.text)
+    except:
+        orders = None
+
+    return orders
 
 
 def getOrderById(orderId):
