@@ -171,7 +171,7 @@ class Order(models.Model):
     shippingPhone = models.CharField(max_length=200, default=None, null=True)
 
     shippingMethod = models.CharField(max_length=200, default=None, null=True)
-    orderNote = models.CharField(max_length=200, default=None, null=True)
+    orderNote = models.CharField(max_length=2000, default=None, null=True, blank=True)
     totalItems = models.FloatField(default=0)
     totalDiscounts = models.FloatField(default=0)
     orderSubtotal = models.FloatField(default=0)
@@ -185,21 +185,21 @@ class Order(models.Model):
     status = models.CharField(max_length=200, default="New", null=True)
     orderType = models.CharField(max_length=200, default="Order", null=True)
     manufacturerList = models.CharField(
-        max_length=200, default=None, null=True)
+        max_length=2000, default=None, null=True)
     referenceNumber = models.CharField(
-        max_length=200, default=None, null=True)
+        max_length=2000, default=None, null=True)
 
     customerEmailed = models.SmallIntegerField(default=0)
     customerCalled = models.SmallIntegerField(default=0)
     customerChatted = models.SmallIntegerField(default=0)
 
     specialShipping = models.CharField(
-        max_length=200, default=None, null=True)
+        max_length=200, default=None, null=True, blank=True)
     customerOrderStatus = models.CharField(
         max_length=200, default=None, null=True)
 
     note = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
+        max_length=5000, default=None, null=True, blank=True)
     oldPO = models.CharField(max_length=200, default=None, null=True)
 
     isFraud = models.SmallIntegerField(default=False)
