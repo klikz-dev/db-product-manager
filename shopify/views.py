@@ -212,34 +212,6 @@ class LineItemViewSet(viewsets.ModelViewSet):
         if brandName != "":
             lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
 
-        # ALTER TABLE `DecoratorsBestDB`.`PORecord`
-        # ADD COLUMN `JFFabricsOrder` INT(11) NULL DEFAULT NULL AFTER `CovingtonSample`,
-        # ADD COLUMN `JFFabricsSample` INT(11) NULL DEFAULT NULL AFTER `JFFabricsOrder`,
-        # ADD COLUMN `KasmirOrder` INT(11) NULL DEFAULT NULL AFTER `JFFabricsSample`,
-        # ADD COLUMN `KasmirSample` INT(11) NULL DEFAULT NULL AFTER `KasmirOrder`,
-        # ADD COLUMN `MadcapCottageOrder` INT(11) NULL DEFAULT NULL AFTER `KasmirSample`,
-        # ADD COLUMN `MadcapCottageSample` INT(11) NULL DEFAULT NULL AFTER `MadcapCottageOrder`,
-        # ADD COLUMN `MaterialworksOrder` INT(11) NULL DEFAULT NULL AFTER `MadcapCottageSample`,
-        # ADD COLUMN `MaterialworksSample` INT(11) NULL DEFAULT NULL AFTER `MaterialworksOrder`,
-        # ADD COLUMN `MaxwellOrder` INT(11) NULL DEFAULT NULL AFTER `MaterialworksSample`,
-        # ADD COLUMN `MaxwellSample` INT(11) NULL DEFAULT NULL AFTER `MaxwellOrder`,
-        # ADD COLUMN `PhillipJeffriesOrder` INT(11) NULL DEFAULT NULL AFTER `MaxwellSample`,
-        # ADD COLUMN `PhillipJeffriesSample` INT(11) NULL DEFAULT NULL AFTER `PhillipJeffriesOrder`,
-        # ADD COLUMN `PindlerOrder` INT(11) NULL DEFAULT NULL AFTER `PhillipJeffriesSample`,
-        # ADD COLUMN `PindlerSample` INT(11) NULL DEFAULT NULL AFTER `PindlerOrder`,
-        # ADD COLUMN `PremierPrintsOrder` INT(11) NULL DEFAULT NULL AFTER `PindlerSample`,
-        # ADD COLUMN `PremierPrintsSample` INT(11) NULL DEFAULT NULL AFTER `PremierPrintsOrder`,
-        # ADD COLUMN `RalphLaurenOrder` INT(11) NULL DEFAULT NULL AFTER `PremierPrintsSample`,
-        # ADD COLUMN `RalphLaurenSample` INT(11) NULL DEFAULT NULL AFTER `RalphLaurenOrder`,
-        # ADD COLUMN `ScalamandreOrder` INT(11) NULL DEFAULT NULL AFTER `RalphLaurenSample`,
-        # ADD COLUMN `ScalamandreSample` INT(11) NULL DEFAULT NULL AFTER `ScalamandreOrder`,
-        # ADD COLUMN `SeabrookOrder` INT(11) NULL DEFAULT NULL AFTER `ScalamandreSample`,
-        # ADD COLUMN `SeabrookSample` INT(11) NULL DEFAULT NULL AFTER `SeabrookOrder`,
-        # ADD COLUMN `StoutOrder` INT(11) NULL DEFAULT NULL AFTER `SeabrookSample`,
-        # ADD COLUMN `StoutSample` INT(11) NULL DEFAULT NULL AFTER `StoutOrder`,
-        # ADD COLUMN `ZoffanyOrder` INT(11) NULL DEFAULT NULL AFTER `StoutSample`,
-        # ADD COLUMN `ZoffanySample` INT(11) NULL DEFAULT NULL AFTER `ZoffanyOrder`;
-
         if lastPO is not None:
             lastPO = int(lastPO) + 1
             lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
