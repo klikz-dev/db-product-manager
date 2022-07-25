@@ -266,8 +266,8 @@ def importOrder(order, con):
 
         except Exception as e:
             print(e)
-            debug("Order", 2, "Import Order error: {}".format(e))
-            continue
+            debug("Order", 2, "Import Order error: PO {}".format(order['order_number']))
+            return
 
     # Update Order Manufacturers and Types
     manufacturers.sort()
