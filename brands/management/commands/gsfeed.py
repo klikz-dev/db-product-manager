@@ -110,7 +110,7 @@ class Command(BaseCommand):
             try:
                 username = 'decoratorsbest'
                 password = '5iXrwa8X!ZjRT'
-                url = "https://www.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
+                url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
                     username, password, sku)
 
                 payload = {}
