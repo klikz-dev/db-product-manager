@@ -88,19 +88,19 @@ class ProductImageAdmin(admin.ModelAdmin):
 class VariantAdmin(admin.ModelAdmin):
     actions = None
 
-    def get_readonly_fields(self, request, obj=None):
-        return self.fields or [f.name for f in self.model._meta.fields]
+    # def get_readonly_fields(self, request, obj=None):
+    #     return self.fields or [f.name for f in self.model._meta.fields]
 
-    def has_add_permission(self, request):
-        return False
+    # def has_add_permission(self, request):
+    #     return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
+    # def has_change_permission(self, request, obj=None):
+    #     return False
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
 
-    fields = ['product', 'name', 'cost', 'price', 'pricing',
+    fields = ['name', 'cost', 'price', 'pricing',
               'minimumQuantity', 'restrictedQuantities', 'weight', 'isDefault', 'published']
 
     list_display = ('variantId', 'productId', 'product', 'name', 'cost',
@@ -112,6 +112,9 @@ class VariantAdmin(admin.ModelAdmin):
 class VariantInline(admin.StackedInline):
     model = Variant
     extra = 0
+
+    fields = ['variantId', 'name', 'cost', 'price', 'pricing',
+              'minimumQuantity', 'restrictedQuantities', 'weight']
 
     def __init__(self, *args, **kwargs):
         super(VariantInline, self).__init__(*args, **kwargs)
@@ -193,7 +196,7 @@ class ProductAdmin(admin.ModelAdmin):
             'deleted',
         ]}),
     ]
-    inlines = [VariantInline]
+    # inlines = [VariantInline]
 
     ordering = ['sku']
 

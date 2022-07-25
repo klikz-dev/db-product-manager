@@ -117,7 +117,8 @@ class Variant(models.Model):
     isDefault = models.BooleanField(default=True)
     published = models.BooleanField(default=True)
 
-    backOrderDate = models.DateField(default=None)
+    backOrderDate = models.CharField(
+        max_length=200, default='0000-00-00', blank=True, null=True)
     boDateStatus = models.SmallIntegerField(default=0)
 
     createdAt = models.DateTimeField(auto_now_add=True)
@@ -171,7 +172,8 @@ class Order(models.Model):
     shippingPhone = models.CharField(max_length=200, default=None, null=True)
 
     shippingMethod = models.CharField(max_length=200, default=None, null=True)
-    orderNote = models.CharField(max_length=2000, default=None, null=True, blank=True)
+    orderNote = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
     totalItems = models.FloatField(default=0)
     totalDiscounts = models.FloatField(default=0)
     orderSubtotal = models.FloatField(default=0)
