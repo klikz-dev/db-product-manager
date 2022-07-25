@@ -108,6 +108,31 @@ class VariantAdmin(admin.ModelAdmin):
     list_filter = ['pricing', 'isDefault', 'published']
     search_fields = ['variantId', 'productId', 'name', ]
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        if obj.productId != "" and obj.productId != None:
+            try:
+                PendingUpdateProduct.objects.create(
+                    productId=obj.productId
+                )
+            except:
+                pass
+
+            try:
+                PendingUpdatePublish.objects.create(
+                    productId=obj.productId
+                )
+            except:
+                pass
+
+            try:
+                PendingUpdatePrice.objects.create(
+                    productId=obj.productId
+                )
+            except:
+                pass
+
 
 class VariantInline(admin.StackedInline):
     model = Variant

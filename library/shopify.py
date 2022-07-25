@@ -751,3 +751,44 @@ def getOrderById(orderId):
     s.close()
 
     return json.loads(r.text)
+
+
+def updateOrderById(orderId, order):
+    note_attributes = {
+        "status": order.status,
+        "initials": order.initials,
+        "manufacturerList": order.manufacturerList
+    }
+
+    if order.oldPO:
+        note_attributes['oldPO'] = order.oldPO
+
+    if order.referenceNumber:
+        note_attributes['referenceNumber'] = order.referenceNumber
+
+    if order.specialShipping:
+        note_attributes['specialShipping'] = order.specialShipping
+
+    if order.customerOrderStatus:
+        note_attributes['customerOrderStatus'] = order.customerOrderStatus
+
+    if order.customerEmailed:
+        note_attributes['customerEmailed'] = order.customerEmailed
+
+    if order.customerCalled:
+        note_attributes['customerCalled'] = order.customerCalled
+
+    if order.customerChatted:
+        note_attributes['customerChatted'] = order.customerChatted
+
+    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
+        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+
+    s = requests.Session()
+
+    r = s.put(api_url + "/admin/api/{}/orders/{}.json".format(api_version,
+              orderId), json={"order": {"id": orderId, "note": order.note, "note_attributes": note_attributes}})
+
+    s.close()
+
+    return json.loads(r.text)

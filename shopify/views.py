@@ -144,11 +144,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        # con = pymysql.connect(host=db_host, user=db_username,
-        #                       passwd=db_password, db=db_name, connect_timeout=5)
-        # ordersRes = shopify.getOrderById(pk)
-        # for order in ordersRes['orders']:
-        #     common.importOrder(order, con)
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        ordersRes = shopify.getOrderById(pk)
+        for order in ordersRes['orders']:
+            common.importOrder(order, con)
 
         orders = Order.objects.all()
         order = get_object_or_404(orders, pk=pk)
@@ -164,6 +164,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.update(
                 instance=order, validated_data=serializer.validated_data)
+
+            updatedOrder = get_object_or_404(orders, pk=pk)
+            shopify.updateOrderById(order.shopifyOrderId, updatedOrder)
+
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors,

@@ -266,7 +266,8 @@ def importOrder(order, con):
 
         except Exception as e:
             print(e)
-            debug("Order", 2, "Import Order error: PO {}".format(order['order_number']))
+            debug("Order", 2, "Import Order error: PO {}".format(
+                order['order_number']))
             return
 
     # Update Order Manufacturers and Types
@@ -285,51 +286,52 @@ def importOrder(order, con):
     con.commit()
 
     # Import Order Attributes
-    # attrs = order['note_attributes']
-    # status = ""
-    # initials = ""
-    # manufacturerList = ""
-    # referenceNumber = ""
+    attrs = order['note_attributes']
+    status = ""
+    initials = ""
+    manufacturerList = ""
+    referenceNumber = ""
 
-    # for attr in attrs:
-    #     if attr['value'] != "" and attr['value'] != None:
-    #         if attr['name'] == "Status":
-    #             status = attr['value']
-    #             csr.execute(
-    #                 "UPDATE Orders SET Status = '{}' WHERE ShopifyOrderID = {}".format(
-    #                     status,
-    #                     orderId
-    #                 )
-    #             )
-    #             con.commit()
-    #         if attr['name'] == "Initials":
-    #             initials = attr['value']
-    #             csr.execute(
-    #                 "UPDATE Orders SET Initials = '{}' WHERE ShopifyOrderID = {}".format(
-    #                     initials,
-    #                     orderId
-    #                 )
-    #             )
-    #             con.commit()
-    #         if attr['name'] == "ManufacturerList":
-    #             manufacturerList = attr['value']
-    #             csr.execute(
-    #                 "UPDATE Orders SET ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
-    #                     manufacturerList,
-    #                     orderId
-    #                 )
-    #             )
-    #             con.commit()
-    #         if attr['name'] == "ReferenceNumber":
-    #             referenceNumber = attr['value']
-    #             csr.execute(
-    #                 "UPDATE Orders SET ReferenceNumber = '{}' WHERE ShopifyOrderID = {}".format(
-    #                     referenceNumber,
-    #                     orderId
-    #                 )
-    #             )
-    #             con.commit()
+    for attr in attrs:
+        if attr['value'] != "" and attr['value'] != None:
+            if attr['name'] == "Status":
+                status = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET Status = '{}' WHERE ShopifyOrderID = {}".format(
+                        status,
+                        orderId
+                    )
+                )
+                con.commit()
+            if attr['name'] == "Initials":
+                initials = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET Initials = '{}' WHERE ShopifyOrderID = {}".format(
+                        initials,
+                        orderId
+                    )
+                )
+                con.commit()
+            if attr['name'] == "ManufacturerList":
+                manufacturerList = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
+                        manufacturerList,
+                        orderId
+                    )
+                )
+                con.commit()
+            if attr['name'] == "ReferenceNumber":
+                referenceNumber = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET ReferenceNumber = '{}' WHERE ShopifyOrderID = {}".format(
+                        referenceNumber,
+                        orderId
+                    )
+                )
+                con.commit()
 
-    debug("Order", 0, "Downloaded Order {} / {}".format(order['order_number'], orderId))
+    debug("Order", 0,
+          "Downloaded Order {} / {}".format(order['order_number'], orderId))
 
     csr.close()
