@@ -8,20 +8,23 @@ import os
 import codecs
 import time
 
-from library import config, common, debug
+from library import common, debug
 
 debug = debug.debug
 sq = common.sq
 
-db_host = config.db_endpoint
-db_username = config.db_username
-db_password = config.db_password
-db_name = config.db_name
-db_port = config.db_port
+import environ
+env = environ.Env()
 
-api_version = config.shopify_api_version
-shopify_api_key = config.shopify_fulfillment_key
-shopify_api_password = config.shopify_fulfillment_password
+db_host = env('MYSQL_HOST')
+db_username = env('MYSQL_USER')
+db_password = env('MYSQL_PASSWORD')
+db_name = env('MYSQL_DATABASE')
+db_port = int(env('MYSQL_PORT'))
+
+api_version = env('shopify_api_version')
+shopify_api_key = env('shopify_fulfillment_key')
+shopify_api_password = env('shopify_fulfillment_password')
 
 api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
     shopify_api_key, shopify_api_password)
