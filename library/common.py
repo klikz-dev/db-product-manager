@@ -330,6 +330,6 @@ def importOrder(order, con):
     #             )
     #             con.commit()
 
-    debug("Order", 0, "Downloaded Order {}".format(orderId))
+    debug("Order", 0, "Downloaded Order {} / {}".format(order['order_number'], orderId))
 
     csr.close()
