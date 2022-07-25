@@ -146,9 +146,10 @@ class OrderViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
-        ordersRes = shopify.getOrderById(pk)
-        for order in ordersRes['orders']:
-            common.importOrder(order, con)
+        orderRes = shopify.getOrderById(pk)
+
+        if orderRes.get('order'):
+            common.importOrder(orderRes['order'], con)
 
         orders = Order.objects.all()
         order = get_object_or_404(orders, pk=pk)

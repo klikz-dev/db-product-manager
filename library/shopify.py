@@ -746,7 +746,7 @@ def getOrderById(orderId):
 
     s = requests.Session()
     r = s.get(
-        api_url + "/admin/api/{}/orders.json?ids={}&statu=any".format(api_version, orderId))
+        api_url + "/admin/api/{}/orders/{}.json".format(api_version, orderId))
 
     s.close()
 
