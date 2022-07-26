@@ -1,3 +1,4 @@
+import pymysql
 from library.debug import debug
 import os
 import requests
@@ -14,6 +15,15 @@ opener.addheaders = [
 urllib.request.install_opener(opener)
 
 DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+import environ
+env = environ.Env()
+
+db_host = env('MYSQL_HOST')
+db_username = env('MYSQL_USER')
+db_password = env('MYSQL_PASSWORD')
+db_name = env('MYSQL_DATABASE')
+db_port = int(env('MYSQL_PORT'))
 
 
 def picdownload(link, name):
@@ -67,7 +77,9 @@ def backup():
         debug("Manage", 1, "Database Backup Failed. {}".format(e))
 
 
-def importOrder(order, con):
+def importOrder(order):
+    con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
     csr = con.cursor()
 
     customer = order['customer']
@@ -335,3 +347,4 @@ def importOrder(order, con):
           "Downloaded Order {} / {}".format(order['order_number'], orderId))
 
     csr.close()
+    con.close()

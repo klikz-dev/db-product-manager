@@ -43,10 +43,10 @@ class Command(BaseCommand):
         row = csr.fetchone()
         lastOrderId = row[0]
 
+        csr.close()
+        con.close()
+
         ordersRes = shopify.getNewOrders(lastOrderId)
 
         for order in ordersRes['orders']:
-            common.importOrder(order, con)
-
-        csr.close()
-        con.close()
+            common.importOrder(order)
