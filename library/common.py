@@ -158,16 +158,28 @@ def importOrder(order):
     if 'Fraud' in order['tags']:
         isFraud = 1
 
-    shipping_last_name = order['billing_address']['last_name']
-    shipping_first_name = order['billing_address']['first_name']
-    shipping_company = order['billing_address']['company']
-    shipping_address1 = order['billing_address']['address1']
-    shipping_address2 = order['billing_address']['address2']
-    shipping_city = order['billing_address']['city']
-    shipping_province_code = order['billing_address']['province_code']
-    shipping_zip = order['billing_address']['zip']
-    shipping_country = order['billing_address']['country']
-    shipping_phone = order['billing_address']['phone']
+    if order.get('billing_address'):
+        billing_last_name = order['billing_address']['last_name']
+        billing_first_name = order['billing_address']['first_name']
+        billing_company = order['billing_address']['company']
+        billing_address1 = order['billing_address']['address1']
+        billing_address2 = order['billing_address']['address2']
+        billing_city = order['billing_address']['city']
+        billing_province_code = order['billing_address']['province_code']
+        billing_zip = order['billing_address']['zip']
+        billing_country = order['billing_address']['country']
+        billing_phone = order['billing_address']['phone']
+    else:
+        billing_last_name = ""
+        billing_first_name = ""
+        billing_company = ""
+        billing_address1 = ""
+        billing_address2 = ""
+        billing_city = ""
+        billing_province_code = ""
+        billing_zip = ""
+        billing_country = ""
+        billing_phone = ""
 
     if order.get('shipping_address'):
         shipping_last_name = order['shipping_address']['last_name']
@@ -180,6 +192,18 @@ def importOrder(order):
         shipping_zip = order['shipping_address']['zip']
         shipping_country = order['shipping_address']['country']
         shipping_phone = order['shipping_address']['phone']
+    else:
+        shipping_last_name = billing_last_name
+        shipping_first_name = billing_first_name
+        shipping_company = billing_company
+        shipping_address1 = billing_address1
+        shipping_address2 = billing_address2
+        shipping_city = billing_city
+        shipping_province_code = billing_province_code
+        shipping_zip = billing_zip
+        shipping_country = billing_country
+        shipping_phone = billing_phone
+
 
     csr.execute(
         'CALL ImportOrder (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
@@ -189,16 +213,16 @@ def importOrder(order):
             order['email'],
             order['phone'],
             customer['id'],
-            order['billing_address']['last_name'],
-            order['billing_address']['first_name'],
-            order['billing_address']['company'],
-            order['billing_address']['address1'],
-            order['billing_address']['address2'],
-            order['billing_address']['city'],
-            order['billing_address']['province_code'],
-            order['billing_address']['zip'],
-            order['billing_address']['country'],
-            order['billing_address']['phone'],
+            billing_last_name,
+            billing_first_name,
+            billing_company,
+            billing_address1,
+            billing_address2,
+            billing_city,
+            billing_province_code,
+            billing_zip,
+            billing_country,
+            billing_phone,
             shipping_last_name,
             shipping_first_name,
             shipping_company,
