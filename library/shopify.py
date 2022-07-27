@@ -755,31 +755,32 @@ def getOrderById(orderId):
 
 def updateOrderById(orderId, order):
     note_attributes = {
-        "status": order.status,
-        "initials": order.initials,
-        "manufacturerList": order.manufacturerList
+        "CSNote": order.note,
+        "Status": order.status,
+        "Initials": order.initials,
+        "ManufacturerList": order.manufacturerList
     }
 
     if order.oldPO:
-        note_attributes['oldPO'] = order.oldPO
+        note_attributes['OldPO'] = order.oldPO
 
     if order.referenceNumber:
-        note_attributes['referenceNumber'] = order.referenceNumber
+        note_attributes['ReferenceNumber'] = order.referenceNumber
 
     if order.specialShipping:
-        note_attributes['specialShipping'] = order.specialShipping
+        note_attributes['SpecialShipping'] = order.specialShipping
 
     if order.customerOrderStatus:
-        note_attributes['customerOrderStatus'] = order.customerOrderStatus
+        note_attributes['CustomerOrderStatus'] = order.customerOrderStatus
 
     if order.customerEmailed:
-        note_attributes['customerEmailed'] = order.customerEmailed
+        note_attributes['CustomerEmailed'] = order.customerEmailed
 
     if order.customerCalled:
-        note_attributes['customerCalled'] = order.customerCalled
+        note_attributes['CustomerCalled'] = order.customerCalled
 
     if order.customerChatted:
-        note_attributes['customerChatted'] = order.customerChatted
+        note_attributes['CustomerChatted'] = order.customerChatted
 
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
         env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
@@ -787,7 +788,7 @@ def updateOrderById(orderId, order):
     s = requests.Session()
 
     r = s.put(api_url + "/admin/api/{}/orders/{}.json".format(api_version,
-              orderId), json={"order": {"id": orderId, "note": order.note, "note_attributes": note_attributes}})
+              orderId), json={"order": {"id": orderId, "note_attributes": note_attributes}})
 
     s.close()
 

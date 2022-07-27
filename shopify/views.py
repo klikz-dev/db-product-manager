@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from misc.models import Config
 
 from mysql.models import Manufacturer, PORecord
-from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Variant
-from shopify.serializers import AddressDetailSerializer, AddressListSerializer, CustomerDetailSerializer, CustomerListSerializer, ImageDetailSerializer, ImageListSerializer, LineItemDetailSerializer, LineItemListSerializer, OrderDetailSerializer, OrderListSerializer, OrderUpdateSerializer, ProductDetailSerializer, ProductListSerializer, VariantDetailSerializer, VariantListSerializer, VariantUpdateSerializer
+from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Tracking, Variant
+from shopify.serializers import AddressDetailSerializer, AddressListSerializer, CustomerDetailSerializer, CustomerListSerializer, ImageDetailSerializer, ImageListSerializer, LineItemDetailSerializer, LineItemListSerializer, OrderDetailSerializer, OrderListSerializer, OrderTrackingSerializer, OrderUpdateSerializer, ProductDetailSerializer, ProductListSerializer, VariantDetailSerializer, VariantListSerializer, VariantUpdateSerializer
 
 from datetime import datetime, timedelta
 from django.db.models import Q
@@ -321,3 +321,24 @@ class PORecordViewSet(viewsets.ModelViewSet):
             con.commit()
 
         return Response(status=status.HTTP_200_OK)
+
+
+class TrakcingViewSet(viewsets.ModelViewSet):
+
+    queryset = Tracking.objects.all()
+    serializer_class = OrderTrackingSerializer
+
+    def list(self, request):
+        trackings = Tracking.objects.all()
+
+        orderNumber = self.request.query_params.get('po')
+        if orderNumber is not None:
+            trackings = trackings.filter(orderNumber=orderNumber)
+
+        page = self.paginate_queryset(trackings)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(trackings, many=True)
+        return Response(serializer.data)

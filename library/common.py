@@ -366,6 +366,24 @@ def importOrder(order):
                     )
                 )
                 con.commit()
+            if attr['name'] == "CSNote":
+                note = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET Note = '{}' WHERE ShopifyOrderID = {}".format(
+                        note,
+                        orderId
+                    )
+                )
+                con.commit()
+            if attr['name'] == "SpecialShipping":
+                specialShipping = attr['value']
+                csr.execute(
+                    "UPDATE Orders SET SpecialShipping = '{}' WHERE ShopifyOrderID = {}".format(
+                        specialShipping,
+                        orderId
+                    )
+                )
+                con.commit()
 
     debug("Order", 0,
           "Downloaded Order {} / {}".format(order['order_number'], orderId))

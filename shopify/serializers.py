@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Variant
+from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Tracking, Variant
 
 
 # Address
@@ -101,6 +101,13 @@ class LineItemListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Line_Item
         fields = '__all__'
+
+
+# Order Tracking
+class OrderTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tracking
+        fields = ['brand', 'trackingNumber', 'trackingMethod', 'createdAt']
 
 
 # Orders
