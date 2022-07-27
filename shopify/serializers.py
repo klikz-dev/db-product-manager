@@ -125,7 +125,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                   'shippingMethod', 'orderNote', 'totalItems', 'totalDiscounts', 'orderSubtotal', 'orderTax', 'orderShippingCost',
                   'orderTotal', 'weight', 'orderDate', 'initials', 'status', 'orderType', 'manufacturerList', 'referenceNumber',
                   'customerEmailed', 'customerCalled', 'customerChatted', 'specialShipping', 'customerOrderStatus', 'note', 'oldPO',
-                  'isFraud', 'line_items']
+                  'isFraud', 'line_items', 'updatedAt']
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
