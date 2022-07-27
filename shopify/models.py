@@ -189,7 +189,7 @@ class Order(models.Model):
     manufacturerList = models.CharField(
         max_length=2000, default=None, null=True)
     referenceNumber = models.CharField(
-        max_length=2000, default=None, null=True)
+        max_length=2000, default=None, null=True, blank=True)
 
     customerEmailed = models.SmallIntegerField(default=0)
     customerCalled = models.SmallIntegerField(default=0)
