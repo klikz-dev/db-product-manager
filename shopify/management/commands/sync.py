@@ -1,10 +1,11 @@
 import time
 from django.core.management.base import BaseCommand
-
+from django.db.models import Max
 import os
-import pymysql
 
 from library import debug, shopify, common
+
+from shopify.models import Order
 
 import environ
 env = environ.Env()
@@ -34,17 +35,8 @@ class Command(BaseCommand):
                 time.sleep(300)
 
     def main(self):
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        csr.execute(
-            "SELECT MAX(ShopifyOrderID) FROM Orders")
-        row = csr.fetchone()
-        lastOrderId = row[0]
-
-        csr.close()
-        con.close()
+        lastOrderId = Order.objects.aggregate(Max('shopifyOrderId'))[
+            'shopifyOrderId__max']
 
         ordersRes = shopify.getNewOrders(lastOrderId)
 

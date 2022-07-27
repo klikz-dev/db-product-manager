@@ -1,3 +1,4 @@
+import environ
 import pymysql
 from library.debug import debug
 import os
@@ -9,6 +10,8 @@ import pytz
 
 import urllib.request
 
+from shopify.models import Address, Customer, Line_Item, Order, Variant
+
 opener = urllib.request.build_opener()
 opener.addheaders = [
     ('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
@@ -16,7 +19,6 @@ urllib.request.install_opener(opener)
 
 DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-import environ
 env = environ.Env()
 
 db_host = env('MYSQL_HOST')
@@ -77,64 +79,53 @@ def backup():
         debug("Manage", 1, "Database Backup Failed. {}".format(e))
 
 
-def importOrder(order):
-    con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-    csr = con.cursor()
-
-    customer = order['customer']
-    address = customer['default_address']
-
-    # Import Address
-    csr.execute(
-        'CALL ImportAddress (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
-        (
-            address['id'],
-            customer['id'],
-            address['last_name'],
-            address['first_name'],
-            address['company'],
-            address['address1'],
-            address['address2'],
-            address['city'],
-            address['province_code'],
-            address['zip'],
-            address['country'],
-            address['phone']
-        )
-    )
-    con.commit()
+def importOrder(shopifyOrder):
+    shopifyCustomer = shopifyOrder['customer']
+    shopifyAddress = shopifyCustomer['default_address']
 
     # Import Customer
-    csr.execute(
-        'CALL ImportCustomer (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
-        (
-            customer['id'],
-            customer['email'],
-            customer['first_name'],
-            customer['last_name'],
-            customer['phone'],
-            address['id'],
-            customer['orders_count'],
-            customer['total_spent'],
-            customer['state'],
-            customer['note'],
-            customer['tags'],
-            customer['accepts_marketing'],
-            customer['created_at']
-        )
-    )
-    con.commit()
+    customer = Customer(customerId=shopifyCustomer['id'])
+
+    customer.email = shopifyCustomer['email']
+    customer.firstName = shopifyCustomer['first_name']
+    customer.lastName = shopifyCustomer['last_name']
+    customer.phone = shopifyCustomer['phone']
+    customer.defaultAddressId = shopifyAddress['id']
+    customer.orderCount = shopifyCustomer['orders_count']
+    customer.totalSpent = shopifyCustomer['total_spent']
+    customer.state = shopifyCustomer['state']
+    customer.note = shopifyCustomer['note']
+    customer.tags = shopifyCustomer['tags']
+    customer.acceptsMarketing = shopifyCustomer['accepts_marketing']
+    customer.createdAt = shopifyCustomer['created_at']
+
+    customer.save()
+
+    # Import Address
+    address = Address(addressId=shopifyAddress['id'])
+
+    address.customer = customer
+    address.firstName = shopifyAddress['first_name']
+    address.lastName = shopifyAddress['last_name']
+    address.phone = shopifyAddress['phone']
+    address.address1 = shopifyAddress['address1']
+    address.address2 = shopifyAddress['address2']
+    address.company = shopifyAddress['company']
+    address.city = shopifyAddress['city']
+    address.state = shopifyAddress['province_code']
+    address.zip = shopifyAddress['zip']
+    address.country = shopifyAddress['country']
+
+    address.save()
 
     # Import Order
-    orderId = order['id']
 
     specialShipping = ''
     shippingMethod = ''
     shippingCost = 0
 
-    if len(order['shipping_lines']) > 0:
-        shipping = order['shipping_lines'][0]
+    if len(shopifyOrder['shipping_lines']) > 0:
+        shipping = shopifyOrder['shipping_lines'][0]
         shippingCost = float(shipping['price'])
 
         shippingMethod = shipping['title']
@@ -143,7 +134,7 @@ def importOrder(order):
         if 'UPS 2nd Day Air' in shippingMethod:
             shippingMethod = 'UPS 2nd Day Air'
 
-        if order['shipping_address']['country'] != 'United States' and order['shipping_address']['country'] != "US":
+        if shopifyOrder['shipping_address']['country'] != 'United States' and shopifyOrder['shipping_address']['country'] != "US":
             specialShipping = 'International'
         elif shippingMethod == 'UPS Next Day Air':
             specialShipping = 'Overnight'
@@ -155,20 +146,20 @@ def importOrder(order):
             specialShipping = 'Overnight'
 
     isFraud = 0
-    if 'Fraud' in order['tags']:
+    if 'Fraud' in shopifyOrder['tags']:
         isFraud = 1
 
-    if order.get('billing_address'):
-        billing_last_name = order['billing_address']['last_name']
-        billing_first_name = order['billing_address']['first_name']
-        billing_company = order['billing_address']['company']
-        billing_address1 = order['billing_address']['address1']
-        billing_address2 = order['billing_address']['address2']
-        billing_city = order['billing_address']['city']
-        billing_province_code = order['billing_address']['province_code']
-        billing_zip = order['billing_address']['zip']
-        billing_country = order['billing_address']['country']
-        billing_phone = order['billing_address']['phone']
+    if shopifyOrder.get('billing_address'):
+        billing_last_name = shopifyOrder['billing_address']['last_name']
+        billing_first_name = shopifyOrder['billing_address']['first_name']
+        billing_company = shopifyOrder['billing_address']['company']
+        billing_address1 = shopifyOrder['billing_address']['address1']
+        billing_address2 = shopifyOrder['billing_address']['address2']
+        billing_city = shopifyOrder['billing_address']['city']
+        billing_province_code = shopifyOrder['billing_address']['province_code']
+        billing_zip = shopifyOrder['billing_address']['zip']
+        billing_country = shopifyOrder['billing_address']['country']
+        billing_phone = shopifyOrder['billing_address']['phone']
     else:
         billing_last_name = ""
         billing_first_name = ""
@@ -181,17 +172,17 @@ def importOrder(order):
         billing_country = ""
         billing_phone = ""
 
-    if order.get('shipping_address'):
-        shipping_last_name = order['shipping_address']['last_name']
-        shipping_first_name = order['shipping_address']['first_name']
-        shipping_company = order['shipping_address']['company']
-        shipping_address1 = order['shipping_address']['address1']
-        shipping_address2 = order['shipping_address']['address2']
-        shipping_city = order['shipping_address']['city']
-        shipping_province_code = order['shipping_address']['province_code']
-        shipping_zip = order['shipping_address']['zip']
-        shipping_country = order['shipping_address']['country']
-        shipping_phone = order['shipping_address']['phone']
+    if shopifyOrder.get('shipping_address'):
+        shipping_last_name = shopifyOrder['shipping_address']['last_name']
+        shipping_first_name = shopifyOrder['shipping_address']['first_name']
+        shipping_company = shopifyOrder['shipping_address']['company']
+        shipping_address1 = shopifyOrder['shipping_address']['address1']
+        shipping_address2 = shopifyOrder['shipping_address']['address2']
+        shipping_city = shopifyOrder['shipping_address']['city']
+        shipping_province_code = shopifyOrder['shipping_address']['province_code']
+        shipping_zip = shopifyOrder['shipping_address']['zip']
+        shipping_country = shopifyOrder['shipping_address']['country']
+        shipping_phone = shopifyOrder['shipping_address']['phone']
     else:
         shipping_last_name = billing_last_name
         shipping_first_name = billing_first_name
@@ -204,60 +195,59 @@ def importOrder(order):
         shipping_country = billing_country
         shipping_phone = billing_phone
 
+    order = Order(shopifyOrderId=shopifyOrder['id'])
 
-    csr.execute(
-        'CALL ImportOrder (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
-        (
-            orderId,
-            order['order_number'],
-            order['email'],
-            order['phone'],
-            customer['id'],
-            billing_last_name,
-            billing_first_name,
-            billing_company,
-            billing_address1,
-            billing_address2,
-            billing_city,
-            billing_province_code,
-            billing_zip,
-            billing_country,
-            billing_phone,
-            shipping_last_name,
-            shipping_first_name,
-            shipping_company,
-            shipping_address1,
-            shipping_address2,
-            shipping_city,
-            shipping_province_code,
-            shipping_zip,
-            shipping_country,
-            shipping_phone,
-            shippingMethod,
-            specialShipping,
-            order['note'],
-            order['total_line_items_price'],
-            order['total_discounts'],
-            order['subtotal_price'],
-            order['total_tax'],
-            shippingCost,
-            order['total_price'],
-            float(order['total_weight']) / 453.592,
-            order['created_at'],
-            isFraud
-        )
-    )
-    con.commit()
+    order.orderNumber = shopifyOrder['order_number']
+    order.email = shopifyOrder['email']
+    order.phone = shopifyOrder['phone']
+    order.customer = customer
+
+    order.billingFirstName = billing_first_name
+    order.billingLastName = billing_last_name
+    order.billingCompany = billing_company
+    order.billingAddress1 = billing_address1
+    order.billingAddress2 = billing_address2
+    order.billingCity = billing_city
+    order.billingState = billing_province_code
+    order.billingZip = billing_zip
+    order.billingCountry = billing_country
+    order.billingPhone = billing_phone
+
+    order.shippingFirstName = shipping_first_name
+    order.shippingLastName = shipping_last_name
+    order.shippingCompany = shipping_company
+    order.shippingAddress1 = shipping_address1
+    order.shippingAddress2 = shipping_address2
+    order.shippingCity = shipping_city
+    order.shippingState = shipping_province_code
+    order.shippingZip = shipping_zip
+    order.shippingCountry = shipping_country
+    order.shippingPhone = shipping_phone
+
+    order.shippingMethod = shippingMethod
+    order.specialShipping = specialShipping
+    order.orderNote = shopifyOrder['note']
+
+    order.totalItems = shopifyOrder['total_line_items_price']
+    order.totalDiscounts = shopifyOrder['total_discounts']
+    order.orderSubtotal = shopifyOrder['subtotal_price']
+    order.orderTax = shopifyOrder['total_tax']
+    order.orderShippingCost = shippingCost
+    order.orderTotal = shopifyOrder['total_price']
+
+    order.weight = float(shopifyOrder['total_weight']) / 453.592
+    order.orderDate = shopifyOrder['created_at']
+    order.isFraud = isFraud
+
+    order.save()
 
     # Import Shopping Cart
-    line_items = order['line_items']
+    line_items = shopifyOrder['line_items']
 
     manufacturers = []
     orderTypes = []
 
-    csr.execute("""DELETE FROM Orders_ShoppingCart
-        WHERE ShopifyOrderID = '{}';""".format(orderId))
-    con.commit()
+    Line_Item.objects.filter(order=order).delete()
 
     for line_item in line_items:
         try:
@@ -280,25 +270,22 @@ def importOrder(order):
             if manufacturer not in manufacturers:
                 manufacturers.append(manufacturer)
 
-            csr.execute(
-                'CALL ImportOrderShoppingCart (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
-                (
-                    orderId,
-                    line_item['product_id'],
-                    line_item['variant_id'],
-                    line_item['quantity'],
-                    line_item['title'],
-                    variantTitle,
-                    line_item['name'],
-                    line_item['sku'],
-                    manufacturer,
-                    line_item['price'],
-                    line_item['total_discount'],
-                    weight / 453.592,
-                    line_item['taxable']
-                )
-            )
-            con.commit()
+            variant = Variant.objects.get(variantId=line_item['variant_id'])
+            shoppingCart = Line_Item(order=order)
+
+            shoppingCart.variant = variant
+            shoppingCart.quantity = line_item['quantity']
+            shoppingCart.orderedProductTitle = line_item['title']
+            shoppingCart.orderedProductVariantTitle = variantTitle
+            shoppingCart.orderedProductVariantName = line_item['name']
+            shoppingCart.orderedProductSKU = line_item['sku']
+            shoppingCart.orderedProductManufacturer = manufacturer
+            shoppingCart.orderedProductUnitPrice = line_item['price']
+            shoppingCart.orderedProductLineDiscount = line_item['total_discount']
+            shoppingCart.orderedProductUnitWeight = weight / 453.592
+            shoppingCart.taxable = line_item['taxable']
+
+            shoppingCart.save()
 
         except Exception as e:
             print(e)
@@ -312,81 +299,33 @@ def importOrder(order):
     manufacturerList = ",".join(manufacturers)
     orderTypeList = "/".join(orderTypes)
 
-    csr.execute(
-        "UPDATE Orders SET OrderType = '{}', ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
-            orderTypeList,
-            manufacturerList,
-            orderId
-        )
-    )
-    con.commit()
+    order.orderType = orderTypeList
+    order.manufacturerList = manufacturerList
 
     # Import Order Attributes
-    attrs = order['note_attributes']
-    status = ""
-    initials = ""
-    manufacturerList = ""
-    referenceNumber = ""
+    attrs = shopifyOrder['note_attributes']
 
     for attr in attrs:
         if attr['value'] != "" and attr['value'] != None:
             if attr['name'] == "Status":
-                status = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET Status = '{}' WHERE ShopifyOrderID = {}".format(
-                        status,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.status = attr['value']
+
             if attr['name'] == "Initials":
-                initials = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET Initials = '{}' WHERE ShopifyOrderID = {}".format(
-                        initials,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.initials = attr['value']
+
             if attr['name'] == "ManufacturerList":
-                manufacturerList = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET ManufacturerList = '{}' WHERE ShopifyOrderID = {}".format(
-                        manufacturerList,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.manufacturerList = attr['value']
+
             if attr['name'] == "ReferenceNumber":
-                referenceNumber = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET ReferenceNumber = '{}' WHERE ShopifyOrderID = {}".format(
-                        referenceNumber,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.referenceNumber = attr['value']
+
             if attr['name'] == "CSNote":
-                note = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET Note = '{}' WHERE ShopifyOrderID = {}".format(
-                        note,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.note = attr['value']
+
             if attr['name'] == "SpecialShipping":
-                specialShipping = attr['value']
-                csr.execute(
-                    "UPDATE Orders SET SpecialShipping = '{}' WHERE ShopifyOrderID = {}".format(
-                        specialShipping,
-                        orderId
-                    )
-                )
-                con.commit()
+                order.specialShipping = attr['value']
+
+    order.save()
 
     debug("Order", 0,
-          "Downloaded Order {} / {}".format(order['order_number'], orderId))
-
-    csr.close()
-    con.close()
+          "Downloaded Order {} / {}".format(order.orderNumber, order.shopifyOrderId))
