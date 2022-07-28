@@ -1,5 +1,4 @@
 import environ
-import pymysql
 from library.debug import debug
 import os
 import requests
@@ -84,7 +83,10 @@ def importOrder(shopifyOrder):
     shopifyAddress = shopifyCustomer['default_address']
 
     # Import Customer
-    customer = Customer(customerId=shopifyCustomer['id'])
+    try:
+        customer = Customer.objects.get(customerId=shopifyCustomer['id'])
+    except Customer.DoesNotExist:
+        customer = Customer(customerId=shopifyCustomer['id'])
 
     customer.email = shopifyCustomer['email']
     customer.firstName = shopifyCustomer['first_name']
@@ -102,7 +104,10 @@ def importOrder(shopifyOrder):
     customer.save()
 
     # Import Address
-    address = Address(addressId=shopifyAddress['id'])
+    try:
+        address = Address.objects.get(addressId=shopifyAddress['id'])
+    except Address.DoesNotExist:
+        address = Address(addressId=shopifyAddress['id'])
 
     address.customer = customer
     address.firstName = shopifyAddress['first_name']
@@ -195,7 +200,10 @@ def importOrder(shopifyOrder):
         shipping_country = billing_country
         shipping_phone = billing_phone
 
-    order = Order(shopifyOrderId=shopifyOrder['id'])
+    try:
+        order = Order.objects.get(shopifyOrderId=shopifyOrder['id'])
+    except Order.DoesNotExist:
+        order = Order(shopifyOrderId=shopifyOrder['id'])
 
     order.orderNumber = shopifyOrder['order_number']
     order.email = shopifyOrder['email']
@@ -270,8 +278,16 @@ def importOrder(shopifyOrder):
             if manufacturer not in manufacturers:
                 manufacturers.append(manufacturer)
 
-            variant = Variant.objects.get(variantId=line_item['variant_id'])
-            shoppingCart = Line_Item(order=order)
+            try:
+                variant = Variant.objects.get(
+                    variantId=line_item['variant_id'])
+            except Variant.DoesNotExist:
+                variant = None
+
+            try:
+                shoppingCart = Line_Item.objects.get(order=order)
+            except Line_Item.DoesNotExist:
+                shoppingCart = Line_Item(order=order)
 
             shoppingCart.variant = variant
             shoppingCart.quantity = line_item['quantity']
@@ -288,9 +304,8 @@ def importOrder(shopifyOrder):
             shoppingCart.save()
 
         except Exception as e:
-            print(e)
-            debug("Order", 2, "Import Order error: PO {}".format(
-                order['order_number']))
+            debug("Order", 2, "Import Order error: PO {}. Error: {}".format(
+                shopifyOrder['order_number']), e)
             return
 
     # Update Order Manufacturers and Types
@@ -303,27 +318,27 @@ def importOrder(shopifyOrder):
     order.manufacturerList = manufacturerList
 
     # Import Order Attributes
-    attrs = shopifyOrder['note_attributes']
+    # attrs = shopifyOrder['note_attributes']
 
-    for attr in attrs:
-        if attr['value'] != "" and attr['value'] != None:
-            if attr['name'] == "Status":
-                order.status = attr['value']
+    # for attr in attrs:
+    #     if attr['value'] != "" and attr['value'] != None:
+    #         if attr['name'] == "Status":
+    #             order.status = attr['value']
 
-            if attr['name'] == "Initials":
-                order.initials = attr['value']
+    #         if attr['name'] == "Initials":
+    #             order.initials = attr['value']
 
-            if attr['name'] == "ManufacturerList":
-                order.manufacturerList = attr['value']
+    #         if attr['name'] == "ManufacturerList":
+    #             order.manufacturerList = attr['value']
 
-            if attr['name'] == "ReferenceNumber":
-                order.referenceNumber = attr['value']
+    #         if attr['name'] == "ReferenceNumber":
+    #             order.referenceNumber = attr['value']
 
-            if attr['name'] == "CSNote":
-                order.note = attr['value']
+    #         if attr['name'] == "CSNote":
+    #             order.note = attr['value']
 
-            if attr['name'] == "SpecialShipping":
-                order.specialShipping = attr['value']
+    #         if attr['name'] == "SpecialShipping":
+    #             order.specialShipping = attr['value']
 
     order.save()
 
