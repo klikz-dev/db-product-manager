@@ -284,11 +284,9 @@ def importOrder(shopifyOrder):
             except Variant.DoesNotExist:
                 variant = None
 
-            try:
-                shoppingCart = Line_Item.objects.get(order=order)
-            except Line_Item.DoesNotExist:
-                shoppingCart = Line_Item(order=order)
+            shoppingCart = Line_Item()
 
+            shoppingCart.order = order
             shoppingCart.variant = variant
             shoppingCart.quantity = line_item['quantity']
             shoppingCart.orderedProductTitle = line_item['title']
