@@ -96,7 +96,6 @@ class Command(BaseCommand):
                         AND O.Status NOT LIKE '%Processed%'
                         AND O.Status NOT LIKE '%CFA%'
                         AND O.Status NOT LIKE '%Call Manufacturer%'
-                        AND O.Status NOT LIKE '%Reference#%'
                         AND O.Status NOT LIKE '%Brewster EDI%'
 
                     ORDER BY O.OrderNumber ASC""")
