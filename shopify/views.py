@@ -217,21 +217,21 @@ class LineItemViewSet(viewsets.ModelViewSet):
         )
 
         # Filter by Last Processed Order/Sample Ids
-        # poRecord = PORecord.objects.values()
-        # lastPO = None
+        poRecord = PORecord.objects.values()
+        lastPO = None
 
-        # brandName = brand.replace(' ', '')
-        # if type == "o":
-        #     typeName = "Order"
-        # else:
-        #     typeName = "Sample"
+        brandName = brand.replace(' ', '')
+        if type == "o":
+            typeName = "Order"
+        else:
+            typeName = "Sample"
 
-        # if brandName != "":
-        #     lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
+        if brandName != "":
+            lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
 
-        # if lastPO is not None:
-        #     lastPO = int(lastPO) + 1
-        #     lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
+        if lastPO is not None:
+            lastPO = int(lastPO) + 1
+            lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
         ############################################
 
         page = self.paginate_queryset(lineItems)
