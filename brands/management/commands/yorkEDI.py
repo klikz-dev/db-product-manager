@@ -492,23 +492,23 @@ class Command(BaseCommand):
         except:
             debug("York EDI", 2, "failed FTP server login.")
 
-        files = os.listdir(FILEDIR + "/files/EDI/York/")
-        print(files)
+        # files = os.listdir(FILEDIR + "/files/EDI/York/")
+        # print(files)
 
         # Validate upload
         print(ftp.nlst())
 
-        for filename in files:
-            try:
-                f = open(FILEDIR + '/files/EDI/York/' + filename, 'rb')
-                ftp.storbinary('STOR ' + filename, f)
-                f.close()
-                debug("York EDI", 0, "EDI uploaded {}".format(
-                    FILEDIR + '/files/EDI/York/' + filename))
-            except Exception as e:
-                print(e)
-                print("Error upload EDI XML")
-                continue
+        # for filename in files:
+        #     try:
+        #         f = open(FILEDIR + '/files/EDI/York/' + filename, 'rb')
+        #         ftp.storbinary('STOR ' + filename, f)
+        #         f.close()
+        #         debug("York EDI", 0, "EDI uploaded {}".format(
+        #             FILEDIR + '/files/EDI/York/' + filename))
+        #     except Exception as e:
+        #         print(e)
+        #         print("Error upload EDI XML")
+        #         continue
 
         ftp.close()
 
