@@ -192,7 +192,7 @@ class LineItemViewSet(viewsets.ModelViewSet):
                 orderedProductManufacturer__in=manufacturers)
         ######################
 
-        # Filtery by Processor Type
+        # Filter by Processor Type
         type = self.request.query_params.get('type')
         if type == 's':
             lineItems = lineItems.filter(
@@ -202,22 +202,36 @@ class LineItemViewSet(viewsets.ModelViewSet):
                 orderedProductVariantTitle__icontains='Sample -')
         ###########################
 
+        # Filter by Status
+        lineItems = lineItems.exclude(
+            Q(order__status__icontains='Processed') |
+            Q(order__status__icontains='Cancel') |
+            Q(order__status__icontains='Hold') |
+            Q(order__status__icontains='Call') |
+            Q(order__status__icontains='Return') |
+            Q(order__status__icontains='Discontinued') |
+            Q(order__status__icontains='Back') |
+            Q(order__status__icontains='B/O') |
+            Q(order__status__icontains='Manually') |
+            Q(order__status__icontains='CFA')
+        )
+
         # Filter by Last Processed Order/Sample Ids
-        poRecord = PORecord.objects.values()
-        lastPO = None
+        # poRecord = PORecord.objects.values()
+        # lastPO = None
 
-        brandName = brand.replace(' ', '')
-        if type == "o":
-            typeName = "Order"
-        else:
-            typeName = "Sample"
+        # brandName = brand.replace(' ', '')
+        # if type == "o":
+        #     typeName = "Order"
+        # else:
+        #     typeName = "Sample"
 
-        if brandName != "":
-            lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
+        # if brandName != "":
+        #     lastPO = (poRecord[0]['{}{}'.format(brandName, typeName)])
 
-        if lastPO is not None:
-            lastPO = int(lastPO) + 1
-            lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
+        # if lastPO is not None:
+        #     lastPO = int(lastPO) + 1
+        #     lineItems = lineItems.filter(order__orderNumber__gte=lastPO)
         ############################################
 
         page = self.paginate_queryset(lineItems)
