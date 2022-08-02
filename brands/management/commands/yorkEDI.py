@@ -41,6 +41,9 @@ class Command(BaseCommand):
         if "getRef" in options['functions']:
             self.getRef()
 
+        if "uploadAll" in options['functions']:
+            self.uploadAll()
+
     def main(self):
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -470,7 +473,7 @@ class Command(BaseCommand):
             debug("York EDI", 2, "failed FTP server login. PO: {}".format(filename))
 
         try:
-            f = open(FILEDIR + '/files/EDI/YorkEDI/' + filename, 'r')
+            f = open(FILEDIR + '/files/EDI/York/' + filename, 'rb')
             ftp.storbinary('STOR ' + filename, f)
             f.close()
             print("uploaded EDI XML successfully")
@@ -480,6 +483,34 @@ class Command(BaseCommand):
         ftp.close()
 
         debug("York EDI", 0, "EDI uploaded {}".format(filename))
+
+    def uploadAll(self):
+        try:
+            ftp = FTP("mft.getfoundational.com")
+            ftp.login('EDYRKWAL_decbest', 'zE6e-26K')
+            ftp.cwd("tofdnl")
+        except:
+            debug("York EDI", 2, "failed FTP server login.")
+
+        files = os.listdir(FILEDIR + "/files/EDI/York/")
+        print(files)
+
+        # Validate upload
+        print(ftp.nlst())
+
+        for filename in files:
+            try:
+                f = open(FILEDIR + '/files/EDI/York/' + filename, 'rb')
+                ftp.storbinary('STOR ' + filename, f)
+                f.close()
+                debug("York EDI", 0, "EDI uploaded {}".format(
+                    FILEDIR + '/files/EDI/York/' + filename))
+            except Exception as e:
+                print(e)
+                print("Error upload EDI XML")
+                continue
+
+        ftp.close()
 
     def getRef(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -496,10 +527,10 @@ class Command(BaseCommand):
                 continue
 
             urllib.request.urlretrieve("ftp://EDYRKWAL_decbest:zE6e-26K@mft.getfoundational.com/fromfdnl/" +
-                                       fname, FILEDIR + '/files/EDI/YorkEDI/' + fname)
+                                       fname, FILEDIR + '/files/EDI/York/' + fname)
             ftp.delete(fname)
 
-            f = open(FILEDIR + '/files/EDI/YorkEDI/' + fname, "rb")
+            f = open(FILEDIR + '/files/EDI/York/' + fname, "rb")
             cr = csv.reader(f)
 
             for row in cr:
