@@ -128,8 +128,8 @@ class Command(BaseCommand):
 
             collection = str(row[2]).strip()
             if "STAPETER" in collection:
-                collection = "BORASTAPETER"
-                brand = "Borastapeter"
+                collection = "BORÃ…STAPETER"
+                brand = "BORÃ…STAPETER"
 
             if "FABRIC" == ptype:
                 ptype = "Fabric"
@@ -462,7 +462,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(collection="BORASTAPETER")
+        products = Schumacher.objects.filter(collection="BORÃ…STAPETER")
 
         for product in products:
             try:
