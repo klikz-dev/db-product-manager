@@ -293,7 +293,7 @@ class OrderAdmin(admin.ModelAdmin):
         ("Customer Info", {'fields': [
             'email',
             'phone',
-            'customer',
+            # 'customer',
         ]}),
         ("Billing Information", {'fields': [
             'billingFirstName',
@@ -347,7 +347,7 @@ class OrderAdmin(admin.ModelAdmin):
             'oldPO',
         ]}),
     ]
-    inlines = [ItemInline]
+    # inlines = [ItemInline]
 
     list_display = ('orderNumber', 'email', 'shippingAddress',
                     'orderType', 'orderTotal', 'status', 'referenceNumber', 'orderDate', 'shippingMethod')
