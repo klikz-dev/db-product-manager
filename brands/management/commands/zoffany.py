@@ -69,8 +69,8 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                self.getProducts()
-                self.getProductIds()
+                # self.getProducts()
+                # self.getProductIds()
                 self.updateStock()
 
                 print("Completed process. Waiting for next run.")
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         Zoffany.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master-5.13.22.xlsx")
+            FILEDIR + "/files/zoffany-master.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -623,6 +623,17 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
+        # Mural Subtypes
+        murals = []
+
+        wb = xlrd.open_workbook(
+            FILEDIR + "/files/zoffany-master.xlsx")
+        sh = wb.sheet_by_index(2)
+
+        for i in range(1, sh.nrows):
+            mpn = str(sh.cell_value(i, 1))
+            murals.append(mpn)
+
         products = Zoffany.objects.all()
         for product in products:
             sku = product.sku
@@ -657,6 +668,14 @@ class Command(BaseCommand):
 
                 debug("Zoffany", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+            if product.mpn in murals:
+                csr.execute("CALL AddToEditSubtype ({}, {})".format(
+                    sq(sku), sq(str('Murals').strip())))
+                con.commit()
+
+                debug("York", 0,
+                      "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq('Murals')))
 
         csr.close()
         con.close()
