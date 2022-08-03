@@ -15,7 +15,7 @@ jffabrics = 1.75  # x MAP
 jffabrics_trade = 1
 
 # Kasmir
-kasmir = 1.4
+kasmir = 1.5 # 8/3 from Kasmir. Wholesale = retail / 2. not advertising more than 25% off of the retail
 kasmir_trade = 1
 
 # Kravet

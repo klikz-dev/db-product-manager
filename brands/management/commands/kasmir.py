@@ -62,6 +62,7 @@ class Command(BaseCommand):
             while True:
                 self.getProducts()
                 self.getProductIds()
+                self.updatePrice()
                 self.updateStock()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
