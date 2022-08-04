@@ -457,17 +457,21 @@ class Command(BaseCommand):
 
         rows = csr.fetchall()
         for row in rows:
-            productId = row[0]
-            shopifyProduct = ShopifyProduct.objects.get(productId=productId)
+            try:
+                productId = row[0]
+                shopifyProduct = ShopifyProduct.objects.get(productId=productId)
 
-            pv1 = shopifyProduct.variants.filter(
-                isDefault=1).values('cost', 'price')[0]
-            pv2 = shopifyProduct.variants.filter(
-                name__startswith="Trade - ").values('price')[0]
+                pv1 = shopifyProduct.variants.filter(
+                    isDefault=1).values('cost', 'price')[0]
+                pv2 = shopifyProduct.variants.filter(
+                    name__startswith="Trade - ").values('price')[0]
 
-            oldCost = pv1['cost']
-            oldPrice = pv1['price']
-            oldTradePrice = pv2['price']
+                oldCost = pv1['cost']
+                oldPrice = pv1['price']
+                oldTradePrice = pv2['price']
+            except Exception as e:
+                print(e)
+                continue
 
             try:
                 product = Kasmir.objects.get(
