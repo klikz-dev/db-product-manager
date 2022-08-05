@@ -139,6 +139,6 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['shippingFirstName', 'shippingLastName', 'shippingCompany', 'shippingAddress1', 'shippingAddress2',
-                  'shippingCity', 'shippingState', 'shippingZip', 'shippingCountry', 'shippingPhone', 'shippingMethod',
+                  'shippingCity', 'shippingState', 'shippingZip', 'shippingCountry', 'shippingPhone',
                   'orderTotal', 'orderNote', 'status', 'manufacturerList', 'referenceNumber', 'customerEmailed', 'customerCalled',
                   'customerChatted', 'specialShipping', 'customerOrderStatus', 'note', 'isFraud']
