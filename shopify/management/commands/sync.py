@@ -29,16 +29,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if "main" in options['functions']:
-            while True:
-                self.main()
-                print("Completed process. Waiting for next run.")
-                time.sleep(300)
+            self.main()
 
     def main(self):
         lastOrderId = Order.objects.aggregate(Max('shopifyOrderId'))[
             'shopifyOrderId__max']
 
         ordersRes = shopify.getNewOrders(lastOrderId)
+
+        if ordersRes == None or ordersRes['orders'] == None:
+            return
 
         for order in ordersRes['orders']:
             common.importOrder(order)
