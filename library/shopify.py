@@ -754,6 +754,10 @@ def getOrderById(orderId):
 
 
 def updateOrderById(orderId, order):
+    s = requests.Session()
+    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
+        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+
     note_attributes = {
         "CSNote": order.note,
         "Status": order.status,
@@ -782,13 +786,25 @@ def updateOrderById(orderId, order):
     if order.customerChatted:
         note_attributes['CustomerChatted'] = order.customerChatted
 
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
-
-    s = requests.Session()
-
-    r = s.put(api_url + "/admin/api/{}/orders/{}.json".format(api_version,
-              orderId), json={"order": {"id": orderId, "note_attributes": note_attributes}})
+    r = s.put(
+        api_url +
+        "/admin/api/{}/orders/{}.json".format(api_version, orderId),
+        json={
+            "order": {
+                "id": orderId,
+                "note_attributes": note_attributes,
+                "shipping_address": {
+                    "first_name": order.shippingFirstName,
+                    "last_name": order.shippingLastName,
+                    "address1": order.shippingAddress1,
+                    "city": order.shippingCity,
+                    "province_code": order.shippingState,
+                    "zip": order.shippingZip,
+                    "country": order.shippingCountry,
+                }
+            }
+        }
+    )
 
     s.close()
 
