@@ -122,14 +122,14 @@ class Command(BaseCommand):
             except Schumacher.DoesNotExist:
                 pass
 
-            pattern = str(row[4]).strip()
-            color = str(row[5]).strip()
+            pattern = str(row[4]).strip().replace('', '').replace('¥', '').replace('…', '').replace('„', '')
+            color = str(row[5]).strip().replace('', '').replace('¥', '').replace('…', '').replace('„', '')
             ptype = str(row[0]).strip()
 
             collection = str(row[2]).strip()
             if "STAPETER" in collection:
-                collection = "BORÃ…STAPETER"
-                brand = "BORÃ…STAPETER"
+                collection = "BORÃSTAPETER"
+                brand = "BORÃSTAPETER"
 
             if "FABRIC" == ptype:
                 ptype = "Fabric"
@@ -159,7 +159,7 @@ class Command(BaseCommand):
                 rollLength = float(row[8])
             except:
                 rollLength = 0
-            description = row[17]
+            description = row[17].replace('', '').replace('¥', '').replace('…', '').replace('„', '')
 
             content1 = row[12]
             content2 = row[13]
@@ -462,7 +462,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(collection="BORÃ…STAPETER")
+        products = Schumacher.objects.filter(collection="BORÃSTAPETER")
 
         for product in products:
             try:
