@@ -107,8 +107,10 @@ class Command(BaseCommand):
                     END AS Country,
 
                     CASE
-                        WHEN O.ShippingMethod = 'UPS 2nd Day Air' THEN '2nd Day'
-                        WHEN O.ShippingMethod = 'UPS Next Day Air' THEN 'Overnight'
+                        WHEN O.ShippingMethod LIKE '%2nd Day%' THEN '2nd Day'
+                        WHEN O.ShippingMethod LIKE '%2-day%' THEN '2nd Day'
+                        WHEN O.ShippingMethod LIKE '%Overnight%' THEN 'Overnight'
+                        WHEN O.ShippingMethod LIKE '%Next Day%' THEN 'Overnight'
                     ELSE 'Ground'
                     END AS ShippingMethod,
 
