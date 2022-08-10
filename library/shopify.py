@@ -7,6 +7,8 @@ import pymysql
 from datetime import timedelta
 from datetime import datetime
 
+from shopify.models import Product
+
 from library import debug
 
 import environ
@@ -437,8 +439,15 @@ def UploadImageToShopify(src):
                 imgLink = "https://s3.amazonaws.com/{}/{}.jpg".format(
                     bucket_name, productID)
 
+                # Alt text
+                try:
+                    product = Product.objects.get(productId=productID)
+                    alt = product.title
+                except Product.DoesNotExist:
+                    alt = ''
+
                 rImage = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
-                               productID), json={"product": {"id": productID, "images": [{"src": imgLink}]}})
+                               productID), json={"product": {"id": productID, "images": [{"src": imgLink, "alt": alt}]}})
                 jImage = json.loads(rImage.text)
                 jpImage = jImage["product"]
                 csr.execute("CALL AddToProductImage ({}, 1, {}, '{}')".format(
@@ -464,8 +473,15 @@ def UploadImageToShopify(src):
                 imgLink = "https://s3.amazonaws.com/{}/{}".format(
                     bucket_name, f)
 
+                # Alt text
+                try:
+                    product = Product.objects.get(productId=productID)
+                    alt = product.title
+                except Product.DoesNotExist:
+                    alt = ''
+
                 rImage = s.post(api_url + "/admin/api/{}/products/{}/images.json".format(
-                    api_version, productID), json={"image": {"position": idx, "src": imgLink}})
+                    api_version, productID), json={"image": {"position": idx, "src": imgLink, "alt": alt}})
                 jImage = json.loads(rImage.text)
 
                 csr.execute("CALL AddToProductImage ({}, {}, {}, '{}')".format(
