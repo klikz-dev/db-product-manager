@@ -532,7 +532,7 @@ class Command(BaseCommand):
                                        fname, FILEDIR + '/files/EDI/York/' + fname)
             ftp.delete(fname)
 
-            f = open(FILEDIR + '/files/EDI/York/' + fname, "rb")
+            f = open(FILEDIR + '/files/EDI/York/' + fname, "r")
             cr = csv.reader(f)
 
             for row in cr:
@@ -558,6 +558,8 @@ class Command(BaseCommand):
                         con.commit()
 
                 except Exception as e:
+                    debug("York EDI", 2, "failed Get Ref numbers.")
+                    debug("York EDI", 2, "{}".format(e))
                     continue
 
         ftp.close()
