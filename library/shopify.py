@@ -813,10 +813,13 @@ def updateOrderById(orderId, order):
                     "first_name": order.shippingFirstName,
                     "last_name": order.shippingLastName,
                     "address1": order.shippingAddress1,
+                    "address2": order.shippingAddress2,
+                    "company": order.shippingCompany,
                     "city": order.shippingCity,
                     "province_code": order.shippingState,
                     "zip": order.shippingZip,
                     "country": order.shippingCountry,
+                    "phone": order.shippingPhone,
                 }
             }
         }
