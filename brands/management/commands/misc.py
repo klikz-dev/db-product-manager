@@ -44,7 +44,7 @@ class Command(BaseCommand):
             self.deleteBuggyProducts()
 
         if "deleteProduct" in options['functions']:
-            self.deleteProduct()
+            self.deleteProduct(None)
 
         if "deleteProducts" in options['functions']:
             self.deleteProducts()
@@ -172,7 +172,7 @@ class Command(BaseCommand):
             self.deleteProduct(productId)
 
     def deleteProduct(self, productID):
-        # productID = "6743614128174"
+        productID = "2071095967811"
 
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
