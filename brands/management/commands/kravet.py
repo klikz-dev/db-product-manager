@@ -82,6 +82,12 @@ class Command(BaseCommand):
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
 
+        if "updateStock" in options['functions']:
+            while True:
+                self.updateStock()
+                print("Completed stock update process. Waiting for next run.")
+                time.sleep(43200)
+
     def downloadcsv(self):
 
         if os.path.isfile(FILEDIR + "/files/item_info.csv"):
