@@ -431,7 +431,7 @@ class Command(BaseCommand):
                     if ref == "None":
                         ref = ""
                     if refNumber not in ref:
-                        newRef = "{}\,Brewster EDI: {}".format(ref, refNumber)
+                        newRef = "{}\nBrewster EDI: {}".format(ref, refNumber)
 
                         csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
                             sq(newRef), PONumber))

@@ -438,7 +438,7 @@ class Command(BaseCommand):
                         print(ref)
 
                         if refNumber not in ref:
-                            newRef = "{}\,Schumacher EDI: {}".format(
+                            newRef = "{}\nSchumacher EDI: {}".format(
                                 ref, refNumber)
 
                             csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
