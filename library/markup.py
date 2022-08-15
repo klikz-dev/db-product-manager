@@ -15,7 +15,7 @@ jffabrics = 1.75  # x MAP
 jffabrics_trade = 1
 
 # Kasmir
-kasmir = 1.5 # 8/3 from Kasmir. Wholesale = retail / 2. not advertising more than 25% off of the retail
+kasmir = 1.5  # 8/3 from Kasmir. Wholesale = retail / 2. not advertising more than 25% off of the retail
 kasmir_trade = 1
 
 # Kravet
@@ -37,9 +37,17 @@ materialworks_trade = 1
 maxwell = 1.4
 maxwell_trade = 1
 
+# MindTheGap
+mindthegap = 2.44
+mindthegap_trade = 1
+
 # Phillip Jeffries
 phillipjeffries = 1.4
 phillipjeffries_trade = 1.3
+
+# P/K Lifestyles
+pklifestyles = "MAP"
+pklifestyles_trade = 1
 
 # Pindler
 pindler = 1.4

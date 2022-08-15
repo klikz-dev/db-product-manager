@@ -1,6 +1,52 @@
 from django.contrib import admin
 
-from .models import Covington, MadcapCottage, Materialworks, Maxwell, Brewster, Fabricut, JFFabrics, Kasmir, Kravet, Pindler, PhillipJeffries, PremierPrints, RalphLauren, Scalamandre, Schumacher, Seabrook, Stout, York, Zoffany
+from .models import Covington, MadcapCottage, Materialworks, Maxwell, Brewster, Fabricut, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, RalphLauren, Scalamandre, Schumacher, Seabrook, Stout, York, Zoffany
+
+
+class PklifestylesAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['pattern', 'color']}),
+        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'width', 'sqft', 'rollLength', 'vr', 'material', 'match', 'instruction', 'feature', 'usage']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomset']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+
+    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+
+
+class MindthegapAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['pattern', 'color']}),
+        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'size', 'rollLength', 'content', 'repeat', 'material', 'instruction', 'country', 'usage']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomset']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+
+    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
 class PremierPrintsAdmin(admin.ModelAdmin):
@@ -449,6 +495,8 @@ class YorkAdmin(admin.ModelAdmin):
 
 
 # Register Models
+admin.site.register(Pklifestyles, PklifestylesAdmin)
+admin.site.register(Mindthegap, MindthegapAdmin)
 admin.site.register(PremierPrints, PremierPrintsAdmin)
 admin.site.register(Covington, CovingtonAdmin)
 admin.site.register(Materialworks, MaterialworksAdmin)
