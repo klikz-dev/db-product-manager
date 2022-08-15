@@ -91,25 +91,6 @@ class Command(BaseCommand):
                 time.sleep(86400)
 
     def getProducts(self):
-        # 3/16/22 From BK. Scala block list
-        disabledProducts = [
-            "EL 0001GALLMPILL",
-            "EL 0002GALLMPILL",
-            "EL 0004GALLMPILL",
-            "EL 0005GALLMPILL",
-            "SC 0005INDUSPILL",
-            "SC 0006INDUSPILL",
-            "SC 0016INDUSPILL",
-            "SC 0022INDUSPILL",
-            "SC 0023INDUSPILL",
-            "SC 0024INDUSPILL",
-            "ZS 0001TAILAPILL",
-            "SC 0004ACACPILL",
-            "SC 0004KOMOPILL",
-            "SC 0004EBRUPILL",
-            "SC 0004MANDPILL",
-        ]
-
         try:
             r = requests.get("{}/ScalaFeedAPI/FetchProductsFeed".format(API_ADDRESS),
                              headers={'Authorization': 'Bearer {}'.format(API_TOKEN)})
@@ -128,7 +109,7 @@ class Command(BaseCommand):
             mpn = row['SKU']
             new_mpn = row['ITEMID']
 
-            if row['DISCONTINUED'] != False or new_mpn in disabledProducts:
+            if row['DISCONTINUED'] != False:
                 status = False
             else:
                 status = True
