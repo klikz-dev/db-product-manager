@@ -1,3 +1,4 @@
+from shutil import copyfile
 from timeit import repeat
 from django.core.management.base import BaseCommand
 from brands.models import Pklifestyles
@@ -45,6 +46,9 @@ class Command(BaseCommand):
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
+
+        if "image" in options['functions']:
+            self.image()
 
         if "updateTags" in options['functions']:
             self.updateTags()
@@ -341,3 +345,71 @@ class Command(BaseCommand):
 
         csr.close()
         con.close()
+
+    def updateTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Pklifestyles.objects.all()
+        for product in products:
+            sku = product.sku
+
+            style = product.style
+            category = product.category
+            colors = product.colors
+
+            if style != None and style != "":
+                sty = str(style).strip()
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(sty)))
+                con.commit()
+
+                debug("Pklifestyles", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(sty)))
+
+            if category != None and category != "":
+                cat = str(category).strip()
+                csr.execute("CALL AddToEditCategory ({}, {})".format(
+                    sq(sku), sq(cat)))
+                con.commit()
+
+                debug("Pklifestyles", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(cat)))
+
+            if colors != None and colors != "":
+                col = str(colors).strip()
+                csr.execute("CALL AddToEditColor ({}, {})".format(
+                    sq(sku), sq(col)))
+                con.commit()
+
+                debug("Pklifestyles", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+        csr.close()
+        con.close()
+
+    def image(self):
+        images = os.listdir(FILEDIR + "/files/images/pklifestyles/")
+
+        products = Pklifestyles.objects.all()
+        for product in products:
+            productId = product.productId
+
+            if "{}1.jpg".format(product.mpn) in images:
+                print("{}1.jpg".format(product.mpn))
+
+                copyfile(FILEDIR + "/files/images/pklifestyles/{}1.jpg".format(product.mpn), FILEDIR +
+                         "/../../images/product/{}.jpg".format(productId))
+
+                os.remove(
+                    FILEDIR + "/files/images/pklifestyles/{}1.jpg".format(product.mpn))
+
+            if "{}2.jpg".format(product.mpn) in images:
+                print("{}2.jpg".format(product.mpn))
+
+                copyfile(FILEDIR + "/files/images/pklifestyles/{}2.jpg".format(product.mpn), FILEDIR +
+                         "/../../images/roomset/{}_2.jpg".format(productId))
+
+                os.remove(
+                    FILEDIR + "/files/images/pklifestyles/{}2.jpg".format(product.mpn))
