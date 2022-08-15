@@ -39,7 +39,7 @@ maxwell_trade = 1
 
 # MindTheGap
 mindthegap = 2.44
-mindthegap_trade = 1
+mindthegap_trade = 1.1
 
 # Phillip Jeffries
 phillipjeffries = 1.4
@@ -47,7 +47,7 @@ phillipjeffries_trade = 1.3
 
 # P/K Lifestyles
 pklifestyles = "MAP"
-pklifestyles_trade = 1
+pklifestyles_trade = 1.1
 
 # Pindler
 pindler = 1.4

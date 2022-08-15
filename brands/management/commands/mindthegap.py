@@ -60,6 +60,8 @@ class Command(BaseCommand):
                 time.sleep(86400)
 
     def getProducts(self):
+        Mindthegap.objects.all().delete()
+
         fabricFile = xlrd.open_workbook(
             FILEDIR + "/files/mainthegap-fabric-master.xlsx")
         fabricSheet = fabricFile.sheet_by_index(0)
@@ -72,13 +74,22 @@ class Command(BaseCommand):
             mpn = str(fabricSheet.cell_value(i, 1))
             sku = "MTG {}".format(mpn)
 
+            try:
+                Mindthegap.objects.get(mpn=mpn)
+                continue
+            except Mindthegap.DoesNotExist:
+                pass
+
             brand = "MindTheGap"
             ptype = "Fabric"
 
             collection = str(fabricSheet.cell_value(i, 11))
 
-            pattern = str(fabricSheet.cell_value(i, 4))
-            color = str(fabricSheet.cell_value(i, 15))
+            pattern = str(fabricSheet.cell_value(i, 4)).strip()
+            color = str(fabricSheet.cell_value(i, 15)).strip()
+
+            if mpn == '' or pattern == '' or color == '':
+                continue
 
             cost = float(
                 str(fabricSheet.cell_value(i, 6)).replace("$", ""))
@@ -140,13 +151,22 @@ class Command(BaseCommand):
             mpn = str(wallpaperSheet.cell_value(i, 2))
             sku = "MTG {}".format(mpn)
 
+            try:
+                Mindthegap.objects.get(mpn=mpn)
+                continue
+            except Mindthegap.DoesNotExist:
+                pass
+
             brand = "MindTheGap"
             ptype = "Wallpaper"
 
             collection = str(wallpaperSheet.cell_value(i, 0))
 
-            pattern = str(wallpaperSheet.cell_value(i, 3))
-            color = str(wallpaperSheet.cell_value(i, 12))
+            pattern = str(wallpaperSheet.cell_value(i, 3)).strip()
+            color = str(wallpaperSheet.cell_value(i, 12)).strip()
+
+            if mpn == '' or pattern == '' or color == '':
+                continue
 
             cost = float(
                 str(fabricSheet.cell_value(i, 5)).replace("$", ""))

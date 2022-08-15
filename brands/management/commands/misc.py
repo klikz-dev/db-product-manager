@@ -172,7 +172,7 @@ class Command(BaseCommand):
             self.deleteProduct(productId)
 
     def deleteProduct(self, productID):
-        productID = "2071095967811"
+        # productID = "6811404959790"
 
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -273,7 +273,7 @@ class Command(BaseCommand):
 
         csr.execute("""SELECT P.ProductID, P.SKU 
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Name = 'Borastapeter Wallpaper';""")
+        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Name = 'P/K Lifestyles Wallpaper';""")
 
         total, success, failed = 0, 0, 0
 

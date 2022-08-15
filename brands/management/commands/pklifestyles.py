@@ -60,27 +60,42 @@ class Command(BaseCommand):
                 time.sleep(86400)
 
     def getProducts(self):
+        Pklifestyles.objects.all().delete()
+
         peelandstickFile = xlrd.open_workbook(
             FILEDIR + "/files/pkl-peel-and-stick-wallpaper.xlsx")
         peelandstickSheet = peelandstickFile.sheet_by_index(0)
 
-        for i in range(3, peelandstickSheet.nrows):
+        for i in range(4, peelandstickSheet.nrows):
             mpn = str(peelandstickSheet.cell_value(i, 4))
             sku = "PKL {}".format(mpn)
+
+            try:
+                Pklifestyles.objects.get(mpn=mpn)
+                continue
+            except Pklifestyles.DoesNotExist:
+                pass
 
             brand = "P/K Lifestyles"
             ptype = "Wallpaper"
 
             collection = "Peel & Stick"
 
-            pattern = str(peelandstickSheet.cell_value(i, 1))
-            color = "{}-{}".format(str(peelandstickSheet.cell_value(i, 2)),
-                                   str(peelandstickSheet.cell_value(i, 3)))
+            pattern = str(peelandstickSheet.cell_value(i, 1)).strip()
+            color = "{}-{}".format(str(peelandstickSheet.cell_value(i, 2)).strip(),
+                                   str(peelandstickSheet.cell_value(i, 3)).strip())
 
-            cost = float(
-                str(peelandstickSheet.cell_value(i, 6)).replace("$", ""))
-            map = float(
-                str(peelandstickSheet.cell_value(i, 7)).replace("$", ""))
+            if mpn == '' or pattern == '' or color == '':
+                continue
+
+            try:
+                cost = float(
+                    str(peelandstickSheet.cell_value(i, 6)).replace("$", ""))
+                map = float(
+                    str(peelandstickSheet.cell_value(i, 7)).replace("$", ""))
+            except Exception as e:
+                print(e)
+                continue
 
             minimum = 1
             increment = ""
@@ -107,9 +122,9 @@ class Command(BaseCommand):
 
             weight = 1.75
 
-            style = usage
+            style = "{},{}".format(usage, material)
             colors = color
-            category = usage
+            category = "{},{}".format(usage, material)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -154,7 +169,7 @@ class Command(BaseCommand):
         csr.execute("""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
-                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'MindTheGap')""")
+                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'P/K Lifestyles')""")
         rows = csr.fetchall()
 
         total, pb, upb = len(rows), 0, 0
@@ -243,8 +258,8 @@ class Command(BaseCommand):
                         product.collection)
                 if product.width != None and product.width != "" and float(product.width) != 0:
                     desc += "Width: {} in.<br/>".format(product.width)
-                if product.rollLength != None and product.rollLength != "" and float(product.rollLength) != 0:
-                    desc += "Roll Length: {} in.<br/>".format(
+                if product.rollLength != None and product.rollLength != "":
+                    desc += "Roll Length: {}<br/>".format(
                         product.rollLength)
                 if product.vr != None and product.vr != "" and float(product.vr) != 0:
                     desc += "Vertical Repeat: {} in.<br/>".format(product.vr)
@@ -260,7 +275,7 @@ class Command(BaseCommand):
                 if product.feature != None and product.feature != "":
                     desc += "Features: {}<br/>".format(product.feature)
                 if product.instruction != None and product.instruction != "":
-                    desc += "Care Instructions: {} < br/>".format(
+                    desc += "Care Instructions: {} <br/>".format(
                         product.instruction)
                 if product.usage != None and product.usage != "":
                     desc += "Usage: {}<br/><br/>".format(product.usage)
