@@ -258,7 +258,8 @@ def importOrder(shopifyOrder):
     Line_Item.objects.filter(order=order).delete()
 
     for line_item in line_items:
-        try:
+        # try:
+        if 1 == 1:
             if line_item['variant_title'] == None or line_item['variant_title'] == "" or line_item['vendor'] == None or line_item['vendor'] == "":
                 continue
 
@@ -278,11 +279,14 @@ def importOrder(shopifyOrder):
             if manufacturer not in manufacturers:
                 manufacturers.append(manufacturer)
 
-            try:
-                variant = Variant.objects.get(
-                    variantId=line_item['variant_id'])
-            except Variant.DoesNotExist:
+            if line_item['variant_id'] == None or line_item['variant_id'] == 'None' or line_item['variant_id'] == '' or line_item['variant_id'] == 0:
                 variant = None
+            else:
+                try:
+                    variant = Variant.objects.get(
+                        variantId=line_item['variant_id'])
+                except Variant.DoesNotExist:
+                    variant = None
 
             shoppingCart = Line_Item()
 
@@ -301,10 +305,10 @@ def importOrder(shopifyOrder):
 
             shoppingCart.save()
 
-        except Exception as e:
-            debug("Order", 2, "Import Order error: PO {}. Error: {}".format(
-                shopifyOrder['order_number']), e)
-            return
+        # except Exception as e:
+        #     debug("Order", 2, "Import Order error: PO {}. Error: {}".format(
+        #         shopifyOrder['order_number']), e)
+        #     return
 
     # Update Order Manufacturers and Types
     manufacturers.sort()
