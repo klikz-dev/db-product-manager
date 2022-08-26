@@ -124,7 +124,8 @@ class Command(BaseCommand):
                 mpn = "{}_{}{}".format(pattern, color, book)
                 mpn = mpn.replace("-", "_")
 
-                sku = "JF {}".format(mpn)
+                sku = "JF {}".format(
+                    str(sh.cell_value(i, 4)).replace(".0", ""))
                 if sku in discoSkus:
                     debug("JF Fabrics", 1,
                           "SKU: {} has been discontinued".format(sku))
@@ -268,7 +269,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
+        csr.execute("""SELECT P.ProductID,P.SKU,P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
                     AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'JF Fabrics')""")
@@ -278,11 +279,11 @@ class Command(BaseCommand):
 
         for row in rows:
             productID = row[0]
-            mpn = row[1]
+            sku = row[1]
             published = row[2]
 
             try:
-                product = JFFabrics.objects.get(mpn=mpn)
+                product = JFFabrics.objects.get(sku=sku)
                 product.productId = productID
                 product.save()
 
@@ -296,7 +297,7 @@ class Command(BaseCommand):
 
                     upb = upb + 1
                     debug(
-                        "JF Fabrics", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, mpn))
+                        "JF Fabrics", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
                 if published == 0 and product.status == True and product.cost != None:
                     csr.execute(
@@ -308,7 +309,7 @@ class Command(BaseCommand):
 
                     pb = pb + 1
                     debug(
-                        "JF Fabrics", 0, "Enabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+                        "JF Fabrics", 0, "Enabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
             except JFFabrics.DoesNotExist:
                 if published == 1:
@@ -321,7 +322,7 @@ class Command(BaseCommand):
 
                     upb = upb + 1
                     debug(
-                        "JF Fabrics", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+                        "JF Fabrics", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
             # temp.
             csr.execute(
