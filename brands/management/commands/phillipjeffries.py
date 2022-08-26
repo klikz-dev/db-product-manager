@@ -85,6 +85,8 @@ class Command(BaseCommand):
                         mpn = int(float(mpn))
                     except:
                         pass
+                else:
+                    continue
 
                 try:
                     PhillipJeffries.objects.get(mpn=mpn)
