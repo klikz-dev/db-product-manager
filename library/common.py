@@ -80,7 +80,10 @@ def backup():
 
 def importOrder(shopifyOrder):
     shopifyCustomer = shopifyOrder['customer']
-    shopifyAddress = shopifyCustomer['default_address']
+    try:
+        shopifyAddress = shopifyCustomer['default_address']
+    except:
+        shopifyAddress = shopifyOrder['shipping_address']
 
     # Import Customer
     try:
@@ -92,7 +95,10 @@ def importOrder(shopifyOrder):
     customer.firstName = shopifyCustomer['first_name']
     customer.lastName = shopifyCustomer['last_name']
     customer.phone = shopifyCustomer['phone']
-    customer.defaultAddressId = shopifyAddress['id']
+    try:
+        customer.defaultAddressId = shopifyAddress['id']
+    except:
+        customer.defaultAddressId = ''
     customer.orderCount = shopifyCustomer['orders_count']
     customer.totalSpent = shopifyCustomer['total_spent']
     customer.state = shopifyCustomer['state']
@@ -104,24 +110,25 @@ def importOrder(shopifyOrder):
     customer.save()
 
     # Import Address
-    try:
-        address = Address.objects.get(addressId=shopifyAddress['id'])
-    except Address.DoesNotExist:
-        address = Address(addressId=shopifyAddress['id'])
+    if customer.defaultAddressId:
+        try:
+            address = Address.objects.get(addressId=customer.defaultAddressId)
+        except Address.DoesNotExist:
+            address = Address(addressId=customer.defaultAddressId)
 
-    address.customer = customer
-    address.firstName = shopifyAddress['first_name']
-    address.lastName = shopifyAddress['last_name']
-    address.phone = shopifyAddress['phone']
-    address.address1 = shopifyAddress['address1']
-    address.address2 = shopifyAddress['address2']
-    address.company = shopifyAddress['company']
-    address.city = shopifyAddress['city']
-    address.state = shopifyAddress['province_code']
-    address.zip = shopifyAddress['zip']
-    address.country = shopifyAddress['country']
+        address.customer = customer
+        address.firstName = shopifyAddress['first_name']
+        address.lastName = shopifyAddress['last_name']
+        address.phone = shopifyAddress['phone']
+        address.address1 = shopifyAddress['address1']
+        address.address2 = shopifyAddress['address2']
+        address.company = shopifyAddress['company']
+        address.city = shopifyAddress['city']
+        address.state = shopifyAddress['province_code']
+        address.zip = shopifyAddress['zip']
+        address.country = shopifyAddress['country']
 
-    address.save()
+        address.save()
 
     # Import Order
 
