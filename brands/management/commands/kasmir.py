@@ -459,7 +459,8 @@ class Command(BaseCommand):
         for row in rows:
             try:
                 productId = row[0]
-                shopifyProduct = ShopifyProduct.objects.get(productId=productId)
+                shopifyProduct = ShopifyProduct.objects.get(
+                    productId=productId)
 
                 pv1 = shopifyProduct.variants.filter(
                     isDefault=1).values('cost', 'price')[0]
@@ -527,7 +528,7 @@ class Command(BaseCommand):
 
         csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Kasmir'")
         for row in csr.fetchall():
-            hasImage.append(row[0])
+            hasImage.append(str(row[0]))
 
         products = Kasmir.objects.all()
         for product in products:
