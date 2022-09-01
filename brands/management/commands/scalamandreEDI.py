@@ -222,7 +222,7 @@ class Command(BaseCommand):
                         orders.append(
                             {
                                 "ITEMID": mpn,
-                                "LENGTHININCHES": "{} {}".format(qty, uom),
+                                "LENGTHININCHES": "{}".format(qty),
                                 "CARPETCOST": "{}".format(cost),
                                 "NOTES": [
                                     {
