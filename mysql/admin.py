@@ -293,7 +293,7 @@ class PORecordAdmin(admin.ModelAdmin):
     #     return False
 
     fields = ['KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-              'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI',
+              'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'ScalamandreEDI',
               'CovingtonOrder',
               'CovingtonSample',
               'JFFabricsOrder',
@@ -314,8 +314,8 @@ class PORecordAdmin(admin.ModelAdmin):
               'PremierPrintsSample',
               'RalphLaurenOrder',
               'RalphLaurenSample',
-              'ScalamandreOrder',
-              'ScalamandreSample',
+              #   'ScalamandreOrder',
+              #   'ScalamandreSample',
               'SeabrookOrder',
               'SeabrookSample',
               'StoutOrder',
@@ -325,7 +325,7 @@ class PORecordAdmin(admin.ModelAdmin):
               ]
 
     list_display = ('KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-                    'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI',
+                    'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'ScalamandreEDI',
                     'CovingtonOrder',
                     'CovingtonSample',
                     'JFFabricsOrder',
@@ -346,8 +346,8 @@ class PORecordAdmin(admin.ModelAdmin):
                     'PremierPrintsSample',
                     'RalphLaurenOrder',
                     'RalphLaurenSample',
-                    'ScalamandreOrder',
-                    'ScalamandreSample',
+                    # 'ScalamandreOrder',
+                    # 'ScalamandreSample',
                     'SeabrookOrder',
                     'SeabrookSample',
                     'StoutOrder',
@@ -357,7 +357,7 @@ class PORecordAdmin(admin.ModelAdmin):
                     )
 
     search_fields = ['KravetEDI', 'YorkEDI', 'FabricutEDI', 'RalphLaurenEDI',
-                     'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI',
+                     'ClarenceHouseEDI', 'SampleReminder', 'SampleReminder2', 'BrewsterEDI', 'SchumacherEDI', 'ScalamandreEDI',
                      'CovingtonOrder',
                      'CovingtonSample',
                      'JFFabricsOrder',
@@ -378,8 +378,8 @@ class PORecordAdmin(admin.ModelAdmin):
                      'PremierPrintsSample',
                      'RalphLaurenOrder',
                      'RalphLaurenSample',
-                     'ScalamandreOrder',
-                     'ScalamandreSample',
+                     #  'ScalamandreOrder',
+                     #  'ScalamandreSample',
                      'SeabrookOrder',
                      'SeabrookSample',
                      'StoutOrder',

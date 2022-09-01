@@ -164,6 +164,8 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     SchumacherEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    ScalamandreEDI = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     CovingtonOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -205,10 +207,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     RalphLaurenSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    ScalamandreOrder = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ScalamandreSample = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
+    # ScalamandreOrder = models.CharField(
+    #     max_length=200, default=None, null=True, blank=True)
+    # ScalamandreSample = models.CharField(
+    #     max_length=200, default=None, null=True, blank=True)
     SeabrookOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     SeabrookSample = models.CharField(
