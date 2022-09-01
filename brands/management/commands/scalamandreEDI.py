@@ -168,18 +168,17 @@ class Command(BaseCommand):
 
                 print(orderNumber, orderDate)
 
+                samples = []
+                orders = []
                 for item in items:
                     mpn = item[0]
                     uom = item[1]
                     qty = item[2]
                     cost = item[4]
 
-                    print(mpn, uom, qty, cost)
-
                     ack_email_address = 'purchasing@decoratorsbest.com'
 
                     if "Sample" == uom:
-                        uom = "MM (Sample)"
                         ack_email_address = 'memos@decoratorsbest.com'
                     elif "Yard" == uom:
                         uom = "YD"
@@ -190,136 +189,141 @@ class Command(BaseCommand):
                     else:
                         uom = "EA"
 
-                    if "Sample" in uom:
-                        url = "http://scala-api.scalamandre.com/api/ScalaFeedAPI/SubmitSampleOrder"
-                        headers = {
-                            'Authorization': 'Bearer {}'.format(token),
-                            'Content-Type': 'application/json'
-                        }
-
-                        payload = json.dumps({
-                            "SampleOrderJson": {
-                                "USERNAME": "Decoratorsbest",
-                                "SAMPLEORDER": [
+                    if "Sample" == uom:
+                        samples.append(
+                            {
+                                "ORDER_NO": orderNumber,
+                                "ORDER_DATE": orderDate,
+                                "SHIP_VIA_NO": shippingMethod,
+                                "S_AND_H": 0,
+                                "CUST_NO": "591267",
+                                "SKU_REF1": mpn,
+                                "SALES_PRICE": 0,
+                                "QTY": 1,
+                                "SIZE_NAME": "STANDARD",
+                                "USER_REF1": mpn,
+                                "STNAME": name,
+                                "STADDR_1": address1,
+                                "STADDR_2": address2,
+                                "STCITY": city,
+                                "STSTATE": state,
+                                "STCOUNTRY": country,
+                                "STPOSTAL": postal,
+                                "E_MAIL": ack_email_address,
+                                "ORDERNOTES": instructions,
+                                "BRANCH": "NY",
+                                "REQUIRESMGROK": False,
+                                "COMPANY": 5,
+                                "ORDERTYPE": "SCLL",
+                                "SIDEMARK": "Decoratorsbest"
+                            }
+                        )
+                    else:
+                        orders.append(
+                            {
+                                "ITEMID": mpn,
+                                "LENGTHININCHES": "{} {}".format(qty, uom),
+                                "CARPETCOST": "{}".format(cost),
+                                "NOTES": [
                                     {
-                                        "ORDER_NO": orderNumber,
-                                        "ORDER_DATE": orderDate,
-                                        "SHIP_VIA_NO": shippingMethod,
-                                        "S_AND_H": 0,
-                                        "CUST_NO": "591267",
-                                        "SKU_REF1": mpn,
-                                        "SALES_PRICE": 0,
-                                        "QTY": 1,
-                                        "SIZE_NAME": "STANDARD",
-                                        "USER_REF1": mpn,
-                                        "STNAME": name,
-                                        "STADDR_1": address1,
-                                        "STADDR_2": address2,
-                                        "STCITY": city,
-                                        "STSTATE": state,
-                                        "STCOUNTRY": country,
-                                        "STPOSTAL": postal,
-                                        "E_MAIL": ack_email_address,
-                                        "ORDERNOTES": instructions,
-                                        "BRANCH": "NY",
-                                        "REQUIRESMGROK": False,
-                                        "COMPANY": 5,
-                                        "ORDERTYPE": "SCLL",
-                                        "SIDEMARK": "Decoratorsbest"
+                                        "MSGTYPE": "DELIVERY",
+                                        "MESSAGESTR": instructions
                                     }
                                 ]
-                            }
-                        })
-
-                        print(payload)
-
-                        response = requests.request(
-                            "POST", url, headers=headers, data=payload)
-                        print(response.text)
-
-                        data = json.loads(response.text)
-
-                        print(data)
-
-                        self.getRef(orderNumber, data[0]['ORDER_NO'])
-
-                        debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Samples. PO: {}, REF: {}".format(
-                            orderNumber, data[0]['ORDER_NO']))
-
-                    else:
-                        url = "http://scala-api.scalamandre.com/api/ScalaFeedAPI/SubmitOrder"
-                        headers = {
-                            'Authorization': 'Bearer {}'.format(token),
-                            'Content-Type': 'application/json'
-                        }
-
-                        payload = json.dumps({
-                            "MType": 1,
-                            "MQuoteID": 0,
-                            "AccountID": "591267",
-                            "QuoteJson": {
-                                "ITEMDETAILS": [
-                                    {
-                                        "ITEMID": mpn,
-                                        "LENGTHININCHES": "{} {}".format(qty, uom),
-                                        "CARPETCOST": "{}".format(cost),
-                                        "NOTES": [
-                                            {
-                                                "MSGTYPE": "DELIVERY",
-                                                "MESSAGESTR": instructions
-                                            }
-                                        ]
-                                    },
-                                ],
-                                "SHIPTO": [
-                                    {
-                                        "NAME": name,
-                                        "ADDRESS1": address1,
-                                        "ADDRESS2": address2,
-                                        "CITY": city,
-                                        "STATE": state,
-                                        "ZIP": postal,
-                                        "countrycode": country,
-                                        "phoneNumber1": "None"
-                                    }
-                                ],
-                                "CO_ACCTNUM": "591267",
-                                "COMPANY": "5",
-                                "SUBMITTYPE": 1,
-                                "UserEmail": ack_email_address,
-                                "FinalDest": {
-                                    "Name": name,
-                                    "Address1": address1,
-                                    "Address2": address2,
-                                    "City": city,
-                                    "State": state,
-                                    "zipcode5": postal,
-                                    "ZipCode": postal,
-                                    "SideMark": "Decoratorsbest",
-                                    "SideMark2": "Decoratorsbest",
-                                    "Contact": "",
-                                    "Notes": instructions,
-                                    "countrycode": country
-                                }
                             },
-                            "UserName": "Decoratorsbest",
-                            "UserEmail": ack_email_address
-                        })
+                        )
 
-                        print(payload)
+                if len(samples) > 0:
+                    url = "http://scala-api.scalamandre.com/api/ScalaFeedAPI/SubmitSampleOrder"
+                    headers = {
+                        'Authorization': 'Bearer {}'.format(token),
+                        'Content-Type': 'application/json'
+                    }
 
-                        response = requests.request(
-                            "POST", url, headers=headers, data=payload)
+                    payload = json.dumps({
+                        "SampleOrderJson": {
+                            "USERNAME": "Decoratorsbest",
+                            "SAMPLEORDER": samples
+                        }
+                    })
 
-                        print(response)
+                    print(payload)
 
-                        data = json.loads(response.text)
-                        print(data)
+                    response = requests.request(
+                        "POST", url, headers=headers, data=payload)
+                    print(response.text)
 
-                        self.getRef(orderNumber, data[0]['MQUOTEID'])
+                    data = json.loads(response.text)
 
-                        debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Orders. PO: {}, REF: {}".format(
-                            orderNumber, data[0]['MQUOTEID']))
+                    print(data)
+
+                    self.getRef(orderNumber, data[0]['ORDER_NO'])
+
+                    debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Samples. PO: {}, REF: {}".format(
+                        orderNumber, data[0]['ORDER_NO']))
+
+                if len(orders) > 0:
+                    url = "http://scala-api.scalamandre.com/api/ScalaFeedAPI/SubmitOrder"
+                    headers = {
+                        'Authorization': 'Bearer {}'.format(token),
+                        'Content-Type': 'application/json'
+                    }
+
+                    payload = json.dumps({
+                        "MType": 1,
+                        "MQuoteID": 0,
+                        "AccountID": "591267",
+                        "QuoteJson": {
+                            "ITEMDETAILS": orders,
+                            "SHIPTO": [
+                                {
+                                    "NAME": name,
+                                    "ADDRESS1": address1,
+                                    "ADDRESS2": address2,
+                                    "CITY": city,
+                                    "STATE": state,
+                                    "ZIP": postal,
+                                    "countrycode": country,
+                                    "phoneNumber1": "None"
+                                }
+                            ],
+                            "CO_ACCTNUM": "591267",
+                            "COMPANY": "5",
+                            "SUBMITTYPE": 1,
+                            "UserEmail": ack_email_address,
+                            "FinalDest": {
+                                "Name": name,
+                                "Address1": address1,
+                                "Address2": address2,
+                                "City": city,
+                                "State": state,
+                                "zipcode5": postal,
+                                "ZipCode": postal,
+                                "SideMark": "Decoratorsbest",
+                                "SideMark2": "Decoratorsbest",
+                                "Contact": "",
+                                "Notes": instructions,
+                                "countrycode": country
+                            }
+                        },
+                        "UserName": "Decoratorsbest",
+                        "UserEmail": ack_email_address
+                    })
+
+                    print(payload)
+
+                    response = requests.request(
+                        "POST", url, headers=headers, data=payload)
+
+                    print(response)
+
+                    data = json.loads(response.text)
+                    print(data)
+
+                    self.getRef(orderNumber, data[0]['MQUOTEID'])
+
+                    debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Orders. PO: {}, REF: {}".format(
+                        orderNumber, data[0]['MQUOTEID']))
 
                 csr.execute(
                     "SELECT Status FROM Orders WHERE OrderNumber = {}".format(orderNumber))
