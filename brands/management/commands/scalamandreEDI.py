@@ -271,7 +271,7 @@ class Command(BaseCommand):
 
                     payload = json.dumps({
                         "MType": 1,
-                        "MQuoteID": 0,
+                        "MQuoteID": orderNumber,
                         "AccountID": "591267",
                         "QuoteJson": {
                             "ITEMDETAILS": orders,
