@@ -351,5 +351,10 @@ def importOrder(shopifyOrder):
 
     order.save()
 
+    if float(order.orderTotal) > 2000:
+        if order.status == 'New' or order.status == None:
+            order.status = "Hold"
+            order.save()
+
     debug("Order", 0,
           "Downloaded Order {} / {}".format(order.orderNumber, order.shopifyOrderId))
