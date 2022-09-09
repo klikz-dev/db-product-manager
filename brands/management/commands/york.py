@@ -88,7 +88,7 @@ class Command(BaseCommand):
 
     def testAPI(self):
         testType = "product"
-        testMPN = "PSW1245RL"
+        testMPN = "GO8225"
 
         req = requests.get(
             "{}/{}.php/{}".format(API_BASE_URL, testType, testMPN))
