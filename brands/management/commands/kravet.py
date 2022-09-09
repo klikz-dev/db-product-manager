@@ -307,12 +307,13 @@ class Command(BaseCommand):
             except:
                 minimum = 1
                 pass
+
+            increment = ""
             try:
                 if int(float(row[39])) > 1:
                     increment = ",".join(
                         [str(ii * int(float(row[39]))) for ii in range(1, 21)])
             except:
-                increment = ""
                 pass
 
             thumbnail = picLoc
