@@ -155,6 +155,7 @@ cython_debug/
 *.csv
 *.xls
 *.xlsx
+*.zip
 
 migrations/
 static/
