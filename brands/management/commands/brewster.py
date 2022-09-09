@@ -46,6 +46,7 @@ class Command(BaseCommand):
 
         if "addNew" in options['functions']:
             self.addNew()
+            self.updateTags()
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
@@ -69,8 +70,7 @@ class Command(BaseCommand):
             while True:
                 self.getProducts()
                 self.getProductIds()
-                # self.updatePrice()
-                self.updateStock()
+                self.updatePrice()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
 
