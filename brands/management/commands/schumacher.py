@@ -715,9 +715,26 @@ class Command(BaseCommand):
         con.close()
 
     def fixImages(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Schumacher'")
+        for row in csr.fetchall():
+            hasImage.append(row[0])
+
         products = Schumacher.objects.all()
 
         for product in products:
+            if product.productId == None:
+                continue
+
+            if int(product.productId) in hasImage:
+                continue
+
+            if product.thumbnail == "":
+                continue
+            
             productId = product.productId
             roomsets = str(product.roomset).split(",")
 
