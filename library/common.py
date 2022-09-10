@@ -10,6 +10,7 @@ import pytz
 import urllib.request
 
 from shopify.models import Address, Customer, Line_Item, Order, Variant
+from mysql.models import Manufacturer
 
 opener = urllib.request.build_opener()
 opener.addheaders = [
@@ -264,9 +265,10 @@ def importOrder(shopifyOrder):
 
     Line_Item.objects.filter(order=order).delete()
 
+    orderHold = False
+
     for line_item in line_items:
-        # try:
-        if 1 == 1:
+        try:
             if line_item['variant_title'] == None or line_item['variant_title'] == "" or line_item['vendor'] == None or line_item['vendor'] == "":
                 continue
 
@@ -285,6 +287,16 @@ def importOrder(shopifyOrder):
             manufacturer = line_item['vendor']
             if manufacturer not in manufacturers:
                 manufacturers.append(manufacturer)
+
+            try:
+                brandData = Manufacturer.objects.get(name=manufacturer)
+                brand = brandData.brand
+
+                if int(line_item['quantity']) * float(line_item['price']) > 2000:
+                    if brand == 'Kravet' or brand == 'York' or brand == 'Kasmir':
+                        orderHold = True
+            except:
+                pass
 
             if line_item['variant_id'] == None or line_item['variant_id'] == 'None' or line_item['variant_id'] == '' or line_item['variant_id'] == 0:
                 variant = None
@@ -312,10 +324,10 @@ def importOrder(shopifyOrder):
 
             shoppingCart.save()
 
-        # except Exception as e:
-        #     debug("Order", 2, "Import Order error: PO {}. Error: {}".format(
-        #         shopifyOrder['order_number']), e)
-        #     return
+        except Exception as e:
+            debug("Order", 2, "Import Order error: PO {}. Error: {}".format(
+                shopifyOrder['order_number']), e)
+            return
 
     # Update Order Manufacturers and Types
     manufacturers.sort()
@@ -351,7 +363,7 @@ def importOrder(shopifyOrder):
 
     order.save()
 
-    if float(order.orderTotal) > 2000:
+    if orderHold:
         if order.status == 'New' or order.status == None:
             order.status = "Hold"
             order.save()
