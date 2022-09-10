@@ -923,8 +923,11 @@ class Command(BaseCommand):
         con.close()
 
     def fixImages(self):
-        collections = Brewster.objects.values_list(
-            'collection', flat=True).distinct()
+        # collections = Brewster.objects.values_list(
+        #     'collection', flat=True).distinct()
+
+        collections = ['Fable']
+
         for collection in collections:
             # Socket is closed error. Re initialize the socket per collection
             host = "ftpimages.brewsterhomefashions.com"
