@@ -703,10 +703,10 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # Update All Products
-        # products = Kravet.objects.all()
+        products = Kravet.objects.all()
 
         # Update Specific products
-        products = Kravet.objects.filter(sku="PF50436-1")
+        # products = Kravet.objects.filter(collection="COLE & SON NEW CONTEMPORARY II")
 
         for product in products:
             try:
