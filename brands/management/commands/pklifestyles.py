@@ -1,5 +1,4 @@
 from shutil import copyfile
-from timeit import repeat
 from django.core.management.base import BaseCommand
 from brands.models import Pklifestyles
 
@@ -36,7 +35,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if "getProducts" in options['functions']:
-            self.getProducts()
+            self.getWallpaperProducts()
+            self.getFabricProducts()
 
         if "getProductIds" in options['functions']:
             self.getProductIds()
@@ -58,12 +58,13 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                self.getProducts()
+                self.getWallpaperProducts()
+                self.getFabricProducts()
                 self.getProductIds()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
 
-    def getProducts(self):
+    def getWallpaperProducts(self):
         Pklifestyles.objects.all().delete()
 
         peelandstickFile = xlrd.open_workbook(
@@ -86,8 +87,7 @@ class Command(BaseCommand):
             collection = "Peel & Stick"
 
             pattern = str(peelandstickSheet.cell_value(i, 1)).strip()
-            color = "{}-{}".format(str(peelandstickSheet.cell_value(i, 2)).strip(),
-                                   str(peelandstickSheet.cell_value(i, 3)).strip())
+            color = str(peelandstickSheet.cell_value(i, 2)).strip()
 
             if mpn == '' or pattern == '' or color == '':
                 continue
@@ -106,7 +106,7 @@ class Command(BaseCommand):
 
             uom = "Per Roll"
 
-            width = float(peelandstickSheet.cell_value(i, 8))
+            width = str(peelandstickSheet.cell_value(i, 8))
             usage = "Peel & Stick"
             vr = float(peelandstickSheet.cell_value(i, 10))
             match = str(peelandstickSheet.cell_value(i, 12))
@@ -164,6 +164,140 @@ class Command(BaseCommand):
 
             debug("Pklifestyles", 0,
                   "Success to get product details for MPN: {}".format(mpn))
+
+        categoryFile = xlrd.open_workbook(
+            FILEDIR + "/files/pkl-wallpaper-category.xlsx")
+        categorySheet = categoryFile.sheet_by_index(0)
+
+        for i in range(4, categorySheet.nrows):
+            mpn = str(categorySheet.cell_value(i, 4))
+            newInfo = str(categorySheet.cell_value(i, 6))
+
+            try:
+                product = Pklifestyles.objects.get(mpn=mpn)
+            except Pklifestyles.DoesNotExist:
+                continue
+
+            category = "{}, {}".format(newInfo, product.category)
+            style = "{}, {}".format(newInfo, product.style)
+
+            product.category = category
+            product.style = style
+
+            product.save()
+
+    def getFabricProducts(self):
+        fabricFile = xlrd.open_workbook(
+            FILEDIR + "/files/pkl-fabric-master.xlsx")
+        fabricSheet = fabricFile.sheet_by_index(0)
+
+        for i in range(7, fabricSheet.nrows):
+            mpn = str(int(fabricSheet.cell_value(i, 3)))
+            sku = "PKL {}".format(mpn)
+
+            try:
+                Pklifestyles.objects.get(mpn=mpn)
+                continue
+            except Pklifestyles.DoesNotExist:
+                pass
+
+            brand = "P/K Lifestyles"
+            ptype = "Fabric"
+
+            collection = str(fabricSheet.cell_value(i, 0))
+
+            pattern = str(fabricSheet.cell_value(i, 1)).strip()
+            color = str(fabricSheet.cell_value(i, 2)).strip()
+
+            if mpn == '' or pattern == '' or color == '':
+                continue
+
+            try:
+                cost = float(
+                    str(fabricSheet.cell_value(i, 4)).replace("$", ""))
+                map = float(
+                    str(fabricSheet.cell_value(i, 5)).replace("$", ""))
+            except Exception as e:
+                print(e)
+                continue
+
+            minimum = 1
+            increment = ""
+
+            uom = "Per Roll"
+
+            width = str(fabricSheet.cell_value(i, 6))
+            usage = "Fabric"
+            vr = float(fabricSheet.cell_value(i, 7))
+            hr = float(fabricSheet.cell_value(i, 8))
+            match = str(fabricSheet.cell_value(i, 9))
+            content = str(fabricSheet.cell_value(i, 10))
+            description = str(fabricSheet.cell_value(i, 17))
+
+            if str(fabricSheet.cell_value(i, 11)):
+                feature = "Finish: {}<br />".format(
+                    str(fabricSheet.cell_value(i, 11)))
+            else:
+                feature = ""
+
+            if str(fabricSheet.cell_value(i, 14)):
+                feature = "{}Cleaning: {}".format(feature, str(fabricSheet.cell_value(i, 14)))
+
+            weight = 1
+
+            colors = color
+
+            manufacturer = "{} {}".format(brand, ptype)
+
+            Pklifestyles.objects.create(
+                mpn=mpn,
+                sku=sku,
+                collection=collection,
+                pattern=pattern,
+                color=color,
+                manufacturer=manufacturer,
+                ptype=ptype,
+                brand=brand,
+                uom=uom,
+                minimum=minimum,
+                increment=increment,
+                usage=usage,
+                colors=colors,
+                width=width,
+                vr=vr,
+                hr=hr,
+                description=description,
+                feature=feature,
+                content=content,
+                match=match,
+                cost=cost,
+                map=map,
+                weight=weight
+            )
+
+            debug("Pklifestyles", 0,
+                  "Success to get product details for MPN: {}".format(mpn))
+
+        # categoryFile = xlrd.open_workbook(
+        #     FILEDIR + "/files/pkl-wallpaper-category.xlsx")
+        # categorySheet = categoryFile.sheet_by_index(0)
+
+        # for i in range(4, categorySheet.nrows):
+        #     mpn = str(categorySheet.cell_value(i, 4))
+        #     newInfo = str(categorySheet.cell_value(i, 6))
+
+        #     try:
+        #         product = Pklifestyles.objects.get(mpn=mpn)
+        #     except Pklifestyles.DoesNotExist:
+        #         continue
+
+        #     category = "{}, {}".format(newInfo, product.category)
+        #     style = "{}, {}".format(newInfo, product.style)
+
+        #     product.category = category
+        #     product.style = style
+
+        #     product.save()
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -272,19 +406,24 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.width != None and product.width != "" and float(product.width) != 0:
+                if product.width != None and product.width != "":
                     desc += "Width: {} in.<br/>".format(product.width)
                 if product.rollLength != None and product.rollLength != "":
                     desc += "Roll Length: {}<br/>".format(
                         product.rollLength)
-                if product.vr != None and product.vr != "" and float(product.vr) != 0:
+                if product.vr != None and product.vr != "":
                     desc += "Vertical Repeat: {} in.<br/>".format(product.vr)
-                if product.sqft != None and product.sqft != "" and float(product.sqft) != 0:
+                if product.hr != None and product.hr != "":
+                    desc += "Horizontal Repeat: {} in.<br/>".format(product.hr)
+                if product.sqft != None and product.sqft != "":
                     desc += "SQ. FT Per Roll: {} sqft.<br/>".format(
                         product.sqft)
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/><br/>".format(
                         product.material)
+                if product.content != None and product.content != "":
+                    desc += "Content: {}<br/><br/>".format(
+                        product.content)
                 if product.match != None and product.match != "":
                     desc += "Match: {}<br/>".format(
                         product.match)
@@ -407,6 +546,15 @@ class Command(BaseCommand):
         products = Pklifestyles.objects.all()
         for product in products:
             productId = product.productId
+
+            if "{}.jpg".format(product.mpn) in images:
+                print("{}.jpg".format(product.mpn))
+
+                copyfile(FILEDIR + "/files/images/pklifestyles/{}.jpg".format(product.mpn), FILEDIR +
+                         "/../../images/product/{}.jpg".format(productId))
+
+                os.remove(
+                    FILEDIR + "/files/images/pklifestyles/{}.jpg".format(product.mpn))
 
             if "{}1.jpg".format(product.mpn) in images:
                 print("{}1.jpg".format(product.mpn))

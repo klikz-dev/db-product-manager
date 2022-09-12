@@ -19,12 +19,16 @@ class Pklifestyles(models.Model):
         max_length=200, default=None, null=True, blank=True)
 
     description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    content = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    width = models.FloatField(default=0)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     sqft = models.FloatField(default=0)
     rollLength = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     vr = models.FloatField(default=0)
+    hr = models.FloatField(default=0)
     material = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     match = models.CharField(

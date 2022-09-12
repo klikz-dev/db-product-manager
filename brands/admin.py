@@ -9,7 +9,7 @@ class PklifestylesAdmin(admin.ModelAdmin):
         ('Identities', {'fields': ['pattern', 'color']}),
         ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
         ('Description', {'fields': [
-         'description', 'width', 'sqft', 'rollLength', 'vr', 'material', 'match', 'instruction', 'feature', 'usage']}),
+         'description', 'content', 'width', 'sqft', 'rollLength', 'vr', 'hr', 'material', 'match', 'instruction', 'feature', 'usage']}),
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
