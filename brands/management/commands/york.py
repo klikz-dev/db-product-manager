@@ -507,8 +507,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # products = York.objects.all()
-        products = York.objects.filter(
-            minimum=1)
+        products = York.objects.filter(collection="Greenhouse")
 
         for product in products:
             try:
