@@ -508,7 +508,7 @@ class Command(BaseCommand):
 
         # products = York.objects.all()
         products = York.objects.filter(
-            collection='York Premium Peel + Stick Risky Business Vol. III')
+            minimum=1)
 
         for product in products:
             try:
