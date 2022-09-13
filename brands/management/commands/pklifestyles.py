@@ -214,9 +214,9 @@ class Command(BaseCommand):
 
             try:
                 cost = float(
-                    str(fabricSheet.cell_value(i, 4)).replace("$", ""))
-                map = float(
                     str(fabricSheet.cell_value(i, 5)).replace("$", ""))
+                map = float(
+                    str(fabricSheet.cell_value(i, 6)).replace("$", ""))
             except Exception as e:
                 print(e)
                 continue
@@ -224,28 +224,30 @@ class Command(BaseCommand):
             minimum = 1
             increment = ""
 
-            uom = "Per Roll"
+            uom = "Per Yard"
 
-            width = str(fabricSheet.cell_value(i, 6))
+            width = str(fabricSheet.cell_value(i, 7))
             usage = "Fabric"
-            vr = float(fabricSheet.cell_value(i, 7))
-            hr = float(fabricSheet.cell_value(i, 8))
-            match = str(fabricSheet.cell_value(i, 9))
-            content = str(fabricSheet.cell_value(i, 10))
-            description = str(fabricSheet.cell_value(i, 17))
+            vr = float(fabricSheet.cell_value(i, 8))
+            hr = float(fabricSheet.cell_value(i, 9))
+            match = str(fabricSheet.cell_value(i, 10))
+            content = str(fabricSheet.cell_value(i, 11))
+            description = str(fabricSheet.cell_value(i, 18))
 
-            if str(fabricSheet.cell_value(i, 11)):
+            if str(fabricSheet.cell_value(i, 12)):
                 feature = "Finish: {}<br />".format(
-                    str(fabricSheet.cell_value(i, 11)))
+                    str(fabricSheet.cell_value(i, 12)))
             else:
                 feature = ""
 
-            if str(fabricSheet.cell_value(i, 14)):
-                feature = "{}Cleaning: {}".format(feature, str(fabricSheet.cell_value(i, 14)))
+            if str(fabricSheet.cell_value(i, 15)):
+                feature = "{}Cleaning: {}".format(feature, str(fabricSheet.cell_value(i, 15)))
 
             weight = 1
 
+            category = str(fabricSheet.cell_value(i, 4))
             colors = color
+            style = str(fabricSheet.cell_value(i, 4))
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -262,6 +264,8 @@ class Command(BaseCommand):
                 minimum=minimum,
                 increment=increment,
                 usage=usage,
+                category=category,
+                style=style,
                 colors=colors,
                 width=width,
                 vr=vr,
