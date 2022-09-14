@@ -84,7 +84,8 @@ class Command(BaseCommand):
                     CONCAT('DecoratorsBest/', O.ShippingLastName) AS PackInstruction/*,
                     CAST(O.PaymentMethod AS nvarchar(max)) AS PaymentMethod,
                     CAST(O.Notes AS nvarchar(max)) AS Notes*/,
-                    O.ShopifyOrderID
+                    O.ShopifyOrderID,
+                    O.ShippingPhone
 
                     FROM Orders_ShoppingCart OS JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Orders O ON OS.ShopifyOrderID = O.ShopifyOrderID
 
@@ -116,8 +117,8 @@ class Command(BaseCommand):
                               'ORDERED_QUANTITY',
                               'ORDER_DATE',
                               'ACCOUNT_NUMBER',
-                              'CONTACT_NAME',
-                              'CONT_PHONE_NUMBER',
+                            #   'CONTACT_NAME',
+                            #   'CONT_PHONE_NUMBER',
                               'CUSTOMER_NAME',
                               'HDR_SHIP_ADDRESS1',
                               'HDR_SHIP_ADDRESS2',
@@ -127,6 +128,7 @@ class Command(BaseCommand):
                               'HDR_SHIP_COUNTY',
                               'HDR_SHIP_ZIP',
                               'HDR_SHIP_COUNTRY',
+                              'HDR_SHIP_PHONE',
                               'HDR_SHIP_METHOD',
                               'HDR_SHIP_INSTRUCTIONS',
                               'HDR_PACK_INSTRUCTIONS',
@@ -142,8 +144,8 @@ class Command(BaseCommand):
                     'ORDERED_QUANTITY': 'ORDERED_QUANTITY',
                     'ORDER_DATE': 'ORDER_DATE',
                     'ACCOUNT_NUMBER': 'ACCOUNT_NUMBER',
-                    'CONTACT_NAME': 'CONTACT_NAME',
-                    'CONT_PHONE_NUMBER': 'CONT_PHONE_NUMBER',
+                    # 'CONTACT_NAME': 'CONTACT_NAME',
+                    # 'CONT_PHONE_NUMBER': 'CONT_PHONE_NUMBER',
                     'CUSTOMER_NAME': 'CUSTOMER_NAME',
                     'HDR_SHIP_ADDRESS1': 'HDR_SHIP_ADDRESS1',
                     'HDR_SHIP_ADDRESS2': 'HDR_SHIP_ADDRESS2',
@@ -153,6 +155,7 @@ class Command(BaseCommand):
                     'HDR_SHIP_COUNTY': 'HDR_SHIP_COUNTY',
                     'HDR_SHIP_ZIP': 'HDR_SHIP_ZIP',
                     'HDR_SHIP_COUNTRY': 'HDR_SHIP_COUNTRY',
+                    'HDR_SHIP_PHONE': 'HDR_SHIP_PHONE',
                     'HDR_SHIP_METHOD': 'HDR_SHIP_METHOD',
                     'HDR_SHIP_INSTRUCTIONS': 'HDR_SHIP_INSTRUCTIONS',
                     'HDR_PACK_INSTRUCTIONS': 'HDR_PACK_INSTRUCTIONS',
@@ -175,6 +178,7 @@ class Command(BaseCommand):
                     shippingMethod = row[11]
                     shipInstruction = str(row[12]).replace("\n", " ")
                     packInstruction = str(row[13]).replace("\n", " ")
+                    phone = row[17]
 
                     print(orderNumber)
 
@@ -233,8 +237,8 @@ class Command(BaseCommand):
                             'ORDERED_QUANTITY': qty,
                             'ORDER_DATE': orderDate,
                             'ACCOUNT_NUMBER': '106449',
-                            'CONTACT_NAME': 'BARBARA KARPF',
-                            'CONT_PHONE_NUMBER': '1-212-7226449',
+                            # 'CONTACT_NAME': 'BARBARA KARPF',
+                            # 'CONT_PHONE_NUMBER': '1-212-7226449',
                             'CUSTOMER_NAME': name,
                             'HDR_SHIP_ADDRESS1': address1,
                             'HDR_SHIP_ADDRESS2': address2,
@@ -244,6 +248,7 @@ class Command(BaseCommand):
                             'HDR_SHIP_COUNTY': county,
                             'HDR_SHIP_ZIP': postal,
                             'HDR_SHIP_COUNTRY': country,
+                            'HDR_SHIP_PHONE': phone,
                             'HDR_SHIP_METHOD': shippingMethod,
                             'HDR_SHIP_INSTRUCTIONS': shipInstruction,
                             'HDR_PACK_INSTRUCTIONS': '',

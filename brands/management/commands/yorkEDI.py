@@ -118,7 +118,8 @@ class Command(BaseCommand):
                     CONCAT('DecoratorsBest/', O.ShippingLastName) AS PackInstruction/*,
                     CAST(O.PaymentMethod AS nvarchar(max)) AS PaymentMethod,
                     CAST(O.Notes AS nvarchar(max)) AS Notes*/,
-                    O.ShopifyOrderID
+                    O.ShopifyOrderID,
+                    O.ShippingPhone
 
                     FROM Orders_ShoppingCart OS JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Orders O ON OS.ShopifyOrderID = O.ShopifyOrderID
 
@@ -184,6 +185,7 @@ class Command(BaseCommand):
                 shippingMethod = row[11]
                 shipInstruction = row[12]
                 packInstruction = row[13]
+                phone = row[17]
 
                 if not self.validate(orderNumber):
                     continue
@@ -200,17 +202,18 @@ class Command(BaseCommand):
 
                 line += "<ACCOUNT_NUMBER>27983</ACCOUNT_NUMBER>"
 
-                line += "<CONTACT_NAME>BARBARA KARPF</CONTACT_NAME>"
+                line += "<CONTACT_NAME>" + \
+                    self.fmt(name) + "</CONTACT_NAME>"
 
-                line += "<CONT_PHONE_NUMBER>1-212-7226449</CONT_PHONE_NUMBER>"
+                line += "<CONT_PHONE_NUMBER>" + \
+                    self.fmt(phone) + "</CONT_PHONE_NUMBER>"
 
                 line += "<HDR_SHIP_ADDRESS1>" + \
-                    self.fmt(name) + "</HDR_SHIP_ADDRESS1>"
+                    self.fmt(address1) + "</HDR_SHIP_ADDRESS1>"
 
                 line += "<HDR_SHIP_ADDRESS2>"
-                line += self.fmt(address1)
                 if address2 != "" and address2 != None:
-                    line += ", " + self.fmt(address2)
+                    line = self.fmt(address2)
                 if suite != "" and suite != None:
                     line += ", " + self.fmt(suite)
                 line += "</HDR_SHIP_ADDRESS2>"
