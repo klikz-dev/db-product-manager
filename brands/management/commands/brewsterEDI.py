@@ -178,7 +178,7 @@ class Command(BaseCommand):
                     shippingMethod = row[11]
                     shipInstruction = str(row[12]).replace("\n", " ")
                     packInstruction = str(row[13]).replace("\n", " ")
-                    phone = row[17]
+                    phone = row[15]
 
                     print(orderNumber)
 

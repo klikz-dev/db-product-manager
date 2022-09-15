@@ -149,7 +149,7 @@ class Command(BaseCommand):
 
                 shipInstruction = str(row[12]).replace("\n", " ")
                 packInstruction = str(row[13]).replace("\n", " ")
-                phone = row[17]
+                phone = row[15]
 
                 instructions = ""
                 if shipInstruction != "" and shipInstruction != None:

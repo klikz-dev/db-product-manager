@@ -185,7 +185,7 @@ class Command(BaseCommand):
                 shippingMethod = row[11]
                 shipInstruction = row[12]
                 packInstruction = row[13]
-                phone = row[17]
+                phone = row[15]
 
                 if not self.validate(orderNumber):
                     continue
