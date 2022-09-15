@@ -113,8 +113,7 @@ class Command(BaseCommand):
                     CONCAT('DecoratorsBest/', O.ShippingLastName) AS PackInstruction/*,
                     CAST(O.PaymentMethod AS nvarchar(max)) AS PaymentMethod,
                     CAST(O.Notes AS nvarchar(max)) AS Notes*/,
-                    O.ShopifyOrderID,
-                    O.ShippingPhone
+                    O.ShopifyOrderID
 
                     FROM Orders_ShoppingCart OS JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Orders O ON OS.ShopifyOrderID = O.ShopifyOrderID
 
@@ -149,7 +148,6 @@ class Command(BaseCommand):
 
                 shipInstruction = str(row[12]).replace("\n", " ")
                 packInstruction = str(row[13]).replace("\n", " ")
-                phone = row[15]
 
                 instructions = ""
                 if shipInstruction != "" and shipInstruction != None:
