@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 self.getProducts()
                 self.getPillowProducts()
                 self.getProductIds()
-                self.updatePrice()
+                # self.updatePrice()
                 self.updateStock()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
