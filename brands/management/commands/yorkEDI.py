@@ -213,7 +213,7 @@ class Command(BaseCommand):
 
                 line += "<HDR_SHIP_ADDRESS2>"
                 if address2 != "" and address2 != None:
-                    line = self.fmt(address2)
+                    line += self.fmt(address2)
                 if suite != "" and suite != None:
                     line += ", " + self.fmt(suite)
                 line += "</HDR_SHIP_ADDRESS2>"
