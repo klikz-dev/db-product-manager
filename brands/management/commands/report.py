@@ -32,10 +32,6 @@ class Command(BaseCommand):
             debug("Reporting", 0, "Checking {}th customer out of {} customers".format(
                 index, total))
 
-            # Test
-            if index > 100:
-                break
-
             onlySamples = True
 
             orders = Order.objects.filter(customer=customer)
