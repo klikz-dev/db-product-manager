@@ -122,9 +122,9 @@ class Command(BaseCommand):
                     continue
 
                 uom = str(sh.cell_value(i, 10))
-                if uom.lower() == "yard":
+                if uom.lower() == "yard" or uom.lower() == "y":
                     uom = "Per Yard"
-                elif uom.lower() == "roll":
+                elif uom.lower() == "roll" or uom.lower() == "r":
                     uom = "Per Roll"
                 elif uom.lower() == "panel":
                     uom = "Per Panel"
