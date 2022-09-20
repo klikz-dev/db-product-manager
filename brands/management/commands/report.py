@@ -35,6 +35,9 @@ class Command(BaseCommand):
             onlySamples = True
 
             orders = Order.objects.filter(customer=customer)
+            if len(orders) == 0:
+                continue
+
             for order in orders:
                 line_items = Line_Item.objects.filter(order=order)
                 for line_item in line_items:
