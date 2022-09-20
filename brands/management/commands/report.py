@@ -1,7 +1,7 @@
 import csv
-from itertools import count
 import os
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from library import debug
 from shopify.models import Customer, Line_Item, Order
@@ -39,13 +39,11 @@ class Command(BaseCommand):
                 continue
 
             for order in orders:
-                line_items = Line_Item.objects.filter(order=order)
-                for line_item in line_items:
-                    if "Sample - " not in line_item.orderedProductVariantTitle:
-                        onlySamples = False
-                        break
+                line_items = Line_Item.objects.filter(Q(order=order) & ~Q(
+                    orderedProductVariantTitle__icontains='Sample - '))
 
-                if not onlySamples:
+                if len(line_items) > 0:
+                    onlySamples = False
                     break
 
             if onlySamples:
@@ -58,7 +56,8 @@ class Command(BaseCommand):
                 "email",
                 "phone",
                 "count",
-                "total"
+                "total",
+                "marketing"
             ]
             reportWriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
             reportWriter.writerow({
@@ -67,15 +66,22 @@ class Command(BaseCommand):
                 "email": "Email Address",
                 "phone": "Phone Number",
                 "count": "Total Orders",
-                "total": "Total Spent"
+                "total": "Total Spent",
+                "marketing": "Accept Marketing"
             })
 
             for customer in onlySampleCustomers:
+                if customer.acceptsMarketing:
+                    marketing = "Yes"
+                else:
+                    marketing = "No"
+
                 reportWriter.writerow({
                     "url": "https://decoratorsbest.myshopify.com/admin/customers/{}".format(customer.customerId),
                     "name": "{} {}".format(customer.firstName, customer.lastName),
                     "email": customer.email,
                     "phone": customer.phone,
                     "count": customer.orderCount,
-                    "total": customer.totalSpent
+                    "total": customer.totalSpent,
+                    "marketing": marketing
                 })
