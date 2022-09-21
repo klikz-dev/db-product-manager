@@ -1,3 +1,4 @@
+from library import debug, emailer
 import environ
 from library.debug import debug
 import os
@@ -266,6 +267,7 @@ def importOrder(shopifyOrder):
     Line_Item.objects.filter(order=order).delete()
 
     orderHold = False
+    holdBrand = ""
 
     for line_item in line_items:
         try:
@@ -295,6 +297,7 @@ def importOrder(shopifyOrder):
                 if int(line_item['quantity']) * float(line_item['price']) > 2000:
                     if brand == 'Kravet' or brand == 'York' or brand == 'Kasmir':
                         orderHold = True
+                        holdBrand = brand
             except:
                 pass
 
@@ -367,6 +370,13 @@ def importOrder(shopifyOrder):
         if order.status == 'New' or order.status == None:
             order.status = "Hold"
             order.save()
+
+            emailer.send_email_html("Brewster EDI",
+                                    "murrell@decoratorsbest.com,bk@decoratorsbest.com",
+                                    "PO #{} has been set to hold".format(
+                                        order.orderNumber),
+                                    "Hi, <br><br>PO# {} has been set to hold because it's a {} large order. \
+                Please process it manually. <br><br>Best, <br>OM Backend".format(order.orderNumber, holdBrand))
 
     debug("Order", 0,
           "Downloaded Order {} / {}".format(order.orderNumber, order.shopifyOrderId))
