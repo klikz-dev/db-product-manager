@@ -63,8 +63,6 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                self.getProducts()
-                self.getProductIds()
                 self.updateStock()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
