@@ -371,8 +371,12 @@ def importOrder(shopifyOrder):
             order.status = "Hold"
             order.save()
 
-            emailer.send_email_html("Brewster EDI",
-                                    "murrell@decoratorsbest.com,bk@decoratorsbest.com",
+            emailer.send_email_html("DB Order Manager",
+                                    [
+                                        "purchasing@decoratorsbest.com",
+                                        "bk@decoratorsbest.com",
+                                        "murrell@decoratorsbest.com"
+                                    ],
                                     "PO #{} has been set to hold".format(
                                         order.orderNumber),
                                     "Hi, <br><br>PO# {} has been set to hold because it's a {} large order. \
