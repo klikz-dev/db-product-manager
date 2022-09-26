@@ -119,8 +119,10 @@ class Command(BaseCommand):
             except Schumacher.DoesNotExist:
                 pass
 
-            pattern = str(row[4]).strip().replace('', '').replace('¥', '').replace('…', '').replace('„', '')
-            color = str(row[5]).strip().replace('', '').replace('¥', '').replace('…', '').replace('„', '')
+            pattern = str(row[4]).strip().replace('', '').replace(
+                '¥', '').replace('…', '').replace('„', '')
+            color = str(row[5]).strip().replace('', '').replace(
+                '¥', '').replace('…', '').replace('„', '')
             ptype = str(row[0]).strip()
 
             collection = str(row[2]).strip()
@@ -156,7 +158,8 @@ class Command(BaseCommand):
                 rollLength = float(row[8])
             except:
                 rollLength = 0
-            description = row[17].replace('', '').replace('¥', '').replace('…', '').replace('„', '')
+            description = row[17].replace('', '').replace(
+                '¥', '').replace('…', '').replace('„', '')
 
             content1 = row[12]
             content2 = row[13]
@@ -260,7 +263,7 @@ class Command(BaseCommand):
                 mpn = str(sh.cell_value(i, 3)).strip()
                 sku = "SCH {}".format(str(mpn).replace("'", ""))
 
-            cost = float(sh.cell_value(i, 9))
+            cost = float(sh.cell_value(i, 12))
 
             try:
                 product = Schumacher.objects.get(mpn=mpn)
@@ -752,7 +755,7 @@ class Command(BaseCommand):
 
             if product.thumbnail == "":
                 continue
-            
+
             productId = product.productId
             roomsets = str(product.roomset).split(",")
 
