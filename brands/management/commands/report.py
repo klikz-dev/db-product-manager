@@ -4,6 +4,7 @@ import datetime
 import pytz
 from django.core.management.base import BaseCommand
 from django.db.models import Q
+from django.db.models import Count
 
 from library import debug
 from shopify.models import Customer, Line_Item, Order
@@ -26,43 +27,20 @@ class Command(BaseCommand):
             self.sample_only_customers()
 
     def sample_only_customers(self):
-        onlySampleCustomers = []
-        customers = Customer.objects.all()
-
-        total = len(customers)
-        index = 0
-        for customer in customers:
-            index += 1
-            debug("Reporting", 0, "Checking {}th customer out of {} customers".format(
-                index, total))
-            if index > 100:
-                break
-
-            onlySamples = True
-
-            orders = Order.objects.filter(customer=customer)
-            if len(orders) == 0:
-                continue
-
-            for order in orders:
-                if order.orderDate > utc.localize(datetime.datetime(2022, 5, 31)):
-                    continue
-
-                line_items = Line_Item.objects.filter(Q(order=order) & ~Q(
-                    orderedProductVariantTitle__icontains='Sample - '))
-
-                if len(line_items) > 0:
-                    onlySamples = False
-                    break
-
-            if onlySamples:
-                onlySampleCustomers.append(customer)
+        until = utc.localize(datetime.datetime(2022, 5, 31))
+        customers = Customer.objects.annotate(
+            num_samples=Count(~Q(orders__line_items__orderedProductVariantTitle__icontains='Sample - '))).filter(
+                Q(num_samples=0) &
+                Q(orders__orderDate__lte=until))
 
         with open(FILEDIR + '/files/report/sample_only_customers.csv', 'w', newline='') as csvfile:
             fieldnames = [
                 "firstName",
                 "lastName",
                 "email",
+                "phone",
+                "orderCount",
+                "totalSpent",
                 "marketing"
             ]
             reportWriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -70,10 +48,13 @@ class Command(BaseCommand):
                 "firstName": "First Name",
                 "lastName": "Last Name",
                 "email": "Email Address",
+                "phone": "Phone Number",
+                "orderCount": "Order Count",
+                "totalSpent": "Order Total",
                 "marketing": "Accept Marketing"
             })
 
-            for customer in onlySampleCustomers:
+            for customer in customers:
                 if customer.acceptsMarketing:
                     marketing = "Yes"
                 else:
@@ -83,5 +64,8 @@ class Command(BaseCommand):
                     "firstName": customer.firstName,
                     "lastName": customer.lastName,
                     "email": customer.email,
+                    "phone": customer.phone,
+                    "orderCount": customer.orderCount,
+                    "totalSpent": customer.totalSpent,
                     "marketing": marketing
                 })
