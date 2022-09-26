@@ -1,5 +1,7 @@
 import csv
 import os
+import datetime
+import pytz
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
@@ -7,6 +9,8 @@ from library import debug
 from shopify.models import Customer, Line_Item, Order
 
 debug = debug.debug
+utc = pytz.UTC
+
 
 FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -31,6 +35,8 @@ class Command(BaseCommand):
             index += 1
             debug("Reporting", 0, "Checking {}th customer out of {} customers".format(
                 index, total))
+            if index > 100:
+                break
 
             onlySamples = True
 
@@ -39,6 +45,9 @@ class Command(BaseCommand):
                 continue
 
             for order in orders:
+                if order.orderDate > utc.localize(datetime.datetime(2022, 5, 31)):
+                    continue
+
                 line_items = Line_Item.objects.filter(Q(order=order) & ~Q(
                     orderedProductVariantTitle__icontains='Sample - '))
 
@@ -51,22 +60,16 @@ class Command(BaseCommand):
 
         with open(FILEDIR + '/files/report/sample_only_customers.csv', 'w', newline='') as csvfile:
             fieldnames = [
-                "url",
-                "name",
+                "firstName",
+                "lastName",
                 "email",
-                "phone",
-                "count",
-                "total",
                 "marketing"
             ]
             reportWriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
             reportWriter.writerow({
-                "url": "Shopify Admin URL",
-                "name": "Name",
+                "firstName": "First Name",
+                "lastName": "Last Name",
                 "email": "Email Address",
-                "phone": "Phone Number",
-                "count": "Total Orders",
-                "total": "Total Spent",
                 "marketing": "Accept Marketing"
             })
 
@@ -77,11 +80,8 @@ class Command(BaseCommand):
                     marketing = "No"
 
                 reportWriter.writerow({
-                    "url": "https://decoratorsbest.myshopify.com/admin/customers/{}".format(customer.customerId),
-                    "name": "{} {}".format(customer.firstName, customer.lastName),
+                    "firstName": customer.firstName,
+                    "lastName": customer.lastName,
                     "email": customer.email,
-                    "phone": customer.phone,
-                    "count": customer.orderCount,
-                    "total": customer.totalSpent,
                     "marketing": marketing
                 })
