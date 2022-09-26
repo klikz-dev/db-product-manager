@@ -35,8 +35,6 @@ class Command(BaseCommand):
             index += 1
             debug("Reporting", 0, "Checking {}th customer out of {} customers".format(
                 index, total))
-            if index > 100:
-                break
 
             onlySamples = True
 
