@@ -57,6 +57,7 @@ class Command(BaseCommand):
 
         if "addNew" in options['functions']:
             self.addNew()
+            self.updateTags()
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
