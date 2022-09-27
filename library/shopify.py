@@ -393,9 +393,11 @@ def NewProductBySku(sku, con):
         api_url + "/admin/api/{}/products.json".format(api_version), json={"product": p})
     j = json.loads(r.text)
 
-    if hasattr(j, "errors"):
+    errors = j.get("errors")
+
+    if errors:
         debug("Shopify", 1, "Adding SKU: {} Error: {}".format(
-            sku, j["errors"]["base"]))
+            sku, errors["base"]))
 
         csr.close()
         s.close()

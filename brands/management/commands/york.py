@@ -380,8 +380,7 @@ class Command(BaseCommand):
         products = York.objects.all()
 
         for product in products:
-            # try:
-            if True:
+            try:
                 if product.productId != None:
                     continue
 
@@ -468,12 +467,11 @@ class Command(BaseCommand):
                 ))
                 con.commit()
 
-            # except Exception as e:
-            #     print(e)
-            #     continue
+            except Exception as e:
+                print(e)
+                continue
 
-            # try:
-            if True:
+            try:
                 productId = shopify.NewProductBySku(product.sku, con)
                 if productId == None:
                     continue
@@ -481,25 +479,11 @@ class Command(BaseCommand):
                 product.productId = productId
                 product.save()
 
-                if product.thumbnail and product.thumbnail.strip() != "":
-                    try:
-                        common.picdownload2(
-                            product.thumbnail, "{}.jpg".format(productId))
-                    except:
-                        pass
-
-                if product.roomset and product.roomset.strip() != "":
-                    try:
-                        common.roomdownload(
-                            product.roomset, "{}_2.jpg".format(productId))
-                    except:
-                        pass
-
                 debug("York", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
-            # except Exception as e:
-            #     print(e)
+            except Exception as e:
+                print(e)
 
         csr.close()
         con.close()
