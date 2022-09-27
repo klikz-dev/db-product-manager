@@ -241,7 +241,8 @@ class Command(BaseCommand):
                 feature = ""
 
             if str(fabricSheet.cell_value(i, 15)):
-                feature = "{}Cleaning: {}".format(feature, str(fabricSheet.cell_value(i, 15)))
+                feature = "{}Cleaning: {}".format(
+                    feature, str(fabricSheet.cell_value(i, 15)))
 
             weight = 1
 
@@ -352,7 +353,7 @@ class Command(BaseCommand):
 
                 # Unpublish All products temporarily
                 csr.execute(
-                        "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+                    "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
                 con.commit()
                 csr.execute(
                     "CALL AddToPendingUpdatePublish ({})".format(productID))
@@ -488,6 +489,8 @@ class Command(BaseCommand):
 
             try:
                 productId = shopify.NewProductBySku(product.sku, con)
+                if productId == None:
+                    continue
 
                 product.productId = productId
                 product.save()

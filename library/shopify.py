@@ -393,24 +393,34 @@ def NewProductBySku(sku, con):
         api_url + "/admin/api/{}/products.json".format(api_version), json={"product": p})
     j = json.loads(r.text)
 
-    jp = j["product"]
-    handle = jp["handle"]
-    productID = jp["id"]
-    csr.execute("UPDATE Product SET ProductID = {}, Handle = {} WHERE SKU = {}".format(
-        productID, sq(handle), sq(sku)))
-    con.commit()
+    if hasattr(j, "errors"):
+        debug("Shopify", 1, "Adding SKU: {} Error: {}".format(
+            sku, j["errors"]["base"]))
 
-    for pv in jp["variants"]:
-        variantID = pv["id"]
-        vTitle = pv["option1"]
-        csr.execute("UPDATE ProductVariant SET ProductID = {}, VariantID = {} WHERE SKU = {} AND Name = {}".format(
-            productID, variantID, sq(sku), sq(vTitle)))
+        csr.close()
+        s.close()
+
+        return None
+
+    else:
+        jp = j["product"]
+        handle = jp["handle"]
+        productID = jp["id"]
+        csr.execute("UPDATE Product SET ProductID = {}, Handle = {} WHERE SKU = {}".format(
+            productID, sq(handle), sq(sku)))
         con.commit()
 
-    csr.close()
-    s.close()
+        for pv in jp["variants"]:
+            variantID = pv["id"]
+            vTitle = pv["option1"]
+            csr.execute("UPDATE ProductVariant SET ProductID = {}, VariantID = {} WHERE SKU = {} AND Name = {}".format(
+                productID, variantID, sq(sku), sq(vTitle)))
+            con.commit()
 
-    return productID
+        csr.close()
+        s.close()
+
+        return productID
 
 
 def UploadImageToShopify(src):

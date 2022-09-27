@@ -446,6 +446,8 @@ class Command(BaseCommand):
 
             try:
                 productId = shopify.NewProductBySku(product.sku, con)
+                if productId == None:
+                    continue
 
                 product.productId = productId
                 product.save()

@@ -380,7 +380,8 @@ class Command(BaseCommand):
         products = York.objects.all()
 
         for product in products:
-            try:
+            # try:
+            if True:
                 if product.productId != None:
                     continue
 
@@ -467,12 +468,15 @@ class Command(BaseCommand):
                 ))
                 con.commit()
 
-            except Exception as e:
-                print(e)
-                continue
+            # except Exception as e:
+            #     print(e)
+            #     continue
 
-            try:
+            # try:
+            if True:
                 productId = shopify.NewProductBySku(product.sku, con)
+                if productId == None:
+                    continue
 
                 product.productId = productId
                 product.save()
@@ -494,8 +498,8 @@ class Command(BaseCommand):
                 debug("York", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
-            except Exception as e:
-                print(e)
+            # except Exception as e:
+            #     print(e)
 
         csr.close()
         con.close()
