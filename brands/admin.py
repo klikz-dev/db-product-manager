@@ -417,7 +417,7 @@ class SchumacherAdmin(admin.ModelAdmin):
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
                     'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'minimum', 'collection']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 

@@ -485,7 +485,8 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(collection="BORÃSTAPETER")
+        products = Schumacher.objects.filter(pattern='INDIAN ARBRE')
+        print(len(products))
 
         for product in products:
             try:
