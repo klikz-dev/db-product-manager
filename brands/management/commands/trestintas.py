@@ -400,15 +400,15 @@ class Command(BaseCommand):
 
         for product in products:
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Covington')".format(
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Tres Tintas')".format(
                     product.sku, 5, ""))
                 con.commit()
-                debug("Covington", 0,
+                debug("Tres Tintas", 0,
                       "Updated inventory for {} to {}.".format(product.sku, 5))
             except Exception as e:
                 print(e)
                 debug(
-                    "Covington", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+                    "Tres Tintas", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
 
         csr.close()
         con.close()

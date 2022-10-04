@@ -448,22 +448,22 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Tres Tintas'")
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Elaine Smith'")
         con.commit()
 
-        products = TresTintas.objects.all()
+        products = ElaineSmith.objects.all()
 
         for product in products:
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Covington')".format(
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Elaine Smith')".format(
                     product.sku, 5, ""))
                 con.commit()
-                debug("Covington", 0,
+                debug("Elaine Smith", 0,
                       "Updated inventory for {} to {}.".format(product.sku, 5))
             except Exception as e:
                 print(e)
                 debug(
-                    "Covington", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+                    "Elaine Smith", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
 
         csr.close()
         con.close()
