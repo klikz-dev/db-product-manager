@@ -1,6 +1,77 @@
 from django.db import models
 
 
+class ElaineSmith(models.Model):
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    size = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset1 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset2 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset3 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset4 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset5 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset6 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset7 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
 class TresTintas(models.Model):
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)

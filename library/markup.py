@@ -10,6 +10,10 @@ brewster_trade2 = 1.3
 covington = 2
 covington_trade = 1.5
 
+# Elaine Smith
+elainesmith = "MAP"
+elainesmith_trade = 1.3
+
 # JF Fabrics
 jffabrics = 1.75  # x MAP
 jffabrics_trade = 1

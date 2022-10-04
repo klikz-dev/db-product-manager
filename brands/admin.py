@@ -1,6 +1,30 @@
 from django.contrib import admin
 
-from .models import Covington, MadcapCottage, Materialworks, Maxwell, Brewster, Fabricut, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, RalphLauren, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
+from .models import Covington, ElaineSmith, MadcapCottage, Materialworks, Maxwell, Brewster, Fabricut, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, RalphLauren, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
+
+
+class ElaineSmithAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['pattern', 'color']}),
+        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'size', 'usage']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomset1', 'roomset2',
+         'roomset3', 'roomset4', 'roomset5', 'roomset6', 'roomset7']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+
+    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
 class TresTintasAdmin(admin.ModelAdmin):
@@ -519,6 +543,7 @@ class YorkAdmin(admin.ModelAdmin):
 
 
 # Register Models
+admin.site.register(ElaineSmith, ElaineSmithAdmin)
 admin.site.register(TresTintas, TresTintasAdmin)
 admin.site.register(Pklifestyles, PklifestylesAdmin)
 admin.site.register(Mindthegap, MindthegapAdmin)
