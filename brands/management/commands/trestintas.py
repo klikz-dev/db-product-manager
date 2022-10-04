@@ -364,7 +364,7 @@ class Command(BaseCommand):
         con.close()
 
     def image(self):
-        images = os.listdir(FILEDIR + "/files/images/trestintas/")
+        images = os.listdir(FILEDIR + "/files/images/trestintas/images")
 
         products = TresTintas.objects.all()
         for product in products:
@@ -373,26 +373,14 @@ class Command(BaseCommand):
             if "{}.jpg".format(product.mpn) in images:
                 print("{}.jpg".format(product.mpn))
 
-                copyfile(FILEDIR + "/files/images/trestintas/{}.jpg".format(product.mpn), FILEDIR +
+                copyfile(FILEDIR + "/files/images/trestintas/images/{}.jpg".format(product.mpn), FILEDIR +
                          "/../../images/product/{}.jpg".format(productId))
 
                 os.remove(
-                    FILEDIR + "/files/images/trestintas/{}.jpg".format(product.mpn))
+                    FILEDIR + "/files/images/trestintas/images/{}.jpg".format(product.mpn))
 
-            if "{}1.jpg".format(product.mpn) in images:
-                print("{}1.jpg".format(product.mpn))
+    def roomset(self):
+        images = os.listdir(FILEDIR + "/files/images/trestintas/roomset")
 
-                copyfile(FILEDIR + "/files/images/trestintas/{}1.jpg".format(product.mpn), FILEDIR +
-                         "/../../images/product/{}.jpg".format(productId))
-
-                os.remove(
-                    FILEDIR + "/files/images/trestintas/{}1.jpg".format(product.mpn))
-
-            if "{}2.jpg".format(product.mpn) in images:
-                print("{}2.jpg".format(product.mpn))
-
-                copyfile(FILEDIR + "/files/images/trestintas/{}2.jpg".format(product.mpn), FILEDIR +
-                         "/../../images/roomset/{}_2.jpg".format(productId))
-
-                os.remove(
-                    FILEDIR + "/files/images/trestintas/{}2.jpg".format(product.mpn))
+        for image in images:
+            image = image.replace(".jpg", "")
