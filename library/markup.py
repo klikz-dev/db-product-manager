@@ -81,6 +81,10 @@ seabrook_trade = 1
 stout = "MAP"
 stout_trade = 1
 
+# Tres Tintas
+trestintas = "MAP"
+trestintas_trade = 1.4
+
 # York
 york = 1.5
 york_trade = 1.3
