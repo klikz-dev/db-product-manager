@@ -341,29 +341,6 @@ def importOrder(shopifyOrder):
     order.orderType = orderTypeList
     order.manufacturerList = manufacturerList
 
-    # Import Order Attributes
-    # attrs = shopifyOrder['note_attributes']
-
-    # for attr in attrs:
-    #     if attr['value'] != "" and attr['value'] != None:
-    #         if attr['name'] == "Status":
-    #             order.status = attr['value']
-
-    #         if attr['name'] == "Initials":
-    #             order.initials = attr['value']
-
-    #         if attr['name'] == "ManufacturerList":
-    #             order.manufacturerList = attr['value']
-
-    #         if attr['name'] == "ReferenceNumber":
-    #             order.referenceNumber = attr['value']
-
-    #         if attr['name'] == "CSNote":
-    #             order.note = attr['value']
-
-    #         if attr['name'] == "SpecialShipping":
-    #             order.specialShipping = attr['value']
-
     order.save()
 
     if orderHold:
@@ -374,8 +351,7 @@ def importOrder(shopifyOrder):
             emailer.send_email_html("DB Order Manager",
                                     [
                                         "purchasing@decoratorsbest.com",
-                                        "bk@decoratorsbest.com",
-                                        "murrell@decoratorsbest.com"
+                                        "bk@decoratorsbest.com"
                                     ],
                                     "PO #{} has been set to hold".format(
                                         order.orderNumber),
