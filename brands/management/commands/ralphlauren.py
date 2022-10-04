@@ -288,29 +288,42 @@ class Command(BaseCommand):
                 product.productId = productID
                 product.save()
 
-                if published == 1 and product.status == False:
-                    csr.execute(
-                        "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
-                    con.commit()
-                    csr.execute(
-                        "CALL AddToPendingUpdatePublish ({})".format(productID))
-                    con.commit()
+                # if published == 1 and product.status == False:
+                #     csr.execute(
+                #         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+                #     con.commit()
+                #     csr.execute(
+                #         "CALL AddToPendingUpdatePublish ({})".format(productID))
+                #     con.commit()
 
-                    upb = upb + 1
-                    debug(
-                        "RalphLauren", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
+                #     upb = upb + 1
+                #     debug(
+                #         "RalphLauren", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
-                if published == 0 and product.status == True and product.cost != None:
-                    csr.execute(
-                        "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
-                    con.commit()
-                    csr.execute(
-                        "CALL AddToPendingUpdatePublish ({})".format(productID))
-                    con.commit()
+                # if published == 0 and product.status == True and product.cost != None:
+                #     csr.execute(
+                #         "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
+                #     con.commit()
+                #     csr.execute(
+                #         "CALL AddToPendingUpdatePublish ({})".format(productID))
+                #     con.commit()
 
-                    pb = pb + 1
-                    debug(
-                        "RalphLauren", 0, "Enabled product -- ProductID: {}, SKU: {}".format(productID, sku))
+                #     pb = pb + 1
+                #     debug(
+                #         "RalphLauren", 0, "Enabled product -- ProductID: {}, SKU: {}".format(productID, sku))
+
+                # Disable all products
+                csr.execute(
+                    "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+                con.commit()
+                csr.execute(
+                    "CALL AddToPendingUpdatePublish ({})".format(productID))
+                con.commit()
+
+                upb = upb + 1
+                debug(
+                    "RalphLauren", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
+                #######################
 
             except RalphLauren.DoesNotExist:
                 if published == 1:
