@@ -49,6 +49,9 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
+        if "updateStock" in options['functions']:
+            self.updateStock()
+
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -384,3 +387,28 @@ class Command(BaseCommand):
 
         for image in images:
             image = image.replace(".jpg", "")
+
+    def updateStock(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Tres Tintas'")
+        con.commit()
+
+        products = TresTintas.objects.all()
+
+        for product in products:
+            try:
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Covington')".format(
+                    product.sku, 5, ""))
+                con.commit()
+                debug("Covington", 0,
+                      "Updated inventory for {} to {}.".format(product.sku, 5))
+            except Exception as e:
+                print(e)
+                debug(
+                    "Covington", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+
+        csr.close()
+        con.close()
