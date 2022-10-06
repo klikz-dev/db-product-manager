@@ -13,14 +13,14 @@ class ElaineSmithAdmin(admin.ModelAdmin):
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'stock']}),
+        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
         ('Image', {'fields': ['thumbnail', 'roomset1', 'roomset2',
          'roomset3', 'roomset4', 'roomset5', 'roomset6', 'roomset7']}),
         ('Shipify Product', {'fields': ['productId']}),
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 

@@ -53,11 +53,12 @@ class Command(BaseCommand):
             self.updateStock()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
+            self.addNew()
+            self.image()
+            self.updateTags()
+            self.updateStock()
 
     def getProducts(self):
         TresTintas.objects.all().delete()
@@ -70,7 +71,7 @@ class Command(BaseCommand):
             try:
                 mpn = int(trestintasSheet.cell_value(i, 0))
             except:
-                mpn = str(trestintasSheet.cell_value(i, 0))
+                mpn = str(trestintasSheet.cell_value(i, 0)).strip()
 
             sku = "TT {}".format(mpn)
 

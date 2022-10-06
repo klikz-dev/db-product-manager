@@ -43,6 +43,8 @@ class ElaineSmith(models.Model):
 
     status = models.BooleanField(default=True)
     stock = models.IntegerField(default=0)
+    boDate = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     weight = models.FloatField(default=1)
 
     thumbnail = models.CharField(

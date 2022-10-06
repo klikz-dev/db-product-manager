@@ -1,3 +1,4 @@
+from datetime import datetime
 from shutil import copyfile
 from django.core.management.base import BaseCommand
 from brands.models import ElaineSmith
@@ -155,6 +156,38 @@ class Command(BaseCommand):
 
             debug("Elaine Smith", 0,
                   "Success to get product details for MPN: {}".format(mpn))
+
+        # Update Inventory
+        elainesmithInventoryFile = xlrd.open_workbook(
+            FILEDIR + "/files/elainesmith-inventory.xlsx")
+        elainesmithInventorySheet = elainesmithInventoryFile.sheet_by_index(0)
+
+        for i in range(1, elainesmithInventorySheet.nrows):
+            mpn = str(elainesmithInventorySheet.cell_value(i, 0))
+
+            try:
+                product = ElaineSmith.objects.get(mpn=mpn)
+            except ElaineSmith.DoesNotExist:
+                continue
+
+            statusText = str(elainesmithInventorySheet.cell_value(i, 3))
+
+            status = True
+            boDate = ""
+
+            if "discontinued" in statusText.lower():
+                status = False
+            elif "in stock" in statusText.lower():
+                pass
+            else:
+                boDateTuple = xlrd.xldate_as_tuple(
+                    elainesmithInventorySheet.cell_value(i, 3), elainesmithInventoryFile.datemode)
+                boDate = datetime(*boDateTuple)
+                boDate = boDate.strftime("%m/%d/%Y")
+
+            product.status = status
+            product.boDate = boDate
+            product.save()
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -456,7 +489,7 @@ class Command(BaseCommand):
         for product in products:
             try:
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Elaine Smith')".format(
-                    product.sku, 5, ""))
+                    product.sku, 5, product.boDate))
                 con.commit()
                 debug("Elaine Smith", 0,
                       "Updated inventory for {} to {}.".format(product.sku, 5))
