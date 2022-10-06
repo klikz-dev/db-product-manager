@@ -273,7 +273,7 @@ class Command(BaseCommand):
 
         csr.execute("""SELECT P.ProductID, P.SKU 
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'P/K Lifestyles';""")
+        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'Tres Tintas';""")
 
         total, success, failed = 0, 0, 0
 
