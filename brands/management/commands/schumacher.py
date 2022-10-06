@@ -263,7 +263,7 @@ class Command(BaseCommand):
                 mpn = str(sh.cell_value(i, 3)).strip()
                 sku = "SCH {}".format(str(mpn).replace("'", ""))
 
-            cost = float(sh.cell_value(i, 12))
+            cost = float(sh.cell_value(i, 13))
 
             try:
                 product = Schumacher.objects.get(mpn=mpn)
