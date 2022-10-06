@@ -263,14 +263,18 @@ class Command(BaseCommand):
                 mpn = str(sh.cell_value(i, 3)).strip()
                 sku = "SCH {}".format(str(mpn).replace("'", ""))
 
-            cost = float(sh.cell_value(i, 13))
-
             try:
                 product = Schumacher.objects.get(mpn=mpn)
-                product.cost = cost
-                product.save()
-            except:
+            except Schumacher.DoesNotExist:
                 continue
+
+            if product.uom == "Per Roll":
+                cost = float(sh.cell_value(i, 13))
+            else:
+                cost = float(sh.cell_value(i, 12))
+
+            product.cost = cost
+            product.save()
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
