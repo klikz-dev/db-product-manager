@@ -11,7 +11,7 @@ covington = 2
 covington_trade = 1.5
 
 # Elaine Smith
-elainesmith = "MAP"
+elainesmith = "MAP" # Markup 1.7 - 1.8
 elainesmith_trade = 1.3
 
 # JF Fabrics
@@ -30,11 +30,11 @@ kravet_pillow = 1.75
 kravet_pillow_trade = 1.3
 
 # Madcap Cottage
-madcapcottage = "MAP"
+madcapcottage = "MAP" # Markup 2.0 - 2.3
 madcapcottage_trade = 1
 
 # Material Works
-materialworks = "MAP"
+materialworks = "MAP" # Markup 1.5
 materialworks_trade = 1
 
 # Maxwell
@@ -50,7 +50,7 @@ phillipjeffries = 1.4
 phillipjeffries_trade = 1.3
 
 # P/K Lifestyles
-pklifestyles = "MAP"
+pklifestyles = "MAP" # Markup 2.0
 pklifestyles_trade = 1.1
 
 # Pindler
@@ -82,11 +82,11 @@ seabrook = 1.5
 seabrook_trade = 1
 
 # Stout
-stout = "MAP"
+stout = "MAP" # Markup 1.5 or 2.0
 stout_trade = 1
 
 # Tres Tintas
-trestintas = "MAP"
+trestintas = "MAP" # Markup 2.99 - Cost 50.0, MAP 149.5
 trestintas_trade = 1.4
 
 # York
