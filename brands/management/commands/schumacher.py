@@ -63,6 +63,8 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
+                self.getProducts()
+                self.getProductIds()
                 self.updateStock()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
@@ -125,7 +127,7 @@ class Command(BaseCommand):
                 '¥', '').replace('…', '').replace('„', '')
             ptype = str(row[0]).strip()
 
-            collection = str(row[2]).strip()
+            collection = str(row[2]).replace("Collection Name", "").strip()
             if "STAPETER" in collection:
                 collection = "BORÃSTAPETER"
                 brand = "BORÃSTAPETER"
@@ -250,31 +252,6 @@ class Command(BaseCommand):
 
             debug("Schumacher", 0,
                   "Success to get product details for MPN: {}".format(mpn))
-
-        # wb = xlrd.open_workbook(
-        #     FILEDIR + "/files/schumacher-price.xlsx")
-        # sh = wb.sheet_by_index(0)
-
-        # for i in range(1, sh.nrows):
-        #     try:
-        #         mpn = int(sh.cell_value(i, 3))
-        #         sku = "SCH {}".format(mpn)
-        #     except:
-        #         mpn = str(sh.cell_value(i, 3)).strip()
-        #         sku = "SCH {}".format(str(mpn).replace("'", ""))
-
-        #     try:
-        #         product = Schumacher.objects.get(mpn=mpn)
-        #     except Schumacher.DoesNotExist:
-        #         continue
-
-        #     if product.uom == "Per Roll":
-        #         cost = float(sh.cell_value(i, 13))
-        #     else:
-        #         cost = float(sh.cell_value(i, 12))
-
-        #     product.cost = cost
-        #     product.save()
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
