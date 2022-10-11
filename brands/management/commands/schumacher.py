@@ -251,30 +251,30 @@ class Command(BaseCommand):
             debug("Schumacher", 0,
                   "Success to get product details for MPN: {}".format(mpn))
 
-        wb = xlrd.open_workbook(
-            FILEDIR + "/files/schumacher-price.xlsx")
-        sh = wb.sheet_by_index(0)
+        # wb = xlrd.open_workbook(
+        #     FILEDIR + "/files/schumacher-price.xlsx")
+        # sh = wb.sheet_by_index(0)
 
-        for i in range(1, sh.nrows):
-            try:
-                mpn = int(sh.cell_value(i, 3))
-                sku = "SCH {}".format(mpn)
-            except:
-                mpn = str(sh.cell_value(i, 3)).strip()
-                sku = "SCH {}".format(str(mpn).replace("'", ""))
+        # for i in range(1, sh.nrows):
+        #     try:
+        #         mpn = int(sh.cell_value(i, 3))
+        #         sku = "SCH {}".format(mpn)
+        #     except:
+        #         mpn = str(sh.cell_value(i, 3)).strip()
+        #         sku = "SCH {}".format(str(mpn).replace("'", ""))
 
-            try:
-                product = Schumacher.objects.get(mpn=mpn)
-            except Schumacher.DoesNotExist:
-                continue
+        #     try:
+        #         product = Schumacher.objects.get(mpn=mpn)
+        #     except Schumacher.DoesNotExist:
+        #         continue
 
-            if product.uom == "Per Roll":
-                cost = float(sh.cell_value(i, 13))
-            else:
-                cost = float(sh.cell_value(i, 12))
+        #     if product.uom == "Per Roll":
+        #         cost = float(sh.cell_value(i, 13))
+        #     else:
+        #         cost = float(sh.cell_value(i, 12))
 
-            product.cost = cost
-            product.save()
+        #     product.cost = cost
+        #     product.save()
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
