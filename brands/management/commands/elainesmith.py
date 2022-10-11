@@ -44,6 +44,9 @@ class Command(BaseCommand):
         if "addNew" in options['functions']:
             self.addNew()
 
+        if "updateExisting" in options['functions']:
+            self.updateExisting()
+
         if "image" in options['functions']:
             self.image()
 
@@ -343,6 +346,161 @@ class Command(BaseCommand):
                 product.save()
 
                 debug("Elaine Smith", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    productId, product.sku, title, product.ptype, price))
+
+                # Download Image
+                if product.thumbnail != "":
+                    try:
+                        common.picdownload2(
+                            str(product.thumbnail).strip(), "{}.jpg".format(productId))
+                    except Exception as e:
+                        print(e)
+
+                # Download Roomsets
+                idx = 2
+
+                if product.roomset1 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset1).strip(), "{}_{}.jpg".format(productId, idx))
+                        idx += 1
+                    except Exception as e:
+                        print(e)
+
+                if product.roomset2 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset2).strip(), "{}_{}.jpg".format(productId, idx))
+                        idx += 1
+                    except Exception as e:
+                        print(e)
+
+                if product.roomset3 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset3).strip(), "{}_{}.jpg".format(productId, idx))
+                        idx += 1
+                    except Exception as e:
+                        print(e)
+
+                if product.roomset4 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset4).strip(), "{}_{}.jpg".format(productId, idx))
+                        idx += 1
+                    except Exception as e:
+                        print(e)
+
+                if product.roomset5 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset5).strip(), "{}_{}.jpg".format(productId, idx))
+                        idx += 1
+                    except Exception as e:
+                        print(e)
+
+                if product.roomset6 != "":
+                    try:
+                        common.roomdownload(
+                            str(product.roomset6).strip(), "{}_{}.jpg".format(productId, idx))
+                    except Exception as e:
+                        print(e)
+
+            except Exception as e:
+                print(e)
+
+        csr.close()
+        con.close()
+
+    def updateExisting(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = ElaineSmith.objects.all()
+
+        for product in products:
+            try:
+                if product.status == False or product.productId == None:
+                    continue
+
+                name = " | ".join((product.brand, product.pattern,
+                                  product.color, product.ptype))
+                title = " ".join((product.brand, product.pattern,
+                                 product.color, product.ptype))
+                description = title
+                vname = title
+                hassample = 1
+                gtin = ""
+                weight = product.weight
+
+                desc = ""
+                if product.description != None and product.description != "":
+                    desc += "{}<br/><br/>".format(
+                        product.description)
+                if product.collection != None and product.collection != "":
+                    desc += "Collection: {}<br/><br/>".format(
+                        product.collection)
+                if product.size != None and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                if product.usage != None and product.usage != "":
+                    desc += "Usage: {}<br/><br/>".format(product.usage)
+                if product.ptype != None and product.ptype != "":
+                    desc += "{} {}".format(product.brand, product.ptype)
+
+                cost = product.cost
+                try:
+                    price = common.formatprice(product.map, 1)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
+                except:
+                    debug("Elaine Smith", 1,
+                          "Price Error: SKU: {}".format(product.sku))
+                    continue
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+                priceSample = 5
+
+                csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
+                    sq(product.sku),
+                    sq(name),
+                    sq(product.manufacturer),
+                    sq(product.mpn),
+                    sq(desc),
+                    sq(title),
+                    sq(description),
+                    sq(product.ptype),
+                    sq(vname),
+                    hassample,
+                    cost,
+                    price,
+                    priceTrade,
+                    priceSample,
+                    sq(product.pattern),
+                    sq(product.color),
+                    product.minimum,
+                    sq(product.increment),
+                    sq(product.uom),
+                    sq(product.usage),
+                    sq(product.collection),
+                    sq(str(gtin)),
+                    weight
+                ))
+                con.commit()
+
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                productId = product.productId
+
+                csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(productId))
+                con.commit()
+
+                debug("Elaine Smith", 0, "Update ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
                 # Download Image
