@@ -132,8 +132,8 @@ class Command(BaseCommand):
                 sku = "OWW {}".format(mpn)
             elif "Grey Watkins" in brand:
                 sku = "GWA {}".format(mpn)
-            elif "Boris Kroll" in brand:
-                sku = "BK {}".format(mpn)
+            # elif "Boris Kroll" in brand: ### Strange Bug -- To-do
+            #     sku = "BK {}".format(mpn)
             elif brand == "Aldeco" or brand == "Alhambra" or brand == "Christian Fischbacher" or brand == "Colony" or brand == "Hinson" or brand == "JWall" or brand == "Jean Paul Gaultier" or brand == "Lelievre" or brand == "MissoniHome" or brand == "Nicolette Mayer" or brand == "Tassinari & Chatel":
                 sku = "SCALA {}".format(mpn)
             else:
@@ -514,6 +514,7 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
+                print(product.sku)
                 continue
 
             try:
@@ -862,7 +863,7 @@ class Command(BaseCommand):
         products = Scalamandre.objects.all()
 
         for product in products:
-            if product.productId == None:
+            if product.productId == None or product.productId == "":
                 continue
 
             if int(product.productId) in hasImage:

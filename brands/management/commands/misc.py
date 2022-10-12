@@ -165,11 +165,17 @@ class Command(BaseCommand):
         Log.objects.all().delete()
 
     def deleteBuggyProducts(self):
-        products = ['6759024164910', '6759024295982',
-                    '6759024492590', '6759024656430', '6759024885806', '6759025082414', ]
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
 
-        for productId in products:
-            self.deleteProduct(productId)
+        csr.execute(
+            "DELETE from Product where productID is NULL")
+        con.commit()
+
+        csr.execute(
+            "DELETE from ProductImage where productID is NULL")
+        con.commit()
 
     def deleteProduct(self, productID):
         # productID = "6811404959790"
