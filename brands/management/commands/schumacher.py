@@ -6,7 +6,6 @@ from shopify.models import Product as ShopifyProduct
 import os
 import pymysql
 import sys
-import xlrd
 import paramiko
 import time
 import csv
@@ -737,7 +736,7 @@ class Command(BaseCommand):
             if int(product.productId) in hasImage:
                 continue
 
-            if product.thumbnail == "":
+            if product.thumbnail == "" or product.roomset == "":
                 continue
 
             productId = product.productId

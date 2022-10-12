@@ -74,10 +74,7 @@ class Command(BaseCommand):
                     debug(
                         "Image", 0, "Status check for Image {} successful. Good to upload".format(f))
                     good = good + 1
-                    isOk = True
 
-                if isOk:
-                    m = 'delete'
                     remove(join(mypath, f))
 
                 fd_img.close()

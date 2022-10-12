@@ -77,9 +77,6 @@ class Command(BaseCommand):
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
 
-        if "bestSellers" in options['functions']:
-            self.bestSellers()
-
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -527,7 +524,7 @@ class Command(BaseCommand):
                 product.productId = productId
                 product.save()
 
-                self.images(product.mpn, productId)
+                self.downloadImage(product.mpn, productId)
 
                 debug("Scalamandre", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
@@ -661,12 +658,7 @@ class Command(BaseCommand):
                     "CALL AddToPendingUpdateProduct ({})".format(productId))
                 con.commit()
 
-                if product.thumbnail and product.thumbnail.strip() != "":
-                    try:
-                        common.picdownload2(
-                            product.thumbnail, "{}.jpg".format(productId))
-                    except:
-                        pass
+                self.downloadImage(product.mpn, productId)
 
                 debug("Scalamandre", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
@@ -839,58 +831,58 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    def images(self, mpn, productId):
+    def downloadImage(self, mpn, productId):
         try:
             r = requests.get("{}/ScalaFeedAPI/FetchImagesByItemID?ITEMID={}".format(API_ADDRESS, mpn),
                              headers={'Authorization': 'Bearer {}'.format(API_TOKEN)})
-            j = json.loads(r.text)
+            images = json.loads(r.text)
         except:
             return
 
-        for item in j:
-            if "SH" in item['IMAGETYPE']:
-                try:
-                    roomId = int(item['IMAGETYPE'].replace("SH", ""))
-                    imagePath = item['IMAGEPATH'].replace("\\", "")
+        roomId = 1
+        for image in images:
+            if "MAIN" in image['IMAGETYPE'] and image['IMAGEPATH'] != "":
+                common.picdownload2(
+                    str(image['IMAGEPATH']).strip(), "{}.jpg".format(productId))
 
-                    f1 = open(
-                        "{}/../../images/roomset/{}_{}.jpg".format(FILEDIR, productId, roomId+1), "wb")
-                    f1.write(requests.get(imagePath).content)
-                    f1.close()
-                    print("Downloaded {}_{}.jpg".format(
-                        productId, roomId+1))
-                except Exception as e:
-                    print(e)
-                    debug("Image", 2,
-                          "Image Download Failed. {}".format(imagePath))
+            else:
+                roomId += 1
+                common.roomdownload(
+                    str(image['IMAGEPATH']).strip(), "{}_{}.jpg".format(productId, roomId))
 
     def fixMissingImages(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Scalamandre'")
+        for row in csr.fetchall():
+            hasImage.append(row[0])
+
         products = Scalamandre.objects.all()
 
         for product in products:
-            itemId = product.mpn
-            productId = product.productId
-
-            try:
-                r = requests.get("{}/ScalaFeedAPI/FetchImagesByItemID?ITEMID={}".format(API_ADDRESS, itemId),
-                                 headers={'Authorization': 'Bearer {}'.format(API_TOKEN)})
-                j = json.loads(r.text)
-            except:
+            if product.productId == None:
                 continue
 
-            for item in j:
-                if "SH" in item['IMAGETYPE']:
-                    try:
-                        roomId = int(item['IMAGETYPE'].replace("SH", ""))
-                        imagePath = item['IMAGEPATH'].replace("\\", "")
+            if int(product.productId) in hasImage:
+                continue
 
-                        f1 = open(
-                            "{}/../../images/roomset/{}_{}.jpg".format(FILEDIR, productId, roomId+1), "wb")
-                        f1.write(requests.get(imagePath).content)
-                        f1.close()
-                        print("Downloaded {}_{}.jpg".format(
-                            productId, roomId+1))
-                    except Exception as e:
-                        print(e)
-                        debug("Image", 2,
-                              "Image Download Failed. {}".format(imagePath))
+            # Image API
+            try:
+                r = requests.get("{}/ScalaFeedAPI/FetchImagesByItemID?ITEMID={}".format(API_ADDRESS, product.mpn),
+                                 headers={'Authorization': 'Bearer {}'.format(API_TOKEN)})
+                images = json.loads(r.text)
+            except:
+                return
+
+            roomId = 1
+            for image in images:
+                if "MAIN" in image['IMAGETYPE'] and image['IMAGEPATH'] != "":
+                    common.picdownload2(
+                        str(image['IMAGEPATH']).strip(), "{}.jpg".format(product.productId))
+
+                else:
+                    roomId += 1
+                    common.roomdownload(
+                        str(image['IMAGEPATH']).strip(), "{}_{}.jpg".format(product.productId, roomId))
