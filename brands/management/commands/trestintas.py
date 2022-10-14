@@ -46,6 +46,9 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             self.image()
 
+        if "roomset" in options['functions']:
+            self.roomset()
+
         if "updateTags" in options['functions']:
             self.updateTags()
 
@@ -384,10 +387,21 @@ class Command(BaseCommand):
                     FILEDIR + "/files/images/trestintas/images/{}.jpg".format(product.mpn))
 
     def roomset(self):
-        images = os.listdir(FILEDIR + "/files/images/trestintas/roomset")
+        images = os.listdir(FILEDIR + "/files/images/trestintas/roomsets")
 
-        for image in images:
-            image = image.replace(".jpg", "")
+        products = TresTintas.objects.all()
+        for product in products:
+            productId = product.productId
+
+            if "{}.jpg".format(product.mpn) in images:
+                print("{}.jpg".format(product.mpn))
+
+                copyfile(FILEDIR + "/files/images/trestintas/roomsets/{}.jpg".format(product.mpn), FILEDIR +
+                         "/../../images/roomset/{}_2.jpg".format(productId))
+
+                os.remove(
+                    FILEDIR + "/files/images/trestintas/roomsets/{}.jpg".format(product.mpn))
+            
 
     def updateStock(self):
         con = pymysql.connect(host=db_host, user=db_username,
