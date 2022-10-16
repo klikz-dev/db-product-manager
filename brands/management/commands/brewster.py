@@ -337,7 +337,6 @@ class Command(BaseCommand):
                     if collection in only50:
                         isonly50discount = True
 
-                # collection = sh.cell_value(i, collectionId)
                 # Fix collection name 5/24
                 collection = file.replace('.xlsx', '')
 
@@ -497,10 +496,17 @@ class Command(BaseCommand):
                 continue
 
             try:
-                msrp = float(
-                    str(discontinuedSheet.cell_value(i, 11)).replace("$", ""))  # From Scott - FTP Datasheet price is double roll
+                cost = float(
+                    str(discontinuedSheet.cell_value(i, 13)).replace("$", ""))  # From Scott - FTP Datasheet price is double roll
             except:
-                debug("Brewster", 1, "Updating Price Error SKU: {}".format(sku))
+                debug("Brewster", 1, "Updating Cost Error SKU: {}".format(sku))
+                continue
+
+            try:
+                msrp = float(
+                    str(discontinuedSheet.cell_value(i, 11)).replace("$", ""))
+            except:
+                debug("Brewster", 1, "Updating MSRP Error SKU: {}".format(sku))
                 continue
 
             try:
@@ -508,11 +514,6 @@ class Command(BaseCommand):
                     str(discontinuedSheet.cell_value(i, 12)).replace("$", ""))
             except:
                 map = 0
-
-            if product.only50Discount:
-                cost = round(msrp * 0.5, 2)
-            else:
-                cost = round(msrp * 0.4, 2)
 
             product.cost = cost
             if map != 0:
