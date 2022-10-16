@@ -171,6 +171,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     CovingtonSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    ElaineSmithOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ElaineSmithSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     JFFabricsOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     JFFabricsSample = models.CharField(
@@ -207,10 +211,6 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     RalphLaurenSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    # ScalamandreOrder = models.CharField(
-    #     max_length=200, default=None, null=True, blank=True)
-    # ScalamandreSample = models.CharField(
-    #     max_length=200, default=None, null=True, blank=True)
     SeabrookOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     SeabrookSample = models.CharField(
@@ -218,6 +218,10 @@ class PORecord(models.Model):
     StoutOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     StoutSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    TresTintasOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    TresTintasSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     ZoffanyOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
