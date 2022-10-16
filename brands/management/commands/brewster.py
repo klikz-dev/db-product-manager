@@ -368,7 +368,8 @@ class Command(BaseCommand):
                 if isonly50discount:
                     cost = round(msrp * 0.5, 2)
                 else:
-                    cost = round(msrp * 0.4, 2)
+                    # cost = round(msrp * 0.4, 2) # This is not clear.
+                    cost = round(msrp * 0.5, 2)
 
                 try:
                     width = sh.cell_value(i, widthId)

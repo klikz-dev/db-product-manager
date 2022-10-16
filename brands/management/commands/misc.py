@@ -1,5 +1,6 @@
 import json
 import random
+from brands.models import York
 from monitor.models import Log
 from mysql.models import PendingUpdateTag
 from shopify.models import Product, Variant
@@ -279,7 +280,7 @@ class Command(BaseCommand):
 
         csr.execute("""SELECT P.ProductID, P.SKU 
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'Tres Tintas';""")
+        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'York' AND M.Name = 'Antonina Vella Wallpaper';""")
 
         total, success, failed = 0, 0, 0
 
@@ -290,6 +291,14 @@ class Command(BaseCommand):
         for row in deleteList:
             productID = row[0]
             sku = row[1]
+
+            # Delete a specific colllection
+            try:
+                product = York.objects.get(productId=productID)
+                if product.collection != "Dazzling Dimensions Volume II":
+                    continue
+            except:
+                continue
 
             total += 1
             try:
