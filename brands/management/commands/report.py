@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 continue
 
             for order in orders:
-                if order.orderDate > utc.localize(datetime.datetime(2022, 5, 31)):
+                if order.orderDate < utc.localize(datetime.datetime(2022, 6, 1)) or order.orderDate > utc.localize(datetime.datetime(2022, 7, 31)):
                     continue
 
                 line_items = Line_Item.objects.filter(Q(order=order) & ~Q(
