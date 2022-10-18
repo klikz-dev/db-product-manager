@@ -138,12 +138,18 @@ class Command(BaseCommand):
 
             brand = self.formatter(row[4])
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
-                "Premier Prints", "DB By DecoratorsBest")
+                "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
 
             price = row[5]
             sprice = row[14]
             cost = row[13]
             productID = row[15]
+
+            # Ignore Brewster Peel & Stick
+            if brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper":
+                if "Peel & Stick" in title:
+                    continue
+            ##############################
 
             debug("GS", 0, "Writing -- ProductID: {}, SKU: {}, Brand: {}, Cost: {}".format(
                 productID, sku, brand, price))
