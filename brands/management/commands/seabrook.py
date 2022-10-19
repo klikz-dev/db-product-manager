@@ -56,207 +56,208 @@ class Command(BaseCommand):
             self.image()
 
     def getProducts(self):
-        s = requests.Session()
-
         Seabrook.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/seabrook-master-new.xlsx")
-        map_products = wb.sheet_by_index(0)
-        non_map_products = wb.sheet_by_index(1)
+            FILEDIR + "/files/seabrook-master.xlsx")
+        sh = wb.sheet_by_index(0)
 
-        for idx, sh in enumerate([map_products, non_map_products]):
-            for i in range(2, sh.nrows):
+        for i in range(2, sh.nrows):
+            try:
+                brand = "Seabrook"
+                mpn = str(sh.cell_value(i, 3))
+
                 try:
-                    brand = "Seabrook"
-                    mpn = str(sh.cell_value(i, 3))
+                    Seabrook.objects.get(mpn=mpn)
+                    debug("Seabrook", 1,
+                          " MPN: {} is already exist".format(mpn))
+                    continue
+                except Seabrook.DoesNotExist:
+                    pass
 
-                    try:
-                        Seabrook.objects.get(mpn=mpn)
-                        debug("Seabrook", 1,
-                              " MPN: {} is already exist".format(mpn))
-                        continue
-                    except Seabrook.DoesNotExist:
-                        pass
+                sku = "SB {}".format(mpn)
 
-                    sku = "SB {}".format(mpn)
-
-                    ptype = str(sh.cell_value(i, 18))
+                ptype = str(sh.cell_value(i, 18))
+                usage = "Fabric"
+                if ptype == "Sidewall":
+                    ptype = "Wallpaper"
+                    usage = "Sidewall"
+                elif ptype == "Mural":
+                    ptype = "Wallpaper"
+                    usage = "Mural"
+                elif ptype == "Residential Use":
+                    ptype = "Wallpaper"
+                    usage = "Residential Use"
+                elif ptype == "Fabric":
+                    ptype == "Fabric"
                     usage = "Fabric"
-                    if ptype == "Sidewall":
-                        ptype = "Wallpaper"
-                        usage = "Sidewall"
-                    elif ptype == "Mural":
-                        ptype = "Wallpaper"
-                        usage = "Mural"
-                    elif ptype == "Residential Use":
-                        ptype = "Wallpaper"
-                        usage = "Residential Use"
-                    elif ptype == "Fabric":
-                        ptype == "Fabric"
-                        usage = "Fabric"
-                    else:
-                        debug(
-                            "Seabrook", 1, "Invalid product type. mpn: {}, Type: {}".format(mpn, ptype))
-                        continue
+                else:
+                    debug(
+                        "Seabrook", 1, "Invalid product type. mpn: {}, Type: {}".format(mpn, ptype))
+                    continue
 
+                try:
+                    minimum = int(str(sh.cell_value(i, 42)).split(' ')[0])
+                except:
+                    minimum = 1
+
+                if 'S/R' in sh.cell_value(i, 42):
+                    pricing = "Per Roll"
+                elif 'Bolt' in sh.cell_value(i, 42):
+                    pricing = "Per Roll"
+                    minimum = 2
+                elif 'Yd' in sh.cell_value(i, 42):
+                    pricing = 'Per Yard'
+                elif 'Mural' in sh.cell_value(i, 42):
+                    pricing = 'Per Yard'
+                else:
+                    debug("Seabrook", 1, "Pricing Error for MPN: {}. MOQ: {}".format(
+                        mpn, sh.cell_value(i, 42)))
+                    continue
+
+                if minimum > 1:
+                    increment = ",".join([str(ii * minimum)
+                                          for ii in range(1, 21)])
+                else:
+                    increment = ""
+
+                pattern = str(sh.cell_value(i, 5))
+                color = str(sh.cell_value(i, 10))
+
+                collection = str(sh.cell_value(i, 2))
+
+                try:
+                    price = str(sh.cell_value(i, 12)).replace(" / yd", "")
+                    if price == "N/A":
+                        price = 0
+                    else:
+                        price = round(float(price), 2)
+                except:
+                    debug("Seabrook", 1, "Price Error for MPN: {}".format(mpn))
+                    price = 0
+
+                try:
+                    map = str(sh.cell_value(i, 14)).replace(" / yd", "")
+                    if map == "N/A":
+                        map = 0
+                    else:
+                        map = round(float(map), 2)
+                except:
+                    debug("Seabrook", 1, "MAP Error for MPN: {}".format(mpn))
+                    map = 0
+
+                #####################################################################
+                # 2/15: Seabrook metrics are based on MOQ.
+                # Treat "2 S/R" products as single roll and double up the prices.
+                #####################################################################
+                if minimum == 2:
                     try:
-                        minimum = int(str(sh.cell_value(i, 42)).split(' ')[0])
-                    except:
-                        minimum = 1
-                    if minimum > 1:
-                        increment = ",".join([str(ii * minimum)
-                                              for ii in range(1, 21)])
-                    else:
-                        increment = ""
-
-                    if 'S/R' in sh.cell_value(i, 42):
-                        pricing = "Per Roll"
-                    elif 'Yd' in sh.cell_value(i, 42):
-                        pricing = 'Per Yard'
-                    else:
-                        debug("Seabrook", 1, "Pricing Error for MPN: {}. MOQ: {}".format(
-                            mpn, sh.cell_value(i, 42)))
-
-                    pattern = str(sh.cell_value(i, 5))
-                    color = str(sh.cell_value(i, 10))
-
-                    collection = str(sh.cell_value(i, 2))
-
-                    try:
-                        price = str(sh.cell_value(i, 12)).replace(" / yd", "")
+                        price = str(sh.cell_value(i, 13)
+                                    ).replace(" / yd", "")
                         if price == "N/A":
                             price = 0
                         else:
                             price = round(float(price), 2)
                     except:
-                        debug("Seabrook", 1, "Price Error for MPN: {}".format(mpn))
+                        debug("Seabrook", 1,
+                              "Price Error for MPN: {}".format(mpn))
                         price = 0
 
                     try:
-                        map = str(sh.cell_value(i, 14)).replace(" / yd", "")
+                        map = str(sh.cell_value(i, 15)
+                                  ).replace(" / yd", "")
                         if map == "N/A":
                             map = 0
                         else:
                             map = round(float(map), 2)
                     except:
-                        debug("Seabrook", 1, "MAP Error for MPN: {}".format(mpn))
+                        debug("Seabrook", 1,
+                              "MAP Error for MPN: {}".format(mpn))
                         map = 0
 
-                    #####################################################################
-                    # 2/15: Seabrook metrics are based on MOQ.
-                    # Treat "2 S/R" products as single roll and double up the prices.
-                    #####################################################################
-                    if minimum == 2:
-                        try:
-                            price = str(sh.cell_value(i, 13)
-                                        ).replace(" / yd", "")
-                            if price == "N/A":
-                                price = 0
-                            else:
-                                price = round(float(price), 2)
-                        except:
-                            debug("Seabrook", 1,
-                                  "Price Error for MPN: {}".format(mpn))
-                            price = 0
+                minimum = 1
+                increment = ""
+                #####################################################################
 
-                        try:
-                            map = str(sh.cell_value(i, 15)
-                                      ).replace(" / yd", "")
-                            if map == "N/A":
-                                map = 0
-                            else:
-                                map = round(float(map), 2)
-                        except:
-                            debug("Seabrook", 1,
-                                  "MAP Error for MPN: {}".format(mpn))
-                            map = 0
+                description = str(sh.cell_value(i, 6))
 
-                    minimum = 1
-                    increment = ""
-                    #####################################################################
+                weight = str(sh.cell_value(i, 21))
+                width = "{} in. / {} cm".format(str(sh.cell_value(i, 28)),
+                                                str(sh.cell_value(i, 22)))
+                length = "{} ft.".format(str(sh.cell_value(i, 27)))
 
-                    #####################################################################
-                    # 5/27: Old collections doesn't have MAP
-                    #####################################################################
-                    if idx == 1:
-                        map = 0
+                if float(sh.cell_value(i, 33)) != 0 and float(sh.cell_value(i, 32)) != 0:
+                    repeat = "{} in. / {} cm".format(float(sh.cell_value(i, 33)),
+                                                     float(sh.cell_value(i, 32)))
+                else:
+                    repeat = ""
 
-                    description = str(sh.cell_value(i, 6))
+                if pricing == "Per Roll":
+                    rollLength = round(
+                        float(str(sh.cell_value(i, 27))) / 3, 2)
+                else:
+                    rollLength = 0
 
-                    weight = str(sh.cell_value(i, 21))
-                    width = "{} in. / {} cm".format(str(sh.cell_value(i, 28)),
-                                                    str(sh.cell_value(i, 22)))
-                    length = "{} ft.".format(str(sh.cell_value(i, 27)))
-                    repeat = "{} in. / {} cm".format(str(sh.cell_value(i, 33)),
-                                                     str(sh.cell_value(i, 32)))
+                area = float(str(sh.cell_value(i, 31)))
+                finish = str(sh.cell_value(i, 11))
+                material = str(sh.cell_value(i, 39))
+                clean = str(sh.cell_value(i, 37))
+                remove = str(sh.cell_value(i, 38))
+                country = str(sh.cell_value(i, 41))
 
-                    if pricing == "Per Roll":
-                        rollLength = round(
-                            float(str(sh.cell_value(i, 27))) / 3, 2)
-                    else:
-                        rollLength = 0
+                feature = "<br/>Area: {} sqft<br />Finish: {}<br />Material: {}<br />Cleaning: {}<br />Removal: {}<br />Country: {}<br />".format(
+                    area, finish, material, clean, remove, country)
 
-                    area = float(str(sh.cell_value(i, 31)))
-                    finish = str(sh.cell_value(i, 11))
-                    material = str(sh.cell_value(i, 39))
-                    clean = str(sh.cell_value(i, 37))
-                    remove = str(sh.cell_value(i, 38))
-                    country = str(sh.cell_value(i, 41))
+                category = str(sh.cell_value(i, 7))
+                style = str(sh.cell_value(i, 8))
+                colors = str(sh.cell_value(i, 9))
 
-                    feature = "<br/>Area: {} sqft<br />Finish: {}<br />Material: {}<br />Cleaning: {}<br />Removal: {}<br />Country: {}<br />".format(
-                        area, finish, material, clean, remove, country)
+                thumbnail = str(sh.cell_value(i, 44))
+                roomset = str(sh.cell_value(i, 45))
 
-                    category = str(sh.cell_value(i, 7))
-                    style = str(sh.cell_value(i, 8))
-                    colors = str(sh.cell_value(i, 9))
+                usage = "Fabric"
+                if ptype == "Wallpaper":
+                    usage = "Wallcovering"
 
-                    thumbnail = str(sh.cell_value(i, 44))
-                    roomset = str(sh.cell_value(i, 45))
+                manufacturer = "{} {}".format(brand, ptype)
 
-                    usage = "Fabric"
-                    if ptype == "Wallpaper":
-                        usage = "Wallcovering"
+                Seabrook.objects.create(
+                    mpn=mpn,
+                    sku=sku,
+                    collection=collection,
+                    pattern=pattern,
+                    color=color,
+                    manufacturer=manufacturer,
+                    ptype=ptype,
+                    brand=brand,
+                    uom=pricing,
+                    usage=usage,
+                    description=description,
+                    category=category,
+                    style=style,
+                    colors=colors,
+                    width=width,
+                    height=length,
+                    rollLength=rollLength,
+                    weight=weight,
+                    repeat=repeat,
+                    thumbnail=thumbnail,
+                    roomset=roomset,
+                    cost=price,
+                    map=map,
+                    minimum=minimum,
+                    increment=increment,
+                    feature=feature
+                )
 
-                    manufacturer = "{} {}".format(brand, ptype)
+                debug("Seabrook", 0,
+                      "Success to get product details for MPN: {}".format(mpn))
 
-                    Seabrook.objects.create(
-                        mpn=mpn,
-                        sku=sku,
-                        collection=collection,
-                        pattern=pattern,
-                        color=color,
-                        manufacturer=manufacturer,
-                        ptype=ptype,
-                        brand=brand,
-                        uom=pricing,
-                        usage=usage,
-                        description=description,
-                        category=category,
-                        style=style,
-                        colors=colors,
-                        width=width,
-                        height=length,
-                        rollLength=rollLength,
-                        weight=weight,
-                        repeat=repeat,
-                        thumbnail=thumbnail,
-                        roomset=roomset,
-                        cost=price,
-                        map=map,
-                        minimum=minimum,
-                        increment=increment,
-                        feature=feature
-                    )
-
-                    debug("Seabrook", 0,
-                          "Success to get product details for MPN: {}".format(mpn))
-
-                except Exception as e:
-                    print(e)
-                    debug("Seabrook", 1,
-                          "Failed to get product details for MPN: {}".format(mpn))
-                    continue
+            except Exception as e:
+                print(e)
+                debug("Seabrook", 1,
+                      "Failed to get product details for MPN: {}".format(mpn))
+                continue
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -337,9 +338,9 @@ class Command(BaseCommand):
                     continue
 
                 name = " | ".join((product.brand, product.pattern,
-                                  product.color, product.ptype))
+                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
-                                 product.color, product.ptype))
+                                  product.color, product.ptype))
                 description = title
                 vname = title
                 hassample = 1
@@ -360,10 +361,8 @@ class Command(BaseCommand):
                 if product.rollLength != None and product.rollLength != "" and product.rollLength != 0 and product.uom == "Per Roll":
                     desc += "Roll Length: {} yds<br/>".format(
                         product.rollLength)
-                if product.hr != None and product.hr != "":
-                    desc += "Horizontal Repeat: {}<br/>".format(product.hr)
-                if product.vr != None and product.vr != "":
-                    desc += "Vertical Repeat: {}<br/>".format(product.vr)
+                if product.repeat != None and product.repeat != "":
+                    desc += "Repeat: {}<br/>".format(product.repeat)
                 if product.content != None and product.content != "":
                     desc += "Content: {}<br/>".format(product.content)
                 if product.feature != None and product.feature != "":
@@ -464,9 +463,9 @@ class Command(BaseCommand):
                     continue
 
                 name = " | ".join((product.brand, product.pattern,
-                                  product.color, product.ptype))
+                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
-                                 product.color, product.ptype))
+                                  product.color, product.ptype))
                 description = title
                 vname = title
                 hassample = 1
@@ -487,10 +486,8 @@ class Command(BaseCommand):
                 if product.rollLength != None and product.rollLength != "" and product.rollLength != 0 and product.uom == "Per Roll":
                     desc += "Roll Length: {} yds<br/>".format(
                         product.rollLength)
-                if product.hr != None and product.hr != "":
-                    desc += "Horizontal Repeat: {}<br/>".format(product.hr)
-                if product.vr != None and product.vr != "":
-                    desc += "Vertical Repeat: {}<br/>".format(product.vr)
+                if product.repeat != None and product.repeat != "":
+                    desc += "Repeat: {}<br/>".format(product.repeat)
                 if product.content != None and product.content != "":
                     desc += "Content: {}<br/>".format(product.content)
                 if product.feature != None and product.feature != "":
