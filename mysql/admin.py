@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Manufacturer, Admin, CustomEmail, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
+from .models import EditSize, Manufacturer, Admin, CustomEmail, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
 from .models import ProductManufacturer, PendingNewProduct, PendingUpdateProduct, PendingUpdatePublish, PendingUpdatePrice
 from .models import PendingUpdateTag, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, Tag, Type
 
@@ -139,6 +139,29 @@ class EditSubtypeAdmin(admin.ModelAdmin):
     list_display = ('sku', 'subType', 'isManual')
 
     search_fields = ['sku', 'subType']
+
+
+class EditSizeAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['sku', 'size', 'isManual']
+
+    ordering = ['-updatedAt']
+
+    list_filter = ['isManual']
+
+    list_display = ('sku', 'size', 'isManual')
+
+    search_fields = ['sku', 'size']
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
@@ -535,6 +558,7 @@ admin.site.register(EditCategory, EditCategoryAdmin)
 admin.site.register(EditColor, EditColorAdmin)
 admin.site.register(EditStyle, EditStyleAdmin)
 admin.site.register(EditSubtype, EditSubtypeAdmin)
+admin.site.register(EditSize, EditSizeAdmin)
 admin.site.register(Manufacturer, ManufacturerAdmin)
 admin.site.register(ProductManufacturer, ProductManufacturerAdmin)
 admin.site.register(PendingNewProduct, PendingNewProductAdmin)

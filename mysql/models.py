@@ -74,6 +74,18 @@ class EditSubtype(models.Model):
         db_table = "EditSubtype"
 
 
+class EditSize(models.Model):
+    sku = models.CharField(max_length=200, primary_key=True)
+    size = models.CharField(max_length=2000)
+    isManual = models.CharField(max_length=200)
+
+    updatedAt = models.DateTimeField()
+
+    class Meta:
+        managed = True
+        db_table = "EditSize"
+
+
 class Manufacturer(models.Model):
     manufacturerId = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
