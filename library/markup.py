@@ -43,16 +43,16 @@ maxwell = 1.4
 maxwell_trade = 1
 
 # MindTheGap
-mindthegap = 2.44
-mindthegap_trade = 1.1
+# mindthegap = 2.44
+# mindthegap_trade = 1.1
 
 # Phillip Jeffries
 phillipjeffries = 1.4
 phillipjeffries_trade = 1.3
 
 # P/K Lifestyles
-pklifestyles = "MAP" # Markup 2.0
-pklifestyles_trade = 1.1
+# pklifestyles = "MAP" # Markup 2.0
+# pklifestyles_trade = 1.1
 
 # Pindler
 pindler = 1.4
@@ -63,8 +63,8 @@ premierprints = 3
 premierprints_trade = 2
 
 # Ralph Lauren
-ralphLauren = 1.4
-ralphLauren_trade = 1
+# ralphLauren = 1.4
+# ralphLauren_trade = 1
 
 # Scalamandre
 scalamandre = 1.4
