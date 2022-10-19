@@ -474,9 +474,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        # products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(pattern='INDIAN ARBRE')
-        print(len(products))
+        products = Schumacher.objects.all()
 
         for product in products:
             try:
