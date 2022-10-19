@@ -1028,6 +1028,8 @@ class Kravet(models.Model):
         max_length=200, default=None, null=True, blank=True)
     height = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    size = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     rollLength = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     content = models.CharField(max_length=1000)
@@ -1375,6 +1377,8 @@ class Schumacher(models.Model):
     width = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     height = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    size = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     rollLength = models.CharField(
         max_length=200, default=None, null=True, blank=True)

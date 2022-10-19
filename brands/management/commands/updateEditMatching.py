@@ -210,6 +210,15 @@ colorDict = {
     'yellow': 'Yellow'
 }
 
+sizeDict = {
+    '12" x 12"': '12" diameter Sphere',
+    '18" x 18"': '18" Square',
+    '19" x 19"': '19" Square',
+    '20" x 20"': '20" Square',
+    '22" x 22"': '22" Square',
+    '24" x 24"': '24" Square',
+}
+
 
 class Command(BaseCommand):
     help = 'Update Pending Tags'

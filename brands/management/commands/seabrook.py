@@ -18,7 +18,7 @@ db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
 db_port = int(env('MYSQL_PORT'))
 
-markup_price = markup.seabrookx
+markup_price = markup.seabrook
 markup_trade = markup.seabrook_trade
 
 debug = debug.debug

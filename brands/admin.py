@@ -20,9 +20,10 @@ class ElaineSmithAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'boDate')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -158,9 +159,10 @@ class MaterialworksAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'stock')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -345,10 +347,10 @@ class KravetAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'statusText', 'stock', 'sampleStock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'statusText', 'stock', 'sampleStock')
 
     list_filter = ['ptype', 'status', 'statusText', 'sample',
-                   'uom', 'manufacturer', 'collection']
+                   'uom', 'manufacturer', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -439,9 +441,10 @@ class ScalamandreAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'pieceSize', 'productId', 'status', 'stock')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection', 'pieceSize']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -462,10 +465,10 @@ class SchumacherAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom',
-                   'manufacturer', 'minimum', 'collection']
+                   'manufacturer', 'minimum', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
