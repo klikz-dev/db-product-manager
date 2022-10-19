@@ -542,10 +542,12 @@ def UpdateProductToShopify(productID, key, password, con):
 
         ###################################################################################################
         # If NOT need to update the product metafield, comment the section and the below 2 sections
-        # rpm = s.get(api_url + "/admin/api/{}/products/{}/metafields.json".format(api_version, productID))
-        # jpm = json.loads(rpm.text)
-        # for pm in jpm['metafields']:
-        #     s.delete(api_url + "/admin/api/{}/metafields/{}.json".format(api_version, pm['id']))
+        rpm = s.get(
+            api_url + "/admin/api/{}/products/{}/metafields.json".format(api_version, productID))
+        jpm = json.loads(rpm.text)
+        for pm in jpm['metafields']:
+            s.delete(
+                api_url + "/admin/api/{}/metafields/{}.json".format(api_version, pm['id']))
         ###################################################################################################
 
         body = pd.body
@@ -557,7 +559,7 @@ def UpdateProductToShopify(productID, key, password, con):
         published = pd.published
         tags = pd.ProductTag()
         ##########################################
-        # pMeta = pd.ProductMetafield()
+        pMeta = pd.ProductMetafield()
         ##########################################
 
         p = {
@@ -572,7 +574,7 @@ def UpdateProductToShopify(productID, key, password, con):
             "title": title,
             "vendor": manu,
             ##################################
-            # "metafields" : pMeta
+            "metafields": pMeta
             ##################################
         }
 

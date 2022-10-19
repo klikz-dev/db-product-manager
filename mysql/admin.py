@@ -157,7 +157,7 @@ class EditSizeAdmin(admin.ModelAdmin):
 
     ordering = ['-updatedAt']
 
-    list_filter = ['isManual']
+    list_filter = ['isManual', 'size']
 
     list_display = ('sku', 'size', 'isManual')
 

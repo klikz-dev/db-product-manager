@@ -211,7 +211,10 @@ colorDict = {
 }
 
 sizeDict = {
-    '12" x 12"': '12" diameter Sphere',
+    '12" DIA': '12" Diameter Sphere',
+    '12" x 12"': '12" Diameter Sphere',
+    '14" x 14"': '14" Square',
+    '16" x 16"': '16" Square',
     '18" x 18"': '18" Square',
     '19" x 19"': '19" Square',
     '20" x 20"': '20" Square',
@@ -229,6 +232,7 @@ class Command(BaseCommand):
             self.editCategory()
             self.editStyle()
             self.editSubtype()
+            self.editSize()
 
             debug("Shopify", 0, "Finished Process. Waiting for next run.")
             time.sleep(3600)
@@ -393,6 +397,37 @@ class Command(BaseCommand):
         con.commit()
 
         csr.execute("DELETE FROM EditSubtype")
+        con.commit()
+
+        csr.close()
+        con.close()
+
+    def editSize(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute(
+            "DELETE FROM EditSize WHERE SKU IN (SELECT SKU FROM Product WHERE ProductID IS NULL)")
+        con.commit()
+
+        csr.execute("SELECT SKU, Size FROM EditSize WHERE IsManual = 0")
+        for row in csr.fetchall():
+            sku = row[0]
+            size = row[1].lower()
+            for key in sizeDict.keys():
+                if key in size:
+                    csr.execute("CALL AddToProductTag ({}, {})".format(
+                        common.sq(sku), common.sq(sizeDict[key])))
+                    con.commit()
+
+        csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
+                                                            AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
+                                                            AND SKU IN (SELECT SKU FROM EditSize)
+                                                            AND SKU IN (SELECT SKU FROM ProductTag PT JOIN Tag T ON PT.TagID = T.TagID WHERE T.ParentTagID = 7)""")
+        con.commit()
+
+        csr.execute("DELETE FROM EditSize")
         con.commit()
 
         csr.close()
