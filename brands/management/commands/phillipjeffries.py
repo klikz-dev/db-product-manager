@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         PhillipJeffries.objects.all().delete()
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master.xlsx")
+        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master-new.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
