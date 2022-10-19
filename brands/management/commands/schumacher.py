@@ -57,6 +57,9 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
+        if "updateSizeTags" in options['functions']:
+            self.updateSizeTags()
+
         if "fixImages" in options['functions']:
             self.fixImages()
 
@@ -727,6 +730,28 @@ class Command(BaseCommand):
 
                 debug("Schumacher", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if size != None and size != "" and ptype == "Pillow":
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(size)))
+                con.commit()
+
+                debug("Schumacher", 0,
+                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
+
+        csr.close()
+        con.close()
+
+    def updateSizeTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Schumacher.objects.all()
+        for product in products:
+            sku = product.sku
+            ptype = product.ptype
+            size = product.size
 
             if size != None and size != "" and ptype == "Pillow":
                 csr.execute("CALL AddToEditSize ({}, {})".format(

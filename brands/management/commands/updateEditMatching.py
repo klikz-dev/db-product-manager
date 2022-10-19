@@ -415,11 +415,17 @@ class Command(BaseCommand):
         for row in csr.fetchall():
             sku = row[0]
             size = row[1].lower()
+            isLumbar = True
             for key in sizeDict.keys():
                 if key in size:
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(sizeDict[key])))
                     con.commit()
+                    isLumbar = False
+            if isLumbar:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    common.sq(sku), common.sq('Lumbar')))
+                con.commit()
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
