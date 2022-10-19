@@ -428,6 +428,12 @@ class Command(BaseCommand):
                     height = round(float(sh.cell_value(i, 11)), 2)
                 except:
                     height = 0
+
+                if ptype == "Pillow" and width != 0 and height != 0:
+                    size = '{}" x {}"'.format(int(width), int(height))
+                else:
+                    size = ""
+
                 content = str(sh.cell_value(i, 19))
 
                 country = str(sh.cell_value(i, 20))
@@ -462,6 +468,7 @@ class Command(BaseCommand):
                     colors=color,
                     width=width,
                     height=height,
+                    size=size,
                     content=content,
                     feature=feature,
                     description=description,
@@ -574,10 +581,13 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.width != None and product.width != "" and float(product.width) != 0:
-                    desc += "Width: {} in<br/>".format(product.width)
-                if product.height != None and product.height != "" and float(product.height) != 0:
-                    desc += "Height: {} in<br/>".format(product.height)
+                if product.ptype == "Pillow" and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                else:
+                    if product.width != None and product.width != "" and float(product.width) != 0:
+                        desc += "Width: {} in<br/>".format(product.width)
+                    if product.height != None and product.height != "" and float(product.height) != 0:
+                        desc += "Height: {} in<br/>".format(product.height)
                 if product.hr != None and product.hr != "" and float(product.hr) != 0:
                     desc += "Horizontal Repeat: {} in<br/>".format(
                         product.hr)
@@ -732,10 +742,13 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.width != None and product.width != "" and float(product.width) != 0:
-                    desc += "Width: {} in<br/>".format(product.width)
-                if product.height != None and product.height != "" and float(product.height) != 0:
-                    desc += "Height: {} in<br/>".format(product.height)
+                if product.ptype == "Pillow" and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                else:
+                    if product.width != None and product.width != "" and float(product.width) != 0:
+                        desc += "Width: {} in<br/>".format(product.width)
+                    if product.height != None and product.height != "" and float(product.height) != 0:
+                        desc += "Height: {} in<br/>".format(product.height)
                 if product.hr != None and product.hr != "" and float(product.hr) != 0:
                     desc += "Horizontal Repeat: {} in<br/>".format(
                         product.hr)

@@ -152,6 +152,11 @@ class Command(BaseCommand):
             price = float(row[7])
 
             width = str(row[11]).strip()
+            height = str(row[21]).strip()
+            if ptype == "Pillow" and width != "" and height != "":
+                size = "{} x {}".format(width, height)
+            else:
+                size = ""
             vr = str(row[15]).strip()
             hr = str(row[16]).strip()
             match = str(row[14]).strip()
@@ -235,6 +240,8 @@ class Command(BaseCommand):
                 category=keywords,
                 style=keywords,
                 width=width,
+                height=height,
+                size=size,
                 hr=hr,
                 vr=vr,
                 match=match,
@@ -357,10 +364,13 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.width != None and product.width != "":
-                    desc += "Width: {}<br/>".format(product.width)
-                if product.height != None and product.height != "":
-                    desc += "Height: {}<br/>".format(product.height)
+                if product.ptype == "Pillow" and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                else:
+                    if product.width != None and product.width != "":
+                        desc += "Width: {}<br/>".format(product.width)
+                    if product.height != None and product.height != "":
+                        desc += "Height: {}<br/>".format(product.height)
                 if product.hr != None and product.hr != "":
                     desc += "Horizontal Repeat: {}<br/>".format(product.hr)
                 if product.vr != None and product.vr != "":
@@ -495,10 +505,13 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.width != None and product.width != "":
-                    desc += "Width: {}<br/>".format(product.width)
-                if product.height != None and product.height != "":
-                    desc += "Height: {}<br/>".format(product.height)
+                if product.ptype == "Pillow" and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                else:
+                    if product.width != None and product.width != "":
+                        desc += "Width: {}<br/>".format(product.width)
+                    if product.height != None and product.height != "":
+                        desc += "Height: {}<br/>".format(product.height)
                 if product.hr != None and product.hr != "":
                     desc += "Horizontal Repeat: {}<br/>".format(product.hr)
                 if product.vr != None and product.vr != "":
