@@ -211,7 +211,7 @@ colorDict = {
 }
 
 sizeDict = {
-    '12" DIA': '12" Diameter Sphere',
+    '12" dia': '12" Diameter Sphere',
     '12" x 12"': '12" Diameter Sphere',
     '14" x 14"': '14" Square',
     '16" x 16"': '16" Square',
