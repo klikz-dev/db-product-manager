@@ -804,6 +804,8 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.colors
+            ptype = product.ptype
+            size = product.pieceSize
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
@@ -828,6 +830,14 @@ class Command(BaseCommand):
 
                 debug("Scalamandre", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if size != None and size != "" and ptype == "Pillow":
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(size)))
+                con.commit()
+
+                debug("Scalamandre", 0,
+                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
 
         csr.close()
         con.close()

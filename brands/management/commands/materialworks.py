@@ -123,7 +123,9 @@ class Command(BaseCommand):
 
                 width = str(sh.cell_value(i, 11)).strip()
                 height = str(sh.cell_value(i, 12)).strip()
-                size = str(sh.cell_value(i, 6)).strip().replace("X", "x")
+
+                size = str(sh.cell_value(i, 6)).strip().replace('x', '" x ').replace(
+                    'X', '" x ').replace('In', '"').replace(' "', '"')
 
                 vr = str(sh.cell_value(i, 14)).strip()
                 hr = str(sh.cell_value(i, 15)).strip()
@@ -640,6 +642,8 @@ class Command(BaseCommand):
             style = product.style
             category = product.category
             colors = product.colors
+            ptype = product.ptype
+            size = product.size
 
             if style != None and style != "":
                 sty = str(style).strip()
@@ -667,6 +671,14 @@ class Command(BaseCommand):
 
                 debug("Materialworks", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+            if size != None and size != "" and ptype == "Pillow":
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(size)))
+                con.commit()
+
+                debug("Materialworks", 0,
+                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
 
         csr.close()
         con.close()
