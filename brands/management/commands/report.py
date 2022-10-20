@@ -25,6 +25,59 @@ class Command(BaseCommand):
         if "sample_only_customers" in options['functions']:
             self.sample_only_customers()
 
+        if "profit" in options['functions']:
+            self.profit()
+
+    def profit(self):
+        with open(FILEDIR + '/files/report/cost_of_goods.csv', 'w', newline='') as csvfile:
+            fieldnames = [
+                "po",
+                "type",
+                "cost",
+                "price",
+                "profit",
+                "date"
+            ]
+            reportWriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            reportWriter.writerow({
+                "po": "#PO",
+                "type": "Order Type",
+                "cost": "Cost of Goods",
+                "price": "Order Total",
+                "profit": "Profit",
+                "date": "Order Date"
+            })
+
+            orders = Order.objects.filter(
+                Q(orderDate__gte=utc.localize(datetime.datetime(2022, 1, 1))) & Q(orderDate__lte=utc.localize(datetime.datetime(2022, 9, 30))))
+
+            index = 0
+            for order in orders:
+                index += 1
+                if index > 50:
+                    break
+                lineItems = Line_Item.objects.filter(order=order)
+
+                cost = 0
+                for lineItem in lineItems:
+                    try:
+                        cost += lineItem.variant.cost * lineItem.quantity
+                    except Exception as e:
+                        print(e)
+                        continue
+
+                print(order.orderNumber, cost, order.orderTotal,
+                      order.orderTotal - cost, order.orderDate)
+
+                reportWriter.writerow({
+                    "po": order.orderNumber,
+                    "type": order.orderType,
+                    "cost": cost,
+                    "price": order.orderTotal,
+                    "profit": order.orderTotal - cost,
+                    "date": order.orderDate
+                })
+
     def sample_only_customers(self):
         onlySampleCustomers = []
         customers = Customer.objects.all()

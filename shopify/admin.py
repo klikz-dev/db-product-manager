@@ -267,7 +267,41 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class ItemInline(admin.StackedInline):
+    actions = None
+    extra = 0
+
     model = Line_Item
+
+    fields = ['orderedProductVariantTitle',
+              'orderedProductSKU', 'orderedProductUnitPrice', 'quantity']
+
+
+class LineItemAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['order', 'variant', 'quantity',
+              'orderedProductTitle', 'orderedProductVariantTitle', 'orderedProductVariantName',
+              'orderedProductSKU', 'orderedProductManufacturer', 'orderedProductUnitPrice',
+              'orderedProductLineDiscount', 'orderedProductUnitWeight', 'taxable']
+
+    ordering = ['-createdAt']
+
+    list_filter = ['orderedProductManufacturer']
+
+    list_display = ('order', 'variant',
+                    'orderedProductSKU', 'orderedProductManufacturer', 'orderedProductUnitPrice')
+
+    search_fields = ['order', 'variant',
+                     'orderedProductSKU', 'orderedProductManufacturer', 'orderedProductUnitPrice']
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -347,7 +381,7 @@ class OrderAdmin(admin.ModelAdmin):
             'oldPO',
         ]}),
     ]
-    # inlines = [ItemInline]
+    inlines = [ItemInline]
 
     list_display = ('orderNumber', 'email', 'shippingAddress',
                     'orderType', 'orderTotal', 'status', 'referenceNumber', 'orderDate', 'shippingMethod')
@@ -382,6 +416,7 @@ class TrackingAdmin(admin.ModelAdmin):
 
 admin.site.register(Variant, VariantAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(Line_Item, LineItemAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Tracking, TrackingAdmin)
 admin.site.register(Address, AddressAdmin)
