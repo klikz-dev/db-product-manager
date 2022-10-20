@@ -56,6 +56,9 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             self.image()
 
+        if "bestSellers" in options['functions']:
+            self.bestSellers()
+
     def getProducts(self):
         Seabrook.objects.all().delete()
 
@@ -707,3 +710,56 @@ class Command(BaseCommand):
                         product.roomset, "{}_2.jpg".format(productId))
                 except:
                     pass
+
+    def bestSellers(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        mpns = [
+            'LN11312',
+            'BV35464',
+            'LN11827',
+            'LN11101',
+            'TC75415',
+            'LN11310',
+            'LN10602',
+            'BV30108',
+            'LN11846',
+            'LN11112',
+            'MB31302',
+            'TC70107',
+            'TC75404',
+            'TC70600',
+            'BV35308',
+            'LN11122',
+            'TC70618',
+            'RY31000',
+            'BV30432',
+            'TC75010',
+            'LN11865',
+            'BV35315',
+            'MB30034',
+            'BV30110',
+        ]
+
+        for mpn in mpns:
+            sku = "SB {}".format(mpn)
+
+            try:
+                product = Seabrook.objects.get(sku=sku)
+            except Seabrook.DoesNotExist:
+                continue
+
+            csr.execute("CALL AddToProductTag ({}, {})".format(
+                sq(sku), sq("Best Selling")))
+            con.commit()
+
+            csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                product.productId))
+            con.commit()
+
+            debug('Seabrook', 0, "Added to Best selling. SKU: {}".format(sku))
+
+        csr.close()
+        con.close()
