@@ -51,13 +51,20 @@ class Command(BaseCommand):
             self.updatePrice()
 
         if "updateStock" in options['functions']:
-            self.updateStock()
+            while True:
+                self.updateStock()
+                print("Completed. Waiting for next run")
+                time.sleep(86400)
 
         if "addNew" in options['functions']:
             self.addNew()
+            self.updateTags()
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
+
+        if "updateTags" in options['functions']:
+            self.updateTags()
 
         if "main" in options['functions']:
             while True:
@@ -144,6 +151,10 @@ class Command(BaseCommand):
 
                 manufacturer = "{} {}".format(brand, ptype)
 
+                category = "{}, {}".format(collection, description)
+                style = "{}, {}".format(collection, description)
+                colors = color
+
                 PhillipJeffries.objects.create(
                     mpn=mpn,
                     sku=sku,
@@ -164,6 +175,9 @@ class Command(BaseCommand):
                     description=description,
                     thumbnail=picLink,
                     cost=price,
+                    category=category,
+                    style=style,
+                    colors=colors
                 )
 
                 debug("Phillip Jeffries", 0,
@@ -709,6 +723,49 @@ class Command(BaseCommand):
             except Exception as e:
                 print(e)
                 print("Error Updating inventory for {} to {}.".format(sku, stockval))
+
+        csr.close()
+        con.close()
+
+    def updateTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = PhillipJeffries.objects.all()
+        for product in products:
+            sku = product.sku
+
+            category = product.category
+            style = product.style
+            colors = product.colors
+
+            if category != None and category != "":
+                cat = str(category).strip()
+                csr.execute("CALL AddToEditCategory ({}, {})".format(
+                    sq(sku), sq(cat)))
+                con.commit()
+
+                debug("Phillip Jeffries", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(cat)))
+
+            if style != None and style != "":
+                sty = str(style).strip()
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(sty)))
+                con.commit()
+
+                debug("Phillip Jeffries", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(sty)))
+
+            if colors != None and colors != "":
+                col = str(colors).strip()
+                csr.execute("CALL AddToEditColor ({}, {})".format(
+                    sq(sku), sq(col)))
+                con.commit()
+
+                debug("Phillip Jeffries", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
 
         csr.close()
         con.close()
