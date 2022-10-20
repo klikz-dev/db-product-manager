@@ -353,7 +353,7 @@ class OrderAdmin(admin.ModelAdmin):
                     'orderType', 'orderTotal', 'status', 'referenceNumber', 'orderDate', 'shippingMethod')
     list_filter = ['status', 'orderDate', 'orderType', 'shippingMethod']
     search_fields = ['orderNumber', 'shopifyOrderId',
-                     'email', 'shippingFirstName']
+                     'email', 'shippingFirstName', 'note', 'orderNote']
 
 
 class TrackingAdmin(admin.ModelAdmin):
