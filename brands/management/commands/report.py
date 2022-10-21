@@ -51,11 +51,7 @@ class Command(BaseCommand):
             orders = Order.objects.filter(
                 Q(orderDate__gte=utc.localize(datetime.datetime(2022, 1, 1))) & Q(orderDate__lte=utc.localize(datetime.datetime(2022, 9, 30))))
 
-            index = 0
             for order in orders:
-                index += 1
-                if index > 50:
-                    break
                 lineItems = Line_Item.objects.filter(order=order)
 
                 cost = 0
