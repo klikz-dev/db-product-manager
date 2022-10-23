@@ -1,717 +1,11 @@
 from django.db import models
 
 
-class ElaineSmith(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=2000, default=None, null=True, blank=True)
-    size = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    boDate = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset1 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset2 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset3 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset4 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset5 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset6 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset7 = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-class TresTintas(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=2000, default=None, null=True, blank=True)
-    width = models.FloatField(default=0)
-    rollLength = models.FloatField(default=0)
-    material = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-# class Pklifestyles(models.Model):
-#     mpn = models.CharField(max_length=200)
-#     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     pattern = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     color = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     brand = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     ptype = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     manufacturer = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     collection = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     description = models.CharField(
-#         max_length=2000, default=None, null=True, blank=True)
-#     content = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     width = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     sqft = models.FloatField(default=0)
-#     rollLength = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     vr = models.FloatField(default=0)
-#     hr = models.FloatField(default=0)
-#     material = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     match = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     instruction = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     feature = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     usage = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     minimum = models.IntegerField(default=1)
-#     increment = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     style = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     colors = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     category = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     cost = models.FloatField(default=0)
-#     msrp = models.FloatField(default=0)
-#     map = models.FloatField(default=0)
-
-#     status = models.BooleanField(default=True)
-#     stock = models.IntegerField(default=0)
-#     weight = models.FloatField(default=1)
-
-#     thumbnail = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     roomset = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     productId = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     def __str__(self):
-#         return self.mpn
-
-
-# class Mindthegap(models.Model):
-#     mpn = models.CharField(max_length=200)
-#     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     pattern = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     color = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     brand = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     ptype = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     manufacturer = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     collection = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     description = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     size = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     rollLength = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     content = models.CharField(
-#         max_length=1000, default=None, null=True, blank=True)
-#     repeat = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     material = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     instruction = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     country = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     usage = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     minimum = models.IntegerField(default=1)
-#     increment = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     style = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     colors = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     category = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     cost = models.FloatField(default=0)
-#     msrp = models.FloatField(default=0)
-#     map = models.FloatField(default=0)
-
-#     status = models.BooleanField(default=True)
-#     stock = models.IntegerField(default=0)
-#     weight = models.FloatField(default=1)
-
-#     thumbnail = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     roomset = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     productId = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     def __str__(self):
-#         return self.mpn
-
-
-class PremierPrints(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.FloatField(default=0)
-    height = models.FloatField(default=0)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(
-        max_length=1000, default=None, null=True, blank=True)
-    hr = models.FloatField(default=0)
-    vr = models.FloatField(default=0)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    country = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-class Covington(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.FloatField(default=0)
-    height = models.FloatField(default=0)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(
-        max_length=1000, default=None, null=True, blank=True)
-    hr = models.FloatField(default=0)
-    vr = models.FloatField(default=0)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    country = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-class Materialworks(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    height = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    size = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(
-        max_length=1000, default=None, null=True, blank=True)
-    hr = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    vr = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    country = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-class MadcapCottage(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    height = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(
-        max_length=1000, default=None, null=True, blank=True)
-    hr = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    vr = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    country = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def title(self):
-        return "{} {} {} {}".format(self.brand, self.pattern, self.color, self.ptype)
-
-    def __str__(self):
-        return self.mpn
-
-
-class Zoffany(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.FloatField(default=0)
-    height = models.FloatField(default=0)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(
-        max_length=1000, default=None, null=True, blank=True)
-    hr = models.FloatField(default=0)
-    vr = models.FloatField(default=0)
-    match = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    country = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-    weight = models.FloatField(default=1)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
-class Maxwell(models.Model):
-    mpn = models.CharField(max_length=200)
-    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    pattern = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    color = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    brand = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ptype = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    manufacturer = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    collection = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    description = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    width = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    height = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    rollLength = models.FloatField(default=0)
-    content = models.CharField(max_length=1000)
-    hr = models.CharField(max_length=200, default=None, null=True, blank=True)
-    vr = models.CharField(max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-    usage = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    minimum = models.IntegerField(default=1)
-    increment = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    style = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    colors = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    category = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
-    status = models.BooleanField(default=True)
-    stock = models.IntegerField(default=0)
-
-    thumbnail = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    roomset = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    productId = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.mpn
-
-
 class Brewster(models.Model):
+    class Meta:
+        verbose_name = "Brewster"
+        verbose_name_plural = "Brewster"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -798,78 +92,162 @@ class Brewster(models.Model):
         return self.mpn
 
 
-# class Fabricut(models.Model):
-#     mpn = models.CharField(max_length=200)
-#     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     pattern = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     color = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+class Covington(models.Model):
+    class Meta:
+        verbose_name = "Covington"
+        verbose_name_plural = "Covington"
 
-#     brand = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     ptype = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     manufacturer = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     collection = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     design = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     description = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     width = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     height = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     rollLength = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     content = models.CharField(max_length=1000)
-#     hr = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     vr = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     feature = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     usage = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     minimum = models.IntegerField(default=1)
-#     increment = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.FloatField(default=0)
+    height = models.FloatField(default=0)
+    rollLength = models.FloatField(default=0)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    hr = models.FloatField(default=0)
+    vr = models.FloatField(default=0)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     style = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     colors = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     category = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     cost = models.FloatField(default=0)
-#     msrp = models.FloatField(default=0)
-#     map = models.FloatField(default=0)
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     status = models.BooleanField(default=True)
-#     statusText = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     stock = models.IntegerField(default=0)
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
 
-#     thumbnail = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     roomset = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
 
-#     productId = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     def __str__(self):
-#         return self.mpn
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class ElaineSmith(models.Model):
+    class Meta:
+        verbose_name = "Elaine Smith"
+        verbose_name_plural = "Elaine Smith"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    size = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    boDate = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset1 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset2 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset3 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset4 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset5 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset6 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset7 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
 
 
 class JFFabrics(models.Model):
+    class Meta:
+        verbose_name = "JF Fabrics"
+        verbose_name_plural = "JF Fabrics"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -937,6 +315,10 @@ class JFFabrics(models.Model):
 
 
 class Kasmir(models.Model):
+    class Meta:
+        verbose_name = "Kasmir"
+        verbose_name_plural = "Kasmir"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1006,6 +388,10 @@ class Kasmir(models.Model):
 
 
 class Kravet(models.Model):
+    class Meta:
+        verbose_name = "Kravet"
+        verbose_name_plural = "Kravet"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1080,7 +466,11 @@ class Kravet(models.Model):
         return self.mpn
 
 
-class Pindler(models.Model):
+class MadcapCottage(models.Model):
+    class Meta:
+        verbose_name = "Madcap Cottage"
+        verbose_name_plural = "Madcap Cottage"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1103,8 +493,168 @@ class Pindler(models.Model):
         max_length=200, default=None, null=True, blank=True)
     height = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    rollLength = models.CharField(
+    rollLength = models.FloatField(default=0)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    hr = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    vr = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def title(self):
+        return "{} {} {} {}".format(self.brand, self.pattern, self.color, self.ptype)
+
+    def __str__(self):
+        return self.mpn
+
+
+class Materialworks(models.Model):
+    class Meta:
+        verbose_name = "MaterialWorks"
+        verbose_name_plural = "MaterialWorks"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    height = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    size = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    rollLength = models.FloatField(default=0)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    hr = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    vr = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class Maxwell(models.Model):
+    class Meta:
+        verbose_name = "Maxwell"
+        verbose_name_plural = "Maxwell"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    height = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    rollLength = models.FloatField(default=0)
     content = models.CharField(max_length=1000)
     hr = models.CharField(max_length=200, default=None, null=True, blank=True)
     vr = models.CharField(max_length=200, default=None, null=True, blank=True)
@@ -1131,6 +681,77 @@ class Pindler(models.Model):
 
     status = models.BooleanField(default=True)
     stock = models.IntegerField(default=0)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class Mindthegap(models.Model):
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    size = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    rollLength = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    repeat = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    material = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    instruction = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
 
     thumbnail = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -1148,6 +769,10 @@ class Pindler(models.Model):
 
 
 class PhillipJeffries(models.Model):
+    class Meta:
+        verbose_name = "Phillip Jeffries"
+        verbose_name_plural = "Phillip Jeffries"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1214,77 +839,230 @@ class PhillipJeffries(models.Model):
         return self.mpn
 
 
-# class RalphLauren(models.Model):
-#     mpn = models.CharField(max_length=200)
-#     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     pattern = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     color = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+class Pindler(models.Model):
+    class Meta:
+        verbose_name = "Pindler"
+        verbose_name_plural = "Pindler"
 
-#     brand = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     ptype = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     manufacturer = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     collection = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     description = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     width = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     height = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     rollLength = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     content = models.CharField(max_length=1000)
-#     hr = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     vr = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     feature = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
-#     usage = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     minimum = models.IntegerField(default=1)
-#     increment = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    height = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    rollLength = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    content = models.CharField(max_length=1000)
+    hr = models.CharField(max_length=200, default=None, null=True, blank=True)
+    vr = models.CharField(max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     style = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     colors = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     category = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     cost = models.FloatField(default=0)
-#     msrp = models.FloatField(default=0)
-#     map = models.FloatField(default=0)
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     status = models.BooleanField(default=True)
-#     stock = models.IntegerField(default=0)
-#     stockNote = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     sample = models.BooleanField(default=True)
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
 
-#     thumbnail = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
-#     roomset = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
 
-#     productId = models.CharField(
-#         max_length=200, default=None, null=True, blank=True)
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
-#     def __str__(self):
-#         return self.mpn
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class Pklifestyles(models.Model):
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    content = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    sqft = models.FloatField(default=0)
+    rollLength = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    vr = models.FloatField(default=0)
+    hr = models.FloatField(default=0)
+    material = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    instruction = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class PremierPrints(models.Model):
+    class Meta:
+        verbose_name = "Premier Prints"
+        verbose_name_plural = "Premier Prints"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.FloatField(default=0)
+    height = models.FloatField(default=0)
+    rollLength = models.FloatField(default=0)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    hr = models.FloatField(default=0)
+    vr = models.FloatField(default=0)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
 
 
 class Scalamandre(models.Model):
+    class Meta:
+        verbose_name = "Scalamandre"
+        verbose_name_plural = "Scalamandre"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1356,6 +1134,10 @@ class Scalamandre(models.Model):
 
 
 class Schumacher(models.Model):
+    class Meta:
+        verbose_name = "Schumacher"
+        verbose_name_plural = "Schumacher"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1427,6 +1209,10 @@ class Schumacher(models.Model):
 
 
 class Seabrook(models.Model):
+    class Meta:
+        verbose_name = "Seabrook"
+        verbose_name_plural = "Seabrook"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1499,6 +1285,10 @@ class Seabrook(models.Model):
 
 
 class Stout(models.Model):
+    class Meta:
+        verbose_name = "Stout"
+        verbose_name_plural = "Stout"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1570,7 +1360,78 @@ class Stout(models.Model):
         return self.mpn
 
 
+class TresTintas(models.Model):
+    class Meta:
+        verbose_name = "Tres Tintas"
+        verbose_name_plural = "Tres Tintas"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    width = models.FloatField(default=0)
+    rollLength = models.FloatField(default=0)
+    material = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
 class York(models.Model):
+    class Meta:
+        verbose_name = "York"
+        verbose_name_plural = "York"
+
     mpn = models.CharField(max_length=200)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
@@ -1637,6 +1498,80 @@ class York(models.Model):
         max_length=200, default=None, null=True, blank=True)
     stock = models.IntegerField(default=0)
     quickship = models.BooleanField(default=False)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomset = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
+class Zoffany(models.Model):
+    class Meta:
+        verbose_name = "Zoffany"
+        verbose_name_plural = "Zoffany"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.FloatField(default=0)
+    height = models.FloatField(default=0)
+    rollLength = models.FloatField(default=0)
+    content = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    hr = models.FloatField(default=0)
+    vr = models.FloatField(default=0)
+    match = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    feature = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    weight = models.FloatField(default=1)
 
     thumbnail = models.CharField(
         max_length=200, default=None, null=True, blank=True)
