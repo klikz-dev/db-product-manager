@@ -13,3 +13,22 @@ class Log(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.source, self.date)
+
+
+class Profit(models.Model):
+    class Meta:
+        verbose_name = "Cost of Goods"
+        verbose_name_plural = "Cost of Goods"
+
+    po = models.CharField(max_length=200, primary_key=True)
+    type = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    cost = models.FloatField(default=0)
+    price = models.FloatField(default=0)
+    date = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "#{}".format(self.po)

@@ -1,11 +1,13 @@
 import csv
 import os
 import datetime
+import time
 import pytz
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from library import debug
+from monitor.models import Profit
 from shopify.models import Customer, Line_Item, Order
 
 debug = debug.debug
@@ -26,53 +28,40 @@ class Command(BaseCommand):
             self.sample_only_customers()
 
         if "profit" in options['functions']:
-            self.profit()
+            while True:
+                self.profit()
+                time.sleep(86400)
 
     def profit(self):
-        with open(FILEDIR + '/files/report/cost_of_goods.csv', 'w', newline='') as csvfile:
-            fieldnames = [
-                "po",
-                "type",
-                "cost",
-                "price",
-                "profit",
-                "date"
-            ]
-            reportWriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            reportWriter.writerow({
-                "po": "#PO",
-                "type": "Order Type",
-                "cost": "Cost of Goods",
-                "price": "Order Total",
-                "profit": "Profit",
-                "date": "Order Date"
-            })
+        lastProfit = Profit.objects.last()
+        if lastProfit:
+            fromPO = lastProfit.po
+        else:
+            fromPO = 0
 
-            orders = Order.objects.filter(
-                Q(orderDate__gte=utc.localize(datetime.datetime(2022, 1, 1))) & Q(orderDate__lte=utc.localize(datetime.datetime(2022, 9, 30))))
+        orders = Order.objects.filter(orderNumber__gt=fromPO)
 
-            for order in orders:
-                lineItems = Line_Item.objects.filter(order=order)
+        for order in orders:
+            lineItems = Line_Item.objects.filter(order=order)
 
-                cost = 0
-                for lineItem in lineItems:
-                    try:
-                        cost += lineItem.variant.cost * lineItem.quantity
-                    except Exception as e:
-                        print(e)
-                        continue
+            cost = 0
+            for lineItem in lineItems:
+                try:
+                    cost += lineItem.variant.cost * lineItem.quantity
+                except Exception as e:
+                    print(e)
+                    continue
 
-                print(order.orderNumber, cost, order.orderTotal,
-                      order.orderTotal - cost, order.orderDate)
+            print(order.orderNumber, cost, order.orderTotal,
+                  order.orderTotal - cost, order.orderDate)
 
-                reportWriter.writerow({
-                    "po": order.orderNumber,
-                    "type": order.orderType,
-                    "cost": cost,
-                    "price": order.orderTotal,
-                    "profit": order.orderTotal - cost,
-                    "date": order.orderDate
-                })
+            Profit.objects.create(
+                po=order.orderNumber,
+                type=order.orderType,
+                cost=cost,
+                price=order.orderTotal,
+                date=order.orderDate
+            )
 
     def sample_only_customers(self):
         onlySampleCustomers = []

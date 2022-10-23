@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
+    'rangefilter',
+    'import_export',
 
     'brands',
     'monitor',
