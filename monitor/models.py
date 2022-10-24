@@ -27,8 +27,25 @@ class Profit(models.Model):
     price = models.FloatField(default=0)
     date = models.DateTimeField()
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return "#{}".format(self.po)
+
+
+class NoOrderCustomers(models.Model):
+    class Meta:
+        verbose_name = "No Order Customers"
+        verbose_name_plural = "No Order Customers"
+
+    customerId = models.CharField(max_length=200, primary_key=True)
+    firstName = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    lastName = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    email = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    marketing = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return "{} {}".format(self.firstName, self.lastName)
