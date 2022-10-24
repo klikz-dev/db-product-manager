@@ -82,6 +82,7 @@ def backup():
 
 def importOrder(shopifyOrder):
     shopifyCustomer = shopifyOrder['customer']
+    print(shopifyCustomer)
     try:
         shopifyAddress = shopifyCustomer['default_address']
     except:
@@ -101,8 +102,14 @@ def importOrder(shopifyOrder):
         customer.defaultAddressId = shopifyAddress['id']
     except:
         customer.defaultAddressId = ''
-    customer.orderCount = shopifyCustomer['orders_count']
-    customer.totalSpent = shopifyCustomer['total_spent']
+    try:
+        customer.orderCount = shopifyCustomer['orders_count']
+    except:
+        pass
+    try:
+        customer.totalSpent = shopifyCustomer['total_spent']
+    except:
+        pass
     customer.state = shopifyCustomer['state']
     customer.note = shopifyCustomer['note']
     customer.tags = shopifyCustomer['tags']
