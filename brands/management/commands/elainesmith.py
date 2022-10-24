@@ -60,9 +60,12 @@ class Command(BaseCommand):
             self.updateStock()
 
         if "main" in options['functions']:
-            self.getProducts()
-            self.getProductIds()
-            self.updateStock()
+            if True:
+                self.getProducts()
+                self.getProductIds()
+                self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
 
     def getProducts(self):
         ElaineSmith.objects.all().delete()
