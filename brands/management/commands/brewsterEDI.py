@@ -117,8 +117,6 @@ class Command(BaseCommand):
                               'ORDERED_QUANTITY',
                               'ORDER_DATE',
                               'ACCOUNT_NUMBER',
-                            #   'CONTACT_NAME',
-                            #   'CONT_PHONE_NUMBER',
                               'CUSTOMER_NAME',
                               'HDR_SHIP_ADDRESS1',
                               'HDR_SHIP_ADDRESS2',
@@ -144,8 +142,6 @@ class Command(BaseCommand):
                     'ORDERED_QUANTITY': 'ORDERED_QUANTITY',
                     'ORDER_DATE': 'ORDER_DATE',
                     'ACCOUNT_NUMBER': 'ACCOUNT_NUMBER',
-                    # 'CONTACT_NAME': 'CONTACT_NAME',
-                    # 'CONT_PHONE_NUMBER': 'CONT_PHONE_NUMBER',
                     'CUSTOMER_NAME': 'CUSTOMER_NAME',
                     'HDR_SHIP_ADDRESS1': 'HDR_SHIP_ADDRESS1',
                     'HDR_SHIP_ADDRESS2': 'HDR_SHIP_ADDRESS2',
@@ -167,8 +163,13 @@ class Command(BaseCommand):
                     orderNumber = row[0]
                     orderDate = row[1]
                     name = row[2]
+
                     address1 = row[3]
                     address2 = row[4]
+                    if "," in address1:
+                        address1 = str(address1).split(",")[0]
+                        address2 = str(address1).split(",")[1]
+
                     suite = row[5]
                     city = row[6]
                     state = row[7]
@@ -189,16 +190,6 @@ class Command(BaseCommand):
                     if packInstruction != "" and packInstruction != None:
                         instructions += "Pack Instruction: {}".format(
                             packInstruction)
-
-                    # try:
-                    #     if not self.validate(orderNumber):
-                    #         debug("Brewster EDI", 1,
-                    #             "Status False. {}".format(orderNumber))
-                    #         continue
-                    # except:
-                    #     debug("Brewster EDI", 1,
-                    #             "Status False. {}".format(orderNumber))
-                    #     continue
 
                     # Order Details
                     csr.execute("""SELECT P.ManufacturerPartNumber AS Item, CASE WHEN PV.Name LIKE '%Sample - %' THEN 'Sample' ELSE REPLACE(PV.Pricing, 'Per ', '') END AS UOM, OS.Quantity, P.SKU
@@ -237,8 +228,6 @@ class Command(BaseCommand):
                             'ORDERED_QUANTITY': qty,
                             'ORDER_DATE': orderDate,
                             'ACCOUNT_NUMBER': '106449',
-                            # 'CONTACT_NAME': 'BARBARA KARPF',
-                            # 'CONT_PHONE_NUMBER': '1-212-7226449',
                             'CUSTOMER_NAME': name,
                             'HDR_SHIP_ADDRESS1': address1,
                             'HDR_SHIP_ADDRESS2': address2,
