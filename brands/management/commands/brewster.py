@@ -67,12 +67,9 @@ class Command(BaseCommand):
             self.fixImages()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updatePrice()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
+            self.updatePrice()
 
     def downloadDatasheet(self):
         debug("Brewster", 0, "Download New CSV from Brewster FTP")
@@ -662,7 +659,9 @@ class Command(BaseCommand):
                 map = product.map
                 try:
                     if map > 0:
-                        price = common.formatprice(map, 1)
+                        # 10/24 From Bk - make brewster pricing to be exactly same as MAP
+                        # price = common.formatprice(map, 1)
+                        price = map
                         priceTrade = common.formatprice(cost, markup_trade1)
                     else:
                         price = common.formatprice(cost, markup_price2)
@@ -789,7 +788,9 @@ class Command(BaseCommand):
                 map = product.map
                 try:
                     if map > 0:
-                        price = common.formatprice(map, 1)
+                        # 10/24 From Bk - make brewster pricing to be exactly same as MAP
+                        # price = common.formatprice(map, 1)
+                        price = map
                         priceTrade = common.formatprice(cost, markup_trade1)
                     else:
                         price = common.formatprice(cost, markup_price2)
@@ -1001,7 +1002,9 @@ class Command(BaseCommand):
             map = product.map
             try:
                 if map > 0:
-                    newPrice = common.formatprice(map, 1)
+                    # 10/24 From Bk - make brewster pricing to be exactly same as MAP
+                    # newPrice = common.formatprice(map, 1)
+                    newPrice = map
                     newPriceTrade = common.formatprice(newCost, markup_trade1)
                 else:
                     newPrice = common.formatprice(newCost, markup_price2)
