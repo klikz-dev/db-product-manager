@@ -98,7 +98,7 @@ class Command(BaseCommand):
             sku = "JF {}".format(mpn)
             discoSkus.append(sku)
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master-new.xls")
+        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master.xls")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
