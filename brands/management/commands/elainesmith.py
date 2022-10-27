@@ -52,20 +52,14 @@ class Command(BaseCommand):
 
         if "updateTags" in options['functions']:
             self.updateTags()
-        
+
         if "updateSizeTags" in options['functions']:
             self.updateSizeTags()
 
-        if "updateStock" in options['functions']:
-            self.updateStock()
-
         if "main" in options['functions']:
-            if True:
-                self.getProducts()
-                self.getProductIds()
-                self.updateStock()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
+            self.updateStock()
 
     def getProducts(self):
         ElaineSmith.objects.all().delete()
