@@ -136,10 +136,15 @@ class Command(BaseCommand):
                 orderNumber = row[0]
                 orderDate = row[1]
                 name = row[2]
-                address1 = row[3]
+
+                address1 = row[3].replace("\n", "")
                 address2 = row[4]
+                if "," in address1:
+                    address2 = str(address1).split(",")[1]
+                    address1 = str(address1).split(",")[0]
                 if address2 == None or address2 == '':
                     address2 = 'None'
+
                 city = row[6]
                 state = row[7]
                 postal = str(row[9])
@@ -359,18 +364,18 @@ class Command(BaseCommand):
             csr.execute(
                 "SELECT ReferenceNumber FROM Orders WHERE OrderNumber = '{}'".format(PONumber))
 
-        try:
-            ref = str((csr.fetchone())[0])
-            if ref == "None":
-                ref = ""
-            if refNumber not in ref:
-                newRef = "{}\nScalamandre EDI: {}".format(ref, refNumber)
+            try:
+                ref = str((csr.fetchone())[0])
+                if ref == "None":
+                    ref = ""
+                if refNumber not in ref:
+                    newRef = "{}\nScalamandre EDI: {}".format(ref, refNumber)
 
-                csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
-                    sq(newRef), PONumber))
-                con.commit()
-        except Exception as e:
-            print(e)
+                    csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
+                        sq(newRef), PONumber))
+                    con.commit()
+            except Exception as e:
+                print(e)
 
         csr.close()
         con.close()

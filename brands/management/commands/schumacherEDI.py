@@ -117,8 +117,8 @@ class Command(BaseCommand):
                               'ORDERED_QUANTITY',
                               'ORDER_DATE',
                               'ACCOUNT_NUMBER',
-                            #   'CONTACT_NAME',
-                            #   'CONT_PHONE_NUMBER',
+                              #   'CONTACT_NAME',
+                              #   'CONT_PHONE_NUMBER',
                               'CUSTOMER_NAME',
                               'HDR_SHIP_ADDRESS1',
                               'HDR_SHIP_ADDRESS2',
@@ -167,8 +167,13 @@ class Command(BaseCommand):
                     orderNumber = row[0]
                     orderDate = row[1]
                     name = row[2]
-                    address1 = row[3]
+
+                    address1 = row[3].replace("\n", "")
                     address2 = row[4]
+                    if "," in address1:
+                        address2 = str(address1).split(",")[1]
+                        address1 = str(address1).split(",")[0]
+
                     suite = row[5]
                     city = row[6]
                     state = row[7]

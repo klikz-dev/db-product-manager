@@ -164,11 +164,11 @@ class Command(BaseCommand):
                     orderDate = row[1]
                     name = row[2]
 
-                    address1 = row[3]
+                    address1 = row[3].replace("\n", "")
                     address2 = row[4]
                     if "," in address1:
-                        address1 = str(address1).split(",")[0]
                         address2 = str(address1).split(",")[1]
+                        address1 = str(address1).split(",")[0]
 
                     suite = row[5]
                     city = row[6]
@@ -413,26 +413,29 @@ class Command(BaseCommand):
                     line += 1
                     continue
 
-                PONumber = row[0].strip()
+                PONumber = int(row[0].strip())
                 refNumber = row[2].strip()
+
+                print(PONumber)
+                print(refNumber)
 
                 if PONumber != None and PONumber != "":
                     csr.execute(
                         "SELECT ReferenceNumber FROM Orders WHERE OrderNumber = '{}'".format(PONumber))
 
-                try:
-                    ref = str((csr.fetchone())[0])
-                    if ref == "None":
-                        ref = ""
-                    if refNumber not in ref:
-                        newRef = "{}\nBrewster EDI: {}".format(ref, refNumber)
+                    try:
+                        ref = str((csr.fetchone())[0])
+                        if ref == "None":
+                            ref = ""
+                        if refNumber not in ref:
+                            newRef = "{}\nBrewster EDI: {}".format(ref, refNumber)
 
-                        csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
-                            sq(newRef), PONumber))
-                        con.commit()
-                except Exception as e:
-                    print(e)
-                    continue
+                            csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
+                                sq(newRef), PONumber))
+                            con.commit()
+                    except Exception as e:
+                        print(e)
+                        continue
 
         csr.close()
         con.close()

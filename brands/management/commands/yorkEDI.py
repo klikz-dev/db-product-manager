@@ -174,8 +174,13 @@ class Command(BaseCommand):
                 orderDate = row[1]
 
                 name = row[2]
-                address1 = row[3]
+
+                address1 = row[3].replace("\n", "")
                 address2 = row[4]
+                if "," in address1:
+                    address2 = str(address1).split(",")[1]
+                    address1 = str(address1).split(",")[0]
+
                 suite = row[5]
                 city = row[6]
                 state = row[7]
@@ -527,13 +532,16 @@ class Command(BaseCommand):
         ftp.cwd("fromfdnl")
         flist = ftp.nlst()
 
-        for fname in flist:
-            if fname in "archive":
-                continue
+        # for fname in flist:
+        #     if fname in "archive":
+        #         continue
 
-            urllib.request.urlretrieve("ftp://EDYRKWAL_decbest:zE6e-26K@mft.getfoundational.com/fromfdnl/" +
-                                       fname, FILEDIR + '/files/EDI/York/' + fname)
-            ftp.delete(fname)
+        #     urllib.request.urlretrieve("ftp://EDYRKWAL_decbest:zE6e-26K@mft.getfoundational.com/fromfdnl/" +
+        #                                fname, FILEDIR + '/files/EDI/York/' + fname)
+        #     ftp.delete(fname)
+
+        if True:
+            fname = "ASN.20221026183309.BA25F004-F660-1A8E-A077-0004AC1EA1A4.CSV"
 
             f = open(FILEDIR + '/files/EDI/York/' + fname, "r")
             cr = csv.reader(f)
@@ -544,6 +552,8 @@ class Command(BaseCommand):
 
                 PONumber = str(row[0]).strip()
                 refNumber = str(row[2]).strip()
+
+                print(PONumber)
 
                 try:
                     csr.execute(
