@@ -98,16 +98,6 @@ class Command(BaseCommand):
     def getProducts(self):
         York.objects.all().delete()
 
-        wb = xlrd.open_workbook(
-            FILEDIR + "/files/york-quickship-outstock.xlsx")
-        noQuickshipSheet = wb.sheet_by_index(0)
-
-        noQuickship = []
-
-        for i in range(1, noQuickshipSheet.nrows):
-            mpn = noQuickshipSheet.cell_value(i, 0)
-            noQuickship.append(mpn)
-
         try:
             reqCollections = requests.get(
                 "{}/collections.php".format(API_BASE_URL))
@@ -259,7 +249,7 @@ class Command(BaseCommand):
                 statusText = row['SKUStatus']
 
                 quickship = False
-                if row['QuickShip'] == 'Y' and mpn not in noQuickship:
+                if row['QuickShip'] == 'Y':
                     quickship = True
 
                 try:
