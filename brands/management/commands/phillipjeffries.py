@@ -67,21 +67,15 @@ class Command(BaseCommand):
             self.updateTags()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updatePrice()
-                self.updateStock()
-
-                print("Completed. Waiting for next run")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
 
     def getProducts(self):
         s = requests.Session()
 
         PhillipJeffries.objects.all().delete()
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master-new.xlsx")
+        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -132,7 +126,6 @@ class Command(BaseCommand):
                 stock = math.floor(stock)
 
                 price = float(str(sh.cell_value(i, 2)).replace("$", ""))
-                # price = float(j["order"]["wallcovering"]["price"]["amount"])
 
                 uom = j["order"]["wallcovering"]["price"]["unit_of_measure"]
                 if "YARD" == uom:

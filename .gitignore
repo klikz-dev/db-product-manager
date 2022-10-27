@@ -156,3 +156,4 @@ files/
 
 migrations/
 static/
+main.sqlite3-journal
