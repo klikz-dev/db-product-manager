@@ -152,10 +152,7 @@ cython_debug/
 #.idea/
 
 *.sqlite3
-*.csv
-*.xls
-*.xlsx
-*.zip
+files/
 
 migrations/
 static/
