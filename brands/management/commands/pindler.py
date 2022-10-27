@@ -52,13 +52,8 @@ class Command(BaseCommand):
             self.updatePrice()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updatePrice()
-
-                print("Completed. Waiting for next run")
-                time.sleep(604000)
+            self.getProducts()
+            self.getProductIds()
 
     def downloadcsv(self):
         debug("Pindler", 0, "Download New Master CSV from Pinidler FTP")
