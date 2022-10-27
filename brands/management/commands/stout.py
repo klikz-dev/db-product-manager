@@ -68,7 +68,6 @@ class Command(BaseCommand):
             while True:
                 self.getProducts()
                 self.getProductIds()
-                self.updatePrice()
                 self.updateStock()
 
                 print("Completed. Waiting for next run")
