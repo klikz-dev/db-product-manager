@@ -164,7 +164,7 @@ class Command(BaseCommand):
     def getProducts(self):
         # Discontinued and Discount Table
         discontinued = []
-        only50discount = []
+        # only50discount = []
 
         wb = xlrd.open_workbook(FILEDIR + "/files/brewster-discontinued.xlsx")
         discontinuedSheet = wb.sheet_by_index(0)
@@ -180,17 +180,17 @@ class Command(BaseCommand):
             if discontinuedSheet.cell_value(i, 14) == "Y":
                 discontinued.append(sku)
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/brewster-discount.xlsx")
-        discountSheet = wb.sheet_by_index(0)
+        # wb = xlrd.open_workbook(FILEDIR + "/files/brewster-discount.xlsx")
+        # discountSheet = wb.sheet_by_index(0)
 
-        for i in range(1, discountSheet.nrows):
-            collection = discountSheet.cell_value(i, 0)
+        # for i in range(1, discountSheet.nrows):
+        #     collection = discountSheet.cell_value(i, 0)
 
-            try:
-                if int(discountSheet.cell_value(i, 3)) == 50:
-                    only50discount.append(collection)
-            except:
-                continue
+        #     try:
+        #         if int(discountSheet.cell_value(i, 3)) == 50:
+        #             only50discount.append(collection)
+        #     except:
+        #         continue
 
         # Download Datasheets
         if not self.downloadDatasheet():
@@ -329,10 +329,10 @@ class Command(BaseCommand):
                 except Brewster.DoesNotExist:
                     pass
 
-                isonly50discount = False
-                for only50 in only50discount:
-                    if collection in only50:
-                        isonly50discount = True
+                # isonly50discount = False
+                # for only50 in only50discount:
+                #     if collection in only50:
+                #         isonly50discount = True
 
                 # Fix collection name 5/24
                 collection = file.replace('.xlsx', '')
@@ -362,10 +362,10 @@ class Command(BaseCommand):
                 except:
                     debug("Brewster", 1, "MAP Error SKU: {}".format(sku))
 
-                if isonly50discount:
-                    cost = round(msrp * 0.5, 2)
-                else:
-                    cost = round(msrp * 0.6, 2)
+                # if isonly50discount:
+                #     cost = round(msrp * 0.5, 2)
+                # else:
+                cost = round(msrp * 0.6, 2)
 
                 try:
                     width = sh.cell_value(i, widthId)
@@ -472,7 +472,7 @@ class Command(BaseCommand):
                     bullet4=bullet4,
                     bullet5=bullet5,
                     status=status,
-                    only50Discount=isonly50discount
+                    # only50Discount=isonly50discount
                 )
 
                 debug(
