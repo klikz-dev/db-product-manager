@@ -58,10 +58,6 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
-            self.addNew()
-            self.image()
-            self.updateTags()
-            self.updateStock()
 
     def getProducts(self):
         TresTintas.objects.all().delete()
@@ -401,7 +397,6 @@ class Command(BaseCommand):
 
                 os.remove(
                     FILEDIR + "/files/images/trestintas/roomsets/{}.jpg".format(product.mpn))
-            
 
     def updateStock(self):
         con = pymysql.connect(host=db_host, user=db_username,
