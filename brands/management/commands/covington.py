@@ -63,14 +63,15 @@ class Command(BaseCommand):
         if "roomset" in options['functions']:
             self.roomset()
 
-        if "main" in options['functions']:
+        if "updateStock" in options['functions']:
             while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updatePrice()
                 self.updateStock()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
+
+        if "main" in options['functions']:
+            self.getProducts()
+            self.getProductIds()
 
     def getProducts(self):
         Covington.objects.all().delete()
