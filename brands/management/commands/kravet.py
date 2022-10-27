@@ -76,12 +76,10 @@ class Command(BaseCommand):
             self.bestSeller()
 
         if "main" in options['functions']:
-            self.getProducts()
-            self.getPillowProducts()
-            self.getProductIds()
-
-        if "updateStock" in options['functions']:
             while True:
+                self.getProducts()
+                self.getPillowProducts()
+                self.getProductIds()
                 self.updateStock()
                 print("Completed stock update process. Waiting for next run.")
                 time.sleep(43200)
