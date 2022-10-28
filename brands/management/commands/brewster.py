@@ -304,10 +304,17 @@ class Command(BaseCommand):
                 if mpn == "":
                     continue
 
+                status = True
+
+                try:
+                    Brewster.objects.get(mpn=mpn)
+                    debug("Brewster", 1, "Duplicated SKU: {}".format(mpn))
+                    status = False
+                except:
+                    pass
+
                 brand = sh.cell_value(i, brandId).strip()
                 originalBrand = brand
-
-                status = True
 
                 # 3/7/22 From Ashley. Disable Eijffinger Brand and products
                 if brand == "Eijffinger" or brand == "Eiffinger":
@@ -434,6 +441,14 @@ class Command(BaseCommand):
                 if spPattern == "":
                     spPattern = pattern
                 ########################
+
+                try:
+                    Brewster.objects.get(pattern=spPattern, color=color)
+                    debug("Brewster", 1, "Duplicated Pattern: {}. Color: {}.".format(
+                        spPattern, color))
+                    status = False
+                except:
+                    pass
 
                 manufacturer = "{} {}".format(brand, ptype)
 
