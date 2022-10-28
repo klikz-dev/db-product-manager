@@ -138,7 +138,7 @@ class KravetAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'statusText', 'stock', 'sampleStock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'width', 'productId', 'status', 'statusText', 'stock', 'sampleStock')
 
     list_filter = ['ptype', 'status', 'statusText', 'sample',
                    'uom', 'manufacturer', 'collection', 'size']
@@ -162,7 +162,7 @@ class MaterialworksAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'width', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom',
                    'manufacturer', 'collection', 'size']
@@ -186,7 +186,7 @@ class MadcapCottageAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'width', 'productId', 'status', 'stock')
     # list_display = ('productId', 'title')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
@@ -256,7 +256,7 @@ class PindlerAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'width', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 
@@ -348,7 +348,7 @@ class ScalamandreAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'pieceSize', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'pieceSize', 'width', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom',
                    'manufacturer', 'collection', 'pieceSize']
@@ -372,7 +372,7 @@ class SchumacherAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'size', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'size', 'width', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom',
                    'manufacturer', 'minimum', 'collection', 'size']
@@ -419,7 +419,7 @@ class StoutAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock', 'bodue')
+                    'cost', 'msrp', 'map', 'uom', 'width', 'productId', 'status', 'stock', 'bodue')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 
