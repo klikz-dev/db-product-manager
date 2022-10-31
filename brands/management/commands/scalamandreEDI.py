@@ -256,11 +256,14 @@ class Command(BaseCommand):
 
                     response = requests.request(
                         "POST", url, headers=headers, data=payload)
-                    print(response.text)
+                    print(response)
 
-                    data = json.loads(response.text)
-
-                    print(data)
+                    try:
+                        data = json.loads(response.text)
+                    except Exception as e:
+                        debug("Scalamandre EDI", 2,
+                              "Scalamandre EDI ERROR: PO: {} <br/>Payload: {}".format(orderNumber, json.dumps(payload)))
+                        continue
 
                     self.getRef(orderNumber, data[0]['ORDER_NO'])
 
