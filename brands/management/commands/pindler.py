@@ -51,6 +51,9 @@ class Command(BaseCommand):
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
+        if "updateSizeTags" in options['functions']:
+            self.updateSizeTags()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -541,6 +544,45 @@ class Command(BaseCommand):
                     debug("Pindler", 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                         productId, cost, price, priceTrade))
                     continue
+
+        csr.close()
+        con.close()
+
+    def updateSizeTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Pindler.objects.all()
+        for product in products:
+            sku = product.sku
+            ptype = product.ptype
+            width = product.width
+
+            if width != None and width != "" and ptype == "Trim":
+                try:
+                    width = float(str(width).replace('"', ''))
+                except:
+                    continue
+
+                widthTag = '5" & Up'
+                if width < 1:
+                    widthTag = 'Less than 1"'
+                if width >= 1 and width < 2:
+                    widthTag = '1" to 2"'
+                if width >= 2 and width < 3:
+                    widthTag = '2" to 3"'
+                if width >= 3 and width < 4:
+                    widthTag = '3" to 4"'
+                if width >= 4 and width < 5:
+                    widthTag = '4" to 5"'
+
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(widthTag)))
+                con.commit()
+
+                debug("Pindler", 0,
+                      "Added Width. SKU: {}, Width: {}, Width Tag: {}".format(sku, width, widthTag))
 
         csr.close()
         con.close()

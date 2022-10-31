@@ -980,14 +980,6 @@ class Command(BaseCommand):
                 debug("Kravet", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
 
-            if size != None and size != "" and ptype == "Pillow":
-                csr.execute("CALL AddToEditSize ({}, {})".format(
-                    sq(sku), sq(size)))
-                con.commit()
-
-                debug("Kravet", 0,
-                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
-
         csr.close()
         con.close()
 
@@ -1001,6 +993,7 @@ class Command(BaseCommand):
             sku = product.sku
             ptype = product.ptype
             size = product.size
+            width = product.width
 
             if size != None and size != "" and ptype == "Pillow":
                 csr.execute("CALL AddToEditSize ({}, {})".format(
@@ -1009,6 +1002,31 @@ class Command(BaseCommand):
 
                 debug("Kravet", 0,
                       "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
+
+            if width != None and width != "" and ptype == "Trim":
+                try:
+                    width = float(str(width).replace('"', ''))
+                except:
+                    continue
+
+                widthTag = '5" & Up'
+                if width < 1:
+                    widthTag = 'Less than 1"'
+                if width >= 1 and width < 2:
+                    widthTag = '1" to 2"'
+                if width >= 2 and width < 3:
+                    widthTag = '2" to 3"'
+                if width >= 3 and width < 4:
+                    widthTag = '3" to 4"'
+                if width >= 4 and width < 5:
+                    widthTag = '4" to 5"'
+
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(widthTag)))
+                con.commit()
+
+                debug("Kravet", 0,
+                      "Added Width. SKU: {}, Width: {}, Width Tag: {}".format(sku, width, widthTag))
 
         csr.close()
         con.close()

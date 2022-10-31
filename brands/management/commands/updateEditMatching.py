@@ -220,6 +220,13 @@ sizeDict = {
     '20" x 20"': '20" Square',
     '22" x 22"': '22" Square',
     '24" x 24"': '24" Square',
+
+    'Less than 1"': 'Less than 1"',
+    '1" to 2"': '1" to 2"',
+    '2" to 3"': '2" to 3"',
+    '3" to 4"': '3" to 4"',
+    '4" to 5"': '4" to 5"',
+    '5" & Up': '5" & Up',
 }
 
 
