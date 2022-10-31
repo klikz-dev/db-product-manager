@@ -1,8 +1,8 @@
 import json
 import random
-from brands.models import York
+from brands.models import Kravet, York
 from monitor.models import Log
-from mysql.models import PendingUpdateTag
+from mysql.models import Manufacturer, PendingUpdateTag, ProductTag
 from shopify.models import Product, Variant
 from django.core.management.base import BaseCommand
 
@@ -67,6 +67,9 @@ class Command(BaseCommand):
 
         if "colorCollection" in options['functions']:
             self.colorCollection()
+
+        if "bestSeller" in options['functions']:
+            self.bestSeller()
 
     def deleteBuggyVariants(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -513,3 +516,25 @@ class Command(BaseCommand):
                         subColorTitle, parentColorTitle, parentColorType))
                 except Exception as e:
                     print(e)
+
+    def bestSeller(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Kravet.objects.filter(manufacturer='Cole & Son Wallpaper')
+
+        for product in products:
+            tags = ProductTag.objects.filter(sku=product.sku)
+            for tag in tags:
+                if tag.tagId == 255:
+                    csr.execute("CALL AddToProductTag ({}, {})".format(
+                        sq(product.sku), sq("Quick Ship")))
+                    con.commit()
+
+                    csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                        product.productId))
+                    con.commit()
+
+                    debug("Misc", 0, "Added to Best selling. SKU: {}, ProductId: {}".format(
+                        product.sku, product.productId))
