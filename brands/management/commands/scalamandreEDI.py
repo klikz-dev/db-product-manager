@@ -256,7 +256,7 @@ class Command(BaseCommand):
 
                     response = requests.request(
                         "POST", url, headers=headers, data=payload)
-                    print(response)
+                    print(response.text)
 
                     try:
                         data = json.loads(response.text)
@@ -322,8 +322,7 @@ class Command(BaseCommand):
 
                     response = requests.request(
                         "POST", url, headers=headers, data=payload)
-
-                    print(response)
+                    print(response.text)
 
                     try:
                         data = json.loads(response.text)
