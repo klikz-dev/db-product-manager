@@ -322,8 +322,12 @@ class Command(BaseCommand):
 
                     print(response)
 
-                    data = json.loads(response.text)
-                    print(data)
+                    try:
+                        data = json.loads(response.text)
+                    except Exception as e:
+                        debug("Scalamandre EDI", 2,
+                              "Scalamandre EDI ERROR: PO: {} <br/>Payload: {}".format(orderNumber, json.dumps(payload)))
+                        continue
 
                     self.getRef(orderNumber, data[0]['MQUOTEID'])
 
