@@ -1009,9 +1009,12 @@ class Command(BaseCommand):
                 except:
                     continue
 
-                widthTag = '5" & Up'
+                if width == 0:
+                    continue
+
+                widthTag = '5" and More'
                 if width < 1:
-                    widthTag = 'Less than 1"'
+                    widthTag = 'Up to 1"'
                 if width >= 1 and width < 2:
                     widthTag = '1" to 2"'
                 if width >= 2 and width < 3:
