@@ -63,15 +63,19 @@ class Command(BaseCommand):
         Mindthegap.objects.all().delete()
 
         fabricFile = xlrd.open_workbook(
-            FILEDIR + "/files/mainthegap-fabric-master.xlsx")
+            FILEDIR + "/files/mindthegap-fabric-master.xlsx")
         fabricSheet = fabricFile.sheet_by_index(0)
 
         wallpaperFile = xlrd.open_workbook(
-            FILEDIR + "/files/mainthegap-wallpaper-master.xlsx")
+            FILEDIR + "/files/mindthegap-wallpaper-master.xlsx")
         wallpaperSheet = wallpaperFile.sheet_by_index(0)
 
+        pillowFile = xlrd.open_workbook(
+            FILEDIR + "/files/mindthegap-pillow-master.xlsx")
+        pillowSheet = pillowFile.sheet_by_index(0)
+
         for i in range(1, fabricSheet.nrows):
-            mpn = str(fabricSheet.cell_value(i, 1))
+            mpn = str(fabricSheet.cell_value(i, 0))
             sku = "MTG {}".format(mpn)
 
             try:
@@ -83,26 +87,26 @@ class Command(BaseCommand):
             brand = "MindTheGap"
             ptype = "Fabric"
 
-            collection = str(fabricSheet.cell_value(i, 11))
+            collection = str(fabricSheet.cell_value(i, 10))
 
-            pattern = str(fabricSheet.cell_value(i, 4)).strip()
+            pattern = str(fabricSheet.cell_value(i, 3)).strip()
             color = str(fabricSheet.cell_value(i, 15)).strip()
 
             if mpn == '' or pattern == '' or color == '':
                 continue
 
             cost = float(
-                str(fabricSheet.cell_value(i, 6)).replace("$", ""))
+                str(fabricSheet.cell_value(i, 5)).replace("$", "")) / 2
             msrp = float(
                 str(fabricSheet.cell_value(i, 7)).replace("$", ""))
 
             minimum = 1
             increment = ""
 
-            uom = "Per Meter"
+            uom = "Per Yard"
 
-            content = str(fabricSheet.cell_value(i, 3))
-            size = str(fabricSheet.cell_value(i, 5))
+            content = str(fabricSheet.cell_value(i, 2))
+            # size = "{} cm".format(str(fabricSheet.cell_value(i, 4)))
             usage = str(fabricSheet.cell_value(i, 13))
             repeat = str(fabricSheet.cell_value(i, 14))
             material = str(fabricSheet.cell_value(i, 8))
@@ -133,7 +137,7 @@ class Command(BaseCommand):
                 category=category,
                 style=style,
                 colors=colors,
-                size=size,
+                # size=size,
                 repeat=repeat,
                 instruction=instruction,
                 description=description,
@@ -162,36 +166,45 @@ class Command(BaseCommand):
 
             collection = str(wallpaperSheet.cell_value(i, 0))
 
+            if collection != "TYROL":
+                continue
+            collection = "TYROL APRES-SKI HOME COLLECTION"
+
             pattern = str(wallpaperSheet.cell_value(i, 3)).strip()
-            color = str(wallpaperSheet.cell_value(i, 12)).strip()
+            color = str(wallpaperSheet.cell_value(i, 13)).strip()
 
             if mpn == '' or pattern == '' or color == '':
                 continue
 
             cost = float(
-                str(fabricSheet.cell_value(i, 5)).replace("$", ""))
+                str(wallpaperSheet.cell_value(i, 6)).replace("$", ""))
             msrp = float(
-                str(fabricSheet.cell_value(i, 6)).replace("$", ""))
+                str(wallpaperSheet.cell_value(i, 7)).replace("$", ""))
 
             minimum = 1
             increment = ""
 
-            uom = "Per 3 Rolls in a box"
+            uom = "Per Roll"
 
-            size = str(wallpaperSheet.cell_value(i, 4))
+            if wallpaperSheet.cell_value(i, 1) == "Designer Wallpaper":
+                size = "One full roll is the quantity purchased. One full roll measures 20.5 inches wide x 9.83 yards long. <br>The full roll is pre-cut and packaged into 3 small rolls to facilitate hanging which measure 20.5 inches wide x 3.28 yards long. <br>Each Pre-Cut Roll Width: 20.5 Inches. <br>Each Pre-Cut Roll Length:: 3.28 Yards"
+                rollLength = 9.83
+            elif wallpaperSheet.cell_value(i, 1) == "Complementary Wallpaper":
+                size = 'sold as a single 20.5" wide x 10.9 yard roll'
+                rollLength = 10.9
+
             usage = "Wallcovering"
-            repeat = str(wallpaperSheet.cell_value(i, 13))
-            material = str(wallpaperSheet.cell_value(i, 9))
-            description = str(wallpaperSheet.cell_value(i, 18))
-            rollLength = "52cm width and 300cm in length"
+            repeat = str(wallpaperSheet.cell_value(i, 14))
+            material = str(wallpaperSheet.cell_value(i, 10))
+            description = str(wallpaperSheet.cell_value(i, 19))
 
             weight = 2.2
 
-            country = str(wallpaperSheet.cell_value(i, 14))
+            country = str(wallpaperSheet.cell_value(i, 15))
 
-            style = str(wallpaperSheet.cell_value(i, 7))
+            style = str(wallpaperSheet.cell_value(i, 8))
             colors = color
-            category = str(wallpaperSheet.cell_value(i, 7))
+            category = str(wallpaperSheet.cell_value(i, 8))
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -224,6 +237,83 @@ class Command(BaseCommand):
 
             debug("Mindthegap", 0,
                   "Success to get product details for MPN: {}".format(mpn))
+
+        # for i in range(1, pillowSheet.nrows):
+        #     mpn = str(pillowSheet.cell_value(i, 0))
+        #     sku = "MTG {}".format(mpn)
+
+        #     try:
+        #         Mindthegap.objects.get(mpn=mpn)
+        #         continue
+        #     except Mindthegap.DoesNotExist:
+        #         pass
+
+        #     brand = "MindTheGap"
+        #     ptype = "Pillow"
+
+        #     collection = str(pillowSheet.cell_value(i, 12))
+
+        #     pattern = str(pillowSheet.cell_value(i, 3)).strip()
+        #     color = str(pillowSheet.cell_value(i, 15)).strip()
+
+        #     if mpn == '' or pattern == '' or color == '':
+        #         continue
+
+        #     cost = float(
+        #         str(pillowSheet.cell_value(i, 5)).replace("$", "")) / 2
+        #     msrp = float(
+        #         str(pillowSheet.cell_value(i, 7)).replace("$", ""))
+
+        #     minimum = 1
+        #     increment = ""
+
+        #     uom = "Per Yard"
+
+        #     content = str(pillowSheet.cell_value(i, 2))
+        #     # size = "{} cm".format(str(pillowSheet.cell_value(i, 4)))
+        #     usage = str(pillowSheet.cell_value(i, 13))
+        #     repeat = str(pillowSheet.cell_value(i, 14))
+        #     material = str(pillowSheet.cell_value(i, 8))
+        #     description = str(pillowSheet.cell_value(i, 9))
+
+        #     instruction = str(pillowSheet.cell_value(i, 16))
+        #     country = str(pillowSheet.cell_value(i, 17))
+
+        #     style = usage
+        #     colors = color
+        #     category = usage
+
+        #     manufacturer = "{} {}".format(brand, ptype)
+
+        #     Mindthegap.objects.create(
+        #         mpn=mpn,
+        #         sku=sku,
+        #         collection=collection,
+        #         pattern=pattern,
+        #         color=color,
+        #         manufacturer=manufacturer,
+        #         ptype=ptype,
+        #         brand=brand,
+        #         uom=uom,
+        #         minimum=minimum,
+        #         increment=increment,
+        #         usage=usage,
+        #         category=category,
+        #         style=style,
+        #         colors=colors,
+        #         # size=size,
+        #         repeat=repeat,
+        #         instruction=instruction,
+        #         description=description,
+        #         content=content,
+        #         material=material,
+        #         country=country,
+        #         cost=cost,
+        #         msrp=msrp
+        #     )
+
+        #     debug("MindTheGap", 0,
+        #           "Success to get product details for MPN: {}".format(mpn))
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -333,7 +423,7 @@ class Command(BaseCommand):
                 if product.content != None and product.content != "":
                     desc += "Content: {}<br/>".format(product.content)
                 if product.instruction != None and product.instruction != "":
-                    desc += "Care Instructions: {} < br/>".format(
+                    desc += "Care Instructions: {} <br/>".format(
                         product.instruction)
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(

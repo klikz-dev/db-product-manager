@@ -43,8 +43,8 @@ maxwell = 1.4
 maxwell_trade = 1
 
 # MindTheGap
-# mindthegap = 2.44
-# mindthegap_trade = 1.1
+mindthegap = 2.44
+mindthegap_trade = 1.1
 
 # Phillip Jeffries
 phillipjeffries = 1.4
