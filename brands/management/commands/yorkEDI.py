@@ -532,16 +532,13 @@ class Command(BaseCommand):
         ftp.cwd("fromfdnl")
         flist = ftp.nlst()
 
-        # for fname in flist:
-        #     if fname in "archive":
-        #         continue
+        for fname in flist:
+            if fname in "archive":
+                continue
 
-        #     urllib.request.urlretrieve("ftp://EDYRKWAL_decbest:zE6e-26K@mft.getfoundational.com/fromfdnl/" +
-        #                                fname, FILEDIR + '/files/EDI/York/' + fname)
-        #     ftp.delete(fname)
-
-        if True:
-            fname = "ASN.20221026183309.BA25F004-F660-1A8E-A077-0004AC1EA1A4.CSV"
+            urllib.request.urlretrieve("ftp://EDYRKWAL_decbest:zE6e-26K@mft.getfoundational.com/fromfdnl/" +
+                                       fname, FILEDIR + '/files/EDI/York/' + fname)
+            ftp.delete(fname)
 
             f = open(FILEDIR + '/files/EDI/York/' + fname, "r")
             cr = csv.reader(f)
@@ -550,7 +547,7 @@ class Command(BaseCommand):
                 if "Customer PO Number" == row[0]:
                     continue
 
-                PONumber = str(row[0]).strip()
+                PONumber = int(str(row[0]).strip())
                 refNumber = str(row[2]).strip()
 
                 print(PONumber)
