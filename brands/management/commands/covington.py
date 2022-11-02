@@ -186,6 +186,22 @@ class Command(BaseCommand):
                       "Failed to get product details for MPN: {}".format(mpn))
                 continue
 
+        wb = xlrd.open_workbook(FILEDIR + "/files/covington-price.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(7, sh.nrows):
+            mpn = str(sh.cell_value(i, 0)).strip()
+            print(mpn)
+            price = float(str(sh.cell_value(i, 3)).replace("$", ""))
+
+            try:
+                product = Covington.objects.get(mpn=mpn)
+            except Covington.DoesNotExist:
+                continue
+
+            product.cost = price
+            product.save()
+
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
