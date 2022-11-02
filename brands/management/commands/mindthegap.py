@@ -166,10 +166,6 @@ class Command(BaseCommand):
 
             collection = str(wallpaperSheet.cell_value(i, 0))
 
-            if collection != "TYROL":
-                continue
-            collection = "TYROL APRES-SKI HOME COLLECTION"
-
             pattern = str(wallpaperSheet.cell_value(i, 3)).strip()
             color = str(wallpaperSheet.cell_value(i, 13)).strip()
 
@@ -186,12 +182,14 @@ class Command(BaseCommand):
 
             uom = "Per Roll"
 
-            if wallpaperSheet.cell_value(i, 1) == "Designer Wallpaper":
+            if "Designer" in wallpaperSheet.cell_value(i, 1):
                 size = "One full roll is the quantity purchased. One full roll measures 20.5 inches wide x 9.83 yards long. <br>The full roll is pre-cut and packaged into 3 small rolls to facilitate hanging which measure 20.5 inches wide x 3.28 yards long. <br>Each Pre-Cut Roll Width: 20.5 Inches. <br>Each Pre-Cut Roll Length:: 3.28 Yards"
                 rollLength = 9.83
-            elif wallpaperSheet.cell_value(i, 1) == "Complementary Wallpaper":
+            elif "Complementary" in wallpaperSheet.cell_value(i, 1):
                 size = 'sold as a single 20.5" wide x 10.9 yard roll'
                 rollLength = 10.9
+            else:
+                continue
 
             usage = "Wallcovering"
             repeat = str(wallpaperSheet.cell_value(i, 14))
