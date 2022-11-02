@@ -66,6 +66,9 @@ class Command(BaseCommand):
         if "fixImages" in options['functions']:
             self.fixImages()
 
+        if "bestSellers" in options['functions']:
+            self.bestSellers()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -1090,6 +1093,41 @@ class Command(BaseCommand):
 
                 debug("Brewster", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+        csr.close()
+        con.close()
+
+    def bestSellers(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        wb = xlrd.open_workbook(FILEDIR + "/files/brewster-bestsellers.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            try:
+                mpn = str(sh.cell_value(i, 0))
+            except:
+                continue
+
+            if mpn == 'Item # to Use' or mpn == '':
+                continue
+
+            try:
+                product = Brewster.objects.get(mpn=mpn)
+            except Brewster.DoesNotExist:
+                continue
+
+            csr.execute("CALL AddToProductTag ({}, {})".format(
+                sq(product.sku), sq("Best Selling")))
+            con.commit()
+
+            csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                product.productId))
+            con.commit()
+
+            debug('Zoffany', 0, "Added to Best selling. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()
