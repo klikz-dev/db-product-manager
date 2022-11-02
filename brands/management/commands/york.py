@@ -128,10 +128,16 @@ class Command(BaseCommand):
                 debug("York", 0, "Processing Product ID: {}, Name: {}".format(
                     productID, productName))
 
-                reqProduct = requests.get(
-                    "{}/product.php/{}".format(API_BASE_URL, productID))
-                resProduct = json.loads(reqProduct.text)
-                row = resProduct['results'][0]
+                try:
+                    reqProduct = requests.get(
+                        "{}/product.php/{}".format(API_BASE_URL, productID))
+                    resProduct = json.loads(reqProduct.text)
+                    row = resProduct['results'][0]
+                except Exception as e:
+                    print(e)
+                    debug("York", 1, "Error ID: {}, Name: {}".format(
+                        productID, productName))
+                    continue
 
                 brand = str(row['CategoryName']).strip()
                 brandID = str(row['CategoryNumber']).strip()
