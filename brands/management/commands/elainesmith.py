@@ -579,8 +579,6 @@ class Command(BaseCommand):
             style = product.style
             category = product.category
             colors = product.colors
-            ptype = product.ptype
-            size = product.size
 
             if style != None and style != "":
                 sty = str(style).strip()
@@ -608,14 +606,6 @@ class Command(BaseCommand):
 
                 debug("Elaine Smith", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
-
-            if size != None and size != "" and ptype == "Pillow":
-                csr.execute("CALL AddToEditSize ({}, {})".format(
-                    sq(sku), sq(size)))
-                con.commit()
-
-                debug("Elaine Smith", 0,
-                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
 
         csr.close()
         con.close()

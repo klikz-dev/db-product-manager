@@ -953,8 +953,6 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.colors
-            ptype = product.ptype
-            size = product.size
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(

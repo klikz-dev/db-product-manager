@@ -51,8 +51,14 @@ class Command(BaseCommand):
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
+        if "updateTags" in options['functions']:
+            self.updateTags()
+
         if "updateSizeTags" in options['functions']:
             self.updateSizeTags()
+
+        if "fixMissingImages" in options['functions']:
+            self.fixMissingImages()
 
         if "main" in options['functions']:
             self.getProducts()
@@ -548,6 +554,46 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
+    def updateTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Pindler.objects.all()
+        for product in products:
+            sku = product.sku
+
+            category = product.category
+            style = product.style
+            colors = product.colors
+
+            if category != None and category != "":
+                csr.execute("CALL AddToEditCategory ({}, {})".format(
+                    sq(sku), sq(category)))
+                con.commit()
+
+                debug("Pindler", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(category)))
+
+            if style != None and style != "":
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(style)))
+                con.commit()
+
+                debug("Pindler", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(style)))
+
+            if colors != None and colors != "":
+                csr.execute("CALL AddToEditColor ({}, {})".format(
+                    sq(sku), sq(colors)))
+                con.commit()
+
+                debug("Pindler", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+        csr.close()
+        con.close()
+
     def updateSizeTags(self):
         con = pymysql.connect(host=db_host, port=db_port, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -586,6 +632,33 @@ class Command(BaseCommand):
 
                 debug("Pindler", 0,
                       "Added Width. SKU: {}, Width: {}, Width Tag: {}".format(sku, width, widthTag))
+
+        csr.close()
+        con.close()
+
+    def fixMissingImages(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Pindler'")
+        for row in csr.fetchall():
+            hasImage.append(row[0])
+
+        products = Pindler.objects.all()
+        for product in products:
+            if product.productId == None:
+                continue
+
+            if int(product.productId) in hasImage:
+                continue
+
+            if product.thumbnail and product.thumbnail.strip() != "":
+                try:
+                    common.picdownload2(
+                        product.thumbnail, "{}.jpg".format(product.productId))
+                except:
+                    pass
 
         csr.close()
         con.close()
