@@ -254,7 +254,7 @@ class Command(BaseCommand):
                         csr.execute(
                             "SELECT ReferenceNumber FROM Orders WHERE OrderNumber = {}".format(orderNumber))
                         note = (csr.fetchone())[0]
-                        if note == "None":
+                        if note == "None" or note == None:
                             note = ""
                         newNote = "{}\nNote:\n{} {} of {} {}.".format(
                             note, qty, uom, sku, msg)
