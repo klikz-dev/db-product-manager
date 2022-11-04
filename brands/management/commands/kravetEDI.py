@@ -241,6 +241,9 @@ class Command(BaseCommand):
                         elif "<TRANSACTION_STATUS>Invalid Item</TRANSACTION_STATUS>" in r.text:
                             msg = "is discontinued"
 
+                        debug("Kravet EDI", 1,
+                              "PO #{} - {} {}".format(orderNumber, mpn, msg))
+
                         emailer.send_email_html("Kravet EDI",
                                                 ack_email_address,
                                                 "PO #{} needs manual process (Kravet)".format(
@@ -251,6 +254,8 @@ class Command(BaseCommand):
                         csr.execute(
                             "SELECT ReferenceNumber FROM Orders WHERE OrderNumber = {}".format(orderNumber))
                         note = (csr.fetchone())[0]
+                        if note == "None":
+                            note = ""
                         newNote = "{}\nNote:\n{} {} of {} {}.".format(
                             note, qty, uom, sku, msg)
 
@@ -328,7 +333,7 @@ class Command(BaseCommand):
         ftp.cwd("EDI FROM ALL DECOR/Live")
 
         try:
-            f = open(FILEDIR + '/files/EDI/Kravet/' + filename, 'r')
+            f = open(FILEDIR + '/files/EDI/Kravet/' + filename, 'rb')
             ftp.storbinary('STOR KravetEDI_{}_{}.xml'.format(date, ctime), f)
             f.close()
         except Exception as e:
