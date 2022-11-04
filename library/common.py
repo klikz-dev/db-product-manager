@@ -64,6 +64,10 @@ def formatprice(x, markUp):
     return float(ret)
 
 
+def fmt(x):
+    return str(x).replace("~", "").replace("!", "").replace("@", "").replace("#", "").replace("$", "").replace("%", "").replace("^", "").replace("&", "").replace("*", "").replace("(", "").replace(")", "").strip().upper()
+
+
 def sq(x):
     return "N'" + x.replace("'", "''") + "'"
 
