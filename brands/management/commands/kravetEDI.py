@@ -353,13 +353,15 @@ class Command(BaseCommand):
         ftp.login('decbest', 'mArker999')
         ftp.cwd("EDI TO ALL DECOR/ACK")
 
+        todayMark = datetime.date.today().strftime("%d%b%Y").upper()
+
         files = ftp.nlst()
         for file in files:
-            if "Kravet_AckExt_" + datetime.date.today().strftime("%d%b%Y").upper() in file:
+            if "Kravet_AckExt_" + todayMark in file:
                 urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com/EDI TO ALL DECOR/ACK/" +
                                            file, FILEDIR + '/files/EDI/Kravet/' + file)
 
-                f = open(FILEDIR + '/files/EDI/Kravet/' + file, "rb")
+                f = open(FILEDIR + '/files/EDI/Kravet/' + file, "r")
                 cr = csv.reader(f)
                 for row in cr:
                     if "Customer PO Number" == row[0]:
