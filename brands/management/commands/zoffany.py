@@ -134,6 +134,8 @@ class Command(BaseCommand):
                     continue
 
                 minimum = 2
+                if ptype == "Fabric": # 11/09/22 - from Bk - Zoffany changed policy to help fabric sales
+                    minimum = 1
 
                 # Zoffany has no increment. 1/19 from Barbara
                 increment = ''
@@ -422,7 +424,8 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = Zoffany.objects.all()
+        # products = Zoffany.objects.all()
+        products = Zoffany.objects.filter(ptype="Fabric")
 
         for product in products:
             try:
