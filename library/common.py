@@ -280,6 +280,10 @@ def importOrder(shopifyOrder):
     orderHold = False
     holdBrand = ""
 
+    # Set hold the orders with customer note
+    if order.orderNote:
+        orderHold = True
+
     for line_item in line_items:
         try:
             if line_item['variant_title'] == None or line_item['variant_title'] == "" or line_item['vendor'] == None or line_item['vendor'] == "":
