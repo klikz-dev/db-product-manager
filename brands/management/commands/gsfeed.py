@@ -151,6 +151,20 @@ class Command(BaseCommand):
                     continue
             ##############################
 
+            # Skip word "get"
+            getInText = False
+            for word in title.split():
+                if "get" == word.lower():
+                    getInText = True
+            for word in desc.split():
+                if "get" == word.lower():
+                    getInText = True
+            
+            if getInText:
+                debug("GS", 1, "Ignore SKU: {}. Get in the text".format(sku))
+                continue
+            #################
+
             debug("GS", 0, "Writing -- ProductID: {}, SKU: {}, Brand: {}, Cost: {}".format(
                 productID, sku, brand, price))
 
