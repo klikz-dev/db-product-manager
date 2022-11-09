@@ -69,6 +69,9 @@ class Command(BaseCommand):
         if "bestSellers" in options['functions']:
             self.bestSellers()
 
+        if "discoSamples" in options['functions']:
+            self.discoSamples()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -923,10 +926,12 @@ class Command(BaseCommand):
                 continue
 
             mpn = row[0]
-            brand = row[1]
-            sku = "Brewster {}".format(mpn)
-            if brand == "A-Street Prints":
-                sku = "Street {}".format(mpn)
+            try:
+                product = Brewster.objects.get(mpn=mpn)
+            except:
+                continue
+
+            sku = product.sku
 
             stock = int(row[3])
 
@@ -1128,6 +1133,29 @@ class Command(BaseCommand):
             con.commit()
 
             debug('Zoffany', 0, "Added to Best selling. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()
+
+    def discoSamples(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Brewster.objects.all()
+        for product in products:
+            sku = product.sku
+
+            if "mural" in product.pattern.lower() and product.productId:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(sku), sq("NoSample")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('RalphLauren', 0, "Added No Sample Tag. SKU: {}".format(sku))
 
         csr.close()
         con.close()
