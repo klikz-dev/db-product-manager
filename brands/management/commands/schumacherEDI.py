@@ -431,7 +431,10 @@ class Command(BaseCommand):
                 if str(row[0]).strip() == "Customer PO Number":
                     continue
 
-                PONumber = str(row[0]).strip()
+                try:
+                    PONumber = str(row[0]).strip()
+                except:
+                    continue
                 refNumber = str(row[2]).strip()
 
                 print(PONumber, refNumber)

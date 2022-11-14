@@ -413,7 +413,10 @@ class Command(BaseCommand):
                     line += 1
                     continue
 
-                PONumber = int(row[0].strip())
+                try:
+                    PONumber = int(row[0].strip())
+                except:
+                    continue
                 refNumber = row[2].strip()
 
                 print(PONumber)
