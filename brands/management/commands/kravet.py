@@ -208,6 +208,8 @@ class Command(BaseCommand):
 
             try:
                 Kravet.objects.get(mpn=mpn)
+                Kravet.objects.get(pattern=pattern, color=color)
+                debug("Kravet", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Kravet.DoesNotExist:
                 pass
