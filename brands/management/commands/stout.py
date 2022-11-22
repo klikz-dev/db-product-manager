@@ -606,6 +606,15 @@ class Command(BaseCommand):
             shopifyProduct = ShopifyProduct.objects.get(productId=productId)
 
             try:
+                product = Stout.objects.get(
+                    productId=shopifyProduct.productId)
+                newCost = product.cost
+            except:
+                debug("York", 1, "Discontinued Product: SKU: {}".format(
+                    shopifyProduct.sku))
+                continue
+
+            try:
                 pv1 = shopifyProduct.variants.filter(
                     isDefault=1).values('cost', 'price')[0]
                 pv2 = shopifyProduct.variants.filter(
@@ -617,15 +626,6 @@ class Command(BaseCommand):
             oldCost = pv1['cost']
             oldPrice = pv1['price']
             oldTradePrice = pv2['price']
-
-            try:
-                product = Stout.objects.get(
-                    productId=shopifyProduct.productId)
-                newCost = product.cost
-            except:
-                debug("York", 1, "Discontinued Product: SKU: {}".format(
-                    shopifyProduct.sku))
-                continue
 
             try:
                 if product.map > 0:
