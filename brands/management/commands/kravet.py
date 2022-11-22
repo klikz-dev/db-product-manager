@@ -213,6 +213,9 @@ class Command(BaseCommand):
                 continue
             except Kravet.DoesNotExist:
                 pass
+            except Exception as e:
+                print(e)
+                continue
 
             if row[1] == "." or row[1] == ".." or row[1] == "..." or row[1] == "" or row[1].find("KF ") >= 0 or "KRAVET " in row[1]:
                 pattern = temp[0]
