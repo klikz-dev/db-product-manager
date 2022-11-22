@@ -77,6 +77,9 @@ class Command(BaseCommand):
         if "quickship" in options['functions']:
             self.quickship()
 
+        if "bestSellers" in options['functions']:
+            self.bestSellers()
+
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -851,6 +854,38 @@ class Command(BaseCommand):
                 con.commit()
 
                 debug('York', 0, "Added to Quick Ship. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()
+
+    def bestSellers(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        wb = xlrd.open_workbook(FILEDIR + "/files/york-bestsellers.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            try:
+                mpn = str(sh.cell_value(i, 0))
+            except:
+                continue
+
+            try:
+                product = York.objects.get(mpn=mpn)
+            except York.DoesNotExist:
+                continue
+
+            csr.execute("CALL AddToProductTag ({}, {})".format(
+                sq(product.sku), sq("Best Selling")))
+            con.commit()
+
+            csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                product.productId))
+            con.commit()
+
+            debug('York', 0, "Added to Best selling. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()
