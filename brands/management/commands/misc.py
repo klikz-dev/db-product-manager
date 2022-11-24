@@ -364,8 +364,10 @@ class Command(BaseCommand):
 
         since_id = 0
         processed = 0
+        detected = 0
         while True:
-            print("Getting products since {}. Page: {}".format(since_id, processed))
+            print("Getting products since {}. Checked: {}, Detected: {}".format(
+                since_id, processed, detected))
             products = shopify.getAllProductIds(since_id)
 
             if len(products) == 0:
@@ -380,6 +382,7 @@ class Command(BaseCommand):
                 try:
                     Product.objects.get(productId=productId)
                 except Product.DoesNotExist:
+                    detected += 1
                     print("Deleting Product: {}".format(productId))
 
                     try:
