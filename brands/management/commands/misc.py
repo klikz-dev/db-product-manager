@@ -84,29 +84,12 @@ class Command(BaseCommand):
         WHERE ProductId IS NULL OR ProductId = '' OR SKU IS NULL OR SKU = '';""")
         con.commit()
 
-        # csr.execute("""DELETE v1 FROM ProductVariant v1
-        # INNER JOIN ProductVariant v2
-        # WHERE v1.VariantId = v2.VariantId AND v1.Position IS NULL AND v2.Position IS NOT NULL;""")
-        # con.commit()
-
-        # csr.execute("""DELETE v1 FROM ProductVariant v1
-        # INNER JOIN ProductVariant v2
-        # WHERE v1.VariantId = v2.VariantId AND v1.IsDefault != 1 AND v2.IsDefault = 1;""")
-        # con.commit()
-
-        # csr.execute("""DELETE v1 FROM ProductVariant v1
-        # INNER JOIN ProductVariant v2
-        # WHERE v1.VariantId = v2.VariantId AND v1.IsDefault = v2.IsDefault AND v1.Position = v2.Position AND v1.createdAt < v2.createdAt;""")
-        # con.commit()
-
     def disableBrand(self):
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        # brands_to_disable = ["Robert Allen", "Duralee", "Beacon Hill", "Highland Court",
-        #                      "Jamie Young", "Cyan", "Noir", "Kravet Decor", "Nature's Decoration", "DecoratorsBest", "Fabricut", "Fabric"]  # 2/14 Disable Fabricut
-        brands_to_disable = ["Fabric"]
+        brands_to_disable = ["Fabricut"]
 
         for brand in brands_to_disable:
             debug("Misc", 0, "--- Started Disabling {} ---".format(brand))
@@ -142,7 +125,7 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    # Bug code. Locking the Tagging queue. Do NOT run
+    # Buggy code. Locking the Tagging queue. Do NOT run
     def removeNewTag(self):
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -182,8 +165,6 @@ class Command(BaseCommand):
         con.commit()
 
     def deleteProduct(self, productID):
-        # productID = "6811404959790"
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
@@ -192,19 +173,13 @@ class Command(BaseCommand):
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
         WHERE P.ProductID = '{}'""".format(productID))
 
-        total, success, failed = 0, 0, 0
-
         row = csr.fetchone()
-
         productID = row[0]
         sku = row[1]
 
-        total += 1
         try:
-            success += 1
             shopify.DeleteProductByProductID(productID)
         except Exception as e:
-            failed += 1
             print(e)
 
         try:
@@ -383,9 +358,45 @@ class Command(BaseCommand):
         con.close()
 
     def deleteShopifyProductsNotInDatabase(self):
-        products = shopify.getProductsByVendor("Sure Strip Wallpaper")
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
 
-        print(products)
+        since_id = 0
+        processed = 0
+        while True:
+            print("Getting products since {}. Page: {}".format(since_id, processed))
+            products = shopify.getAllProductIds(since_id)
+
+            if len(products) == 0:
+                break
+
+            for product in products:
+                productId = product['id']
+
+                since_id = productId
+                processed += 1
+
+                try:
+                    Product.objects.get(productId=productId)
+                except Product.DoesNotExist:
+                    print("Deleting Product: {}".format(productId))
+
+                    try:
+                        shopify.DeleteProductByProductID(productId)
+                    except Exception as e:
+                        print(e)
+
+                    try:
+                        csr.execute(
+                            "DELETE from ProductImage where productID='{}';".format(productId))
+                        con.commit()
+                    except Exception as e:
+                        print(e)
+                        pass
+
+        csr.close()
+        con.close()
 
     def randSubcolorCollectionHTML(self, parentColorTitle, subColorTitle, parentColorType, parentColorHandle):
         typePlural = "fabrics"

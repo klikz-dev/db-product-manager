@@ -752,6 +752,25 @@ def getProductsByVendor(vendor):
     return r
 
 
+def getAllProductIds(since_id):
+    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
+        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+
+    s = requests.Session()
+    r = s.get(
+        api_url + "/admin/api/{}/products.json?fields=id&limit=250&since_id={}".format(api_version, since_id))
+
+    s.close()
+
+    try:
+        productsData = json.loads(r.text)
+        products = productsData['products']
+        return products
+    except Exception as e:
+        print(e)
+        return []
+
+
 def getNewOrders(lastOrderId):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
         env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
