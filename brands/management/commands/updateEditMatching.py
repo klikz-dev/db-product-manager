@@ -217,6 +217,7 @@ sizeDict = {
     '16" x 16"': '16" Square',
     '18" x 18"': '18" Square',
     '19" x 19"': '19" Square',
+    '19.7" x 19.7"': '20" Square',
     '20" x 20"': '20" Square',
     '22" x 22"': '22" Square',
     '24" x 24"': '24" Square',

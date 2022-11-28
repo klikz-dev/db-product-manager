@@ -232,10 +232,11 @@ class MindthegapAdmin(admin.ModelAdmin):
         ('Shipify Product', {'fields': ['productId']}),
     ]
 
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color', 'size',
                     'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
 
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
+    list_filter = ['ptype', 'status', 'uom',
+                   'size', 'manufacturer', 'collection']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 

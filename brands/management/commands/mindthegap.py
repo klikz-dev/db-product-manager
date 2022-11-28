@@ -6,6 +6,7 @@ import os
 import pymysql
 import xlrd
 import time
+import paramiko
 
 from library import debug, common, shopify, markup
 
@@ -51,6 +52,9 @@ class Command(BaseCommand):
 
         if "updatePrice" in options['functions']:
             self.updatePrice()
+
+        if "images" in options['functions']:
+            self.images()
 
         if "main" in options['functions']:
             while True:
@@ -236,82 +240,76 @@ class Command(BaseCommand):
             debug("Mindthegap", 0,
                   "Success to get product details for MPN: {}".format(mpn))
 
-        # for i in range(1, pillowSheet.nrows):
-        #     mpn = str(pillowSheet.cell_value(i, 0))
-        #     sku = "MTG {}".format(mpn)
+        for i in range(1, pillowSheet.nrows):
+            mpn = str(pillowSheet.cell_value(i, 0))
+            sku = "MTG {}".format(mpn)
 
-        #     try:
-        #         Mindthegap.objects.get(mpn=mpn)
-        #         continue
-        #     except Mindthegap.DoesNotExist:
-        #         pass
+            try:
+                Mindthegap.objects.get(mpn=mpn)
+                continue
+            except Mindthegap.DoesNotExist:
+                pass
 
-        #     brand = "MindTheGap"
-        #     ptype = "Pillow"
+            brand = "MindTheGap"
+            ptype = "Pillow"
 
-        #     collection = str(pillowSheet.cell_value(i, 12))
+            collection = str(pillowSheet.cell_value(i, 13))
 
-        #     pattern = str(pillowSheet.cell_value(i, 3)).strip()
-        #     color = str(pillowSheet.cell_value(i, 15)).strip()
+            pattern = str(pillowSheet.cell_value(i, 3)).strip()
+            color = str(pillowSheet.cell_value(i, 7)
+                        ).strip().replace(", ", "/")
 
-        #     if mpn == '' or pattern == '' or color == '':
-        #         continue
+            if mpn == '' or pattern == '' or color == '':
+                continue
 
-        #     cost = float(
-        #         str(pillowSheet.cell_value(i, 5)).replace("$", "")) / 2
-        #     msrp = float(
-        #         str(pillowSheet.cell_value(i, 7)).replace("$", ""))
+            cost = float(
+                str(pillowSheet.cell_value(i, 8)).replace("$", ""))
+            msrp = float(
+                str(pillowSheet.cell_value(i, 9)).replace("$", ""))
 
-        #     minimum = 1
-        #     increment = ""
+            minimum = 1
+            increment = ""
 
-        #     uom = "Per Yard"
+            uom = "Per Item"
 
-        #     content = str(pillowSheet.cell_value(i, 2))
-        #     # size = "{} cm".format(str(pillowSheet.cell_value(i, 4)))
-        #     usage = str(pillowSheet.cell_value(i, 13))
-        #     repeat = str(pillowSheet.cell_value(i, 14))
-        #     material = str(pillowSheet.cell_value(i, 8))
-        #     description = str(pillowSheet.cell_value(i, 9))
+            size = '{}"'.format(
+                str(pillowSheet.cell_value(i, 5)).replace(",", ".")).replace("x", '" x ')
+            usage = "Pillow"
+            material = str(pillowSheet.cell_value(i, 10))
+            description = str(pillowSheet.cell_value(i, 11))
 
-        #     instruction = str(pillowSheet.cell_value(i, 16))
-        #     country = str(pillowSheet.cell_value(i, 17))
+            instruction = str(pillowSheet.cell_value(i, 15))
+            country = str(pillowSheet.cell_value(i, 18))
 
-        #     style = usage
-        #     colors = color
-        #     category = usage
+            colors = color
 
-        #     manufacturer = "{} {}".format(brand, ptype)
+            manufacturer = "{} {}".format(brand, ptype)
 
-        #     Mindthegap.objects.create(
-        #         mpn=mpn,
-        #         sku=sku,
-        #         collection=collection,
-        #         pattern=pattern,
-        #         color=color,
-        #         manufacturer=manufacturer,
-        #         ptype=ptype,
-        #         brand=brand,
-        #         uom=uom,
-        #         minimum=minimum,
-        #         increment=increment,
-        #         usage=usage,
-        #         category=category,
-        #         style=style,
-        #         colors=colors,
-        #         # size=size,
-        #         repeat=repeat,
-        #         instruction=instruction,
-        #         description=description,
-        #         content=content,
-        #         material=material,
-        #         country=country,
-        #         cost=cost,
-        #         msrp=msrp
-        #     )
+            Mindthegap.objects.create(
+                mpn=mpn,
+                sku=sku,
+                collection=collection,
+                pattern=pattern,
+                color=color,
+                manufacturer=manufacturer,
+                ptype=ptype,
+                brand=brand,
+                uom=uom,
+                minimum=minimum,
+                increment=increment,
+                usage=usage,
+                colors=colors,
+                size=size,
+                instruction=instruction,
+                description=description,
+                material=material,
+                country=country,
+                cost=cost,
+                msrp=msrp
+            )
 
-        #     debug("MindTheGap", 0,
-        #           "Success to get product details for MPN: {}".format(mpn))
+            debug("MindTheGap", 0,
+                  "Success to get product details for MPN: {}".format(mpn))
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -489,6 +487,122 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
+
+        csr.close()
+        con.close()
+
+    def images(self):
+        host = "18.206.49.64"
+        port = 22
+        username = "mindthegap"
+        password = "DecbestMTG123!"
+
+        try:
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=username, password=password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except:
+            debug("Brewster", 2, "Connection to Brewster FTP Server Failed")
+            return False
+
+        sftp.chdir(path='/mindthegap')
+
+        try:
+            files = sftp.listdir()
+        except:
+            debug("MadcapCottage", 1, "No New Inventory File")
+            return False
+
+        for file in files:
+            if "_" in file:
+                try:
+                    mpn = str(file).split("_")[0]
+                    roomId = int(str(file).split("_")[1].split(".")[0]) + 1
+                except Exception as e:
+                    print(e)
+                    continue
+
+                try:
+                    product = Mindthegap.objects.get(mpn=mpn)
+                except Mindthegap.DoesNotExist:
+                    continue
+
+                sftp.get(file, FILEDIR +
+                         '/../../images/roomset/{}_{}.jpg'.format(product.productId, roomId))
+
+            else:
+                try:
+                    mpn = str(file).split(".")[0]
+                except Exception as e:
+                    print(e)
+                    continue
+
+                try:
+                    product = Mindthegap.objects.get(mpn=mpn)
+                except Mindthegap.DoesNotExist:
+                    continue
+
+                sftp.get(file, FILEDIR +
+                         '/../../images/product/{}.jpg'.format(product.productId))
+
+    def updateTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Mindthegap.objects.all()
+        for product in products:
+            sku = product.sku
+
+            category = product.category
+            style = product.style
+            colors = product.colors
+
+            if category != None and category != "":
+                csr.execute("CALL AddToEditCategory ({}, {})".format(
+                    sq(sku), sq(category)))
+                con.commit()
+
+                debug("Mindthegap", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(category)))
+
+            if style != None and style != "":
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(style)))
+                con.commit()
+
+                debug("Mindthegap", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(style)))
+
+            if colors != None and colors != "":
+                csr.execute("CALL AddToEditColor ({}, {})".format(
+                    sq(sku), sq(colors)))
+                con.commit()
+
+                debug("Mindthegap", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+        csr.close()
+        con.close()
+
+    def updateSizeTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Mindthegap.objects.all()
+        for product in products:
+            sku = product.sku
+            ptype = product.ptype
+            size = product.size
+
+            if size != None and size != "" and ptype == "Pillow":
+                csr.execute("CALL AddToEditSize ({}, {})".format(
+                    sq(sku), sq(size)))
+                con.commit()
+
+                debug("Mindthegap", 0,
+                      "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
 
         csr.close()
         con.close()
