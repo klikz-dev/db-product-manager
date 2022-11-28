@@ -50,8 +50,11 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
-        if "updatePrice" in options['functions']:
-            self.updatePrice()
+        if "updateSizeTags" in options['functions']:
+            self.updateSizeTags()
+
+        if "updateStock" in options['functions']:
+            self.updateStock()
 
         if "images" in options['functions']:
             self.images()
@@ -119,9 +122,9 @@ class Command(BaseCommand):
             instruction = str(fabricSheet.cell_value(i, 16))
             country = str(fabricSheet.cell_value(i, 17))
 
-            style = usage
+            style = "Global, {}".format(usage)
             colors = color
-            category = usage
+            category = "Boho, {}".format(usage)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -204,9 +207,9 @@ class Command(BaseCommand):
 
             country = str(wallpaperSheet.cell_value(i, 15))
 
-            style = str(wallpaperSheet.cell_value(i, 8))
+            style = "Global, {}".format(str(wallpaperSheet.cell_value(i, 8)))
             colors = color
-            category = str(wallpaperSheet.cell_value(i, 8))
+            category = "Boho, {}".format(str(wallpaperSheet.cell_value(i, 8)))
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -603,6 +606,31 @@ class Command(BaseCommand):
 
                 debug("Mindthegap", 0,
                       "Added Size. SKU: {}, Size: {}".format(sku, sq(size)))
+
+        csr.close()
+        con.close()
+
+    def updateStock(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Mindthegap'")
+        con.commit()
+
+        products = Mindthegap.objects.all()
+
+        for product in products:
+            try:
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Mindthegap')".format(
+                    product.sku, 5, ''))
+                con.commit()
+                debug("Mindthegap", 0,
+                      "Updated inventory for {} to {}.".format(product.sku, 5))
+            except Exception as e:
+                print(e)
+                debug(
+                    "Mindthegap", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
 
         csr.close()
         con.close()
