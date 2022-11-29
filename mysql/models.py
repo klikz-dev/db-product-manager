@@ -239,6 +239,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ZoffanySample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    MindTheGapOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MindTheGapSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     class Meta:
         managed = True
