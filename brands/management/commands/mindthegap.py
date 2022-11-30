@@ -54,7 +54,10 @@ class Command(BaseCommand):
             self.updateSizeTags()
 
         if "updateStock" in options['functions']:
-            self.updateStock()
+            while True:
+                self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
 
         if "images" in options['functions']:
             self.images()
