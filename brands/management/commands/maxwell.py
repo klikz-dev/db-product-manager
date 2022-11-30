@@ -151,6 +151,9 @@ class Command(BaseCommand):
                 else:
                     status = True
 
+                if collection == "CURLED UP VIII":
+                    status = True
+
                 if res['image_url'] != None:
                     thumbnail = res['image_url']
                 else:
