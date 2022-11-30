@@ -499,7 +499,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = Mindthegap.objects.all()
+        products = Mindthegap.objects.filter(ptype="Fabric")
 
         for product in products:
             try:
