@@ -477,11 +477,11 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = Schumacher.objects.all()
+        products = Schumacher.objects.filter(pattern="DOLOMITE PERFORMANCE")
 
         for product in products:
             try:
-                if product.status == False or product.productId == None:
+                if product.productId == None:
                     continue
 
                 if product.thumbnail == None or product.thumbnail == "":
