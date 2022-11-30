@@ -618,19 +618,81 @@ class Command(BaseCommand):
         csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Mindthegap'")
         con.commit()
 
+        host = "18.206.49.64"
+        port = 22
+        username = "mindthegap"
+        password = "DecbestMTG123!"
+
+        try:
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=username, password=password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except:
+            debug("Brewster", 2, "Connection to Brewster FTP Server Failed")
+            return False
+        
+        sftp.chdir(path='/mindthegap/Inventory')
+        files = sftp.listdir()
+        for file in files:
+            if "cushions" in file:
+                sftp.get(file, FILEDIR + '/files/mindthegap-pillow-inventory.xlsx')
+            if "fabrics" in file:
+                sftp.get(file, FILEDIR + '/files/mindthegap-fabric-inventory.xlsx')
+
+        fabricFile = xlrd.open_workbook(
+            FILEDIR + "/files/mindthegap-fabric-inventory.xlsx")
+        pillowFile = xlrd.open_workbook(
+            FILEDIR + "/files/mindthegap-pillow-inventory.xlsx")
+        fabricSheet = fabricFile.sheet_by_index(0)
+        pillowSheet = pillowFile.sheet_by_index(0)
+
+        for i in range(1, fabricSheet.nrows):
+            try:
+                mpn = str(fabricSheet.cell_value(i, 1))
+                stock = int(fabricSheet.cell_value(i, 7))
+
+                product = Mindthegap.objects.get(mpn=mpn)
+                product.stock = stock
+                product.save()
+            except:
+                continue
+
+        for i in range(1, pillowSheet.nrows):
+            try:
+                mpn = str(pillowSheet.cell_value(i, 1))
+                stock = int(pillowSheet.cell_value(i, 5))
+
+                product = Mindthegap.objects.get(mpn=mpn)
+                product.stock = stock
+                product.save()
+            except:
+                continue
+
         products = Mindthegap.objects.all()
 
         for product in products:
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Mindthegap')".format(
-                    product.sku, 5, ''))
-                con.commit()
-                debug("Mindthegap", 0,
-                      "Updated inventory for {} to {}.".format(product.sku, 5))
-            except Exception as e:
-                print(e)
-                debug(
-                    "Mindthegap", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+            if product.ptype == "Wallpaper":
+                try:
+                    csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Mindthegap')".format(
+                        product.sku, 5, ''))
+                    con.commit()
+                    debug("Mindthegap", 0,
+                        "Updated inventory for {} to {}.".format(product.sku, 5))
+                except Exception as e:
+                    print(e)
+                    debug(
+                        "Mindthegap", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+            else:
+                try:
+                    csr.execute("CALL UpdateProductInventory ('{}', {}, 2, '{}', 'Mindthegap')".format(
+                        product.sku, product.stock, ''))
+                    con.commit()
+                    debug("Mindthegap", 0,
+                        "Updated inventory for {} to {}.".format(product.sku, product.stock))
+                except Exception as e:
+                    print(e)
+                    debug(
+                        "Mindthegap", 1, "Error Updating inventory for {} to {}.".format(product.sku, product.stock))
 
         csr.close()
         con.close()
