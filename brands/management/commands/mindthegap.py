@@ -107,7 +107,7 @@ class Command(BaseCommand):
             msrp = float(
                 str(fabricSheet.cell_value(i, 7)).replace("$", ""))
 
-            minimum = 1
+            minimum = 2
             increment = ""
 
             uom = "Per Yard"
@@ -494,6 +494,119 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
+    def updateExisting(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Mindthegap.objects.all()
+
+        for product in products:
+            try:
+                if product.status == False or product.productId == None:
+                    continue
+
+                name = " | ".join((product.brand, product.pattern,
+                                  product.color, product.ptype))
+                title = " ".join((product.brand, product.pattern,
+                                 product.color, product.ptype))
+                description = title
+                vname = title
+                hassample = 1
+                gtin = ""
+                weight = product.weight
+
+                desc = ""
+                if product.description != None and product.description != "":
+                    desc += "{}<br/><br/>".format(
+                        product.description)
+                if product.collection != None and product.collection != "":
+                    desc += "Collection: {}<br/><br/>".format(
+                        product.collection)
+                if product.size != None and product.size != "":
+                    desc += "Size: {}<br/>".format(product.size)
+                if product.rollLength != None and product.rollLength != "":
+                    desc += "Roll Length: {}<br/>".format(
+                        product.rollLength)
+                if product.repeat != None and product.repeat != "":
+                    desc += "Repeat: {}<br/>".format(product.repeat)
+                if product.material != None and product.material != "":
+                    desc += "Material: {}<br/>".format(
+                        product.material)
+                if product.content != None and product.content != "":
+                    desc += "Content: {}<br/>".format(product.content)
+                if product.instruction != None and product.instruction != "":
+                    desc += "Care Instructions: {} <br/>".format(
+                        product.instruction)
+                if product.country != None and product.country != "":
+                    desc += "Country of Origin: {}<br/>".format(
+                        product.country)
+                if product.usage != None and product.usage != "":
+                    desc += "Usage: {}<br/><br/>".format(product.usage)
+                if product.ptype != None and product.ptype != "":
+                    desc += "{} {}".format(product.brand, product.ptype)
+
+                cost = product.cost
+                try:
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
+                except:
+                    debug("Mindthegap", 1,
+                          "Price Error: SKU: {}".format(product.sku))
+                    continue
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+                priceSample = 5
+
+                csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
+                    sq(product.sku),
+                    sq(name),
+                    sq(product.manufacturer),
+                    sq(product.mpn),
+                    sq(desc),
+                    sq(title),
+                    sq(description),
+                    sq(product.ptype),
+                    sq(vname),
+                    hassample,
+                    cost,
+                    price,
+                    priceTrade,
+                    priceSample,
+                    sq(product.pattern),
+                    sq(product.color),
+                    product.minimum,
+                    sq(product.increment),
+                    sq(product.uom),
+                    sq(product.usage),
+                    sq(product.collection),
+                    sq(str(gtin)),
+                    weight
+                ))
+                con.commit()
+
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                productId = product.productId
+
+                csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(productId))
+                con.commit()
+
+                debug("Mindthegap", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    productId, product.sku, title, product.ptype, price))
+
+            except Exception as e:
+                print(e)
+
+        csr.close()
+        con.close()
+
     def images(self):
         host = "18.206.49.64"
         port = 22
@@ -630,14 +743,16 @@ class Command(BaseCommand):
         except:
             debug("Brewster", 2, "Connection to Brewster FTP Server Failed")
             return False
-        
+
         sftp.chdir(path='/mindthegap/Inventory')
         files = sftp.listdir()
         for file in files:
             if "cushions" in file:
-                sftp.get(file, FILEDIR + '/files/mindthegap-pillow-inventory.xlsx')
+                sftp.get(file, FILEDIR +
+                         '/files/mindthegap-pillow-inventory.xlsx')
             if "fabrics" in file:
-                sftp.get(file, FILEDIR + '/files/mindthegap-fabric-inventory.xlsx')
+                sftp.get(file, FILEDIR +
+                         '/files/mindthegap-fabric-inventory.xlsx')
 
         fabricFile = xlrd.open_workbook(
             FILEDIR + "/files/mindthegap-fabric-inventory.xlsx")
@@ -677,7 +792,7 @@ class Command(BaseCommand):
                         product.sku, 5, ''))
                     con.commit()
                     debug("Mindthegap", 0,
-                        "Updated inventory for {} to {}.".format(product.sku, 5))
+                          "Updated inventory for {} to {}.".format(product.sku, 5))
                 except Exception as e:
                     print(e)
                     debug(
@@ -688,7 +803,7 @@ class Command(BaseCommand):
                         product.sku, product.stock, ''))
                     con.commit()
                     debug("Mindthegap", 0,
-                        "Updated inventory for {} to {}.".format(product.sku, product.stock))
+                          "Updated inventory for {} to {}.".format(product.sku, product.stock))
                 except Exception as e:
                     print(e)
                     debug(
