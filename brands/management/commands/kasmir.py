@@ -441,7 +441,7 @@ class Command(BaseCommand):
                       "Updated inventory for {} to {}.".format(sku, stock))
             except Exception as e:
                 print(e)
-                debug("Kasmir", 2,
+                debug("Kasmir", 1,
                       "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
