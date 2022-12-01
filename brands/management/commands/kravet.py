@@ -12,6 +12,7 @@ import requests
 import codecs
 import time
 from bs4 import BeautifulSoup
+from shutil import copyfile
 
 from library import debug, common, shopify, markup
 
@@ -71,6 +72,9 @@ class Command(BaseCommand):
 
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
+
+        if "roomset" in options['functions']:
+            self.roomset()
 
         if "bestSeller" in options['functions']:
             self.bestSeller()
@@ -1181,3 +1185,51 @@ class Command(BaseCommand):
 
         csr.close()
         con.close()
+
+    def roomset(self):
+        files = os.listdir(FILEDIR + "/files/images/kravet/")
+
+        for file in files:
+            print(file)
+            newfile1 = file.replace(" ", "-").replace("_", "-")
+
+            newfile2 = ""
+            pieces = newfile1.split("-")
+            for piece in pieces:
+                try:
+                    if str(int(piece)) == str(piece):
+                        if newfile2 == "":
+                            newfile2 = piece
+                        else:
+                            newfile2 = newfile2 + "-" + piece
+                            break
+                except:
+                    continue
+
+            newfile2 = "{}.CS.0_room.jpg".format(newfile2)
+
+            print(newfile2)
+
+            os.rename(FILEDIR + "/files/images/kravet/" + file,
+                      FILEDIR + "/files/images/kravet/" + newfile2)
+
+        for fname in files:
+            try:
+                mpn = fname.split("_")[0]
+                if "-" not in mpn:
+                    continue
+
+                mpn = mpn.replace("-", "/")
+
+                print(mpn)
+
+                product = Kravet.objects.get(mpn=mpn)
+                productId = product.productId
+
+                if productId != None and productId != "":
+                    copyfile(FILEDIR + "/files/images/kravet/" + fname, FILEDIR +
+                             "/../../images/roomset/{}_2.jpg".format(productId))
+
+                os.remove(FILEDIR + "/files/images/kravet/" + fname)
+            except:
+                continue
