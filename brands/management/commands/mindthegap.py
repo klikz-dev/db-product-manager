@@ -288,6 +288,8 @@ class Command(BaseCommand):
             country = str(pillowSheet.cell_value(i, 18))
 
             colors = color
+            style = "Global"
+            category = "Boho"
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -305,6 +307,8 @@ class Command(BaseCommand):
                 increment=increment,
                 usage=usage,
                 colors=colors,
+                style=style,
+                category=category,
                 size=size,
                 instruction=instruction,
                 description=description,
