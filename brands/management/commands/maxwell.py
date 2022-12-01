@@ -146,12 +146,9 @@ class Command(BaseCommand):
                     stock = int(res['inventory']['available'])
                 except:
                     stock = 0
-                if res['image_url'] == None or res['discontinued'] != None:
+                if res['discontinued'] != None:
                     status = False
                 else:
-                    status = True
-
-                if collection == "CURLED UP VIII":
                     status = True
 
                 if res['image_url'] != None:
