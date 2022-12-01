@@ -118,7 +118,7 @@ class Command(BaseCommand):
 
             style = "{}, {}".format(str(elainesmithSheet.cell_value(
                 i, 17)), str(elainesmithSheet.cell_value(i, 18)))
-            category = style
+            category = "Outdoor," + style
             colors = color
 
             manufacturer = "{} {}".format(brand, ptype)
