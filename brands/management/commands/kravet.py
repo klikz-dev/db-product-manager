@@ -1213,6 +1213,8 @@ class Command(BaseCommand):
             os.rename(FILEDIR + "/files/images/kravet/" + file,
                       FILEDIR + "/files/images/kravet/" + newfile2)
 
+        files = os.listdir(FILEDIR + "/files/images/kravet/")
+
         for fname in files:
             try:
                 mpn = fname.split("_")[0]
@@ -1230,6 +1232,6 @@ class Command(BaseCommand):
                     copyfile(FILEDIR + "/files/images/kravet/" + fname, FILEDIR +
                              "/../../images/roomset/{}_2.jpg".format(productId))
 
-                os.remove(FILEDIR + "/files/images/kravet/" + fname)
+                # os.remove(FILEDIR + "/files/images/kravet/" + fname)
             except:
                 continue
