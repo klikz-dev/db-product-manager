@@ -130,25 +130,37 @@ class Command(BaseCommand):
                     feature = ""
 
                 uom = ""
-                try:
-                    usage = res['grading']['USAGE'][0]
-                except:
+                if 'USAGE' in res['grading']:
+                    usage = "/".join(res['grading']['USAGE'])
+                else:
                     usage = ''
                 minimum = 1
                 increment = ""
 
-                style = ""
-                colors = ""
-                category = res['product_category']
+                if 'PATTERN' in res['grading']:
+                    style = ",".join(res['grading']['PATTERN'])
+                else:
+                    style = ""
+
+                if 'COLOR' in res['grading']:
+                    colors = ",".join(res['grading']['COLOR'])
+                else:
+                    colors = ""
+
+                if 'CATEGOR' in res['grading']:
+                    category = ",".join(res['grading']['CATEGOR'])
+                else:
+                    category = ""
 
                 cost = float(res['price'])
                 msrp = 0
                 map = 0
 
                 try:
-                    stock = int(res['inventory']['available'])
+                    stock = int(res['inventory']['on_hand'])
                 except:
                     stock = 0
+
                 if res['discontinued'] != None:
                     status = False
                 else:
