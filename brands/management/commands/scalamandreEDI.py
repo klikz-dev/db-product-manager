@@ -331,10 +331,10 @@ class Command(BaseCommand):
                               "Scalamandre EDI ERROR: PO: {} <br/>Payload: {}".format(orderNumber, json.dumps(payload)))
                         continue
 
-                    self.getRef(orderNumber, data[0]['MQUOTEID'])
+                    self.getRef(orderNumber, data[0]['WEBQUOTEID'])
 
                     debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Orders. PO: {}, REF: {}".format(
-                        orderNumber, data[0]['MQUOTEID']))
+                        orderNumber, data[0]['WEBQUOTEID']))
 
                 csr.execute(
                     "SELECT Status FROM Orders WHERE OrderNumber = {}".format(orderNumber))
