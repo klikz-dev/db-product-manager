@@ -66,6 +66,9 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
+        if "cutFee" in options['functions']:
+            self.cutFee()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -759,6 +762,32 @@ class Command(BaseCommand):
 
                 debug("Phillip Jeffries", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+        csr.close()
+        con.close()
+
+    def cutFee(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = PhillipJeffries.objects.filter(
+            increment='4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80')
+
+        for product in products:
+            if product.minimum < 12:
+                continue
+
+            csr.execute("CALL AddToProductTag ({}, {})".format(
+                sq(product.sku), sq("Cut Fee")))
+            con.commit()
+
+            csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                product.productId))
+            con.commit()
+
+            debug("Phiilip Jeffries", 0,
+                  "Added to Cut Fee. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()
