@@ -133,7 +133,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         ref = self.request.query_params.get('ref')
         if ref is not None:
-            orders = orders.filter(referenceNumber=ref)
+            orders = orders.filter(referenceNumber__icontains=ref)
 
         page = self.paginate_queryset(orders)
         if page is not None:
