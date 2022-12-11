@@ -1,3 +1,4 @@
+import environ
 from django.core.management.base import BaseCommand
 
 import json
@@ -7,13 +8,16 @@ import csv
 import os
 import codecs
 import time
+import paramiko
+from ftplib import FTP
+import datetime
+import urllib.request
 
 from library import common, debug
 
 debug = debug.debug
 sq = common.sq
 
-import environ
 env = environ.Env()
 
 db_host = env('MYSQL_HOST')
@@ -36,13 +40,29 @@ FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Command(BaseCommand):
     help = 'Build Seabrook Database'
 
-    def handle(self, *args, **options):
-        while True:
-            self.getTracking()
-            print("Finished Get Tracking, Waiting for next Run")
-            time.sleep(3600)
+    def add_arguments(self, parser):
+        parser.add_argument('functions', nargs='+', type=str)
 
-    def getTracking(self):
+    def handle(self, *args, **options):
+        if "main" in options['functions']:
+            while True:
+                self.manual()
+                self.schumacherTracking()
+                self.kravetTracking()
+
+                print("Finished Get Tracking, Waiting for next Run")
+                time.sleep(3600)
+
+        if "manual" in options['functions']:
+            self.manual()
+
+        if "schumacherTracking" in options['functions']:
+            self.schumacherTracking()
+
+        if "kravetTracking" in options['functions']:
+            self.kravetTracking()
+
+    def manual(self):
         trackingFile = ""
         files = os.listdir(FILEDIR + "/files/tracking/")
         for file in files:
@@ -98,12 +118,10 @@ class Command(BaseCommand):
                 elif "PREMIER PRINTS" in row[4]:
                     brand = "Premier Prints"
                     orderNumber = row[1].split("|")[0]
-                # elif "PINDLER AND PINDLER INC" in row[4]:
-                #     brand = "Pindler"
-                #     orderNumber = row[1].split("/")[2].replace("PO#", "")
                 else:
                     continue
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
             try:
@@ -115,6 +133,103 @@ class Command(BaseCommand):
 
         f.close()
         os.remove(trackingFile)
+
+    def schumacherTracking(self):
+        host = "34.203.121.151"
+        port = 22
+        username = "schumacher"
+        password = "Sch123Decbest!"
+
+        try:
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=username, password=password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except:
+            debug("Schumacher EDI", 2, "Connection to Schumacher FTP Server Failed")
+            return False
+
+        files = sftp.listdir('../EDI/EDI_to_DB')
+        for file in files:
+            if "ASN" in file:
+                sftp.get("../EDI/EDI_to_DB/{}".format(file),
+                         FILEDIR + '/files/EDI/Schumacher/{}'.format(file))
+                sftp.remove("../EDI/EDI_to_DB/{}".format(file))
+
+        sftp.close()
+
+        for file in files:
+            if "ASN" not in file:
+                continue
+
+            f = open(FILEDIR + "/files/EDI/Schumacher/{}".format(file), "rt")
+            cr = csv.reader(f)
+
+            for row in cr:
+                if str(row[0]).strip() == "Customer PO Number":
+                    continue
+
+                try:
+                    PONumber = str(row[0]).strip()
+                except Exception as e:
+                    print(e)
+                    continue
+
+                try:
+                    tracking = str(row[4]).strip()
+                except Exception as e:
+                    print(e)
+                    continue
+
+                print(PONumber, tracking)
+
+                try:
+                    self.addTracking("Schumacher", PONumber, tracking)
+                except Exception as e:
+                    print(e)
+                    debug("Tracking", 1, "Failed Adding Tracking for Order: {}".format(
+                        PONumber, "Schumacher", tracking))
+
+    def kravetTracking(self):
+        ftp = FTP("file.kravet.com")
+        ftp.login('decbest', 'mArker999')
+        ftp.cwd("EDI TO ALL DECOR")
+
+        files = ftp.nlst()
+        for file in files:
+            if "ShipExt" in file:
+                pass
+            else:
+                continue
+
+            print(file)
+
+            try:
+                ftp.retrbinary("RETR {}".format(file), open(
+                    FILEDIR + '/files/EDI/Kravet/' + file, 'wb').write)
+                ftp.delete(file)
+            except Exception as e:
+                print(e)
+                continue
+
+            f = open(FILEDIR + '/files/EDI/Kravet/' + file, "r")
+            cr = csv.reader(f)
+            for row in cr:
+                if "Customer PO" in row[0]:
+                    continue
+
+                po = str(row[0]).strip()
+                tracking = str(row[7]).strip()
+
+                print(po, tracking)
+
+                try:
+                    self.addTracking("Kravet", po, tracking)
+                except Exception as e:
+                    print(e)
+                    debug("Tracking", 1, "Failed Adding Tracking for Order: {}".format(
+                        po, "Kravet", tracking))
+
+        ftp.close()
 
     def addTracking(self, brand, orderNumber, tracking):
         debug("Tracking", 0, "Adding Tracking for Order: {}, Brand: {}, Tracking Number: {}".format(
