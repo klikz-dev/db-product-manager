@@ -55,6 +55,9 @@ class Command(BaseCommand):
         if "updateStock" in options['functions']:
             self.updateStock()
 
+        if "bestSellers" in options['functions']:
+            self.bestSellers()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -419,6 +422,29 @@ class Command(BaseCommand):
                 print(e)
                 debug(
                     "Tres Tintas", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+
+        csr.close()
+        con.close()
+
+    def bestSellers(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = TresTintas.objects.all()
+
+        for product in products:
+            if product.collection == 'Ïtera' or product.collection == 'Mediterranén' or product.collection == '9 selvas mariscal':
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("Best Selling")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('TresTintas', 0,
+                      "Added to Best selling. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()
