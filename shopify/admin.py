@@ -104,7 +104,7 @@ class VariantAdmin(admin.ModelAdmin):
               'minimumQuantity', 'restrictedQuantities', 'weight', 'isDefault', 'published']
 
     list_display = ('variantId', 'productId', 'product', 'name', 'cost',
-                    'pricing', 'isDefault', 'published')
+                    'pricing', 'GTIN', 'isDefault', 'published')
     list_filter = ['pricing', 'isDefault', 'published']
     search_fields = ['variantId', 'productId', 'name', ]
 

@@ -113,6 +113,7 @@ class Variant(models.Model):
     restrictedQuantities = models.CharField(
         max_length=200, default="", blank=True, null=True)
     weight = models.FloatField(default=1)
+    GTIN = models.CharField(max_length=200, default=None, null=True)
 
     isDefault = models.BooleanField(default=True)
     published = models.BooleanField(default=True)
