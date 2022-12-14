@@ -931,7 +931,7 @@ class Command(BaseCommand):
             style = product.style
             colors = product.colors
 
-            if "performance" in product.collection.lower():
+            if product.collection and "performance" in product.collection.lower():
                 category = "{}, Performance Fabric".format(category)
 
             if category != None and category != "":
