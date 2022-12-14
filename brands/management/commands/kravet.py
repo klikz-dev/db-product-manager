@@ -52,6 +52,9 @@ class Command(BaseCommand):
         if "getProductIds" in options['functions']:
             self.getProductIds()
 
+        if "replaceImages" in options['functions']:
+            self.replaceImages()
+
         if "addNew" in options['functions']:
             self.addNew()
 
@@ -73,6 +76,9 @@ class Command(BaseCommand):
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
 
+        if "fixAllImages" in options['functions']:
+            self.fixAllImages()
+
         if "roomset" in options['functions']:
             self.roomset()
 
@@ -83,6 +89,7 @@ class Command(BaseCommand):
             while True:
                 self.getProducts()
                 self.getPillowProducts()
+                self.replaceImages()
                 self.getProductIds()
                 self.updateStock()
                 print("Completed stock update process. Waiting for next run.")
@@ -373,8 +380,6 @@ class Command(BaseCommand):
             debug("Kravet", 0,
                   "Success to get product details for MPN: {}".format(mpn))
 
-        print(unknownBrands)
-
     def getPillowProducts(self):
         wb = xlrd.open_workbook(FILEDIR + "/files/kravet-pillow.xlsx")
         sh = wb.sheet_by_index(1)
@@ -490,6 +495,27 @@ class Command(BaseCommand):
                 debug("Kravet", 1,
                       "Failed to get product details for MPN: {}".format(mpn))
                 continue
+
+    def replaceImages(self):
+        imageFile = xlrd.open_workbook(
+            FILEDIR + "/files/kravet-images.xlsx")
+        imageSheet = imageFile.sheet_by_index(0)
+
+        for i in range(1, imageSheet.nrows):
+            mpn = str(imageSheet.cell_value(i, 0))
+            image = str(imageSheet.cell_value(i, 1))
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            if image:
+                product.thumbnail = image
+                product.save()
+
+                debug("Kravet", 0, "Replaced image. SKU: {}, Image: {}".format(
+                    product.sku, product.thumbnail))
 
     def getProductIds(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -676,35 +702,6 @@ class Command(BaseCommand):
                 product.productId = productId
                 product.save()
 
-                if product.ptype == "Pillow":
-                    if product.thumbnail and product.thumbnail.strip() != "":
-                        try:
-                            common.picdownload2(
-                                product.thumbnail, "{}.jpg".format(product.productId))
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    if product.roomset and product.roomset.strip() != "":
-                        try:
-                            common.roomdownload(
-                                product.roomset, "{}_2.jpg".format(product.productId))
-                        except Exception as e:
-                            print(e)
-                            pass
-                else:
-                    if product.thumbnail and product.thumbnail.strip() != "":
-                        try:
-                            urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
-                                product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
-                            debug("Kravet", 0, "Successfully downloaded {}.".format(
-                                product.thumbnail))
-                        except Exception as e:
-                            print(e)
-                            debug("Kravet", 1, "Downloaded failed {}.".format(
-                                product.thumbnail))
-                            pass
-
                 debug("Kravet", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
@@ -835,35 +832,6 @@ class Command(BaseCommand):
                 csr.execute(
                     "CALL AddToPendingUpdateProduct ({})".format(productId))
                 con.commit()
-
-                if product.ptype == "Pillow":
-                    if product.thumbnail and product.thumbnail.strip() != "":
-                        try:
-                            common.picdownload2(
-                                product.thumbnail, "{}.jpg".format(product.productId))
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    if product.roomset and product.roomset.strip() != "":
-                        try:
-                            common.roomdownload(
-                                product.roomset, "{}_2.jpg".format(product.productId))
-                        except Exception as e:
-                            print(e)
-                            pass
-                else:
-                    if product.thumbnail and product.thumbnail.strip() != "":
-                        try:
-                            urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
-                                product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
-                            debug("Kravet", 0, "Successfully downloaded {}.".format(
-                                product.thumbnail))
-                        except Exception as e:
-                            print(e)
-                            debug("Kravet", 1, "Downloaded failed {}.".format(
-                                product.thumbnail))
-                            pass
 
                 debug("Kravet", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
@@ -1108,19 +1076,33 @@ class Command(BaseCommand):
             if product.thumbnail == "":
                 continue
 
-            if product.brand == "Winfield Thybony":
+            # Deprecated because Kravet provided image links to CDN. check kravet-images.xlsx file.
+            # if product.brand == "Winfield Thybony":
+            #     common.picdownload2(product.thumbnail, str(
+            #         product.productId) + ".jpg")
+            # else:
+            #     try:
+            #         debug("Kravet", 0, "Downloading {}.".format(product.thumbnail))
+            #         urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
+            #             product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
+            #     except Exception as e:
+            #         print(e)
+            #         continue
+
+            # new download - from CDN
+            if "http" in product.thumbnail:
                 common.picdownload2(product.thumbnail, str(
                     product.productId) + ".jpg")
-            else:
-                try:
-                    debug("Kravet", 0, "Downloading {}.".format(product.thumbnail))
-                    urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
-                        product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
-                except Exception as e:
-                    print(e)
-                    continue
+
         csr.close()
         con.close()
+
+    def fixAllImages(self):
+        products = Kravet.objects.all()
+        for product in products:
+            if product.thumbnail:
+                common.picdownload2(product.thumbnail, str(
+                    product.productId) + ".jpg")
 
     def updateStock(self):
         con = pymysql.connect(host=db_host, user=db_username,
