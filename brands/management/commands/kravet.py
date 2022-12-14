@@ -1100,7 +1100,7 @@ class Command(BaseCommand):
     def fixAllImages(self):
         products = Kravet.objects.all()
         for product in products:
-            if product.thumbnail:
+            if "http" in product.thumbnail:
                 common.picdownload2(product.thumbnail, str(
                     product.productId) + ".jpg")
 
