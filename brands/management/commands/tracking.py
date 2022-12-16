@@ -63,6 +63,10 @@ class Command(BaseCommand):
             self.kravetTracking()
 
     def manual(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
         trackingFile = ""
         files = os.listdir(FILEDIR + "/files/tracking/")
         for file in files:
@@ -118,6 +122,18 @@ class Command(BaseCommand):
                 elif "PREMIER PRINTS" in row[4]:
                     brand = "Premier Prints"
                     orderNumber = row[1].split("|")[0]
+                elif "HERITAGE FABRICS LLC" in row[4]:
+                    brand = "Maxwell"
+                    referenceNumber = row[1].split("|")[0].replace("MAXWELL", "")
+                    csr.execute(
+                        "SELECT OrderNumber FROM Orders WHERE ReferenceNumber Like '%{}%' ORDER BY OrderNumber DESC".format(referenceNumber))
+                    orderNumber = str((csr.fetchone())[0])
+                elif "PINDLER AND PINDLER" in row[4]:
+                    brand = "Pindler"
+                    referenceNumber = row[1].split("|")[0]
+                    csr.execute(
+                        "SELECT OrderNumber FROM Orders WHERE ReferenceNumber Like '%{}%' ORDER BY OrderNumber DESC".format(referenceNumber))
+                    orderNumber = str((csr.fetchone())[0])
                 else:
                     continue
             except Exception as e:
