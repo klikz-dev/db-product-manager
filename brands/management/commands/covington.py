@@ -150,6 +150,8 @@ class Command(BaseCommand):
                 colors = str(sh.cell_value(i, 25)).strip()
                 category = feature + ", " + str(sh.cell_value(i, 26)).strip()
 
+                gtin = int(sh.cell_value(i, 12))
+
                 manufacturer = "{} {}".format(brand, ptype)
 
                 Covington.objects.create(
@@ -175,6 +177,7 @@ class Command(BaseCommand):
                     content=content,
                     feature=feature,
                     cost=price,
+                    gtin=gtin
                 )
 
                 debug("Covington", 0,
@@ -287,7 +290,7 @@ class Command(BaseCommand):
                 description = title
                 vname = title
                 hassample = 1
-                gtin = ""
+                gtin = product.gtin
                 weight = product.weight
 
                 desc = ""
@@ -407,7 +410,7 @@ class Command(BaseCommand):
                 description = title
                 vname = title
                 hassample = 1
-                gtin = ""
+                gtin = product.gtin
                 weight = product.weight
 
                 desc = ""

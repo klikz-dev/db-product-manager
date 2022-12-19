@@ -143,6 +143,9 @@ class Covington(models.Model):
     category = models.CharField(
         max_length=200, default=None, null=True, blank=True)
 
+    gtin = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
     cost = models.FloatField(default=0)
     msrp = models.FloatField(default=0)
     map = models.FloatField(default=0)

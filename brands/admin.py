@@ -33,7 +33,7 @@ class CovingtonAdmin(admin.ModelAdmin):
         ('Identities', {'fields': ['pattern', 'color']}),
         ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
         ('Description', {'fields': [
-         'description', 'width', 'height', 'rollLength', 'content', 'hr', 'vr', 'match', 'feature', 'usage']}),
+         'description', 'width', 'height', 'rollLength', 'content', 'hr', 'vr', 'match', 'feature', 'usage', 'gtin']}),
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
@@ -43,7 +43,7 @@ class CovingtonAdmin(admin.ModelAdmin):
     ]
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
+                    'cost', 'msrp', 'map', 'uom', 'gtin', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 
