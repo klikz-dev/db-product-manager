@@ -63,11 +63,9 @@ class Command(BaseCommand):
             self.images()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
+            self.updateTags()
 
     def getProducts(self):
         Mindthegap.objects.all().delete()
@@ -125,9 +123,9 @@ class Command(BaseCommand):
             instruction = str(fabricSheet.cell_value(i, 16))
             country = str(fabricSheet.cell_value(i, 17))
 
-            style = "Global, {}".format(usage)
+            style = "Global, {}, {}, {}".format(usage, collection, description)
             colors = color
-            category = "Boho, {}".format(usage)
+            category = "Boho, {}, {}, {}".format(usage, collection, description)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -210,9 +208,9 @@ class Command(BaseCommand):
 
             country = str(wallpaperSheet.cell_value(i, 15))
 
-            style = "Global, {}".format(str(wallpaperSheet.cell_value(i, 8)))
+            style = "Global, {}, {}, {}".format(str(wallpaperSheet.cell_value(i, 8)), collection, description)
             colors = color
-            category = "Boho, {}".format(str(wallpaperSheet.cell_value(i, 8)))
+            category = "Boho, {}, {}, {}".format(str(wallpaperSheet.cell_value(i, 8)), collection, description)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -288,8 +286,8 @@ class Command(BaseCommand):
             country = str(pillowSheet.cell_value(i, 18))
 
             colors = color
-            style = "Global"
-            category = "Boho"
+            style = "Global, {}, {}".format(collection, description)
+            category = "Boho, {}, {}".format(collection, description)
 
             manufacturer = "{} {}".format(brand, ptype)
 

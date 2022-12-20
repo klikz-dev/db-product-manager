@@ -28,7 +28,7 @@ class CustomEmail(models.Model):
 
 class EditCategory(models.Model):
     sku = models.CharField(max_length=200, primary_key=True)
-    category = models.CharField(max_length=2000)
+    category = models.CharField(max_length=5000)
     isManual = models.CharField(max_length=200)
 
     updatedAt = models.DateTimeField()
@@ -52,7 +52,7 @@ class EditColor(models.Model):
 
 class EditStyle(models.Model):
     sku = models.CharField(max_length=200, primary_key=True)
-    style = models.CharField(max_length=2000)
+    style = models.CharField(max_length=5000)
     isManual = models.CharField(max_length=200)
 
     updatedAt = models.DateTimeField()
