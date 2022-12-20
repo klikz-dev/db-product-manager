@@ -301,10 +301,10 @@ class Command(BaseCommand):
                 if (product.productId != None and product.productId != "") or product.status == False:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("Maxwell", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
+                # if product.thumbnail == None or product.thumbnail == "":
+                #     debug("Maxwell", 1,
+                #           "No product Image for MPN: {}".format(product.mpn))
+                #     continue
 
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
