@@ -116,8 +116,8 @@ class Command(BaseCommand):
 
             weight = 1
 
-            style = "{}, {}".format(str(elainesmithSheet.cell_value(
-                i, 17)), str(elainesmithSheet.cell_value(i, 18)))
+            style = "{}, {}, {}, {}".format(str(elainesmithSheet.cell_value(
+                i, 17)), str(elainesmithSheet.cell_value(i, 18)), pattern, description)
             category = "Outdoor," + style
             colors = color
 
