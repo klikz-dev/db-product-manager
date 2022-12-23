@@ -1079,20 +1079,6 @@ class Command(BaseCommand):
             if product.thumbnail == "":
                 continue
 
-            # Deprecated because Kravet provided image links to CDN. check kravet-images.xlsx file.
-            # if product.brand == "Winfield Thybony":
-            #     common.picdownload2(product.thumbnail, str(
-            #         product.productId) + ".jpg")
-            # else:
-            #     try:
-            #         debug("Kravet", 0, "Downloading {}.".format(product.thumbnail))
-            #         urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
-            #             product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
-            #     except Exception as e:
-            #         print(e)
-            #         continue
-
-            # new download - from CDN
             if "http" in product.thumbnail:
                 common.picdownload2(product.thumbnail, str(
                     product.productId) + ".jpg")
