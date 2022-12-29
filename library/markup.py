@@ -2,7 +2,7 @@
 
 # Brewster
 brewster1 = "MAP"
-brewster_trade1 = 1.5  # If MAP provided
+brewster_trade1 = 1.3  # If MAP provided
 
 brewster2 = 1.4  # If MAP is NOT provided
 brewster_trade2 = 1.3  # If MAP NOT provided
