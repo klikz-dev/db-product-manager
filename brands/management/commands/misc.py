@@ -165,6 +165,8 @@ class Command(BaseCommand):
         con.commit()
 
     def deleteProduct(self, productID):
+        productID = "2076213215299"
+
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()

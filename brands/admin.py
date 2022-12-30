@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Covington, ElaineSmith, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
+from .models import Covington, ElaineSmith, JamieYoung, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -71,6 +71,31 @@ class ElaineSmithAdmin(admin.ModelAdmin):
 
     list_filter = ['ptype', 'status', 'uom',
                    'manufacturer', 'collection', 'size']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+
+
+class JamieYoungAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['pattern', 'color']}),
+        ('Collection', {'fields': [
+         'brand', 'ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'width', 'height', 'depth', 'features', 'material', 'disclaimer', 'care', 'specs', 'country', 'usage', 'weight', 'upc']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomsets']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
+
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -503,6 +528,7 @@ class ZoffanyAdmin(admin.ModelAdmin):
 admin.site.register(Brewster, BrewsterAdmin)
 admin.site.register(Covington, CovingtonAdmin)
 admin.site.register(ElaineSmith, ElaineSmithAdmin)
+admin.site.register(JamieYoung, JamieYoungAdmin)
 admin.site.register(JFFabrics, JFFabricsAdmin)
 admin.site.register(Kasmir, KasmirAdmin)
 admin.site.register(Kravet, KravetAdmin)

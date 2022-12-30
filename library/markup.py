@@ -12,8 +12,12 @@ covington = 2
 covington_trade = 1.5
 
 # Elaine Smith
-elainesmith = "MAP" # Markup 1.7 - 1.8
+elainesmith = "MAP"  # Markup 1.7 - 1.8
 elainesmith_trade = 1.3
+
+# Jamie Young
+jamieyoung = "MAP"  # Markup 2 - 2.3
+jamieyoung_trade = 1
 
 # JF Fabrics
 jffabrics = 1.75  # x MAP
@@ -31,11 +35,11 @@ kravet_pillow = 1.75
 kravet_pillow_trade = 1.3
 
 # Madcap Cottage
-madcapcottage = "MAP" # Markup 2.0 - 2.3
+madcapcottage = "MAP"  # Markup 2.0 - 2.3
 madcapcottage_trade = 1
 
 # Material Works
-materialworks = "MAP" # Markup 1.5
+materialworks = "MAP"  # Markup 1.5
 materialworks_trade = 1
 
 # Maxwell
@@ -83,11 +87,11 @@ seabrook = 1.5
 seabrook_trade = 1
 
 # Stout
-stout = "MAP" # Markup 1.5 or 2.0
+stout = "MAP"  # Markup 1.5 or 2.0
 stout_trade = 1
 
 # Tres Tintas
-trestintas = "MAP" # Markup 2.99 - Cost 50.0, MAP 149.5
+trestintas = "MAP"  # Markup 2.99 - Cost 50.0, MAP 149.5
 trestintas_trade = 1.4
 
 # York
