@@ -667,7 +667,7 @@ class Command(BaseCommand):
 
             try:
                 csr.execute('CALL UpdateProductInventory ("{}", {}, 3, "{}", "Madcap Cottage")'.format(
-                    product.sku, stock, "Ships in 2-3 weeks"))
+                    product.sku, stock, "Ships in 1-2 weeks"))
                 con.commit()
                 debug("MadcapCottage", 0,
                       "Updated inventory for {} to {}.".format(product.sku, stock))
