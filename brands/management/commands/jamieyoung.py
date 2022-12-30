@@ -46,6 +46,12 @@ class Command(BaseCommand):
         if "addNew" in options['functions']:
             self.addNew()
 
+        if "updateTags" in options['functions']:
+            self.updateTags()
+
+        if "updateStock" in options['functions']:
+            self.updateStock()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -415,6 +421,123 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
+
+        csr.close()
+        con.close()
+
+    def updateTags(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = JamieYoung.objects.all()
+        for product in products:
+            sku = product.sku
+
+            category = product.category
+            style = product.style
+            colors = product.colors
+
+            if category != None and category != "":
+                csr.execute("CALL AddToEditCategory ({}, {})".format(
+                    sq(sku), sq(category)))
+                con.commit()
+
+                debug("JamieYoung", 0, "Added Category. SKU: {}, Category: {}".format(
+                    sku, sq(category)))
+
+            if style != None and style != "":
+                csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    sq(sku), sq(style)))
+                con.commit()
+
+                debug("JamieYoung", 0, "Added Style. SKU: {}, Style: {}".format(
+                    sku, sq(style)))
+
+            if colors != None and colors != "":
+                csr.execute("CALL AddToEditColor ({}, {})".format(
+                    sq(sku), sq(colors)))
+                con.commit()
+
+                debug("JamieYoung", 0,
+                      "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+        csr.close()
+        con.close()
+
+    def downloadInvFile(self):
+        debug("JamieYoung", 0, "Download New CSV from JamieYoung FTP")
+
+        host = "18.206.49.64"
+        port = 22
+        username = "jamieyoung"
+        password = "JY123!"
+
+        try:
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=username, password=password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except:
+            debug("JamieYoung", 2, "Connection to JamieYoung FTP Server Failed")
+            return False
+
+        try:
+            files = sftp.listdir("/jamieyoung")
+        except:
+            debug("JamieYoung", 1, "No New Inventory File")
+            return False
+
+        for file in files:
+            if "EDI" in file:
+                continue
+            sftp.get(file, FILEDIR + '/files/jamieyoung-inventory.csv')
+            sftp.remove(file)
+
+        sftp.close()
+
+        debug("JamieYoung", 0, "JamieYoung FTP Inventory Download Completed")
+        return True
+
+    def updateStock(self):
+        if not self.downloadInvFile():
+            return
+
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Jamie Young'")
+        con.commit()
+
+        f = open(FILEDIR + '/files/jamieyoung-inventory.csv', "rt")
+        cr = csv.reader(f)
+
+        index = 0
+        for row in cr:
+            index += 1
+            if index == 1:
+                continue
+
+            mpn = row[0]
+            try:
+                product = JamieYoung.objects.get(mpn=mpn)
+            except:
+                continue
+
+            sku = product.sku
+
+            stock = int(row[3])
+
+            try:
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jamie Young')".format(
+                    sku, stock, ""))
+                con.commit()
+                debug("JamieYoung", 0,
+                      "Updated inventory for {} to {}.".format(sku, stock))
+            except Exception as e:
+                print(e)
+                debug(
+                    "JamieYoung", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
