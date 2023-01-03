@@ -482,7 +482,8 @@ class Command(BaseCommand):
             return False
 
         try:
-            files = sftp.listdir("/jamieyoung")
+            sftp.chdir(path='/jamieyoung')
+            files = sftp.listdir()
         except:
             debug("JamieYoung", 1, "No New Inventory File")
             return False
@@ -518,7 +519,7 @@ class Command(BaseCommand):
             if index == 1:
                 continue
 
-            mpn = row[0]
+            mpn = row[1]
             try:
                 product = JamieYoung.objects.get(mpn=mpn)
             except:
@@ -526,7 +527,7 @@ class Command(BaseCommand):
 
             sku = product.sku
 
-            stock = int(row[3])
+            stock = int(row[2])
 
             try:
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jamie Young')".format(
