@@ -17,7 +17,7 @@ elainesmith_trade = 1.3
 
 # Jamie Young
 jamieyoung = "MAP"  # Markup 2 - 2.3
-jamieyoung_trade = 1
+jamieyoung_trade = "MAP 10% Off" # 1/3/22 from BK
 
 # JF Fabrics
 jffabrics = 1.75  # x MAP

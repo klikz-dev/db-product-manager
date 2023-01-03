@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from brands.models import JamieYoung
+from shopify.models import Product as ShopifyProduct
 
 import os
 import paramiko
@@ -51,6 +52,9 @@ class Command(BaseCommand):
 
         if "updateStock" in options['functions']:
             self.updateStock()
+
+        if "updatePrice" in options['functions']:
+            self.updatePrice()
 
         if "main" in options['functions']:
             self.getProducts()
@@ -539,6 +543,78 @@ class Command(BaseCommand):
                 print(e)
                 debug(
                     "JamieYoung", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
+
+        csr.close()
+        con.close()
+
+    def updatePrice(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute("""SELECT ProductID, SKU, Published FROM Product
+        WHERE ManufacturerPartNumber<>'' AND ProductID IS NOT NULL AND ProductID != 0
+        AND SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+        WHERE M.Brand = 'Jamie Young');""")
+
+        rows = csr.fetchall()
+        for row in rows:
+            try:
+                productId = row[0]
+                shopifyProduct = ShopifyProduct.objects.get(
+                    productId=productId)
+
+                pv1 = shopifyProduct.variants.filter(
+                    isDefault=1).values('cost', 'price')[0]
+                pv2 = shopifyProduct.variants.filter(
+                    name__startswith="Trade - ").values('price')[0]
+
+                oldCost = pv1['cost']
+                oldPrice = pv1['price']
+                oldTradePrice = pv2['price']
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                product = JamieYoung.objects.get(
+                    productId=shopifyProduct.productId)
+                newCost = product.cost
+                map = product.map
+            except:
+                debug("JamieYoung", 1, "Discontinued Product: SKU: {}".format(
+                    shopifyProduct.sku))
+                continue
+
+            try:
+                newPrice = common.formatprice(map, 1)
+                newPriceTrade = common.formatprice(map, 0.9)
+            except:
+                debug("JamieYoung", 1, "Price Error: SKU: {}".format(product.sku))
+                continue
+
+            if newPrice < 19.99:
+                newPrice = 19.99
+                newPriceTrade = 16.99
+
+            if float(oldCost) != float(newCost) or float(oldPrice) != float(newPrice) or float(oldTradePrice) != float(newPriceTrade):
+                try:
+                    csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                        shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+                    con.commit()
+
+                    csr.execute(
+                        "CALL AddToPendingUpdatePrice ({})".format(shopifyProduct.productId))
+                    con.commit()
+                except Exception as e:
+                    print(e)
+                    continue
+
+                debug("JamieYoung", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+            else:
+                debug("JamieYoung", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newPrice, newPriceTrade))
 
         csr.close()
         con.close()
