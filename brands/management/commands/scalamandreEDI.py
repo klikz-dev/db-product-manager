@@ -137,13 +137,15 @@ class Command(BaseCommand):
                 orderDate = row[1]
                 name = row[2]
 
-                address1 = row[3].replace("\n", "")
-                address2 = row[4]
+                address1 = str(row[3]).replace("\n", "").strip()
+                address2 = str(row[4]).strip()
                 if "," in address1:
-                    address2 = str(address1).split(",")[1]
-                    address1 = str(address1).split(",")[0]
+                    address2 = str(address1).split(",")[1].strip()
+                    address1 = str(address1).split(",")[0].strip()
                 if address2 == None or address2 == '':
                     address2 = 'None'
+
+                print("--" + address2 + "--")
 
                 city = row[6]
                 state = row[7]
