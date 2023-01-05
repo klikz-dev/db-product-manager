@@ -248,6 +248,7 @@ class Command(BaseCommand):
         ftp.close()
 
     def addTracking(self, brand, orderNumber, tracking):
+        tracking = str(tracking).replace("'", "")
         debug("Tracking", 0, "Adding Tracking for Order: {}, Brand: {}, Tracking Number: {}".format(
             orderNumber, brand, tracking))
 
@@ -292,6 +293,7 @@ class Command(BaseCommand):
         tObj['location_id'] = int(14712864835)
         tObj['line_items'] = items
         tObj['tracking_numbers'] = [tracking]
+        tObj['tracking_url'] = "https://www.ups.com/WebTracking?loc=en_US&requester=ST&trackNums={}/trackdetails".format(tracking)
 
         r2 = s.post(api_url + "/admin/api/{}/orders/{}/fulfillments.json".format(
             api_version, oid), json={'fulfillment': tObj})
