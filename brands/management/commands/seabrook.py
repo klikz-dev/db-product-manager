@@ -130,6 +130,11 @@ class Command(BaseCommand):
 
                 collection = str(sh.cell_value(i, 2))
 
+                # Disable Lillian August Grasscloth Binder products. 1/5/23 from Ashely
+                status = True
+                if collection == 'Lillian August Grasscloth Binder':
+                    status = False
+
                 try:
                     price = str(sh.cell_value(i, 12)).replace(" / yd", "")
                     if price == "N/A":
@@ -251,7 +256,8 @@ class Command(BaseCommand):
                     map=map,
                     minimum=minimum,
                     increment=increment,
-                    feature=feature
+                    feature=feature,
+                    status=status
                 )
 
                 debug("Seabrook", 0,
