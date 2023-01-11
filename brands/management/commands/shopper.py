@@ -27,7 +27,7 @@ FEEDDIR = FILEDIR + '/files/feed/DecoratorsBestSA.xml'
 
 api_version = env('shopify_api_version')
 shopify_api_key = env('shopify_order_key')
-shopify_api_password = env('shopify_product_sec')
+shopify_api_password = env('shopify_order_sec')
 
 api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
     shopify_api_key, shopify_api_password)

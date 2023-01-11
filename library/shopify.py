@@ -772,7 +772,7 @@ def getAllProductIds(since_id):
 
 def getNewOrders(lastOrderId):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_product_sec'))
+        env('shopify_order_key'), env('shopify_order_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -790,7 +790,7 @@ def getNewOrders(lastOrderId):
 
 def getOrderById(orderId):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_product_sec'))
+        env('shopify_order_key'), env('shopify_order_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -804,7 +804,7 @@ def getOrderById(orderId):
 def updateOrderById(orderId, order):
     s = requests.Session()
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_product_sec'))
+        env('shopify_order_key'), env('shopify_order_sec'))
 
     note_attributes = {
         "CSNote": order.note,
