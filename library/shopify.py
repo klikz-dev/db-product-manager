@@ -22,9 +22,17 @@ db_port = int(env('MYSQL_PORT'))
 aws_access_key = env('aws_access_key')
 aws_secret_key = env('aws_secret_key')
 
-api_version = env('shopify_api_version')
-
 debug = debug.debug
+
+
+SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
+    env('shopify_api_version'))
+SHOPIFY_PRODUCT_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_product_token')
+}
+SHOPIFY_ORDER_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_order_token')
+}
 
 
 class ProductData:
@@ -155,10 +163,7 @@ class ProductData:
 
         # Hipliee tag i.e. keep tags added by other vendors
         s = requests.Session()
-        api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-            env('shopify_product_key'), env('shopify_product_sec'))
-        r = s.get(
-            api_url+"/admin/api/{}/products/{}.json".format(api_version, self.productID))
+        r = s.get("{}/products/{}.json".format(SHOPIFY_API_URL, self.productID), headers=SHOPIFY_PRODUCT_API_HEADER)
 
         exProdMeta = json.loads(r.text)
         try:
@@ -337,8 +342,8 @@ def NewProductBySku(sku, con):
     csr = con.cursor()
     csr.execute("SELECT Title FROM Product WHERE SKU = {}".format(sq(sku)))
     title = (csr.fetchone())[0]
-    rTitle = s.get(api_url + "/admin/api/{}/products.json?title={}".format(
-        api_version, urllib.parse.quote_plus(title)))
+    rTitle = s.get("{}/products.json?title={}".format(SHOPIFY_API_URL,
+                   urllib.parse.quote_plus(title)), headers=SHOPIFY_PRODUCT_API_HEADER)
     jTitle = json.loads(rTitle.text)
 
     for cp in jTitle['products']:
@@ -389,8 +394,9 @@ def NewProductBySku(sku, con):
     if published == 0:
         p.update({'published': False})
 
-    r = s.post(
-        api_url + "/admin/api/{}/products.json".format(api_version), json={"product": p})
+    r = s.post("{}/products.json".format(SHOPIFY_API_URL),
+               headers=SHOPIFY_PRODUCT_API_HEADER,
+               json={"product": p})
     j = json.loads(r.text)
 
     errors = j.get("errors")
@@ -458,8 +464,10 @@ def UploadImageToShopify(src):
                 except Product.DoesNotExist:
                     alt = ''
 
-                rImage = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
-                               productID), json={"product": {"id": productID, "images": [{"src": imgLink, "alt": alt}]}})
+                rImage = s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+                               headers=SHOPIFY_PRODUCT_API_HEADER,
+                               json={"product": {"id": productID, "images": [{"src": imgLink, "alt": alt}]}})
+
                 jImage = json.loads(rImage.text)
                 jpImage = jImage["product"]
                 csr.execute("CALL AddToProductImage ({}, 1, {}, '{}')".format(
@@ -476,7 +484,7 @@ def UploadImageToShopify(src):
                 if temp != None:
                     imageId = temp[0]
                     rImage = s.delete(
-                        api_url + "/admin/api/{}/products/{}/images/{}.json".format(api_version, productID, imageId))
+                        "{}/products/{}/images/{}.json".format(SHOPIFY_API_URL, productID, imageId))
                     jImage = json.loads(rImage.text)
 
                 s3.upload_file("{}/{}".format(src, f), bucket_name, f,
@@ -492,8 +500,9 @@ def UploadImageToShopify(src):
                 except Product.DoesNotExist:
                     alt = ''
 
-                rImage = s.post(api_url + "/admin/api/{}/products/{}/images.json".format(
-                    api_version, productID), json={"image": {"position": idx, "src": imgLink, "alt": alt}})
+                rImage = s.post("{}/products/{}/images.json".format(SHOPIFY_API_URL, productID),
+                                headers=SHOPIFY_PRODUCT_API_HEADER,
+                                json={"image": {"position": idx, "src": imgLink, "alt": alt}})
                 jImage = json.loads(rImage.text)
 
                 csr.execute("CALL AddToProductImage ({}, {}, {}, '{}')".format(
@@ -526,27 +535,28 @@ def UpdateProductToShopify(productID, key, password, con):
             "SELECT VariantID FROM ProductVariant WHERE SKU = {}".format(sq(sku)))
         for v in csr.fetchall():
             variantID = v[0]
-            rvm = s.get(api_url + "/admin/api/{}/products/{}/variants/{}/metafields.json".format(
-                api_version, productID, variantID))
+            rvm = s.get("{}/products/{}/variants/{}/metafields.json".format(
+                SHOPIFY_API_URL, productID, variantID), headers=SHOPIFY_PRODUCT_API_HEADER)
             jvm = json.loads(rvm.text)
             if 'metafields' in jvm:
                 for vm in jvm['metafields']:
                     s.delete(
-                        api_url + "/admin/api/{}/metafields/{}.json".format(api_version, vm['id']))
+                        "{}/metafields/{}.json".format(SHOPIFY_API_URL, vm['id']))
             variant = pd.ProductVariant(variantID)
             titles.append(variant['title'])
             variant.update({"id": variantID})
-            s.put(api_url + "/admin/api/{}/variants/{}.json".format(api_version,
-                  variantID), json={"variant": variant})
+            s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
+                  headers=SHOPIFY_PRODUCT_API_HEADER,
+                  json={"variant": variant})
 
         ###################################################################################################
         # If NOT need to update the product metafield, comment the section and the below 2 sections
-        rpm = s.get(
-            api_url + "/admin/api/{}/products/{}/metafields.json".format(api_version, productID))
+        rpm = s.get("{}/products/{}/metafields.json".format(SHOPIFY_API_URL,
+                    productID), headers=SHOPIFY_PRODUCT_API_HEADER)
         jpm = json.loads(rpm.text)
         for pm in jpm['metafields']:
             s.delete(
-                api_url + "/admin/api/{}/metafields/{}.json".format(api_version, pm['id']))
+                "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']))
         ###################################################################################################
 
         body = pd.body
@@ -580,8 +590,10 @@ def UpdateProductToShopify(productID, key, password, con):
         if published == 0:
             p.update({'published': False})
 
-        r = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
-                  productID), json={"product": p})
+        s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+              headers=SHOPIFY_PRODUCT_API_HEADER,
+              json={"product": p})
+
         # print r.text
         csr.execute(
             "DELETE FROM PendingUpdateProduct WHERE ProductID = {}".format(productID))
@@ -606,8 +618,9 @@ def UpdatePriceToShopify(productID, con):
         variantID = row[0]
         price = float(row[1])
 
-        r = s.put(api_url + "/admin/api/{}/variants/{}.json".format(api_version,
-                  variantID), json={"variant": {'id': variantID, 'price': price}})
+        s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
+              headers=SHOPIFY_PRODUCT_API_HEADER,
+              json={"variant": {'id': variantID, 'price': price}})
 
         csr.execute(
             "DELETE FROM PendingUpdatePrice WHERE ProductID = {}".format(productID))
@@ -639,8 +652,9 @@ def UpdatePublishToShopify(productID, con):
         else:
             published = False
 
-        r = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
-                  productID), json={"product": {'id': productID, 'published': published, 'status': 'active'}})
+        s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+              headers=SHOPIFY_PRODUCT_API_HEADER,
+              json={"product": {'id': productID, 'published': published, 'status': 'active'}})
 
         csr.execute(
             "DELETE FROM PendingUpdatePublish WHERE ProductID = {}".format(productID))
@@ -663,8 +677,9 @@ def UpdateTagBodyToShopify(productID, con):
     tags = pd.ProductTag()
     tag = ",".join(tags)
 
-    r = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version, productID),
-              json={"product": {"id": productID, "body_html": body, "tags": tag}})
+    s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+          headers=SHOPIFY_PRODUCT_API_HEADER,
+          json={"product": {"id": productID, "body_html": body, "tags": tag}})
 
     csr.execute(
         "DELETE FROM PendingUpdateTagBodyHTML WHERE ProductID = {}".format(productID))
@@ -675,89 +690,70 @@ def UpdateTagBodyToShopify(productID, con):
 
 
 def AddProductToCollection(productID, collectionID):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
     s = requests.Session()
-    r = s.post(api_url + "/admin/api/{}/collects.json".format(api_version, productID),
-               json={"collect": {"product_id": productID, "collection_id": collectionID}})
+    s.post("{}/collects.json".format(SHOPIFY_API_URL, productID),
+           headers=SHOPIFY_PRODUCT_API_HEADER,
+           json={"collect": {"product_id": productID, "collection_id": collectionID}})
+
+    s.close()
 
 
 def UpdateProductByProductID(productID, param):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
-              productID), json={"product": param})
+    s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+          headers=SHOPIFY_PRODUCT_API_HEADER,
+          json={"product": param}
+          )
 
     s.close()
 
 
 def UpdateVariantByVariantID(variantID, param):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), ('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.put(api_url + "/admin/api/{}/variants/{}.json".format(api_version,
-              variantID), json={"variant": param})
+    s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
+          headers=SHOPIFY_PRODUCT_API_HEADER, json={"variant": param})
 
     s.close()
 
 
 def DeleteVariantByVariantID(variantID):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.delete(
-        api_url + "/admin/api/{}/variants/{}.json".format(api_version, variantID))
+    s.delete("{}/variants/{}.json".format(SHOPIFY_API_URL,
+             variantID), headers=SHOPIFY_PRODUCT_API_HEADER)
 
     s.close()
 
 
 def DeleteProductByProductID(productID):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.delete(
-        api_url + "/admin/api/{}/products/{}.json".format(api_version, productID))
+    s.delete("{}/products/{}.json".format(SHOPIFY_API_URL,
+             productID), headers=SHOPIFY_PRODUCT_API_HEADER)
 
     s.close()
 
 
 def GetProductByProductID(productID):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.get(
-        api_url + "/admin/api/{}/products/{}.json".format(api_version, productID))
-
+    r = s.get("{}/products/{}.json".format(SHOPIFY_API_URL,
+              productID), headers=SHOPIFY_PRODUCT_API_HEADER)
     s.close()
 
     return r
 
 
 def getProductsByVendor(vendor):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.get(
-        api_url + "/admin/api/{}/products.json?fields=id,vendor&vendor={}".format(api_version, vendor))
+    r = s.get("{}/products.json?fields=id,vendor&vendor={}".format(SHOPIFY_API_URL,
+              vendor), headers=SHOPIFY_PRODUCT_API_HEADER)
 
     s.close()
     return r
 
 
 def getAllProductIds(since_id):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
-    r = s.get(
-        api_url + "/admin/api/{}/products.json?fields=id&limit=250&since_id={}".format(api_version, since_id))
+    r = s.get("{}/products.json?fields=id&limit=250&since_id={}".format(
+        SHOPIFY_API_URL, since_id), headers=SHOPIFY_PRODUCT_API_HEADER)
 
     s.close()
 
@@ -771,12 +767,9 @@ def getAllProductIds(since_id):
 
 
 def getNewOrders(lastOrderId):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_order_sec'))
-
     s = requests.Session()
-    r = s.get(
-        api_url + "/admin/api/{}/orders.json?since_id={}&statu=any".format(api_version, lastOrderId))
+    r = s.get("{}/orders.json?since_id={}&statu=any".format(SHOPIFY_API_URL,
+              lastOrderId), headers=SHOPIFY_ORDER_API_HEADER)
 
     s.close()
 
@@ -789,12 +782,9 @@ def getNewOrders(lastOrderId):
 
 
 def getOrderById(orderId):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_order_sec'))
-
     s = requests.Session()
-    r = s.get(
-        api_url + "/admin/api/{}/orders/{}.json".format(api_version, orderId))
+    r = s.get("{}/orders/{}.json".format(SHOPIFY_API_URL,
+              orderId), headers=SHOPIFY_ORDER_API_HEADER)
 
     s.close()
 
@@ -803,8 +793,6 @@ def getOrderById(orderId):
 
 def updateOrderById(orderId, order):
     s = requests.Session()
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_order_key'), env('shopify_order_sec'))
 
     note_attributes = {
         "CSNote": order.note,
@@ -834,27 +822,26 @@ def updateOrderById(orderId, order):
     if order.customerChatted:
         note_attributes['CustomerChatted'] = order.customerChatted
 
-    r = s.put(
-        api_url +
-        "/admin/api/{}/orders/{}.json".format(api_version, orderId),
-        json={
-            "order": {
-                "id": orderId,
-                "note_attributes": note_attributes,
-                "shipping_address": {
-                    "first_name": order.shippingFirstName,
-                    "last_name": order.shippingLastName,
-                    "address1": order.shippingAddress1,
-                    "address2": order.shippingAddress2,
-                    "company": order.shippingCompany,
-                    "city": order.shippingCity,
-                    "province_code": order.shippingState,
-                    "zip": order.shippingZip,
-                    "country": order.shippingCountry,
-                    "phone": order.shippingPhone,
-                }
+    r = s.put("{}/orders/{}.json".format(SHOPIFY_API_URL, orderId),
+              headers=SHOPIFY_ORDER_API_HEADER,
+              json={
+        "order": {
+            "id": orderId,
+            "note_attributes": note_attributes,
+            "shipping_address": {
+                "first_name": order.shippingFirstName,
+                "last_name": order.shippingLastName,
+                "address1": order.shippingAddress1,
+                "address2": order.shippingAddress2,
+                "company": order.shippingCompany,
+                "city": order.shippingCity,
+                "province_code": order.shippingState,
+                "zip": order.shippingZip,
+                "country": order.shippingCountry,
+                "phone": order.shippingPhone,
             }
         }
+    }
     )
 
     s.close()
