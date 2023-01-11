@@ -73,7 +73,8 @@ class Command(BaseCommand):
                       P.BodyHTML,
                       PV.Cost,
                       PV.Price as SPrice,
-                      P.ProductID
+                      P.ProductID,
+                      P.Pattern
                       FROM Product P
                       LEFT JOIN ProductImage PI ON P.ProductID = PI.ProductID
                       LEFT JOIN ProductVariant PV ON P.ProductID = PV.ProductID
@@ -107,25 +108,25 @@ class Command(BaseCommand):
             sku = row[0]
 
             # Check Stock
-            try:
-                username = 'decoratorsbest'
-                password = '5iXrwa8X!ZjRT'
-                url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
-                    username, password, sku)
+            # try:
+            #     username = 'decoratorsbest'
+            #     password = '5iXrwa8X!ZjRT'
+            #     url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
+            #         username, password, sku)
 
-                payload = {}
-                headers = {}
+            #     payload = {}
+            #     headers = {}
 
-                response = requests.request(
-                    "GET", url, headers=headers, data=payload)
-                stockInfo = json.loads(response.text)
-                print(stockInfo['Quantity'])
+            #     response = requests.request(
+            #         "GET", url, headers=headers, data=payload)
+            #     stockInfo = json.loads(response.text)
+            #     print(stockInfo['Quantity'])
 
-                if int(stockInfo['Quantity']) < 3:
-                    continue
-            except Exception as e:
-                print(e)
-                continue
+            #     if int(stockInfo['Quantity']) < 1:
+            #         continue
+            # except Exception as e:
+            #     print(e)
+            #     continue
             ############
 
             title = self.formatter("{} - {}".format(row[1].title(), sku))
@@ -202,6 +203,15 @@ class Command(BaseCommand):
             elif ptype == "Wallpaper":
                 category = "Home & Garden > Decor > Wallpaper"
                 productType = "Home & Garden > Bed and Living Room > Home Wallpaper"
+            elif ptype == "Pillow":
+                category = "Home & Garden > Decor > Pillow"
+                productType = "Home & Garden > Bed and Living Room > Home Pillow"
+            elif ptype == "Trim":
+                category = "Home & Garden > Decor > Trim"
+                productType = "Home & Garden > Bed and Living Room > Home Trim"
+            elif ptype == "Furniture":
+                category = "Home & Garden > Decor > Furniture"
+                productType = "Home & Garden > Bed and Living Room > Home Furniture"
             else:
                 category = "Home & Garden > Decor"
                 productType = ""
@@ -209,6 +219,18 @@ class Command(BaseCommand):
 
             category = self.formatter(category)
             productType = self.formatter(productType)
+
+            # Material
+            material = ""
+            bodyHTML = str(row[12]).replace("<br />", "<br/>").replace("<br/>", "<br>")
+            lines = bodyHTML.split("<br>")
+            for line in lines:
+                if "Material:" in line:
+                    material = line.replace("Material:", "").strip()
+
+            # Pattern
+            if style == "":
+                style = row[16]
 
             f.write('<item>')
             f.write('<g:id>{}</g:id>'.format(sku))
@@ -239,6 +261,8 @@ class Command(BaseCommand):
             f.write('<g:color>{}</g:color>'.format(color))
             f.write('<g:pattern>{}</g:pattern>'.format(style))
             f.write('<g:shipping_weight>{} lb</g:shipping_weight>'.format(weight))
+            if material != '':
+                f.write('<g:material>{}</g:material>'.format(material))
             f.write('<g:custom_label_0>{}</g:custom_label_0>'.format(ptype))
             f.write('<g:custom_label_1>{}</g:custom_label_1>'.format(brand))
             f.write('<g:custom_label_2>{}</g:custom_label_2>'.format(priceRange))
