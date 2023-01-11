@@ -160,7 +160,7 @@ class Command(BaseCommand):
             for word in desc.split():
                 if "get" == word.lower():
                     getInText = True
-            
+
             if getInText:
                 debug("GS", 1, "Ignore SKU: {}. Get in the text".format(sku))
                 continue
@@ -222,7 +222,8 @@ class Command(BaseCommand):
 
             # Material
             material = ""
-            bodyHTML = str(row[12]).replace("<br />", "<br/>").replace("<br/>", "<br>")
+            bodyHTML = self.formatter(str(row[12]).replace(
+                "<br />", "<br/>").replace("<br/>", "<br>"))
             lines = bodyHTML.split("<br>")
             for line in lines:
                 if "Material:" in line:
@@ -230,7 +231,7 @@ class Command(BaseCommand):
 
             # Pattern
             if style == "":
-                style = row[16]
+                style = self.formatter(row[16])
 
             f.write('<item>')
             f.write('<g:id>{}</g:id>'.format(sku))
