@@ -26,8 +26,8 @@ FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEEDDIR = FILEDIR + '/files/feed/DecoratorsBestSA.xml'
 
 api_version = env('shopify_api_version')
-shopify_api_key = env('shopify_fulfillment_key')
-shopify_api_password = env('shopify_fulfillment_password')
+shopify_api_key = env('shopify_order_key')
+shopify_api_password = env('shopify_product_sec')
 
 api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
     shopify_api_key, shopify_api_password)

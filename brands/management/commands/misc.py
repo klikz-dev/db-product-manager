@@ -442,8 +442,8 @@ class Command(BaseCommand):
 
     def colorCollection(self):
         API_VERSION = env('shopify_api_version')
-        API_KEY = env('shopify_general_key')
-        API_PASS = env('shopify_general_password')
+        API_KEY = env('shopify_product_key')
+        API_PASS = env('shopify_product_sec')
 
         API_URL = "https://{}:{}@decoratorsbest.myshopify.com/admin/api/{}".format(
             API_KEY, API_PASS, API_VERSION)

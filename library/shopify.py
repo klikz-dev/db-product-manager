@@ -156,7 +156,7 @@ class ProductData:
         # Hipliee tag i.e. keep tags added by other vendors
         s = requests.Session()
         api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-            env('shopify_newproduct_key'), env('shopify_newproduct_password'))
+            env('shopify_product_key'), env('shopify_product_sec'))
         r = s.get(
             api_url+"/admin/api/{}/products/{}.json".format(api_version, self.productID))
 
@@ -427,7 +427,7 @@ def NewProductBySku(sku, con):
 
 def UploadImageToShopify(src):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_uploadimage_key'), env('shopify_uploadimage_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     s3 = boto3.client('s3', aws_access_key_id=aws_access_key,
@@ -507,7 +507,6 @@ def UploadImageToShopify(src):
 
 
 def UpdateProductToShopify(productID, key, password, con):
-    # api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(env('shopify_updateproduct_key, env('shopify_updateproduct_password)
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
         key, password)
     s = requests.Session()
@@ -597,7 +596,7 @@ def UpdateProductToShopify(productID, key, password, con):
 
 def UpdatePriceToShopify(productID, con):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateprice_key'), env('shopify_updateprice_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     csr = con.cursor()
@@ -620,7 +619,7 @@ def UpdatePriceToShopify(productID, con):
 
 def UpdatePublishToShopify(productID, con):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updatepublish_key'), env('shopify_updatepublish_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     csr = con.cursor()
@@ -653,7 +652,7 @@ def UpdatePublishToShopify(productID, con):
 
 def UpdateTagBodyToShopify(productID, con):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updatetagbody_key'), env('shopify_updatetagbody_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     csr = con.cursor()
@@ -677,7 +676,7 @@ def UpdateTagBodyToShopify(productID, con):
 
 def AddProductToCollection(productID, collectionID):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_addproducttocollection_key'), env('shopify_addproducttocollection_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
     s = requests.Session()
     r = s.post(api_url + "/admin/api/{}/collects.json".format(api_version, productID),
                json={"collect": {"product_id": productID, "collection_id": collectionID}})
@@ -685,7 +684,7 @@ def AddProductToCollection(productID, collectionID):
 
 def UpdateProductByProductID(productID, param):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.put(api_url + "/admin/api/{}/products/{}.json".format(api_version,
@@ -696,7 +695,7 @@ def UpdateProductByProductID(productID, param):
 
 def UpdateVariantByVariantID(variantID, param):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), ('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), ('shopify_product_sec'))
 
     s = requests.Session()
     r = s.put(api_url + "/admin/api/{}/variants/{}.json".format(api_version,
@@ -707,7 +706,7 @@ def UpdateVariantByVariantID(variantID, param):
 
 def DeleteVariantByVariantID(variantID):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.delete(
@@ -718,7 +717,7 @@ def DeleteVariantByVariantID(variantID):
 
 def DeleteProductByProductID(productID):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.delete(
@@ -729,7 +728,7 @@ def DeleteProductByProductID(productID):
 
 def GetProductByProductID(productID):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -742,7 +741,7 @@ def GetProductByProductID(productID):
 
 def getProductsByVendor(vendor):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -754,7 +753,7 @@ def getProductsByVendor(vendor):
 
 def getAllProductIds(since_id):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_updateproductbyid_key'), env('shopify_updateproductbyid_password'))
+        env('shopify_product_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -773,7 +772,7 @@ def getAllProductIds(since_id):
 
 def getNewOrders(lastOrderId):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+        env('shopify_order_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -791,7 +790,7 @@ def getNewOrders(lastOrderId):
 
 def getOrderById(orderId):
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+        env('shopify_order_key'), env('shopify_product_sec'))
 
     s = requests.Session()
     r = s.get(
@@ -805,7 +804,7 @@ def getOrderById(orderId):
 def updateOrderById(orderId, order):
     s = requests.Session()
     api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_fulfillment_key'), env('shopify_fulfillment_password'))
+        env('shopify_order_key'), env('shopify_product_sec'))
 
     note_attributes = {
         "CSNote": order.note,

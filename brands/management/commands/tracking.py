@@ -27,8 +27,8 @@ db_name = env('MYSQL_DATABASE')
 db_port = int(env('MYSQL_PORT'))
 
 api_version = env('shopify_api_version')
-shopify_api_key = env('shopify_fulfillment_key')
-shopify_api_password = env('shopify_fulfillment_password')
+shopify_api_key = env('shopify_order_key')
+shopify_api_password = env('shopify_product_sec')
 
 api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
     shopify_api_key, shopify_api_password)
@@ -124,7 +124,8 @@ class Command(BaseCommand):
                     orderNumber = row[1].split("|")[0]
                 elif "HERITAGE FABRICS LLC" in row[4]:
                     brand = "Maxwell"
-                    referenceNumber = row[1].split("|")[0].replace("MAXWELL", "")
+                    referenceNumber = row[1].split(
+                        "|")[0].replace("MAXWELL", "")
                     csr.execute(
                         "SELECT OrderNumber FROM Orders WHERE ReferenceNumber Like '%{}%' ORDER BY OrderNumber DESC".format(referenceNumber))
                     orderNumber = str((csr.fetchone())[0])
@@ -293,7 +294,8 @@ class Command(BaseCommand):
         tObj['location_id'] = int(14712864835)
         tObj['line_items'] = items
         tObj['tracking_numbers'] = [tracking]
-        tObj['tracking_url'] = "https://www.ups.com/WebTracking?loc=en_US&requester=ST&trackNums={}/trackdetails".format(tracking)
+        tObj['tracking_url'] = "https://www.ups.com/WebTracking?loc=en_US&requester=ST&trackNums={}/trackdetails".format(
+            tracking)
 
         r2 = s.post(api_url + "/admin/api/{}/orders/{}/fulfillments.json".format(
             api_version, oid), json={'fulfillment': tObj})
