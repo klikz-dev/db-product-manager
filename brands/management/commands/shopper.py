@@ -25,12 +25,12 @@ aws_secret_key = env('aws_secret_key')
 FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEEDDIR = FILEDIR + '/files/feed/DecoratorsBestSA.xml'
 
-api_version = env('shopify_api_version')
-shopify_api_key = env('shopify_order_key')
-shopify_api_password = env('shopify_order_sec')
 
-api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-    shopify_api_key, shopify_api_password)
+SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
+    env('shopify_api_version'))
+SHOPIFY_ORDER_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_order_token')
+}
 
 
 class Command(BaseCommand):
@@ -41,81 +41,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if "feed" in options['functions']:
-            self.feed()
-            self.upload()
+            while True:
+                self.feed()
+                self.upload()
+                print("Finished Process. Waiting for Next run")
+                time.sleep(86400 * 3)
 
         if "main" in options['functions']:
-            while True:
-                self.followup()
-                self.reward()
-
-                print("Finished Process. Waiting for Next run")
-                time.sleep(86400)
-
-    def followup(self):
-        today = datetime.date.today()
-        yesterday = today - datetime.timedelta(days=1)
-
-        followup = today + datetime.timedelta(days=3)
-
-        s = requests.Session()
-
-        # Update Fulfilled orders
-        nextLink = api_url + \
-            '/admin/api/{}/orders.json?status=any&fulfillment_status=shipped&updated_at_min={}&updated_at_max={}'.format(
-                api_version, yesterday, today)
-
-        page = 0
-        while nextLink != "":
-            page += 1
-            res = s.get(nextLink)
-
-            headers = res.headers
-            nextLink = ""
-            try:
-                if headers['Link'] != None:
-                    rel = headers['Link'].split("rel=")[1].replace('"', '')
-                    if rel == "next":
-                        nextLink = headers['Link'].split(
-                            ";")[0].replace("<", "").replace(">", "")
-                        nextLink = nextLink.replace(
-                            "https://decoratorsbest.myshopify.com", api_url)
-            except:
-                pass
-
-            body = json.loads(res.text)
-            orders = body['orders']
-
-            for order in orders:
-                orderNumber = order['order_number']
-                customerName = "{} {}".format(
-                    order['customer']['first_name'], order['customer']['last_name'])
-                email = order['email']
-
-                productIds = []
-                for line_item in order['line_items']:
-                    productId = line_item['product_id']
-                    productIds.append(productId)
-
-                print(orderNumber)
-                print(customerName)
-                print(email)
-                print(productIds)
-
-                # try:
-                if 1 == 1:
-                    saReq = s.post("https://api.shopperapproved.com/reviews/26410/{}".format(
-                        orderNumber), data={"token": "a24cf54fa5", "followup": followup, "orderid": orderNumber,
-                                            "name": customerName, "products": productIds, "email": email})
-
-                    saRes = json.loads(saReq.text)
-                    print(saRes)
-                    # if saRes["status"] == "success":
-                    #     debug("Shopper Approved", 0, "Order {} Review follow up date has been updated to {} successfully".format(
-                    #         orderNumber, followup))
-                    # else:
-                    #     debug("Shopper Approved", 1, "Failed Updating Order {} Review follow up date".format(
-                    #         orderNumber))
+            self.followup()
+            self.reward()
 
     def formatter(self, s):
         if s != None and s != "":
@@ -155,7 +89,6 @@ class Command(BaseCommand):
                       LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
                       LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
                       WHERE PI.ImageIndex = 1
-                      AND M.Brand NOT IN ("Fabricut", "Schumacher", "P/K Lifestyles", "Clarence House", "Jamie Young", "Noir", "Studio Zen", "Cyan", "Couture Lamps", "Global Views", "Olympus Minerals", "Kravet Decor", "Robert Allen", "Nature's Decoration", "Duralee")
                       AND PV.Cost != 0
                       AND P.Published = 1
                       AND P.ManufacturerPartNumber <> ''
@@ -190,7 +123,7 @@ class Command(BaseCommand):
             price = row[5]
             productID = row[15]
 
-            debug("SA", 0, "Writing -- ProductID: {}, SKU: {}, Brand: {}, Cost: {}".format(
+            debug.debug("Shopper", 0, "Writing -- ProductID: {}, SKU: {}, Brand: {}, Cost: {}".format(
                 productID, sku, brand, price))
 
             ptype = row[6]
@@ -240,7 +173,64 @@ class Command(BaseCommand):
 
         s3.upload_file(FEEDDIR,
                        bucket_name, "DecoratorsBestSA.xml", ExtraArgs={'ACL': 'public-read'})
-        debug("GS", 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestSA.xml')
+        debug.debug(
+            "Shopper", 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestSA.xml')
+
+    def followup(self):
+        today = datetime.date.today()
+
+        start = today - datetime.timedelta(days=7)
+        to = today - datetime.timedelta(days=6)
+        followup = today + datetime.timedelta(days=3)
+
+        s = requests.Session()
+
+        nextLink = "{}/orders.json?status=any&fulfillment_status=shipped&updated_at_min={}&updated_at_max={}".format(
+            SHOPIFY_API_URL, start, to)
+
+        page = 0
+        while nextLink != "":
+            page += 1
+            res = s.get(nextLink, headers=SHOPIFY_ORDER_API_HEADER)
+
+            headers = res.headers
+            nextLink = ""
+            try:
+                if headers['Link'] != None:
+                    rel = headers['Link'].split("rel=")[1].replace('"', '')
+                    if rel == "next":
+                        nextLink = headers['Link'].split(
+                            ";")[0].replace("<", "").replace(">", "")
+            except:
+                pass
+
+            body = json.loads(res.text)
+            orders = body['orders']
+
+            for order in orders:
+                orderNumber = order['order_number']
+                customerName = "{} {}".format(
+                    order['customer']['first_name'], order['customer']['last_name'])
+                email = order['email']
+
+                productIds = []
+                for line_item in order['line_items']:
+                    productId = line_item['product_id']
+                    productIds.append(productId)
+
+                debug.debug("Shopper", 0, "Requesting Review for PO: {}, Customer: {}, Email: {}".format(
+                    orderNumber, customerName, email))
+
+                try:
+                    saReq = s.post("https://api.shopperapproved.com/reviews/26410/{}".format(
+                        orderNumber), data={"token": "a24cf54fa5", "followup": followup, "orderid": orderNumber,
+                                            "name": customerName, "products": productIds, "email": email})
+
+                    saRes = json.loads(saReq.text)
+                    print(saRes)
+                except Exception as e:
+                    print(e)
+                    continue
 
     def reward(self):
         today = datetime.date.today()
