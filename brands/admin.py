@@ -224,8 +224,7 @@ class MaxwellAdmin(admin.ModelAdmin):
         (None, {'fields': ['mpn', 'sku']}),
         ('Identities', {'fields': ['pattern', 'color']}),
         ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'height', 'rollLength', 'content', 'hr', 'vr', 'feature']}),
+        ('Description', {'fields': ['description', 'width', 'repeat', 'content']}),
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),

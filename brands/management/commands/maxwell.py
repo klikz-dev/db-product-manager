@@ -75,11 +75,11 @@ class Command(BaseCommand):
         for page in range(1, 30):
             reqList = requests.get(
                 "{}/api/simple/item/list?count=1000&page={}".format(MXURL, str(page)), headers=HEADERS)
-            resList = json.loads(reqList.text)
+            rows = json.loads(reqList.text)
 
-            for i in range(0, len(resList)):
+            for row in rows:
                 brand = "Maxwell"
-                mpn = resList[i]['sku']
+                mpn = row['sku']
                 sku = "MW {}".format(mpn)
 
                 try:
@@ -88,98 +88,45 @@ class Command(BaseCommand):
                 except Maxwell.DoesNotExist:
                     pass
 
-                req = requests.get(
-                    "{}/api/simple/item/lookup?sku={}".format(MXURL, mpn), headers=HEADERS)
-                try:
-                    res = json.loads(req.text)
-                except:
-                    continue
+                pattern = row['style']
+                color = row['color']
 
-                pattern = res['style']
-                color = res['color']
+                collection = row['product_category']
 
-                ptype = ""
-                try:
-                    collection = res['books'][len(res['books']) - 1]
-                except:
-                    collection = ''
-
-                description = ""
-                try:
-                    width = res['width'].split("X")[0]
-                except:
-                    width = ""
-                try:
-                    height = res['width'].split("X")[1]
-                except:
-                    height = ""
-                if res['repeat'] != None:
-                    vr = res['repeat'].split(" ")[0]
-                    try:
-                        hr = res['repeat'].split(" ")[1]
-                    except:
-                        hr = ""
+                if "WALLPAPER" in collection:
+                    usage = "Wallpaper"
+                    ptype = "Wallpaper"
+                    uom = "Per Roll"
                 else:
-                    hr = ""
-                    vr = ""
-                content = res['content']
-                if content == None:
-                    content = ""
-                feature = res['label_message']
-                if feature == None:
-                    feature = ""
+                    usage = "Fabric"
+                    ptype = "Fabric"
+                    uom = "Per Yard"
 
-                uom = ""
-                if 'USAGE' in res['grading']:
-                    usage = "/".join(res['grading']['USAGE'])
-                else:
-                    usage = ''
+                description = str(row['tests'])
+                width = str(row['width'])
+                repeat = str(row['repeat'])
+                content = str(row['content'])
+
                 minimum = 1
                 increment = ""
 
-                if 'PATTERN' in res['grading']:
-                    style = ",".join(res['grading']['PATTERN'])
-                else:
-                    style = ""
-
-                if 'COLOR' in res['grading']:
-                    colors = ",".join(res['grading']['COLOR'])
-                else:
-                    colors = ""
-
-                if 'CATEGOR' in res['grading']:
-                    category = ",".join(res['grading']['CATEGOR'])
-                else:
-                    category = ""
-
-                cost = float(res['price'])
+                cost = float(row['discounted_price'])
                 msrp = 0
                 map = 0
 
-                try:
-                    stock = int(res['inventory']['on_hand'])
-                except:
-                    stock = 0
+                stock = 0
 
-                if res['discontinued'] != None:
+                if row['discontinued'] != None:
                     status = False
                 else:
                     status = True
 
-                if res['image_url'] != None:
-                    thumbnail = res['image_url']
-                else:
-                    thumbnail = ""
+                thumbnail = row['image_url']
                 roomset = ""
 
-                if "WALLPAPER" in category:
-                    usage == "Wallpaper"
-                    ptype = "Wallpaper"
-                    uom = "Per Roll"
-                else:
-                    usage == "Fabric"
-                    ptype = "Fabric"
-                    uom = "Per Yard"
+                style = collection
+                category = collection
+                colors = color
 
                 manufacturer = "{} {}".format(brand, ptype)
 
@@ -195,11 +142,8 @@ class Command(BaseCommand):
                         collection=collection,
                         description=description,
                         width=width,
-                        height=height,
+                        repeat=repeat,
                         content=content,
-                        hr=hr,
-                        vr=vr,
-                        feature=feature,
                         uom=uom,
                         usage=usage,
                         minimum=minimum,
@@ -558,7 +502,7 @@ class Command(BaseCommand):
         products = Maxwell.objects.all()
 
         for product in products:
-            if int(product.stock) < 5 and product.ptype == "wallpaper":
+            if int(product.stock) < 5 and product.ptype == "Wallpaper":
                 try:
                     csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Maxwell')".format(
                         product.sku, 5, ''))

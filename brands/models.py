@@ -735,14 +735,9 @@ class Maxwell(models.Model):
         max_length=200, default=None, null=True, blank=True)
     width = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    height = models.CharField(
+    repeat = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    rollLength = models.FloatField(default=0)
     content = models.CharField(max_length=1000)
-    hr = models.CharField(max_length=200, default=None, null=True, blank=True)
-    vr = models.CharField(max_length=200, default=None, null=True, blank=True)
-    feature = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
 
     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
     usage = models.CharField(
