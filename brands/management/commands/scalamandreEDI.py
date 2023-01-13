@@ -54,7 +54,7 @@ class Command(BaseCommand):
             print(response.text)
 
             data = json.loads(response.text)
-            token = data['token']
+            token = data['Token']
 
             if token == '' or token == None:
                 debug("Scalamandre EDI", 2,
@@ -143,9 +143,7 @@ class Command(BaseCommand):
                     address2 = str(address1).split(",")[1].strip()
                     address1 = str(address1).split(",")[0].strip()
                 if address2 == None or address2 == '':
-                    address2 = 'None'
-
-                print("--" + address2 + "--")
+                    address2 = ''
 
                 city = row[6]
                 state = row[7]
