@@ -279,12 +279,12 @@ def importOrder(shopifyOrder):
 
     Line_Item.objects.filter(order=order).delete()
 
-    orderHold = False
-    holdBrand = ""
+    # orderHold = False
+    # holdBrand = ""
 
     # Set hold the orders with customer note
-    if order.orderNote:
-        orderHold = True
+    # if order.orderNote:
+    #     orderHold = True
 
     for line_item in line_items:
         try:
@@ -311,21 +311,21 @@ def importOrder(shopifyOrder):
                 brandData = Manufacturer.objects.get(name=manufacturer)
                 brand = brandData.brand
 
-                if int(line_item['quantity']) * float(line_item['price']) > 2000:
-                    if brand == 'Kravet' or brand == 'York' or brand == 'Kasmir':
-                        orderHold = True
-                        holdBrand = brand
+                # if int(line_item['quantity']) * float(line_item['price']) > 2000:
+                #     if brand == 'Kravet' or brand == 'York' or brand == 'Kasmir':
+                #         orderHold = True
+                #         holdBrand = brand
 
-                        if isNewOrder:
-                            emailer.send_email_html("DB Order Manager",
-                                                [
-                                                    "purchasing@decoratorsbest.com",
-                                                    "bk@decoratorsbest.com"
-                                                ],
-                                                "PO #{} has been set to hold".format(
-                                                    order.orderNumber),
-                                                "Hi, <br><br>PO# {} has been set to hold because it's a {} large order. \
-                            Please process it manually. <br><br>Best, <br>OM Backend".format(order.orderNumber, holdBrand))
+                #         if isNewOrder:
+                #             emailer.send_email_html("DB Order Manager",
+                #                                 [
+                #                                     "purchasing@decoratorsbest.com",
+                #                                     "bk@decoratorsbest.com"
+                #                                 ],
+                #                                 "PO #{} has been set to hold".format(
+                #                                     order.orderNumber),
+                #                                 "Hi, <br><br>PO# {} has been set to hold because it's a {} large order. \
+                #             Please process it manually. <br><br>Best, <br>OM Backend".format(order.orderNumber, holdBrand))
 
             except Exception as e:
                 print(e)
@@ -373,10 +373,10 @@ def importOrder(shopifyOrder):
 
     order.save()
 
-    if orderHold:
-        if order.status == 'New' or order.status == None:
-            order.status = "Hold"
-            order.save()
+    # if orderHold:
+    #     if order.status == 'New' or order.status == None:
+    #         order.status = "Hold"
+    #         order.save()
 
     debug("Order", 0,
           "Downloaded Order {} / {}".format(order.orderNumber, order.shopifyOrderId))
