@@ -1,6 +1,7 @@
 from timeit import repeat
 from django.core.management.base import BaseCommand
 from brands.models import Mindthegap
+from shopify.models import Product as ShopifyProduct
 
 import os
 import pymysql
@@ -21,6 +22,7 @@ db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.mindthegap
 markup_trade = markup.mindthegap_trade
+markup_pillow_trade = markup.mindthegap_pillow_trade
 
 debug = debug.debug
 sq = common.sq
@@ -46,6 +48,9 @@ class Command(BaseCommand):
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
+
+        if "updatePrice" in options['functions']:
+            self.updatePrice()
 
         if "updateTags" in options['functions']:
             self.updateTags()
@@ -441,6 +446,8 @@ class Command(BaseCommand):
                 try:
                     price = common.formatprice(cost, markup_price)
                     priceTrade = common.formatprice(product.cost, markup_trade)
+                    if product.ptype == "Pillow":
+                        priceTrade = common.formatprice(product.cost, markup_pillow_trade)
                 except:
                     debug("Mindthegap", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -555,6 +562,8 @@ class Command(BaseCommand):
                 try:
                     price = common.formatprice(cost, markup_price)
                     priceTrade = common.formatprice(product.cost, markup_trade)
+                    if product.ptype == "Pillow":
+                        priceTrade = common.formatprice(product.cost, markup_pillow_trade)
                 except:
                     debug("Mindthegap", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -608,6 +617,75 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
+
+        csr.close()
+        con.close()
+
+    def updatePrice(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute("""SELECT ProductID, SKU, Published FROM Product
+        WHERE ManufacturerPartNumber<>'' AND ProductID IS NOT NULL AND ProductID != 0
+        AND SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+        WHERE M.Brand = 'MindTheGap');""")
+
+        rows = csr.fetchall()
+        for row in rows:
+            productId = row[0]
+            shopifyProduct = ShopifyProduct.objects.get(productId=productId)
+
+            pv1 = shopifyProduct.variants.filter(
+                isDefault=1).values('cost', 'price')[0]
+            pv2 = shopifyProduct.variants.filter(
+                name__startswith="Trade - ").values('price')[0]
+
+            oldCost = pv1['cost']
+            oldPrice = pv1['price']
+            oldTradePrice = pv2['price']
+
+            try:
+                product = Mindthegap.objects.get(
+                    productId=shopifyProduct.productId)
+                newCost = product.cost
+            except:
+                debug("Mindthegap", 1, "Discontinued Product: SKU: {}".format(
+                    shopifyProduct.sku))
+                continue
+
+            try:
+                newPrice = common.formatprice(newCost, markup_price)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
+                if product.ptype == "Pillow":
+                    newPriceTrade = common.formatprice(newCost, markup_pillow_trade)
+            except:
+                debug("Mindthegap", 1,
+                      "Price Error: SKU: {}".format(product.sku))
+                continue
+
+            if newPrice < 19.99:
+                newPrice = 19.99
+                newPriceTrade = 16.99
+
+            if float(oldCost) != float(newCost) or float(oldPrice) != float(newPrice) or float(oldTradePrice) != float(newPriceTrade):
+                try:
+                    csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                        shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+                    con.commit()
+
+                    csr.execute(
+                        "CALL AddToPendingUpdatePrice ({})".format(shopifyProduct.productId))
+                    con.commit()
+                except Exception as e:
+                    print(e)
+                    continue
+
+                debug("Mindthegap", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+            else:
+                debug("Mindthegap", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newPrice, newPriceTrade))
 
         csr.close()
         con.close()

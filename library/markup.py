@@ -41,6 +41,7 @@ madcapcottage_trade = 1
 # Material Works
 materialworks = "MAP"  # Markup 1.5
 materialworks_trade = 1
+materialworks_pillow_trade = 1.3
 
 # Maxwell
 maxwell = 1.4
@@ -49,6 +50,7 @@ maxwell_trade = 1
 # MindTheGap
 mindthegap = 2.44
 mindthegap_trade = 1.1
+mindthegap_pillow_trade = 1.3
 
 # Phillip Jeffries
 phillipjeffries = 1.4

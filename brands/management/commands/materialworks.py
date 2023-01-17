@@ -22,6 +22,7 @@ db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.materialworks
 markup_trade = markup.materialworks_trade
+markup_pillow_trade = markup.materialworks_pillow_trade
 
 debug = debug.debug
 sq = common.sq
@@ -310,6 +311,8 @@ class Command(BaseCommand):
                 try:
                     price = common.formatprice(product.map, 1)
                     priceTrade = common.formatprice(cost, markup_trade)
+                    if product.ptype == "Pillow":
+                        priceTrade = common.formatprice(cost, markup_pillow_trade)
                 except:
                     debug("Materialworks", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -430,6 +433,8 @@ class Command(BaseCommand):
                 try:
                     price = common.formatprice(product.map, 1)
                     priceTrade = common.formatprice(cost, markup_trade)
+                    if product.ptype == "Pillow":
+                        priceTrade = common.formatprice(cost, markup_pillow_trade)
                 except:
                     debug("Materialworks", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -521,11 +526,10 @@ class Command(BaseCommand):
                 continue
 
             try:
-                newPrice = common.formatprice(newCost, markup_price)
-                if newPrice < product.map:
-                    newPrice = common.formatprice(product.map, 1)
-
+                newPrice = common.formatprice(product.map, 1)
                 newPriceTrade = common.formatprice(newCost, markup_trade)
+                if product.ptype == "Pillow":
+                    newPriceTrade = common.formatprice(newCost, markup_pillow_trade)
             except:
                 debug("Materialworks", 1,
                       "Price Error: SKU: {}".format(product.sku))
