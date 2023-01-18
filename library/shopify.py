@@ -28,10 +28,12 @@ debug = debug.debug
 SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
     env('shopify_api_version'))
 SHOPIFY_PRODUCT_API_HEADER = {
-    'X-Shopify-Access-Token': env('shopify_product_token')
+    'X-Shopify-Access-Token': env('shopify_product_token'),
+    'Content-Type': 'application/json'
 }
 SHOPIFY_ORDER_API_HEADER = {
-    'X-Shopify-Access-Token': env('shopify_order_token')
+    'X-Shopify-Access-Token': env('shopify_order_token'),
+    'Content-Type': 'application/json'
 }
 
 
@@ -199,15 +201,15 @@ class ProductData:
         # Product Metafields
         pMeta = [
             {"key": "description_tag", "value": description,
-                "namespace": "global", "value_type": "string"},
+                "namespace": "global", "type": "single_line_text_field"},
             {"key": "title_tag", "value": "{} | DecoratorsBest".format(
-                title), "namespace": "global", "value_type": "string"},
+                title), "namespace": "global", "type": "single_line_text_field"},
             {"key": "ManufacturerPartNumber", "value": mpn,
-                "namespace": "inventory", "value_type": "string"}
+                "namespace": "inventory", "type": "single_line_text_field"}
         ]
         if collection != None and collection != "":
             pMeta.append({"key": "collections", "value": collection,
-                         "namespace": "product", "value_type": "string"})
+                         "namespace": "product", "type": "single_line_text_field"})
 
         return pMeta
 
@@ -232,24 +234,24 @@ class ProductData:
             # Variant MetaFields
             vMeta = [
                 {"key": "Cost", "value": cost,
-                    "namespace": "inventory", "value_type": "string"},
+                    "namespace": "inventory", "type": "single_line_text_field"},
                 {"key": "ManufacturerPartNumber", "value": mpn,
-                    "namespace": "inventory", "value_type": "string"},
+                    "namespace": "inventory", "type": "single_line_text_field"},
                 {"key": "UnitOfMeasurement", "value": pricing,
-                    "namespace": "inventory", "value_type": "string"},
+                    "namespace": "inventory", "type": "single_line_text_field"},
                 {"key": "Published", "value": vPublished,
-                    "namespace": "inventory", "value_type": "string"}
+                    "namespace": "inventory", "type": "single_line_text_field"}
             ]
             if "Sample - " not in vName:
                 if minimum != None and minimum != 1:
                     vMeta.append({"key": "MinimumQuantity", "value": minimum,
-                                 "namespace": "inventory", "value_type": "string"})
+                                 "namespace": "inventory", "type": "single_line_text_field"})
                 if increment != None and increment != "":
                     vMeta.append({"key": "RestrictedQuantities", "value": increment,
-                                 "namespace": "inventory", "value_type": "string"})
+                                 "namespace": "inventory", "type": "single_line_text_field"})
             else:
                 vMeta.append({"key": "RestrictedQuantities", "value": "1",
-                             "namespace": "inventory", "value_type": "string"})
+                             "namespace": "inventory", "type": "single_line_text_field"})
 
             variant = {
                 "title": vName,
@@ -293,24 +295,24 @@ class ProductData:
         # Variant MetaFields
         vMeta = [
             {"key": "Cost", "value": cost,
-                "namespace": "inventory", "value_type": "string"},
+                "namespace": "inventory", "type": "single_line_text_field"},
             {"key": "ManufacturerPartNumber", "value": mpn,
-                "namespace": "inventory", "value_type": "string"},
+                "namespace": "inventory", "type": "single_line_text_field"},
             {"key": "UnitOfMeasurement", "value": pricing,
-                "namespace": "inventory", "value_type": "string"},
+                "namespace": "inventory", "type": "single_line_text_field"},
             {"key": "Published", "value": vPublished,
-                "namespace": "inventory", "value_type": "string"}
+                "namespace": "inventory", "type": "single_line_text_field"}
         ]
         if "Sample - " not in vName:
             if minimum != None and minimum != 1:
                 vMeta.append({"key": "MinimumQuantity", "value": minimum,
-                             "namespace": "inventory", "value_type": "string"})
+                             "namespace": "inventory", "type": "single_line_text_field"})
             if increment != None and increment != "":
                 vMeta.append({"key": "RestrictedQuantities", "value": increment,
-                             "namespace": "inventory", "value_type": "string"})
+                             "namespace": "inventory", "type": "single_line_text_field"})
         else:
             vMeta.append({"key": "RestrictedQuantities", "value": "1",
-                         "namespace": "inventory", "value_type": "string"})
+                         "namespace": "inventory", "type": "single_line_text_field"})
 
         variant = {
             "title": vName,
@@ -336,8 +338,6 @@ def sq(x):
 
 
 def NewProductBySku(sku, con):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_newproduct_key'), env('shopify_newproduct_password'))
     s = requests.Session()
     csr = con.cursor()
     csr.execute("SELECT Title FROM Product WHERE SKU = {}".format(sq(sku)))
@@ -403,7 +403,7 @@ def NewProductBySku(sku, con):
 
     if errors:
         debug("Shopify", 1, "Adding SKU: {} Error: {}".format(
-            sku, errors["base"]))
+            sku, errors))
 
         csr.close()
         s.close()
@@ -432,9 +432,6 @@ def NewProductBySku(sku, con):
 
 
 def UploadImageToShopify(src):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
     s3 = boto3.client('s3', aws_access_key_id=aws_access_key,
                       aws_secret_access_key=aws_secret_key)
@@ -516,8 +513,6 @@ def UploadImageToShopify(src):
 
 
 def UpdateProductToShopify(productID, key, password, con):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        key, password)
     s = requests.Session()
     csr = con.cursor()
     csr.execute(
@@ -607,9 +602,6 @@ def UpdateProductToShopify(productID, key, password, con):
 
 
 def UpdatePriceToShopify(productID, con):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
     csr = con.cursor()
     csr.execute(
@@ -631,9 +623,6 @@ def UpdatePriceToShopify(productID, con):
 
 
 def UpdatePublishToShopify(productID, con):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
     csr = con.cursor()
     csr.execute("SELECT P.Published, (SELECT PI.ImageIndex FROM ProductImage PI WHERE PI.ImageIndex = 1 and PI.ProductID=P.ProductID) img, P.ProductID FROM Product P WHERE P.ProductID = {}".format(productID))
@@ -665,9 +654,6 @@ def UpdatePublishToShopify(productID, con):
 
 
 def UpdateTagBodyToShopify(productID, con):
-    api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
-        env('shopify_product_key'), env('shopify_product_sec'))
-
     s = requests.Session()
     csr = con.cursor()
     csr.execute("SELECT SKU FROM Product WHERE ProductID = {}".format(productID))

@@ -1,15 +1,13 @@
 from django.core.management.base import BaseCommand
 from brands.models import JamieYoung
 from shopify.models import Product as ShopifyProduct
+from mysql.models import Type
 
 import os
 import paramiko
 import pymysql
-import time
 import xlrd
 import csv
-import codecs
-from shutil import copyfile
 
 from library import debug, common, shopify, markup
 
@@ -365,6 +363,17 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
+                productType = Type.objects.get(name=product.ptype)
+                if productType.parentTypeId == 0:
+                    ptype = productType.name
+                else:
+                    parentType = Type.objects.get(typeId=productType.parentTypeId)
+                    if parentType.parentTypeId == 0:
+                        ptype = parentType.name
+                    else:
+                        rootType = Type.objects.get(typeId=parentType.parentTypeId)
+                        ptype = rootType.name
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -373,7 +382,7 @@ class Command(BaseCommand):
                     sq(desc),
                     sq(title),
                     sq(description),
-                    sq(product.ptype),
+                    sq(ptype),
                     sq(vname),
                     hassample,
                     product.cost,
@@ -503,6 +512,17 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
+                productType = Type.objects.get(name=product.ptype)
+                if productType.parentTypeId == 0:
+                    ptype = productType.name
+                else:
+                    parentType = Type.objects.get(typeId=productType.parentTypeId)
+                    if parentType.parentTypeId == 0:
+                        ptype = parentType.name
+                    else:
+                        rootType = Type.objects.get(typeId=parentType.parentTypeId)
+                        ptype = rootType.name
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -511,7 +531,7 @@ class Command(BaseCommand):
                     sq(desc),
                     sq(title),
                     sq(description),
-                    sq(product.ptype),
+                    sq(ptype),
                     sq(vname),
                     hassample,
                     product.cost,
@@ -562,6 +582,7 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.colors
+            subtypes = product.ptype
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
@@ -586,6 +607,14 @@ class Command(BaseCommand):
 
                 debug("JamieYoung", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if subtypes != None and subtypes != "":
+                csr.execute("CALL AddToEditSubtype ({}, {})".format(
+                    sq(sku), sq(str(subtypes).strip())))
+                con.commit()
+
+                debug("JamieYoung", 0,
+                      "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
 
         csr.close()
         con.close()
