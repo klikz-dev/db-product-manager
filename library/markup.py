@@ -53,7 +53,7 @@ mindthegap_trade = 1.1
 mindthegap_pillow_trade = 1.3
 
 # Phillip Jeffries
-phillipjeffries = 1.4
+phillipjeffries = 1.5
 phillipjeffries_trade = 1.3
 
 # P/K Lifestyles
