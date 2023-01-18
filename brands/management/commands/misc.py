@@ -89,7 +89,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        brands_to_disable = ["Fabricut"]
+        brands_to_disable = ["Jamie Young"]
 
         for brand in brands_to_disable:
             debug("Misc", 0, "--- Started Disabling {} ---".format(brand))
@@ -260,7 +260,7 @@ class Command(BaseCommand):
 
         csr.execute("""SELECT P.ProductID, P.SKU 
         FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'York' AND M.Name = 'Antonina Vella Wallpaper';""")
+        WHERE P.ProductID IS NOT NULL AND P.ProductID != 0 AND M.Brand = 'Jamie Young' AND M.Name = 'Jamie Young';""")
 
         total, success, failed = 0, 0, 0
 
@@ -273,12 +273,12 @@ class Command(BaseCommand):
             sku = row[1]
 
             # Delete a specific colllection
-            try:
-                product = York.objects.get(productId=productID)
-                if product.collection != "Dazzling Dimensions Volume II":
-                    continue
-            except:
-                continue
+            # try:
+            #     product = York.objects.get(productId=productID)
+            #     if product.collection != "Dazzling Dimensions Volume II":
+            #         continue
+            # except:
+            #     continue
 
             total += 1
             try:

@@ -47,6 +47,9 @@ class Command(BaseCommand):
         if "addNew" in options['functions']:
             self.addNew()
 
+        if "updateExisting" in options['functions']:
+            self.updateExisting()
+
         if "updateTags" in options['functions']:
             self.updateTags()
 
@@ -138,7 +141,7 @@ class Command(BaseCommand):
             specs = "<br>".join(specsArr)
 
             country = str(sh.cell_value(i, 33)).strip()
-            usage = "Furniture"
+            usage = ptype
             try:
                 weight = float(sh.cell_value(i, 9))
             except:
@@ -351,7 +354,7 @@ class Command(BaseCommand):
 
                 try:
                     price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.cost, markup_trade)
+                    priceTrade = common.formatprice(product.cost, 0.9)
                 except:
                     debug("JamieYoung", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -370,7 +373,7 @@ class Command(BaseCommand):
                     sq(desc),
                     sq(title),
                     sq(description),
-                    sq("Furniture"),
+                    sq(product.ptype),
                     sq(vname),
                     hassample,
                     product.cost,
@@ -421,6 +424,124 @@ class Command(BaseCommand):
                             pass
 
                 debug("JamieYoung", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    productId, product.sku, title, product.ptype, price))
+
+            except Exception as e:
+                print(e)
+
+        csr.close()
+        con.close()
+
+    def updateExisting(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = JamieYoung.objects.all()
+
+        for product in products:
+            try:
+                if product.productId == None:
+                    continue
+
+                name = " | ".join((product.brand, product.pattern,
+                                  product.color, product.ptype))
+                title = " ".join((product.brand, product.pattern,
+                                 product.color, product.ptype))
+                description = title
+                vname = title
+                hassample = 1
+                gtin = product.upc
+                weight = product.weight
+
+                desc = ""
+                if product.description != None and product.description != "":
+                    desc += "{}<br/><br/>".format(
+                        product.description)
+                if product.collection != None and product.collection != "":
+                    desc += "Collection: {}<br/><br/>".format(
+                        product.collection)
+
+                if product.width != None and product.width != "" and float(product.width) != 0:
+                    desc += "Width: {} in<br/>".format(product.width)
+                if product.height != None and product.height != "" and float(product.height) != 0:
+                    desc += "Height: {} in<br/>".format(product.height)
+                if product.depth != None and product.depth != "" and float(product.depth) != 0:
+                    desc += "Depth: {} in<br/><br/>".format(product.depth)
+
+                if product.features != None and product.features != "":
+                    desc += "Feature: {}<br/><br/>".format(product.features)
+
+                if product.material != None and product.material != "":
+                    desc += "Material: {}<br/>".format(product.material)
+                if product.disclaimer != None and product.disclaimer != "":
+                    desc += "Disclaimer: {}<br/>".format(product.disclaimer)
+                if product.care != None and product.care != "":
+                    desc += "Product Care: {}<br/><br/>".format(product.care)
+
+                if product.specs != None and product.specs != "":
+                    desc += "Specs: {}<br/><br/>".format(product.specs)
+
+                if product.country != None and product.country != "":
+                    desc += "Country of Origin: {}<br/>".format(
+                        product.country)
+                if product.usage != None and product.usage != "":
+                    desc += "Usage: {}<br/>".format(product.usage)
+                if product.ptype != None and product.ptype != "":
+                    desc += "{} {}".format(product.brand, product.ptype)
+
+                try:
+                    price = common.formatprice(product.map, 1)
+                    priceTrade = common.formatprice(product.cost, 0.9)
+                except:
+                    debug("JamieYoung", 1,
+                          "Price Error: SKU: {}".format(product.sku))
+                    continue
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+                priceSample = 5
+
+                csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
+                    sq(product.sku),
+                    sq(name),
+                    sq(product.manufacturer),
+                    sq(product.mpn),
+                    sq(desc),
+                    sq(title),
+                    sq(description),
+                    sq(product.ptype),
+                    sq(vname),
+                    hassample,
+                    product.cost,
+                    price,
+                    priceTrade,
+                    priceSample,
+                    sq(product.pattern),
+                    sq(product.color),
+                    product.minimum,
+                    sq(product.increment),
+                    sq(product.uom),
+                    sq(product.usage),
+                    sq(product.collection),
+                    sq(str(gtin)),
+                    weight
+                ))
+                con.commit()
+
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                productId = product.productId
+
+                csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(productId))
+                con.commit()
+
+                debug("JamieYoung", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
             except Exception as e:
