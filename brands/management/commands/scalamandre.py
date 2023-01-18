@@ -42,7 +42,7 @@ API_PASSWORD = 'EuEc9MNAvDqvrwjgRaf55HCLr8c5B2^Ly%C578Mj*=CUBZ-Y4Q5&Sc_BZE?n+eR^
 r = requests.post("{}/Auth/authenticate".format(API_ADDRESS), headers={'Content-Type': 'application/json'},
                   data=json.dumps({"Username": API_USERNAME, "Password": API_PASSWORD}))
 j = json.loads(r.text)
-API_TOKEN = j['token']
+API_TOKEN = j['Token']
 
 
 class Command(BaseCommand):
@@ -259,19 +259,19 @@ class Command(BaseCommand):
             except:
                 increment = ""
 
-            if row['UNIT OF MEASURE'] == "RL" or row['UNIT OF MEASURE'] == "DR":
+            if row['UNITOFMEASURE'] == "RL" or row['UNITOFMEASURE'] == "DR":
                 uom = 'Per Roll'
-            elif row['UNIT OF MEASURE'] == "YD" or row['UNIT OF MEASURE'] == "LY":
+            elif row['UNITOFMEASURE'] == "YD" or row['UNITOFMEASURE'] == "LY":
                 uom = 'Per Yard'
-            elif row['UNIT OF MEASURE'] == "EA" or row['UNIT OF MEASURE'] == "PC":
+            elif row['UNITOFMEASURE'] == "EA" or row['UNITOFMEASURE'] == "PC":
                 uom = 'Per Item'
-            elif row['UNIT OF MEASURE'] == "SF":
+            elif row['UNITOFMEASURE'] == "SF":
                 uom = 'Per Square Foot'
-            elif row['UNIT OF MEASURE'] == "ST":
+            elif row['UNITOFMEASURE'] == "ST":
                 uom = 'Per Set'
-            elif row['UNIT OF MEASURE'] == "PN":
+            elif row['UNITOFMEASURE'] == "PN":
                 uom = 'Per Panel'
-            elif row['UNIT OF MEASURE'] == "TL":
+            elif row['UNITOFMEASURE'] == "TL":
                 uom = 'Per Tile'
             else:
                 debug("Scalamandre", 1, "UOM Error. MPN: {}".format(new_mpn))
