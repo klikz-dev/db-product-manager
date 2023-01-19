@@ -165,7 +165,8 @@ class ProductData:
 
         # Hipliee tag i.e. keep tags added by other vendors
         s = requests.Session()
-        r = s.get("{}/products/{}.json".format(SHOPIFY_API_URL, self.productID), headers=SHOPIFY_PRODUCT_API_HEADER)
+        r = s.get("{}/products/{}.json".format(SHOPIFY_API_URL,
+                  self.productID), headers=SHOPIFY_PRODUCT_API_HEADER)
 
         exProdMeta = json.loads(r.text)
         try:
@@ -480,8 +481,8 @@ def UploadImageToShopify(src):
                 temp = csr.fetchone()
                 if temp != None:
                     imageId = temp[0]
-                    rImage = s.delete(
-                        "{}/products/{}/images/{}.json".format(SHOPIFY_API_URL, productID, imageId))
+                    rImage = s.delete("{}/products/{}/images/{}.json".format(
+                        SHOPIFY_API_URL, productID, imageId), headers=SHOPIFY_PRODUCT_API_HEADER)
                     jImage = json.loads(rImage.text)
 
                 s3.upload_file("{}/{}".format(src, f), bucket_name, f,
@@ -536,7 +537,7 @@ def UpdateProductToShopify(productID, key, password, con):
             if 'metafields' in jvm:
                 for vm in jvm['metafields']:
                     s.delete(
-                        "{}/metafields/{}.json".format(SHOPIFY_API_URL, vm['id']))
+                        "{}/metafields/{}.json".format(SHOPIFY_API_URL, vm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
             variant = pd.ProductVariant(variantID)
             titles.append(variant['title'])
             variant.update({"id": variantID})
@@ -551,7 +552,7 @@ def UpdateProductToShopify(productID, key, password, con):
         jpm = json.loads(rpm.text)
         for pm in jpm['metafields']:
             s.delete(
-                "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']))
+                "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
         ###################################################################################################
 
         body = pd.body
@@ -585,11 +586,20 @@ def UpdateProductToShopify(productID, key, password, con):
         if published == 0:
             p.update({'published': False})
 
-        s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
-              headers=SHOPIFY_PRODUCT_API_HEADER,
-              json={"product": p})
+        r = s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
+                  headers=SHOPIFY_PRODUCT_API_HEADER,
+                  json={"product": p})
 
-        # print r.text
+        j = json.loads(r.text)
+
+        errors = j.get("errors")
+        if errors:
+            debug("Shopify", 1, "Adding SKU: {} Error: {}".format(
+                sku, errors))
+
+            csr.close()
+            s.close()
+
         csr.execute(
             "DELETE FROM PendingUpdateProduct WHERE ProductID = {}".format(productID))
         con.commit()

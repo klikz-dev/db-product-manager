@@ -477,7 +477,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = Schumacher.objects.filter(pattern="DOLOMITE PERFORMANCE")
+        products = Schumacher.objects.all()
 
         for product in products:
             try:
