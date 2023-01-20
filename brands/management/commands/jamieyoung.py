@@ -583,6 +583,8 @@ class Command(BaseCommand):
             style = product.style
             colors = product.colors
             subtypes = product.ptype
+            if subtypes == "Accessories":
+                subtypes = "Accents"
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
