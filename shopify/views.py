@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from misc.models import Config
 
-from mysql.models import Manufacturer, PORecord
+from mysql.models import Manufacturer, PORecord, PendingUpdatePublish
 from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Tracking, Variant
-from shopify.serializers import AddressDetailSerializer, AddressListSerializer, CustomerDetailSerializer, CustomerListSerializer, ImageDetailSerializer, ImageListSerializer, LineItemDetailSerializer, LineItemListSerializer, OrderDetailSerializer, OrderListSerializer, OrderTrackingSerializer, OrderUpdateSerializer, ProductDetailSerializer, ProductListSerializer, VariantDetailSerializer, VariantListSerializer, VariantUpdateSerializer
+from shopify.serializers import AddressDetailSerializer, AddressListSerializer, CustomerDetailSerializer, CustomerListSerializer, ImageDetailSerializer, ImageListSerializer, LineItemDetailSerializer, LineItemListSerializer, OrderDetailSerializer, OrderListSerializer, OrderTrackingSerializer, OrderUpdateSerializer, ProductDetailSerializer, ProductListSerializer, ProductUpdateSerializer, VariantDetailSerializer, VariantListSerializer, VariantUpdateSerializer
 
 from datetime import datetime, timedelta
 from django.db.models import Q
@@ -276,6 +276,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = ProductDetailSerializer(
             instance=product, context={'request': request})
         return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        products = Product.objects.all()
+        product = get_object_or_404(products, productId=pk)
+        serializer = ProductUpdateSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.update(
+                instance=product, validated_data=serializer.validated_data)
+
+            updateProduct = get_object_or_404(products, productId=pk)
+            try:
+                PendingUpdatePublish.objects.get(
+                    productId=updateProduct.productId)
+            except PendingUpdatePublish.DoesNotExist:
+                PendingUpdatePublish.objects.create(
+                    productId=updateProduct.productId)
+
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class VariantViewSet(viewsets.ModelViewSet):

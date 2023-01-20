@@ -56,6 +56,12 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['published']
+
+
 # Product Variant
 class VariantDetailSerializer(serializers.ModelSerializer):
     product = ProductDetailSerializer()
