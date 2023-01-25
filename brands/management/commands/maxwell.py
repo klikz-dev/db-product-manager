@@ -58,9 +58,6 @@ class Command(BaseCommand):
         if "roomset" in options['functions']:
             self.roomset()
 
-        if "updateStock" in options['functions']:
-            self.updateStock()
-
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -114,8 +111,6 @@ class Command(BaseCommand):
                 msrp = 0
                 map = 0
 
-                stock = 0
-
                 if row['discontinued'] != None:
                     status = False
                 else:
@@ -155,7 +150,6 @@ class Command(BaseCommand):
                         msrp=msrp,
                         map=map,
                         status=status,
-                        stock=stock,
                         thumbnail=thumbnail,
                         roomset=roomset,
                         productId="",
@@ -490,40 +484,3 @@ class Command(BaseCommand):
             except Exception as e:
                 print(e)
                 continue
-
-    def updateStock(self):
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Maxwell'")
-        con.commit()
-
-        products = Maxwell.objects.all()
-
-        for product in products:
-            if int(product.stock) < 5 and product.ptype == "Wallpaper":
-                try:
-                    csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Maxwell')".format(
-                        product.sku, 5, ''))
-                    con.commit()
-                    debug("Maxwell", 0,
-                          "Updated inventory for {} to {}.".format(product.sku, 5))
-                except Exception as e:
-                    print(e)
-                    debug(
-                        "Maxwell", 1, "Error Updating inventory for {} to {}.".format(product.sku, 5))
-            else:
-                try:
-                    csr.execute("CALL UpdateProductInventory ('{}', {}, 2, '{}', 'Maxwell')".format(
-                        product.sku, product.stock, ''))
-                    con.commit()
-                    debug("Maxwell", 0,
-                          "Updated inventory for {} to {}.".format(product.sku, product.stock))
-                except Exception as e:
-                    print(e)
-                    debug(
-                        "Maxwell", 1, "Error Updating inventory for {} to {}.".format(product.sku, product.stock))
-
-        csr.close()
-        con.close()
