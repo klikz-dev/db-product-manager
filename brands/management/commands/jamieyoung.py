@@ -83,10 +83,16 @@ class Command(BaseCommand):
             pattern = str(sh.cell_value(i, 1)).strip()
             color = str(sh.cell_value(i, 21)).strip().replace(",", " /")
 
+            if "Sideboard" in pattern or "Console" in pattern:
+                continue # we won't sell large peices for Jamie Young. 1/25/23 from BK.
+
             brand = "Jamie Young"
             ptype = str(sh.cell_value(i, 3)).strip().title()
             manufacturer = "Jamie Young"
             collection = str(sh.cell_value(i, 2))
+
+            if ptype == "Accessories":
+                ptype = "Accents"
 
             try:
                 cost = round(float(sh.cell_value(i, 4)), 2)
@@ -448,9 +454,18 @@ class Command(BaseCommand):
 
         products = JamieYoung.objects.all()
 
+        idx = 0
+        total = len(products)
         for product in products:
+            idx += 1
             try:
                 if product.productId == None:
+                    continue
+
+                # Update Mirrors, Accents, Wall Art, Chandeliers
+                if product.ptype == "Mirrors" or product.ptype == "Accents" or product.ptype == "Wall Art" or product.ptype == "Chandeliers":
+                    pass
+                else:
                     continue
 
                 name = " | ".join((product.brand, product.pattern,
@@ -561,8 +576,8 @@ class Command(BaseCommand):
                     "CALL AddToPendingUpdateProduct ({})".format(productId))
                 con.commit()
 
-                debug("JamieYoung", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
-                    productId, product.sku, title, product.ptype, price))
+                debug("JamieYoung", 0, "{}/{}: Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    idx, total, productId, product.sku, title, product.ptype, price))
 
             except Exception as e:
                 print(e)
@@ -579,20 +594,19 @@ class Command(BaseCommand):
         for product in products:
             sku = product.sku
 
-            category = product.category
+            # category = product.category
             style = product.style
             colors = product.colors
-            subtypes = product.ptype
-            if subtypes == "Accessories":
-                subtypes = "Accents"
+            subtypes = "{}, {}".format(product.ptype, product.pattern)
 
-            if category != None and category != "":
-                csr.execute("CALL AddToEditCategory ({}, {})".format(
-                    sq(sku), sq(category)))
-                con.commit()
+            # Hide Category for JY. 1/25/23 from BK.
+            # if category != None and category != "":
+            #     csr.execute("CALL AddToEditCategory ({}, {})".format(
+            #         sq(sku), sq(category)))
+            #     con.commit()
 
-                debug("JamieYoung", 0, "Added Category. SKU: {}, Category: {}".format(
-                    sku, sq(category)))
+            #     debug("JamieYoung", 0, "Added Category. SKU: {}, Category: {}".format(
+            #         sku, sq(category)))
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
