@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Covington, ElaineSmith, JamieYoung, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
+from .models import Covington, ElaineSmith, JamieYoung, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -171,6 +171,31 @@ class KravetAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
+class KravetDecorAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['pattern', 'color']}),
+        ('Collection', {'fields': [
+         'brand', 'ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'width', 'height', 'depth', 'features', 'material', 'care', 'country', 'usage', 'weight', 'upc']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomsets']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
+
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+
+
 class MaterialworksAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['mpn', 'sku']}),
@@ -224,7 +249,8 @@ class MaxwellAdmin(admin.ModelAdmin):
         (None, {'fields': ['mpn', 'sku']}),
         ('Identities', {'fields': ['pattern', 'color']}),
         ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': ['description', 'width', 'repeat', 'content']}),
+        ('Description', {'fields': [
+         'description', 'width', 'repeat', 'content']}),
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
@@ -531,6 +557,7 @@ admin.site.register(JamieYoung, JamieYoungAdmin)
 admin.site.register(JFFabrics, JFFabricsAdmin)
 admin.site.register(Kasmir, KasmirAdmin)
 admin.site.register(Kravet, KravetAdmin)
+admin.site.register(KravetDecor, KravetDecorAdmin)
 admin.site.register(Materialworks, MaterialworksAdmin)
 admin.site.register(MadcapCottage, MadcapCottageAdmin)
 admin.site.register(Maxwell, MaxwellAdmin)

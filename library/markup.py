@@ -34,6 +34,10 @@ kravet_trade = 1
 kravet_pillow = 1.75
 kravet_pillow_trade = 1.3
 
+# Kravet Decor
+kravetdecor = 1.75 # MAP = cost x 1.75
+kravetdecor_trade = 1.2
+
 # Madcap Cottage
 madcapcottage = "MAP"  # Markup 2.0 - 2.3
 madcapcottage_trade = 1

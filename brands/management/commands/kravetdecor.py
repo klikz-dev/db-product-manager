@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
-from brands.models import JamieYoung
+from brands.models import KravetDecor
 from shopify.models import Product as ShopifyProduct
 from mysql.models import Type
 
 import os
 import paramiko
 import pymysql
-import xlrd
+import codecs
 import csv
 
 from library import debug, common, shopify, markup
@@ -20,8 +20,8 @@ db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
 db_port = int(env('MYSQL_PORT'))
 
-markup_price = markup.jamieyoung
-markup_trade = markup.jamieyoung_trade
+markup_price = markup.kravetdecor
+markup_trade = markup.kravetdecor_trade
 
 debug = debug.debug
 sq = common.sq
@@ -30,7 +30,7 @@ FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Command(BaseCommand):
-    help = 'Build Jamie Young Database'
+    help = 'Build Kravet Decor Database'
 
     def add_arguments(self, parser):
         parser.add_argument('functions', nargs='+', type=str)
@@ -62,113 +62,95 @@ class Command(BaseCommand):
             self.getProductIds()
 
     def getProducts(self):
-        JamieYoung.objects.all().delete()
+        KravetDecor.objects.all().delete()
 
-        wb = xlrd.open_workbook(FILEDIR + '/files/jamieyoung-master.xlsx')
-        sh = wb.sheet_by_index(0)
+        f = open(FILEDIR + "/files/kravet-decor-master.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
 
-        for i in range(2, sh.nrows):
-            mpn = str(sh.cell_value(i, 0)).strip()
+        for row in cr:
+            if row[0] == "sku":
+                continue
 
+            mpn = str(row[0]).strip()
             try:
-                JamieYoung.objects.get(mpn=mpn)
-                debug("JamieYoung", 1,
+                KravetDecor.objects.get(mpn=mpn)
+                debug("KravetDecor", 1,
                       "Produt Already exist. MPN: {}".format(mpn))
                 continue
-            except JamieYoung.DoesNotExist:
+            except KravetDecor.DoesNotExist:
                 pass
 
-            sku = "JY {}".format(mpn)
+            sku = "KD {}".format(mpn.replace(".0", "").replace(".", "-"))
 
-            pattern = str(sh.cell_value(i, 1)).strip()
-            color = str(sh.cell_value(i, 21)).strip().replace(",", " /")
+            pattern = str(row[1]).strip().replace(",", "")
+            color = sku.split("-")[2].title()
 
-            if "Sideboard" in pattern or "Console" in pattern:
-                # we won't sell large peices for Jamie Young. 1/25/23 from BK.
-                continue
-
-            brand = "Jamie Young"
-            ptype = str(sh.cell_value(i, 3)).strip().title()
-            manufacturer = "Jamie Young"
-            collection = str(sh.cell_value(i, 2))
-
-            if ptype == "Accessories":
-                ptype = "Accents"
+            brand = "Kravet Decor"
+            ptype = str(row[6]).strip().title()
+            manufacturer = "Kravet Decor"
+            collection = str(row[3]).strip()
 
             try:
-                cost = round(float(sh.cell_value(i, 4)), 2)
+                cost = round(float(row[15]), 2)
             except:
-                debug("JamieYoung", 1, "Produt Cost error {}".format(mpn))
+                debug("KravetDecor", 1, "Produt Cost error {}".format(mpn))
                 continue
-
-            try:
-                map = round(float(sh.cell_value(i, 5)), 2)
-            except:
-                debug("JamieYoung", 1, "Produt MAP error {}".format(mpn))
-                continue
-
-            try:
-                msrp = round(float(sh.cell_value(i, 6)), 2)
-            except:
-                debug("JamieYoung", 1, "Produt MSRP error {}".format(mpn))
-                msrp = 0
 
             uom = "Per Item"
             minimum = 1
             increment = ""
 
-            description = str(sh.cell_value(i, 14)).strip()
+            description = str(row[2]).strip()
 
             try:
-                width = round(float(sh.cell_value(i, 11)), 2)
-                height = round(float(sh.cell_value(i, 10)), 2)
-                depth = round(float(sh.cell_value(i, 12)), 2)
+                width = round(float(row[11]), 2)
             except:
-                debug("JamieYoung", 1, "Dimension error {}".format(mpn))
-                continue
+                width = 0
 
-            featuresArr = []
-            for id in range(15, 19):
-                feature = str(sh.cell_value(i, id)).strip()
-                if feature != "":
-                    featuresArr.append(feature)
-            features = "<br>".join(featuresArr)
-
-            material = str(sh.cell_value(i, 20)).strip()
-            disclaimer = str(sh.cell_value(i, 22)).strip()
-            care = str(sh.cell_value(i, 23)).strip()
-
-            specsArr = []
-            for id in range(24, 32):
-                spec = str(sh.cell_value(i, id)).strip()
-                if spec != "":
-                    specsArr.append(spec)
-            specs = "<br>".join(specsArr)
-
-            country = str(sh.cell_value(i, 33)).strip()
-            usage = ptype
             try:
-                weight = float(sh.cell_value(i, 9))
+                height = round(float(row[10]), 2)
+            except:
+                height = 0
+
+            try:
+                depth = round(float(row[12]), 2)
+            except:
+                depth = 0
+
+            features = str(row[25]).strip()
+
+            material = str(row[20]).strip()
+            care = str(row[24]).strip()
+
+            country = str(row[21]).strip()
+            usage = str(row[5]).strip()
+
+            try:
+                weight = round(float(row[14]), 2)
             except:
                 weight = 5
-            upc = int(sh.cell_value(i, 8))
 
-            keywords = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(
-            ), features.replace("<br>", ", "), collection, description)
+            upc = str(row[34]).strip()
+
+            keywords = "{}, {}, {}, {}".format(
+                usage, pattern, collection, description)
 
             style = keywords
             category = keywords
-            colors = color
+            colors = str(row[7]).strip().replace(";", " / ")
 
-            status = True
+            status = False
+            if str(row[4]) == "Active":
+                status = True
+
             stock = 5
-            boDate = "Lead Time: 3 days"
+            boDate = str(row[18]).strip()
 
-            thumbnail = str(sh.cell_value(i, 49)).strip()
+            thumbnail = str(row[35]).strip()
 
             roomsetsArr = []
-            for id in range(50, 63):
-                roomset = str(sh.cell_value(i, id)).strip()
+            for id in range(36, 40):
+                roomset = str(row[id]).strip()
                 if roomset != "":
                     roomsetsArr.append(roomset)
             roomsets = "|".join(roomsetsArr)
@@ -184,7 +166,7 @@ class Command(BaseCommand):
             pattern = pattern.replace("  ", " ").strip()
             ##############
 
-            JamieYoung.objects.create(
+            KravetDecor.objects.create(
                 mpn=mpn,
                 sku=sku,
 
@@ -206,9 +188,7 @@ class Command(BaseCommand):
                 depth=depth,
                 features=features,
                 material=material,
-                disclaimer=disclaimer,
                 care=care,
-                specs=specs,
                 country=country,
                 usage=usage,
                 weight=weight,
@@ -226,11 +206,9 @@ class Command(BaseCommand):
                 roomsets=roomsets,
 
                 cost=cost,
-                map=map,
-                msrp=msrp
             )
 
-            debug("JamieYoung", 0,
+            debug("KravetDecor", 0,
                   "Success to get product details for MPN: {}".format(mpn))
 
     def getProductIds(self):
@@ -241,7 +219,7 @@ class Command(BaseCommand):
         csr.execute("""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
-                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'Jamie Young')""")
+                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'Kravet Decor')""")
         rows = csr.fetchall()
 
         total, pb, upb = len(rows), 0, 0
@@ -252,7 +230,7 @@ class Command(BaseCommand):
             published = row[2]
 
             try:
-                product = JamieYoung.objects.get(mpn=mpn)
+                product = KravetDecor.objects.get(mpn=mpn)
                 product.productId = productID
                 product.save()
 
@@ -266,7 +244,7 @@ class Command(BaseCommand):
 
                     upb = upb + 1
                     debug(
-                        "JamieYoung", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+                        "KravetDecor", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
 
                 if published == 0 and product.status == True and product.cost != None:
                     csr.execute(
@@ -278,9 +256,9 @@ class Command(BaseCommand):
 
                     pb = pb + 1
                     debug(
-                        "JamieYoung", 0, "Enabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+                        "KravetDecor", 0, "Enabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
 
-            except JamieYoung.DoesNotExist:
+            except KravetDecor.DoesNotExist:
                 if published == 1:
                     csr.execute(
                         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
@@ -291,9 +269,9 @@ class Command(BaseCommand):
 
                     upb = upb + 1
                     debug(
-                        "JamieYoung", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+                        "KravetDecor", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
 
-        debug("JamieYoung", 0, "Total {} Products. Published {} Products, Unpublished {} Products.".format(
+        debug("KravetDecor", 0, "Total {} Products. Published {} Products, Unpublished {} Products.".format(
             total, pb, upb))
 
         csr.close()
@@ -304,7 +282,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = JamieYoung.objects.all()
+        products = KravetDecor.objects.all()
 
         for product in products:
             try:
@@ -338,16 +316,10 @@ class Command(BaseCommand):
 
                 if product.features != None and product.features != "":
                     desc += "Feature: {}<br/><br/>".format(product.features)
-
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
-                if product.disclaimer != None and product.disclaimer != "":
-                    desc += "Disclaimer: {}<br/>".format(product.disclaimer)
                 if product.care != None and product.care != "":
                     desc += "Product Care: {}<br/><br/>".format(product.care)
-
-                if product.specs != None and product.specs != "":
-                    desc += "Specs: {}<br/><br/>".format(product.specs)
 
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
@@ -358,10 +330,10 @@ class Command(BaseCommand):
                     desc += "{} {}".format(product.brand, product.ptype)
 
                 try:
-                    price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.map, 0.9)
+                    price = common.formatprice(product.cost, markup_price)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
                 except:
-                    debug("JamieYoung", 1,
+                    debug("KravetDecor", 1,
                           "Price Error: SKU: {}".format(product.sku))
                     continue
 
@@ -370,18 +342,23 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
-                productType = Type.objects.get(name=product.ptype)
-                if productType.parentTypeId == 0:
-                    ptype = productType.name
+                if "Pillow" in product.ptype:
+                    ptype = "Pillows"
+                elif product.ptype == "Benches & Ottomans":
+                    ptype = "Furniture"
                 else:
-                    parentType = Type.objects.get(
-                        typeId=productType.parentTypeId)
-                    if parentType.parentTypeId == 0:
-                        ptype = parentType.name
+                    productType = Type.objects.get(name=product.ptype)
+                    if productType.parentTypeId == 0:
+                        ptype = productType.name
                     else:
-                        rootType = Type.objects.get(
-                            typeId=parentType.parentTypeId)
-                        ptype = rootType.name
+                        parentType = Type.objects.get(
+                            typeId=productType.parentTypeId)
+                        if parentType.parentTypeId == 0:
+                            ptype = parentType.name
+                        else:
+                            rootType = Type.objects.get(
+                                typeId=parentType.parentTypeId)
+                            ptype = rootType.name
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
@@ -425,7 +402,7 @@ class Command(BaseCommand):
                 if product.thumbnail and product.thumbnail.strip() != "":
                     try:
                         common.picdownload2(
-                            product.thumbnail.replace("dl=0", "dl=1"), "{}.jpg".format(product.productId))
+                            product.thumbnail, "{}.jpg".format(product.productId))
                     except Exception as e:
                         print(e)
                         pass
@@ -435,13 +412,13 @@ class Command(BaseCommand):
                     for roomset in product.roomsets.split("|"):
                         try:
                             common.roomdownload(
-                                roomset.replace("dl=0", "dl=1"), "{}_{}.jpg".format(product.productId, idx))
+                                roomset, "{}_{}.jpg".format(product.productId, idx))
                             idx = idx + 1
                         except Exception as e:
                             print(e)
                             pass
 
-                debug("JamieYoung", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                debug("KravetDecor", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
 
             except Exception as e:
@@ -455,7 +432,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = JamieYoung.objects.all()
+        products = KravetDecor.objects.all()
 
         idx = 0
         total = len(products)
@@ -518,10 +495,10 @@ class Command(BaseCommand):
                     desc += "{} {}".format(product.brand, product.ptype)
 
                 try:
-                    price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.map, 0.9)
+                    price = common.formatprice(product.cost, markup_price)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
                 except:
-                    debug("JamieYoung", 1,
+                    debug("KravetDecor", 1,
                           "Price Error: SKU: {}".format(product.sku))
                     continue
 
@@ -581,7 +558,7 @@ class Command(BaseCommand):
                     "CALL AddToPendingUpdateProduct ({})".format(productId))
                 con.commit()
 
-                debug("JamieYoung", 0, "{}/{}: Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                debug("KravetDecor", 0, "{}/{}: Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     idx, total, productId, product.sku, title, product.ptype, price))
 
             except Exception as e:
@@ -595,7 +572,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = JamieYoung.objects.all()
+        products = KravetDecor.objects.all()
         for product in products:
             sku = product.sku
 
@@ -610,7 +587,7 @@ class Command(BaseCommand):
             #         sq(sku), sq(category)))
             #     con.commit()
 
-            #     debug("JamieYoung", 0, "Added Category. SKU: {}, Category: {}".format(
+            #     debug("KravetDecor", 0, "Added Category. SKU: {}, Category: {}".format(
             #         sku, sq(category)))
 
             if style != None and style != "":
@@ -618,7 +595,7 @@ class Command(BaseCommand):
                     sq(sku), sq(style)))
                 con.commit()
 
-                debug("JamieYoung", 0, "Added Style. SKU: {}, Style: {}".format(
+                debug("KravetDecor", 0, "Added Style. SKU: {}, Style: {}".format(
                     sku, sq(style)))
 
             if colors != None and colors != "":
@@ -626,7 +603,7 @@ class Command(BaseCommand):
                     sq(sku), sq(colors)))
                 con.commit()
 
-                debug("JamieYoung", 0,
+                debug("KravetDecor", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
 
             if subtypes != None and subtypes != "":
@@ -634,18 +611,18 @@ class Command(BaseCommand):
                     sq(sku), sq(str(subtypes).strip())))
                 con.commit()
 
-                debug("JamieYoung", 0,
+                debug("KravetDecor", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
 
         csr.close()
         con.close()
 
     def downloadInvFile(self):
-        debug("JamieYoung", 0, "Download New CSV from JamieYoung FTP")
+        debug("KravetDecor", 0, "Download New CSV from KravetDecor FTP")
 
         host = "18.206.49.64"
         port = 22
-        username = "jamieyoung"
+        username = "KravetDecor"
         password = "JY123!"
 
         try:
@@ -653,25 +630,25 @@ class Command(BaseCommand):
             transport.connect(username=username, password=password)
             sftp = paramiko.SFTPClient.from_transport(transport)
         except:
-            debug("JamieYoung", 2, "Connection to JamieYoung FTP Server Failed")
+            debug("KravetDecor", 2, "Connection to KravetDecor FTP Server Failed")
             return False
 
         try:
-            sftp.chdir(path='/jamieyoung')
+            sftp.chdir(path='/KravetDecor')
             files = sftp.listdir()
         except:
-            debug("JamieYoung", 1, "No New Inventory File")
+            debug("KravetDecor", 1, "No New Inventory File")
             return False
 
         for file in files:
             if "EDI" in file:
                 continue
-            sftp.get(file, FILEDIR + '/files/jamieyoung-inventory.csv')
+            sftp.get(file, FILEDIR + '/files/KravetDecor-inventory.csv')
             sftp.remove(file)
 
         sftp.close()
 
-        debug("JamieYoung", 0, "JamieYoung FTP Inventory Download Completed")
+        debug("KravetDecor", 0, "KravetDecor FTP Inventory Download Completed")
         return True
 
     def updateStock(self):
@@ -682,10 +659,10 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Jamie Young'")
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
         con.commit()
 
-        f = open(FILEDIR + '/files/jamieyoung-inventory.csv', "rt")
+        f = open(FILEDIR + '/files/KravetDecor-inventory.csv', "rt")
         cr = csv.reader(f)
 
         index = 0
@@ -696,7 +673,7 @@ class Command(BaseCommand):
 
             mpn = row[1]
             try:
-                product = JamieYoung.objects.get(mpn=mpn)
+                product = KravetDecor.objects.get(mpn=mpn)
             except:
                 continue
 
@@ -705,15 +682,15 @@ class Command(BaseCommand):
             stock = int(row[2])
 
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jamie Young')".format(
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet Decor')".format(
                     sku, stock, ""))
                 con.commit()
-                debug("JamieYoung", 0,
+                debug("KravetDecor", 0,
                       "Updated inventory for {} to {}.".format(sku, stock))
             except Exception as e:
                 print(e)
                 debug(
-                    "JamieYoung", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
+                    "KravetDecor", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
@@ -726,7 +703,7 @@ class Command(BaseCommand):
         csr.execute("""SELECT ProductID, SKU, Published FROM Product
         WHERE ManufacturerPartNumber<>'' AND ProductID IS NOT NULL AND ProductID != 0
         AND SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE M.Brand = 'Jamie Young');""")
+        WHERE M.Brand = 'Kravet Decor');""")
 
         rows = csr.fetchall()
         for row in rows:
@@ -748,20 +725,19 @@ class Command(BaseCommand):
                 continue
 
             try:
-                product = JamieYoung.objects.get(
+                product = KravetDecor.objects.get(
                     productId=shopifyProduct.productId)
                 newCost = product.cost
-                map = product.map
             except:
-                debug("JamieYoung", 1, "Discontinued Product: SKU: {}".format(
+                debug("KravetDecor", 1, "Discontinued Product: SKU: {}".format(
                     shopifyProduct.sku))
                 continue
 
             try:
-                newPrice = common.formatprice(map, 1)
-                newPriceTrade = common.formatprice(map, 0.9)
+                newPrice = common.formatprice(newCost, markup_price)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
             except:
-                debug("JamieYoung", 1, "Price Error: SKU: {}".format(product.sku))
+                debug("KravetDecor", 1, "Price Error: SKU: {}".format(product.sku))
                 continue
 
             if newPrice < 19.99:
@@ -781,10 +757,10 @@ class Command(BaseCommand):
                     print(e)
                     continue
 
-                debug("JamieYoung", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                debug("KravetDecor", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newCost, newPrice, newPriceTrade))
             else:
-                debug("JamieYoung", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                debug("KravetDecor", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
 
         csr.close()
