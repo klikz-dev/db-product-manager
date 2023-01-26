@@ -195,7 +195,7 @@ class Command(BaseCommand):
                 uom = "Per Yard"
             elif "ROLL" in priceby:
                 uom = "Per Roll"
-            elif "EACH" in priceby or "UNIT" in priceby or "SET" in priceby:
+            elif "EACH" in priceby or "UNIT" in priceby or "SET" in priceby or "ITEM" in priceby:
                 uom = "Per Item"
             elif "PANEL" in priceby:
                 uom = "Per Panel"
@@ -481,6 +481,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
+        products = Schumacher.objects.filter(manufacturer="Schumacher Rug")
 
         for product in products:
             try:
