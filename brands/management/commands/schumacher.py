@@ -147,10 +147,13 @@ class Command(BaseCommand):
                 ptype = "Pillow"
                 usage = "Pillow"
                 pattern = pattern.replace("Pillow", "").strip()
+            elif "RUGS & CARPETS" == ptype:
+                ptype = "Rug"
+                usage = "RUGS & CARPETS"
+                pattern = pattern.replace("Rug", "").strip()
             else:
-                debug("Schumacher", 1,
-                      "Product Type Error: MPN: {}, Type: {}".format(mpn, ptype))
-                continue
+                ptype = ptype.title()
+                usage = ptype
 
             price = float(row[7])
 
@@ -704,6 +707,7 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.color
+            subtypes = "{}, {}".format(product.ptype, product.pattern)
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
@@ -728,6 +732,14 @@ class Command(BaseCommand):
 
                 debug("Schumacher", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if subtypes != None and subtypes != "":
+                csr.execute("CALL AddToEditSubtype ({}, {})".format(
+                    sq(sku), sq(str(subtypes).strip())))
+                con.commit()
+
+                debug("Schumacher", 0,
+                      "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
 
         csr.close()
         con.close()
