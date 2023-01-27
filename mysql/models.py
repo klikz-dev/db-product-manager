@@ -195,6 +195,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     KasmirSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    KravetDecorOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    KravetDecorSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     MadcapCottageOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     MadcapCottageSample = models.CharField(
