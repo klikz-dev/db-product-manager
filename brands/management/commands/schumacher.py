@@ -481,7 +481,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(manufacturer="Schumacher Rug")
+        products = Schumacher.objects.filter(manufacturer="Schumacher Pillow")
 
         for product in products:
             try:
