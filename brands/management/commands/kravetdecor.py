@@ -617,80 +617,30 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    def downloadInvFile(self):
-        debug("KravetDecor", 0, "Download New CSV from KravetDecor FTP")
-
-        host = "18.206.49.64"
-        port = 22
-        username = "KravetDecor"
-        password = "JY123!"
-
-        try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug("KravetDecor", 2, "Connection to KravetDecor FTP Server Failed")
-            return False
-
-        try:
-            sftp.chdir(path='/KravetDecor')
-            files = sftp.listdir()
-        except:
-            debug("KravetDecor", 1, "No New Inventory File")
-            return False
-
-        for file in files:
-            if "EDI" in file:
-                continue
-            sftp.get(file, FILEDIR + '/files/KravetDecor-inventory.csv')
-            sftp.remove(file)
-
-        sftp.close()
-
-        debug("KravetDecor", 0, "KravetDecor FTP Inventory Download Completed")
-        return True
-
     def updateStock(self):
-        if not self.downloadInvFile():
-            return
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
+        csr.execute(
+            "DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
         con.commit()
 
-        f = open(FILEDIR + '/files/KravetDecor-inventory.csv', "rt")
-        cr = csv.reader(f)
+        products = KravetDecor.objects.all()
 
-        index = 0
-        for row in cr:
-            index += 1
-            if index == 1:
-                continue
-
-            mpn = row[1]
-            try:
-                product = KravetDecor.objects.get(mpn=mpn)
-            except:
-                continue
-
-            sku = product.sku
-
-            stock = int(row[2])
+        for product in products:
+            stock = 5
 
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet Decor')".format(
-                    sku, stock, ""))
+                csr.execute('CALL UpdateProductInventory ("{}", {}, 3, "{}", "Kravet Decor")'.format(
+                    product.sku, stock, product.boDate))
                 con.commit()
                 debug("KravetDecor", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
+                      "Updated inventory for {} to {}.".format(product.sku, stock))
             except Exception as e:
                 print(e)
                 debug(
-                    "KravetDecor", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
+                    "KravetDecor", 1, "Error Updating inventory for {} to {}.".format(product.sku, stock))
 
         csr.close()
         con.close()
