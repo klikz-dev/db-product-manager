@@ -4,10 +4,12 @@ from shopify.models import Product as ShopifyProduct
 from mysql.models import Type
 
 import os
-import paramiko
+import urllib.request
+import zipfile
 import pymysql
 import codecs
 import csv
+import time
 
 from library import debug, common, shopify, markup
 
@@ -52,7 +54,10 @@ class Command(BaseCommand):
             self.updateTags()
 
         if "updateStock" in options['functions']:
-            self.updateStock()
+            while True:
+                self.updateStock()
+                print("Completed stock update process. Waiting for next run.")
+                time.sleep(86400)
 
         if "updatePrice" in options['functions']:
             self.updatePrice()
@@ -617,22 +622,52 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
+    def downloadcsv(self):
+        if os.path.isfile(FILEDIR + "/files/curated_onhand_info.csv"):
+            os.remove(FILEDIR + "/files/curated_onhand_info.csv")
+        if os.path.isfile(FILEDIR + "/files/curated_onhand_info.zip"):
+            os.remove(FILEDIR + "/files/curated_onhand_info.zip")
+
+        try:
+            urllib.request.urlretrieve(
+                "ftp://decbest:mArker999@file.kravet.com/curated_onhand_info.zip", FILEDIR + "/files/curated_onhand_info.zip")
+            z = zipfile.ZipFile(
+                FILEDIR + "/files/curated_onhand_info.zip", "r")
+            z.extractall(FILEDIR + "/files/")
+            z.close()
+        except Exception as e:
+            debug("Kravet", 2, "Download Failed. Exiting")
+            print(e)
+            return False
+
+        debug("KravetDecor", 0, "Download Completed")
+        return True
+
     def updateStock(self):
+        if not self.downloadcsv():
+            return
+
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
+        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
         con.commit()
 
-        products = KravetDecor.objects.all()
+        f = open(FILEDIR + "/files/curated_onhand_info.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
 
-        for product in products:
-            stock = 5
+        for row in cr:
+            if row[0] == "Item":
+                continue
+
+            mpn = str(row[0]).strip()
+            stock = int(row[1])
 
             try:
-                csr.execute('CALL UpdateProductInventory ("{}", {}, 3, "{}", "Kravet Decor")'.format(
+                product = KravetDecor.objects.get(mpn=mpn)
+
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet Decor')".format(
                     product.sku, stock, product.boDate))
                 con.commit()
                 debug("KravetDecor", 0,

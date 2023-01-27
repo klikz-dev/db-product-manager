@@ -431,6 +431,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = MadcapCottage.objects.all()
+        products = MadcapCottage.objects.filter(pattern="Runaway Bay")
 
         for product in products:
             try:
