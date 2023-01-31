@@ -1,4 +1,4 @@
-from math import pi
+from django.db.models import Q
 from django.core.management.base import BaseCommand
 from brands.models import Schumacher
 from shopify.models import Product as ShopifyProduct
@@ -154,15 +154,20 @@ class Command(BaseCommand):
             else:
                 ptype = ptype.title()
                 usage = ptype
+            if "Throw" in pattern:
+                ptype = "Throw"
+                usage = "Throw"
 
             price = float(row[7])
 
             width = str(row[11]).strip()
             height = str(row[21]).strip()
-            if ptype == "Pillow" and width != "" and height != "":
-                size = "{} x {}".format(width, height)
-            else:
-                size = ""
+
+            size = ""
+            if ptype == "Pillow" or ptype == "Rug" or ptype == "Throw":
+                if width != "" and height != "":
+                    size = "{} x {}".format(width, height)
+
             vr = str(row[15]).strip()
             hr = str(row[16]).strip()
             match = str(row[14]).strip()
@@ -215,7 +220,8 @@ class Command(BaseCommand):
 
             # Update 7/30/21. Sch Trim has minimum of 2. No increment changes needed
             # if ptype == "Trim" and minimum < 2:
-            if ptype != "Wallpaper" and ptype != "Pillow" and minimum < 2:  # Update 8/2. Same issue with Fabric
+            # Update 8/2. Same issue with Fabric
+            if (ptype == "Trim" or ptype == "Fabric") and minimum < 2:
                 minimum = 2
 
             increment = ""
@@ -370,7 +376,7 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.ptype == "Pillow" and product.size != "":
+                if product.size != "":
                     desc += "Size: {}<br/>".format(product.size)
                 else:
                     if product.width != None and product.width != "":
@@ -481,7 +487,8 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(manufacturer="Schumacher Pillow")
+        products = Schumacher.objects.filter(
+            Q(manufacturer="Schumacher Rug") | Q(manufacturer="Schumacher Throw"))
 
         for product in products:
             try:
@@ -510,7 +517,7 @@ class Command(BaseCommand):
                 if product.collection != None and product.collection != "":
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
-                if product.ptype == "Pillow" and product.size != "":
+                if product.size != "":
                     desc += "Size: {}<br/>".format(product.size)
                 else:
                     if product.width != None and product.width != "":
@@ -757,7 +764,7 @@ class Command(BaseCommand):
             size = product.size
             width = product.width
 
-            if size != None and size != "" and ptype == "Pillow":
+            if size != None and size != "" and (ptype == "Pillow" or ptype == "Rug" or ptype == "Throw"):
                 csr.execute("CALL AddToEditSize ({}, {})".format(
                     sq(sku), sq(size)))
                 con.commit()

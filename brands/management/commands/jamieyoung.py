@@ -599,19 +599,9 @@ class Command(BaseCommand):
         for product in products:
             sku = product.sku
 
-            # category = product.category
             style = product.style
             colors = product.colors
             subtypes = "{}, {}".format(product.ptype, product.pattern)
-
-            # Hide Category for JY. 1/25/23 from BK.
-            # if category != None and category != "":
-            #     csr.execute("CALL AddToEditCategory ({}, {})".format(
-            #         sq(sku), sq(category)))
-            #     con.commit()
-
-            #     debug("JamieYoung", 0, "Added Category. SKU: {}, Category: {}".format(
-            #         sku, sq(category)))
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(

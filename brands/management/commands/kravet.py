@@ -86,11 +86,13 @@ class Command(BaseCommand):
             self.bestSeller()
 
         if "main" in options['functions']:
+            self.getProducts()
+            self.getPillowProducts()
+            self.replaceImages()
+            self.getProductIds()
+
+        if "updateStock" in options['functions']:
             while True:
-                self.getProducts()
-                self.getPillowProducts()
-                self.replaceImages()
-                self.getProductIds()
                 self.updateStock()
                 print("Completed stock update process. Waiting for next run.")
                 time.sleep(43200)
@@ -1094,6 +1096,9 @@ class Command(BaseCommand):
                     product.productId) + ".jpg")
 
     def updateStock(self):
+        if not self.downloadcsv():
+            return
+
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
@@ -1101,15 +1106,29 @@ class Command(BaseCommand):
         csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet'")
         con.commit()
 
-        products = Kravet.objects.all()
+        f = open(FILEDIR + "/files/item_info.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            temp = row[0].strip().split(".")
 
-        for product in products:
+            if len(temp) != 3 or temp[2] != "0":
+                continue
+            if row[12] == "LEATHER - 100%":
+                continue
+
+            mpn = row[0].strip()
+            stock = int(float(row[46]))
+            stockNote = row[47]
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
             sku = product.sku
-            stock = product.stock
             if stock < 3:
                 stock = 0
-
-            leadtime = "{} days".format(product.stockNote)
+            leadtime = "{} days".format(stockNote)
 
             try:
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet')".format(
