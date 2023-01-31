@@ -1,10 +1,11 @@
 import json
 import random
-from brands.models import Kravet, York
+from brands.models import Kravet, JamieYoung, Schumacher
 from monitor.models import Log
 from mysql.models import Manufacturer, PendingUpdateTag, ProductTag
 from shopify.models import Product, Variant
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 import os
 import pymysql
@@ -70,6 +71,9 @@ class Command(BaseCommand):
 
         if "bestSeller" in options['functions']:
             self.bestSeller()
+
+        if "deleteBuggyTypes" in options['functions']:
+            self.deleteBuggyTypes()
 
     def deleteBuggyVariants(self):
         con = pymysql.connect(host=db_host, user=db_username,
@@ -554,3 +558,26 @@ class Command(BaseCommand):
 
                     debug("Misc", 0, "Added to Best selling. SKU: {}, ProductId: {}".format(
                         product.sku, product.productId))
+
+    def deleteBuggyTypes(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = JamieYoung.objects.all()
+        # products = Schumacher.objects.filter(Q(ptype="Rug") | Q(ptype="Throw"))
+        for product in products:
+            sku = product.sku
+            productId = product.productId
+
+            if sku != None and productId != None:
+                csr.execute(
+                    """DELETE FROM ProductSubtype WHERE SKU = '{}';""".format(sku))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    productId))
+                con.commit()
+
+                debug("Misc", 0, "Deleted Types for SKU: {}, ProductId: {}".format(
+                    sku, productId))

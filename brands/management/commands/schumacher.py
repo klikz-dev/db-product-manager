@@ -709,6 +709,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
+        products = Schumacher.objects.filter(Q(ptype="Rug") | Q(ptype="Throw"))
         for product in products:
             sku = product.sku
 

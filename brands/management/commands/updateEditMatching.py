@@ -364,7 +364,7 @@ class Command(BaseCommand):
 
         subtypes = {}
         csr.execute(
-            "SELECT DISTINCT T.Name AS Type, T.TypeID FROM Type T WHERE T.ParentTypeID != 0")
+            "SELECT DISTINCT T.Name AS Type, T.TypeID, PT.TypeID FROM Type T LEFT JOIN Type PT ON T.ParentTypeID = PT.TypeID WHERE T.ParentTypeID != 0 AND T.Published != 0")
         for row in csr.fetchall():
             ptype = row[0].lower()
             if ptype[-2:] == 'es':
@@ -388,17 +388,23 @@ class Command(BaseCommand):
                     ptype = ptype[0:-2]
             elif ptype[-1:] == 's':
                 ptype = ptype[0:-1]
-            subtypes.update({ptype: row[1]})
 
-        csr.execute("SELECT SKU, Subtype FROM EditSubtype WHERE IsManual = 0")
+            subtypes.update({ptype: {"id": row[1], "parent": row[2]}})
+
+        csr.execute(
+            "SELECT T.SKU, T.Subtype, P.ProductTypeID FROM EditSubtype T LEFT JOIN Product P ON P.SKU = T.SKU WHERE T.IsManual = 0")
         for row in csr.fetchall():
             sku = row[0]
             subtype = row[1].lower()
             for key, value in subtypes.items():
                 if key in subtype:
-                    csr.execute("CALL AddToProductSubtype ({}, {})".format(
-                        common.sq(sku), value))
-                    con.commit()
+                    if value['parent'] == row[2]:
+                        csr.execute("CALL AddToProductSubtype ({}, {})".format(
+                            common.sq(sku), value['id']))
+                        con.commit()
+
+                        print("Added product subtype tag: {} for product: {}. ParentType: {}".format(
+                            value['id'], sku, value['parent']))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
