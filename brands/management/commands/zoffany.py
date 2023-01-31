@@ -81,7 +81,7 @@ class Command(BaseCommand):
         Zoffany.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master.xlsx")
+            FILEDIR + "/files/zoffany-master-1.31.23.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
