@@ -778,42 +778,42 @@ class Command(BaseCommand):
         fnames = os.listdir(FILEDIR + "/files/images/jffabrics/")
 
         for fname in fnames:
-            try:
-                if "-" in fname:
-                    mpn = fname.split("-")[0]
-                    roomId = int(fname.split("-")[1].split(".")[0]) + 1
+            if "-" in fname:
+                mpn = fname.split("-")[0]
+                roomId = int(fname.split("-")[1].split(".")[0]) + 1
 
+                try:
                     product = JFFabrics.objects.get(mpn=mpn)
-                    productId = product.productId
+                except JFFabrics.DoesNotExist:
+                    print("No product found with MPN: {}".format(mpn))
+                    continue
 
-                    if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
-                                 "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
+                productId = product.productId
 
-                        debug("JF Fabrics", 0, "Roomset Image {}_{}.jpg".format(
-                            productId, roomId))
+                copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
+                         "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
 
-                        os.remove(
-                            FILEDIR + "/files/images/jffabrics/" + fname)
-                    else:
-                        print("No product found with MPN: {}".format(mpn))
-                else:
-                    mpn = fname.split(".")[0]
+                debug("JF Fabrics", 0, "Roomset Image {}_{}.jpg".format(
+                    productId, roomId))
 
+                os.remove(
+                    FILEDIR + "/files/images/jffabrics/" + fname)
+
+            else:
+                mpn = fname.split(".")[0]
+
+                try:
                     product = JFFabrics.objects.get(mpn=mpn)
-                    productId = product.productId
+                except JFFabrics.DoesNotExist:
+                    print("No product found with MPN: {}".format(mpn))
+                    continue
 
-                    if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
-                                 "/../../images/product/{}.jpg".format(productId))
+                productId = product.productId
 
-                        debug("JF Fabrics", 0, "Product Image {}.jpg".format())
+                copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
+                         "/../../images/product/{}.jpg".format(productId))
 
-                        os.remove(
-                            FILEDIR + "/files/images/jffabrics/" + fname)
-                    else:
-                        print("No product found with MPN: {}".format(mpn))
+                debug("JF Fabrics", 0, "Product Image {}.jpg".format(productId))
 
-            except Exception as e:
-                print(e)
-                continue
+                os.remove(
+                    FILEDIR + "/files/images/jffabrics/" + fname)
