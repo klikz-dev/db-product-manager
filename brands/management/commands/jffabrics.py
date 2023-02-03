@@ -58,8 +58,8 @@ class Command(BaseCommand):
         if "updateTags" in options['functions']:
             self.updateTags()
 
-        if "roomset" in options['functions']:
-            self.roomset()
+        if "image" in options['functions']:
+            self.image()
 
         if "main" in options['functions']:
             while True:
@@ -98,7 +98,7 @@ class Command(BaseCommand):
             sku = "JF {}".format(mpn)
             discoSkus.append(sku)
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master.xls")
+        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master-2.2.23.xls")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -154,29 +154,13 @@ class Command(BaseCommand):
                     map = float(
                         str(sh.cell_value(i, 74)).replace('$', '').strip())
                 except:
-                    debug("JF Fabrics", 1, "Failed produt data -- {}: {} {}".format(mpn,
-                                                                                    sh.cell_value(i, 75), sh.cell_value(i, 74)))
+                    debug("JF Fabrics", 1, "Failed product data -- {}: {} {}".format(mpn,
+                                                                                     sh.cell_value(i, 75), sh.cell_value(i, 74)))
                     continue
 
                 uom = "Per Yard"
                 minimum = 1
                 increment = ""
-
-                #  JFF is totally priced as SR or YD. 5/1
-                # if sh.cell_value(i, 73) == "DR":
-                #     uom = "Per Roll"
-                #     minimum = 2
-                #     increment = ",".join(
-                #         [str(ii * 2) for ii in range(1, 21)])
-                #     try:
-                #         price = float(
-                #             str(sh.cell_value(i, 77)).replace('$', '').strip())
-                #         map = float(
-                #             str(sh.cell_value(i, 75)).replace('$', '').strip())
-                #     except:
-                #         debug("JF Fabrics", 1, "Failed produt data -- {}: {} {}".format(mpn,
-                #                                                                         sh.cell_value(i, 75), sh.cell_value(i, 74)))
-                #         continue
 
                 if sh.cell_value(i, 73) == "DR":
                     uom = "Per Roll"
@@ -347,11 +331,6 @@ class Command(BaseCommand):
                 if product.status == False or product.productId != None:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("JF Fabrics", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -479,11 +458,6 @@ class Command(BaseCommand):
         for product in products:
             try:
                 if product.status == False or product.productId == None:
-                    continue
-
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("JF Fabrics", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
                     continue
 
                 name = " | ".join((product.brand, product.pattern,
@@ -800,8 +774,8 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    def roomset(self):
-        fnames = os.listdir(FILEDIR + "/files/images/jf fabrics/")
+    def image(self):
+        fnames = os.listdir(FILEDIR + "/files/images/jffabrics/")
 
         for fname in fnames:
             try:
@@ -813,18 +787,32 @@ class Command(BaseCommand):
                     productId = product.productId
 
                     if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/jf fabrics/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
 
                         debug("JF Fabrics", 0, "Roomset Image {}_{}.jpg".format(
                             productId, roomId))
 
                         os.remove(
-                            FILEDIR + "/files/images/jf fabrics/" + fname)
+                            FILEDIR + "/files/images/jffabrics/" + fname)
                     else:
                         print("No product found with MPN: {}".format(mpn))
                 else:
-                    continue
+                    mpn = fname.split(".")[0]
+
+                    product = JFFabrics.objects.get(mpn=mpn)
+                    productId = product.productId
+
+                    if productId != None and productId != "":
+                        copyfile(FILEDIR + "/files/images/jffabrics/" + fname, FILEDIR +
+                                 "/../../images/product/{}.jpg".format(productId))
+
+                        debug("JF Fabrics", 0, "Product Image {}.jpg".format())
+
+                        os.remove(
+                            FILEDIR + "/files/images/jffabrics/" + fname)
+                    else:
+                        print("No product found with MPN: {}".format(mpn))
 
             except Exception as e:
                 print(e)
