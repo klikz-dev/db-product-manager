@@ -61,8 +61,8 @@ class Command(BaseCommand):
         if "updateStock" in options['functions']:
             self.updateStock()
 
-        if "roomset" in options['functions']:
-            self.roomset()
+        if "image" in options['functions']:
+            self.image()
 
         if "bestSellers" in options['functions']:
             self.bestSellers()
@@ -81,7 +81,7 @@ class Command(BaseCommand):
         Zoffany.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master-1.31.23.xlsx")
+            FILEDIR + "/files/zoffany-master-2.1.23.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -134,7 +134,7 @@ class Command(BaseCommand):
                     continue
 
                 minimum = 2
-                if ptype == "Fabric": # 11/09/22 - from Bk - Zoffany changed policy to help fabric sales
+                if ptype == "Fabric":  # 11/09/22 - from Bk - Zoffany changed policy to help fabric sales
                     minimum = 1
 
                 # Zoffany has no increment. 1/19 from Barbara
@@ -424,8 +424,7 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        # products = Zoffany.objects.all()
-        products = Zoffany.objects.filter(ptype="Fabric")
+        products = Zoffany.objects.all()
 
         for product in products:
             try:
@@ -785,35 +784,49 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    def roomset(self):
+    def image(self):
         fnames = os.listdir(FILEDIR + "/files/images/zoffany/")
 
         for fname in fnames:
-            try:
-                if "_" in fname:
-                    mpn = fname.split("_")[0]
-                    roomId = int(fname.split("_")[1].split(".")[0]) + 1
+            if "_" in fname:
+                mpn = fname.split("_")[0]
+                roomId = int(fname.split("_")[1].split(".")[0]) + 1
 
+                try:
                     product = Zoffany.objects.get(mpn=mpn)
-                    productId = product.productId
-
-                    if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/zoffany/" + fname, FILEDIR +
-                                 "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
-
-                        debug("Zoffany", 0, "Roomset Image {}_{}.jpg".format(
-                            productId, roomId))
-
-                        os.remove(
-                            FILEDIR + "/files/images/zoffany/" + fname)
-                    else:
-                        print("No product found with MPN: {}".format(mpn))
-                else:
+                except Zoffany.DoesNotExist:
+                    print("No product found with MPN: {}".format(mpn))
                     continue
 
-            except Exception as e:
-                print(e)
-                continue
+                productId = product.productId
+
+                if productId != None and productId != "":
+                    copyfile(FILEDIR + "/files/images/zoffany/" + fname, FILEDIR +
+                             "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
+
+                    debug("Zoffany", 0, "Roomset Image {}_{}.jpg".format(
+                        productId, roomId))
+
+                    os.remove(FILEDIR + "/files/images/zoffany/" + fname)
+
+            else:
+                mpn = fname.split(".")[0]
+
+                try:
+                    product = Zoffany.objects.get(mpn=mpn)
+                except Zoffany.DoesNotExist:
+                    print("No product found with MPN: {}".format(mpn))
+                    continue
+
+                productId = product.productId
+
+                if productId != None and productId != "":
+                    copyfile(FILEDIR + "/files/images/zoffany/" + fname, FILEDIR +
+                             "/../../images/product/{}.jpg".format(productId))
+
+                    debug("Zoffany", 0, "Product Image {}.jpg".format(productId))
+
+                    os.remove(FILEDIR + "/files/images/zoffany/" + fname)
 
     def bestSellers(self):
         con = pymysql.connect(host=db_host, port=db_port, user=db_username,
