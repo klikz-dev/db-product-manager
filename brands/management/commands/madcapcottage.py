@@ -68,7 +68,8 @@ class Command(BaseCommand):
     def getProducts(self):
         MadcapCottage.objects.all().delete()
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/madcapcottage-master.xlsx")
+        wb = xlrd.open_workbook(
+            FILEDIR + "/files/madcapcottage-master-1.18.23.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -139,6 +140,9 @@ class Command(BaseCommand):
                 elif uom == "11 yd Roll":
                     uom = "Per Roll"
                     rollLength = 11
+                elif uom == "4.5 yard single roll":
+                    uom = "Per Roll"
+                    rollLength = 4.5
                 else:
                     debug("MadcapCottage", 1, "UOM error {}".format(mpn))
                     continue
@@ -174,6 +178,10 @@ class Command(BaseCommand):
 
                 thumbnail = str(sh.cell_value(i, 30)).strip()
                 roomset = str(sh.cell_value(i, 31)).strip()
+
+                status = True
+                if str(sh.cell_value(i, 33)).strip() != "Active":
+                    status = False
 
                 style = str(sh.cell_value(i, 27)).strip()
                 colors = str(sh.cell_value(i, 28)).strip()
@@ -213,6 +221,7 @@ class Command(BaseCommand):
                     msrp=msrp,
                     thumbnail=thumbnail,
                     roomset=roomset,
+                    status=status
                 )
 
                 debug("MadcapCottage", 0,
