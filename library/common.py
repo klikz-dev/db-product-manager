@@ -279,12 +279,12 @@ def importOrder(shopifyOrder):
 
     Line_Item.objects.filter(order=order).delete()
 
-    # orderHold = False
+    orderHold = False
     # holdBrand = ""
 
     # Set hold the orders with customer note
-    # if order.orderNote:
-    #     orderHold = True
+    if order.orderNote:
+        orderHold = True
 
     for line_item in line_items:
         try:
@@ -373,10 +373,10 @@ def importOrder(shopifyOrder):
 
     order.save()
 
-    # if orderHold:
-    #     if order.status == 'New' or order.status == None:
-    #         order.status = "Hold"
-    #         order.save()
+    if orderHold:
+        if order.status == 'New' or order.status == None:
+            order.status = "Hold"
+            order.save()
 
     debug("Order", 0,
           "Downloaded Order {} / {}".format(order.orderNumber, order.shopifyOrderId))
