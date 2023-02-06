@@ -87,6 +87,9 @@ class Command(BaseCommand):
             pattern = str(sh.cell_value(i, 4)).strip()
             color = str(sh.cell_value(i, 3)).strip()
 
+            if "Lumbar" in pattern:
+                pattern = "{} Pillow".format(pattern)
+
             if color == "":
                 continue
 
@@ -441,16 +444,8 @@ class Command(BaseCommand):
                 if product.productId == None:
                     continue
 
-                # Update Mirrors, Accents, Wall Art, Chandeliers
-                if product.ptype == "Mirrors" or product.ptype == "Accents" or product.ptype == "Wall Art" or product.ptype == "Chandeliers":
-                    pass
-                else:
-                    continue
-
-                name = " | ".join((product.brand, product.pattern,
-                                  product.color, product.ptype))
-                title = " ".join((product.brand, product.pattern,
-                                 product.color, product.ptype))
+                name = " | ".join((product.brand, product.pattern))
+                title = " ".join((product.brand, product.pattern))
                 description = title
                 vname = title
                 hassample = 1
@@ -472,18 +467,13 @@ class Command(BaseCommand):
                 if product.depth != None and product.depth != "" and float(product.depth) != 0:
                     desc += "Depth: {} in<br/><br/>".format(product.depth)
 
-                if product.features != None and product.features != "":
-                    desc += "Feature: {}<br/><br/>".format(product.features)
-
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
-                if product.disclaimer != None and product.disclaimer != "":
-                    desc += "Disclaimer: {}<br/>".format(product.disclaimer)
-                if product.care != None and product.care != "":
-                    desc += "Product Care: {}<br/><br/>".format(product.care)
+                if product.finish != None and product.finish != "":
+                    desc += "Finish: {}<br/>".format(product.finish)
 
-                if product.specs != None and product.specs != "":
-                    desc += "Specs: {}<br/><br/>".format(product.specs)
+                if product.features != None and product.features != "":
+                    desc += "Feature: {}<br/><br/>".format(product.features)
 
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
@@ -506,7 +496,11 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
-                productType = Type.objects.get(name=product.ptype)
+                try:
+                    productType = Type.objects.get(name=product.ptype)
+                except Type.DoesNotExist:
+                    productType = Type.objects.get(name="Accents")
+
                 if productType.parentTypeId == 0:
                     ptype = productType.name
                 else:
@@ -764,7 +758,7 @@ class Command(BaseCommand):
             mpnStr = product.mpn.replace("-", "").lower()
 
             for fname in fnames:
-                if mpnStr in fname:
+                if mpnStr in fname.lower():
                     if "_bak" in fname:
                         copyfile(FILEDIR + "/files/images/danagibson/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_2.jpg".format(product.productId))
