@@ -169,90 +169,93 @@ class Command(BaseCommand):
         con.commit()
 
     def deleteProduct(self, productID):
-        productID = "2076213215299"
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("""SELECT P.ProductID, P.SKU 
-        FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-        WHERE P.ProductID = '{}'""".format(productID))
+        productIDs = [
+            '4591854649390',
+        ]
 
-        row = csr.fetchone()
-        productID = row[0]
-        sku = row[1]
+        for productID in productIDs:
+            csr.execute("""SELECT P.ProductID, P.SKU 
+            FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+            WHERE P.ProductID = '{}'""".format(productID))
 
-        try:
-            shopify.DeleteProductByProductID(productID)
-        except Exception as e:
-            print(e)
+            row = csr.fetchone()
+            productID = row[0]
+            sku = row[1]
 
-        try:
-            csr.execute(
-                "DELETE from Product where productID={}".format(productID))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                shopify.DeleteProductByProductID(productID)
+            except Exception as e:
+                print(e)
 
-        try:
-            csr.execute(
-                "DELETE from ProductImage where productID='{}';".format(productID))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from Product where productID={}".format(productID))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductInventory where SKU='{}';".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductImage where productID='{}';".format(productID))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductManufacturer where SKU='{}';".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductInventory where SKU='{}';".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductSubcategory where SKU='{}';".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductManufacturer where SKU='{}';".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductSubtype where SKU='{}';".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductSubcategory where SKU='{}';".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductTag where SKU='{}';".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductSubtype where SKU='{}';".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        try:
-            csr.execute(
-                "DELETE from ProductVariant where SKU='{}'".format(sku))
-            con.commit()
-        except Exception as e:
-            print(e)
-            pass
+            try:
+                csr.execute(
+                    "DELETE from ProductTag where SKU='{}';".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
 
-        debug("Misc", 0, "Deleted --- ProductID: {}, sku: {}".format(productID, sku))
+            try:
+                csr.execute(
+                    "DELETE from ProductVariant where SKU='{}'".format(sku))
+                con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            debug("Misc", 0, "Deleted --- ProductID: {}, sku: {}".format(productID, sku))
 
         csr.close()
         con.close()

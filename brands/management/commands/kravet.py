@@ -221,14 +221,10 @@ class Command(BaseCommand):
 
             try:
                 Kravet.objects.get(mpn=mpn)
-                Kravet.objects.get(pattern=pattern, color=color)
                 debug("Kravet", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Kravet.DoesNotExist:
                 pass
-            except Exception as e:
-                print(e)
-                continue
 
             if row[1] == "." or row[1] == ".." or row[1] == "..." or row[1] == "" or row[1].find("KF ") >= 0 or "KRAVET " in row[1]:
                 pattern = temp[0]
@@ -241,6 +237,18 @@ class Command(BaseCommand):
                 else:
                     color = row[2]
             except:
+                pass
+
+            pattern = pattern.title()
+            color = color.title()
+            if pattern == "" or color == "":
+                continue
+
+            try:
+                Kravet.objects.get(pattern=pattern, color=color)
+                debug("Kravet", 1, "Duplicated Product MPN: {}".format(mpn))
+                continue
+            except Kravet.DoesNotExist:
                 pass
 
             if row[17] == "WALLCOVERING":

@@ -86,11 +86,8 @@ premierprints_trade = 2
 
 # Scalamandre
 scalamandre = 1.5
-scalamandre_colony = 1.5
-scalamandre_trade = 1.3
-scalamandre_trade_european = 1.3
 scalamandre_pillow = 1.4
-scalamandre_pillow_trade = 1.3
+scalamandre_trade = 1.3
 
 # Schumacher
 schumacher = 1.4

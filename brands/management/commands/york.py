@@ -191,6 +191,15 @@ class Command(BaseCommand):
                 color = str(row['Color']).replace(
                     ", ", "/").replace("\"", "").strip()
 
+                pattern = pattern.title()
+                color = color.title()
+                try:
+                    York.objects.get(pattern=pattern, color=color)
+                    debug("York", 1, "Duplicated MPN: {}, Brand: {}".format(mpn, brand))
+                    continue
+                except York.DoesNotExist:
+                    pass
+
                 uomText = str(row['UOM'])
                 if "YARD" in uomText:
                     uom = "Per Yard"

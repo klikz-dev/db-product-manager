@@ -20,11 +20,8 @@ db_name = env('MYSQL_DATABASE')
 db_port = int(env('MYSQL_PORT'))
 
 markup_price = markup.scalamandre
-markup_price_colony = markup.scalamandre_colony
+markup_pillow = markup.scalamandre_pillow
 markup_trade = markup.scalamandre_trade
-markup_trade_european = markup.scalamandre_trade_european
-markup_price_pillow = markup.scalamandre_pillow
-markup_trade_pillow = markup.scalamandre_pillow_trade
 
 debug = debug.debug
 sq = common.sq
@@ -146,14 +143,24 @@ class Command(BaseCommand):
 
             try:
                 Scalamandre.objects.get(sku=sku)
+                debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Scalamandre.DoesNotExist:
                 pass
 
-            pattern = row['PATTERN_DESCRIPTION']
-            pattern = pattern.replace("PILLOW", "").strip()
+            pattern = str(row['PATTERN_DESCRIPTION']).replace(
+                "PILLOW", "").strip().title()
+            color = str(row['COLOR']).strip().title()
 
-            color = row['COLOR']
+            if pattern == "" or color == "":
+                continue
+
+            try:
+                Scalamandre.objects.get(pattern=pattern, color=color)
+                debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
+                continue
+            except Scalamandre.DoesNotExist:
+                pass
 
             if "FABR" in row['CATEGORY']:
                 ptype = "Fabric"
@@ -462,22 +469,11 @@ class Command(BaseCommand):
 
                 cost = product.cost
                 try:
-                    if product.ptype == "Pillow":
-                        price = common.formatprice(cost, markup_price_pillow)
-                        priceTrade = common.formatprice(
-                            cost, markup_trade_pillow)
-                    else:
-                        if "Colony" in product.manufacturer:
-                            price = common.formatprice(
-                                cost, markup_price_colony)
-                        else:
-                            price = common.formatprice(cost, markup_price)
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(cost, markup_trade)
 
-                        if 'Old World Weavers' in product.manufacturer or 'Grey Watkins' in product.manufacturer or 'Hinson' in product.manufacturer:
-                            priceTrade = common.formatprice(cost, markup_trade)
-                        else:
-                            priceTrade = common.formatprice(
-                                cost, markup_trade_european)
+                    if product.ptype == "Pillow":
+                        price = common.formatprice(cost, markup_pillow)
                 except:
                     debug("Scalamandre", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -598,22 +594,11 @@ class Command(BaseCommand):
 
                 cost = product.cost
                 try:
-                    if product.ptype == "Pillow":
-                        price = common.formatprice(cost, markup_price_pillow)
-                        priceTrade = common.formatprice(
-                            cost, markup_trade_pillow)
-                    else:
-                        if "Colony" in product.manufacturer:
-                            price = common.formatprice(
-                                cost, markup_price_colony)
-                        else:
-                            price = common.formatprice(cost, markup_price)
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(cost, markup_trade)
 
-                        if 'Old World Weavers' in product.manufacturer or 'Grey Watkins' in product.manufacturer or 'Hinson' in product.manufacturer:
-                            priceTrade = common.formatprice(cost, markup_trade)
-                        else:
-                            priceTrade = common.formatprice(
-                                cost, markup_trade_european)
+                    if product.ptype == "Pillow":
+                        price = common.formatprice(cost, markup_pillow)
                 except:
                     debug("Scalamandre", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -708,23 +693,11 @@ class Command(BaseCommand):
                 continue
 
             try:
-                if product.ptype == "Pillow":
-                    newPrice = common.formatprice(newCost, markup_price_pillow)
-                    newPriceTrade = common.formatprice(
-                        newCost, markup_trade_pillow)
-                else:
-                    if "Colony" in product.manufacturer:
-                        newPrice = common.formatprice(
-                            newCost, markup_price_colony)
-                    else:
-                        newPrice = common.formatprice(newCost, markup_price)
+                newPrice = common.formatprice(newCost, markup_price)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
 
-                    if 'Old World Weavers' in product.manufacturer or 'Grey Watkins' in product.manufacturer or 'Hinson' in product.manufacturer:
-                        newPriceTrade = common.formatprice(
-                            newCost, markup_trade)
-                    else:
-                        newPriceTrade = common.formatprice(
-                            newCost, markup_trade_european)
+                if product.ptype == "Pillow":
+                    newPrice = common.formatprice(newCost, markup_pillow)
             except:
                 debug("Scalamandre", 1,
                       "Price Error: SKU: {}".format(product.sku))
@@ -750,6 +723,12 @@ class Command(BaseCommand):
                 debug("Scalamandre", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newCost, newPrice, newPriceTrade))
             else:
+                # Temp
+                csr.execute(
+                    "CALL AddToPendingUpdatePrice ({})".format(shopifyProduct.productId))
+                con.commit()
+                ###
+
                 debug("Scalamandre", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
 

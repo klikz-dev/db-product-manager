@@ -46,7 +46,6 @@ class Command(BaseCommand):
 
         if "addNew" in options['functions']:
             self.addNew()
-            self.updateTags()
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
@@ -119,15 +118,26 @@ class Command(BaseCommand):
 
             try:
                 Schumacher.objects.get(sku=sku)
+                debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Schumacher.DoesNotExist:
                 pass
 
             pattern = str(row[4]).strip().replace('', '').replace(
-                '¥', '').replace('…', '').replace('„', '')
+                '¥', '').replace('…', '').replace('„', '').title()
             color = str(row[5]).strip().replace('', '').replace(
-                '¥', '').replace('…', '').replace('„', '')
-            ptype = str(row[0]).strip()
+                '¥', '').replace('…', '').replace('„', '').title()
+            ptype = str(row[0]).strip().title()
+
+            if pattern == "" or color == "" or ptype == "":
+                continue
+
+            try:
+                Schumacher.objects.get(pattern=pattern, color=color)
+                debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
+                continue
+            except Schumacher.DoesNotExist:
+                pass
 
             collection = str(row[2]).replace("Collection Name", "").strip()
             if "STAPETER" in collection:
@@ -709,7 +719,6 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(Q(ptype="Rug") | Q(ptype="Throw"))
         for product in products:
             sku = product.sku
 
@@ -822,7 +831,7 @@ class Command(BaseCommand):
             if int(product.productId) in hasImage:
                 continue
 
-            if product.thumbnail == "" or product.roomset == "":
+            if product.thumbnail == "":
                 continue
 
             productId = product.productId
