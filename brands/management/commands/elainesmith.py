@@ -171,7 +171,7 @@ class Command(BaseCommand):
             except ElaineSmith.DoesNotExist:
                 continue
 
-            statusText = str(elainesmithInventorySheet.cell_value(i, 3))
+            statusText = str(elainesmithInventorySheet.cell_value(i, 4))
 
             status = True
             boDate = ""
@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 pass
             else:
                 boDateTuple = xlrd.xldate_as_tuple(
-                    elainesmithInventorySheet.cell_value(i, 3), elainesmithInventoryFile.datemode)
+                    elainesmithInventorySheet.cell_value(i, 4), elainesmithInventoryFile.datemode)
                 boDate = datetime(*boDateTuple)
                 boDate = boDate.strftime("%m/%d/%Y")
 

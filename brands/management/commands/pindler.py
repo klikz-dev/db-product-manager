@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 from brands.models import Pindler
+from shopify.models import Product as ShopifyProduct
 
 import os
 import sys
-import time
 import pymysql
 import requests
 import csv
@@ -133,7 +133,6 @@ class Command(BaseCommand):
                 uom = "Per Yard"
 
                 colors = str(row[12]).strip()
-                category = str(row[13]).strip()
 
                 keywords = " ".join(
                     [row[12], row[13], row[14], row[15], row[16], row[17]])
@@ -164,7 +163,8 @@ class Command(BaseCommand):
                     brand=brand,
                     uom=uom,
                     usage=usage,
-                    category=category,
+                    category=keywords,
+                    style=keywords,
                     width=width,
                     hr=hr,
                     vr=vr,
@@ -302,7 +302,6 @@ class Command(BaseCommand):
 
                     if product.map > 0:
                         price = common.formatprice(product.map, 1)
-                        priceTrade = common.formatprice(cost, markup_trade)
                 except:
                     debug("Pindler", 2, "Price Error: SKU: {}".format(product.sku))
                     continue
@@ -426,7 +425,6 @@ class Command(BaseCommand):
 
                     if product.map > 0:
                         price = common.formatprice(product.map, 1)
-                        priceTrade = common.formatprice(cost, markup_trade)
                 except:
                     debug("Pindler", 2, "Price Error: SKU: {}".format(product.sku))
                     continue
@@ -499,57 +497,67 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        products = Pindler.objects.all()
+        csr.execute("""SELECT ProductID, SKU, Published FROM Product
+        WHERE ManufacturerPartNumber<>'' AND ProductID IS NOT NULL AND ProductID != 0
+        AND SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+        WHERE M.Brand = 'Pindler');""")
 
-        for product in products:
-            mpn = product.mpn
-            cost = product.cost
-            productId = product.productId
+        rows = csr.fetchall()
+        for row in rows:
+            productId = row[0]
+            shopifyProduct = ShopifyProduct.objects.get(productId=productId)
 
-            if productId != "" and productId != None:
-                cost = product.cost
+            pv1 = shopifyProduct.variants.filter(
+                isDefault=1).values('cost', 'price')[0]
+            pv2 = shopifyProduct.variants.filter(
+                name__startswith="Trade - ").values('price')[0]
 
+            oldCost = pv1['cost']
+            oldPrice = pv1['price']
+            oldTradePrice = pv2['price']
+
+            try:
+                product = Pindler.objects.get(
+                    productId=shopifyProduct.productId)
+                newCost = product.cost
+            except:
+                debug("Pindler", 1, "Discontinued Product: SKU: {}".format(
+                    shopifyProduct.sku))
+                continue
+
+            map = product.map
+            try:
+                newPrice = common.formatprice(newCost, markup_price)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
+
+                if product.map > 0:
+                    newPrice = common.formatprice(map, 1)
+            except:
+                debug("Pindler", 2, "Price Error: SKU: {}".format(product.sku))
+                continue
+
+            if newPrice < 19.99:
+                newPrice = 19.99
+                newPriceTrade = 16.99
+
+            if float(oldCost) != float(newCost) or float(oldPrice) != float(newPrice) or float(oldTradePrice) != float(newPriceTrade):
                 try:
-                    price = common.formatprice(cost, markup_price)
-                    priceTrade = common.formatprice(cost, markup_trade)
-                except:
-                    debug("Pindler", 1,
-                          "Price Error: SKU: {}".format(product.sku))
+                    csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                        shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+                    con.commit()
+
+                    csr.execute(
+                        "CALL AddToPendingUpdatePrice ({})".format(shopifyProduct.productId))
+                    con.commit()
+                except Exception as e:
+                    print(e)
                     continue
 
-                if price < 19.99:
-                    price = 19.99
-                    priceTrade = 16.99
-
-                try:
-                    csr.execute("SELECT PV1.Cost, PV1.Price, PV2.Price AS TradePrice FROM ProductVariant PV1, ProductVariant PV2 WHERE PV1.ProductID = {} AND PV2.ProductID = {} AND PV1.IsDefault = 1 AND PV2.Name LIKE 'Trade - %' AND PV1.Cost IS NOT NULL AND PV2.Cost IS NOT NULL".format(productId, productId))
-                    tmp = csr.fetchone()
-                    if tmp == None:
-                        debug("Pindler", 2, "Update Price Error: ProductId: {}, MPN: {}".format(
-                            productId, mpn))
-                        continue
-                    oCost = float(tmp[0])
-                    oPrice = float(tmp[1])
-                    oTrade = float(tmp[2])
-
-                    if cost != oCost or price != oPrice or priceTrade != oTrade:
-                        csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
-                            productId, cost, price, priceTrade))
-                        con.commit()
-                        csr.execute(
-                            "CALL AddToPendingUpdatePrice ({})".format(productId))
-                        con.commit()
-
-                        debug("Pindler", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
-                            productId, cost, price, priceTrade))
-                    else:
-                        debug("Scalamandre", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
-                            productId, price, priceTrade))
-
-                except:
-                    debug("Pindler", 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
-                        productId, cost, price, priceTrade))
-                    continue
+                debug("Pindler", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newCost, newPrice, newPriceTrade))
+            else:
+                debug("Pindler", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                    shopifyProduct.productId, newPrice, newPriceTrade))
 
         csr.close()
         con.close()
