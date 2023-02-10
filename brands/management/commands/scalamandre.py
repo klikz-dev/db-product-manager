@@ -723,12 +723,6 @@ class Command(BaseCommand):
                 debug("Scalamandre", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newCost, newPrice, newPriceTrade))
             else:
-                # Temp
-                csr.execute(
-                    "CALL AddToPendingUpdatePrice ({})".format(shopifyProduct.productId))
-                con.commit()
-                ###
-
                 debug("Scalamandre", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
 
