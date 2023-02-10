@@ -97,6 +97,10 @@ schumacher_trade = 1.3
 seabrook = 1.5
 seabrook_trade = 1
 
+# Stark Studio
+starkstudio = "MAP"  # Markup 2.22
+starkstudio_trade = 1.5
+
 # Stout
 stout = "MAP"  # Markup 1.5 or 2.0
 stout_trade = 1
