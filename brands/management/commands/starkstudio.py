@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
         wb = xlrd.open_workbook(FILEDIR + '/files/stark-studio-master.xlsx')
 
-        for index in [0, 1]:
+        for index in [0, 1, 2]:
             sh = wb.sheet_by_index(index)
 
             for i in range(2, sh.nrows):
@@ -95,8 +95,10 @@ class Command(BaseCommand):
 
                 if index == 0:
                     collection = "Essentials Machinemades"
-                else:
+                if index == 1:
                     collection = "Essentials Handmades"
+                if index == 2:
+                    collection = "Fabricated Rug Program"
 
                 try:
                     cost = round(
@@ -142,7 +144,10 @@ class Command(BaseCommand):
                 except:
                     weight = 5
 
-                upc = int(sh.cell_value(i, 2))
+                try:
+                    upc = int(sh.cell_value(i, 2))
+                except:
+                    upc = ""
 
                 style = description
                 category = description
@@ -555,7 +560,7 @@ class Command(BaseCommand):
 
         host = "18.206.49.64"
         port = 22
-        username = "couturelamps"
+        username = "startstudio"
         password = "JY123!"
 
         try:
@@ -567,7 +572,7 @@ class Command(BaseCommand):
             return False
 
         try:
-            sftp.chdir(path='/couturelamps')
+            sftp.chdir(path='/startstudio')
             files = sftp.listdir()
         except:
             debug("StarkStudio", 1, "No New Inventory File")
@@ -576,7 +581,7 @@ class Command(BaseCommand):
         for file in files:
             if "EDI" in file:
                 continue
-            sftp.get(file, FILEDIR + '/files/couturelamps-inventory.csv')
+            sftp.get(file, FILEDIR + '/files/startstudio-inventory.csv')
             sftp.remove(file)
 
         sftp.close()
@@ -686,13 +691,14 @@ class Command(BaseCommand):
         con.close()
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/couturelamps/")
+        fnames = os.listdir(FILEDIR + "/files/images/startstudio/")
 
         products = StarkStudio.objects.all()
         for product in products:
-            mpnStr = product.mpn
+            keyStr = "{} {}".format(product.pattern, product.color).replace(
+                ",", "").replace("/", " ")
 
             for fname in fnames:
-                if ".jpg" in fname.lower() and mpnStr in fname:
-                    copyfile(FILEDIR + "/files/images/couturelamps/" + fname, FILEDIR +
+                if keyStr in fname:
+                    copyfile(FILEDIR + "/files/images/startstudio/" + fname, FILEDIR +
                              "/../../images/product/{}.jpg".format(product.productId))
