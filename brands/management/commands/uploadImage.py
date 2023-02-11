@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
             print("Completed. Waiting for next run.")
 
-            time.sleep(300)
+            time.sleep(3600)
 
     def compressProductImages(self, mypath):
         good, total = 0, 0
