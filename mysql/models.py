@@ -112,6 +112,15 @@ class ProductManufacturer(models.Model):
         db_table = "ProductManufacturer"
 
 
+class ProductCollection(models.Model):
+    sku = models.CharField(max_length=200, primary_key=True)
+    collection = models.CharField(max_length=200)
+
+    class Meta:
+        managed = True
+        db_table = "ProductCollection"
+
+
 class PendingNewProduct(models.Model):
     sku = models.CharField(
         max_length=200, primary_key=True)

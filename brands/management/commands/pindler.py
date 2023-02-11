@@ -315,6 +315,11 @@ class Command(BaseCommand):
                 if product.increment != None:
                     increment = product.increment
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -376,6 +381,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Pindler.objects.all()
+        products = Pindler.objects.filter(productId='6864031514670')
 
         for product in products:
             try:
@@ -437,6 +443,11 @@ class Command(BaseCommand):
                 increment = ""
                 if product.increment != None:
                     increment = product.increment
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),

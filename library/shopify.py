@@ -374,6 +374,14 @@ def NewProductBySku(sku, con):
     # Product Tag
     tags = pd.ProductTag()
 
+    # Product Collection Tag
+    csr.execute(
+        "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(sku)))
+    productCollection = csr.fetchone()
+    if productCollection != None:
+        collection = productCollection[0]
+        tags.append("Collection:{}".format(collection))
+
     # Product Metafields
     pMeta = pd.ProductMetafield()
 
@@ -518,7 +526,6 @@ def UpdateProductToShopify(productID, key, password, con):
     csr = con.cursor()
     csr.execute(
         "SELECT SKU, Published FROM Product WHERE ProductID = {}".format(productID))
-    # if 1==1:
     try:
         upd = csr.fetchone()
         pub = upd[1]
@@ -545,15 +552,12 @@ def UpdateProductToShopify(productID, key, password, con):
                   headers=SHOPIFY_PRODUCT_API_HEADER,
                   json={"variant": variant})
 
-        ###################################################################################################
-        # If NOT need to update the product metafield, comment the section and the below 2 sections
         rpm = s.get("{}/products/{}/metafields.json".format(SHOPIFY_API_URL,
                     productID), headers=SHOPIFY_PRODUCT_API_HEADER)
         jpm = json.loads(rpm.text)
         for pm in jpm['metafields']:
             s.delete(
                 "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
-        ###################################################################################################
 
         body = pd.body
         title = pd.title
@@ -563,9 +567,15 @@ def UpdateProductToShopify(productID, key, password, con):
         manu = pd.manufacturer
         published = pd.published
         tags = pd.ProductTag()
-        ##########################################
         pMeta = pd.ProductMetafield()
-        ##########################################
+
+        # Product Collection Tag
+        csr.execute(
+            "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(sku)))
+        productCollection = csr.fetchone()
+        if productCollection != None:
+            collection = productCollection[0]
+            tags.append("Collection:{}".format(collection))
 
         p = {
             "body_html": body,
@@ -578,9 +588,7 @@ def UpdateProductToShopify(productID, key, password, con):
             "tags": ",".join(tags),
             "title": title,
             "vendor": manu,
-            ##################################
             "metafields": pMeta
-            ##################################
         }
 
         if published == 0:

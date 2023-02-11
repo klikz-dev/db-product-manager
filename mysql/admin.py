@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import EditSize, Manufacturer, Admin, CustomEmail, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
 from .models import ProductManufacturer, PendingNewProduct, PendingUpdateProduct, PendingUpdatePublish, PendingUpdatePrice
-from .models import PendingUpdateTag, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, Tag, Type
+from .models import PendingUpdateTag, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, ProductCollection, Tag, Type
 
 
 class AdminAdmin(admin.ModelAdmin):
@@ -206,6 +206,25 @@ class ProductManufacturerAdmin(admin.ModelAdmin):
     list_filter = ['manufacturer']
 
     search_fields = ['sku']
+
+
+class ProductCollectionAdmin(admin.ModelAdmin):
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    fields = ['sku', 'collection']
+
+    list_display = ('sku', 'collection')
+
+    search_fields = ['sku', 'collection']
 
 
 class PendingNewProductAdmin(admin.ModelAdmin):
@@ -583,5 +602,6 @@ admin.site.register(ProductInventory, ProductInventoryAdmin)
 admin.site.register(ProductSubcategory, ProductSubcategoryAdmin)
 admin.site.register(ProductSubtype, ProductSubtypeAdmin)
 admin.site.register(ProductTag, ProductTagAdmin)
+admin.site.register(ProductCollection, ProductCollectionAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Type, TypeAdmin)
