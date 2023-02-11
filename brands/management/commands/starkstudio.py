@@ -560,7 +560,7 @@ class Command(BaseCommand):
 
         host = "18.206.49.64"
         port = 22
-        username = "startstudio"
+        username = "starkstudio"
         password = "JY123!"
 
         try:
@@ -572,7 +572,7 @@ class Command(BaseCommand):
             return False
 
         try:
-            sftp.chdir(path='/startstudio')
+            sftp.chdir(path='/starkstudio')
             files = sftp.listdir()
         except:
             debug("StarkStudio", 1, "No New Inventory File")
@@ -581,7 +581,7 @@ class Command(BaseCommand):
         for file in files:
             if "EDI" in file:
                 continue
-            sftp.get(file, FILEDIR + '/files/startstudio-inventory.csv')
+            sftp.get(file, FILEDIR + '/files/starkstudio-inventory.csv')
             sftp.remove(file)
 
         sftp.close()
@@ -691,14 +691,34 @@ class Command(BaseCommand):
         con.close()
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/startstudio/")
+        fnames = os.listdir(FILEDIR + "/files/images/starkstudio/")
 
         products = StarkStudio.objects.all()
         for product in products:
             keyStr = "{} {}".format(product.pattern, product.color).replace(
                 ",", "").replace("/", " ")
+            
+            print(keyStr)
 
             for fname in fnames:
                 if keyStr in fname:
-                    copyfile(FILEDIR + "/files/images/startstudio/" + fname, FILEDIR +
-                             "/../../images/product/{}.jpg".format(product.productId))
+                    if "_CL" in fname:
+                        print("Roomset 2: {}".format(fname))
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
+                                "/../../images/roomset/{}_2.jpg".format(product.productId))
+                    elif "_ALT1" in fname:
+                        print("Roomset 3: {}".format(fname))
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
+                                "/../../images/roomset/{}_3.jpg".format(product.productId))
+                    elif "_ALT2" in fname:
+                        print("Roomset 4: {}".format(fname))
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
+                                "/../../images/roomset/{}_4.jpg".format(product.productId))
+                    elif "_RM" in fname:
+                        print("Roomset 5: {}".format(fname))
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
+                                "/../../images/roomset/{}_5.jpg".format(product.productId))
+                    else:
+                        print("Product: {}".format(fname))
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
+                                "/../../images/product/{}.jpg".format(product.productId))
