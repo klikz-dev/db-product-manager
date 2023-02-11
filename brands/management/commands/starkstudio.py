@@ -691,34 +691,44 @@ class Command(BaseCommand):
         con.close()
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/starkstudio/")
+        fnames = os.listdir(FILEDIR + "/files/images/starkstudio/stark/")
 
         products = StarkStudio.objects.all()
         for product in products:
-            keyStr = "{} {}".format(product.pattern, product.color).replace(
-                ",", "").replace("/", " ")
-            
-            print(keyStr)
+            productStr = "{} {}".format(product.pattern, product.color).replace(
+                ",", "").replace("/", " ").lower()
+
+            print(productStr)
 
             for fname in fnames:
-                if keyStr in fname:
+                try:
+                    imageStr = fname.lower().replace(
+                        ".jpg", "").split(" ", 1)[1]
+                except:
+                    imageStr = fname.lower().replace(".jpg", "")
+
+                if productStr in imageStr or imageStr in productStr:
                     if "_CL" in fname:
                         print("Roomset 2: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
-                                "/../../images/roomset/{}_2.jpg".format(product.productId))
+                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                                 "/../../images/roomset/{}_2.jpg".format(product.productId))
+
                     elif "_ALT1" in fname:
                         print("Roomset 3: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
-                                "/../../images/roomset/{}_3.jpg".format(product.productId))
+                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                                 "/../../images/roomset/{}_3.jpg".format(product.productId))
+
                     elif "_ALT2" in fname:
                         print("Roomset 4: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
-                                "/../../images/roomset/{}_4.jpg".format(product.productId))
+                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                                 "/../../images/roomset/{}_4.jpg".format(product.productId))
+
                     elif "_RM" in fname:
                         print("Roomset 5: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
-                                "/../../images/roomset/{}_5.jpg".format(product.productId))
+                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                                 "/../../images/roomset/{}_5.jpg".format(product.productId))
+
                     else:
                         print("Product: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
-                                "/../../images/product/{}.jpg".format(product.productId))
+                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                                 "/../../images/product/{}.jpg".format(product.productId))
