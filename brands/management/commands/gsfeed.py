@@ -82,7 +82,7 @@ class Command(BaseCommand):
                       LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
                       LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
                       WHERE PI.ImageIndex = 1
-                      AND M.Brand NOT IN ("Fabricut", "Scalamandre", "P/K Lifestyles", "Clarence House", "Noir", "Studio Zen", "Cyan", "Couture Lamps", "Global Views", "Olympus Minerals", "Robert Allen", "Nature's Decoration", "Duralee")
+                      AND M.Brand NOT IN ("Fabricut", "Scalamandre", "P/K Lifestyles", "Clarence House", "Noir", "Studio Zen", "Cyan", "Global Views", "Olympus Minerals", "Robert Allen", "Nature's Decoration", "Duralee")
                       AND M.Name NOT IN ("Aviva Stanoff Wallpaper", "Missoni Wallpaper", "Patina Vie Wallpaper", "Kravet Pillow")
                       AND PV.Cost != 0
                       AND P.Published = 1
