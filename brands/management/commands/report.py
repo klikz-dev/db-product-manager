@@ -78,8 +78,11 @@ class Command(BaseCommand):
             })
 
             for customer in customers:
-                address = Address.objects.get(
-                    addressId=customer.defaultAddressId)
+                try:
+                    address = Address.objects.get(
+                        addressId=customer.defaultAddressId)
+                except Address.DoesNotExist:
+                    continue
 
                 fname = self.fm(customer.firstName).title()
                 lname = self.fm(customer.lastName).title()
