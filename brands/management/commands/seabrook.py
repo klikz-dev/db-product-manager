@@ -131,8 +131,9 @@ class Command(BaseCommand):
                 collection = str(sh.cell_value(i, 2))
 
                 # Disable Lillian August Grasscloth Binder products. 1/5/23 from Ashely
+                # New Hampton and Indigo collections have been discontinued. 2/13/23 from Seabrook
                 status = True
-                if collection == 'Lillian August Grasscloth Binder':
+                if collection == 'Lillian August Grasscloth Binder' or collection == 'Indigo' or collection == 'New Hampton':
                     status = False
 
                 try:
