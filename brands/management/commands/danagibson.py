@@ -353,7 +353,7 @@ class Command(BaseCommand):
 
                 try:
                     price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.map, 0.9)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
                 except:
                     debug("DanaGibson", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -485,7 +485,7 @@ class Command(BaseCommand):
 
                 try:
                     price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.map, 0.9)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
                 except:
                     debug("DanaGibson", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -664,7 +664,7 @@ class Command(BaseCommand):
 
             try:
                 newPrice = common.formatprice(map, 1)
-                newPriceTrade = common.formatprice(map, 0.9)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
             except:
                 debug("DanaGibson", 1, "Price Error: SKU: {}".format(product.sku))
                 continue

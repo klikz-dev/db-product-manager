@@ -9,7 +9,7 @@ brewster_trade2 = 1.3  # If MAP NOT provided
 
 # Couture Lamps
 couturelamps = "MAP"
-couturelamps_trade = "MAP 10% Off"
+couturelamps_trade = 1.25
 
 # Covington
 covington = 2
@@ -17,7 +17,7 @@ covington_trade = 1.5
 
 # Dana Gibson
 danagibson = "MAP"
-danagibson_trade = "MAP 10% Off"
+danagibson_trade = 1.25
 
 # Elaine Smith
 elainesmith = "MAP"  # Markup 1.7 - 1.8
@@ -25,7 +25,7 @@ elainesmith_trade = 1.3
 
 # Jamie Young
 jamieyoung = "MAP"  # Markup 2 - 2.3
-jamieyoung_trade = "MAP 10% Off"  # 1/3/22 from BK
+jamieyoung_trade = 1.25
 
 # JF Fabrics
 jffabrics = 1.75  # x MAP
@@ -44,7 +44,7 @@ kravet_pillow_trade = 1.3
 
 # Kravet Decor
 kravetdecor = 1.75  # MAP = cost x 1.75
-kravetdecor_trade = 1.2
+kravetdecor_trade = 1.25
 
 # Madcap Cottage
 madcapcottage = "MAP"  # Markup 2.0 - 2.3
@@ -91,7 +91,7 @@ scalamandre_trade = 1.3
 
 # Schumacher
 schumacher = 1.4
-schumacher_trade = 1.3
+schumacher_trade = 1.25
 
 # Seabrook
 seabrook = 1.5
@@ -99,7 +99,7 @@ seabrook_trade = 1
 
 # Stark Studio
 starkstudio = "MAP"  # Markup 2.22
-starkstudio_trade = 1.5
+starkstudio_trade = 1.25
 
 # Stout
 stout = "MAP"  # Markup 1.5 or 2.0
