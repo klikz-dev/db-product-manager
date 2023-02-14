@@ -196,6 +196,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ElaineSmithSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    JamieYoungOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    JamieYoungSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     JFFabricsOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     JFFabricsSample = models.CharField(
@@ -219,6 +223,10 @@ class PORecord(models.Model):
     MaxwellOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     MaxwellSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MindTheGapOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    MindTheGapSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     PhillipJeffriesOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -251,10 +259,6 @@ class PORecord(models.Model):
     ZoffanyOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     ZoffanySample = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    MindTheGapOrder = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    MindTheGapSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
 
     class Meta:
