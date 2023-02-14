@@ -600,83 +600,28 @@ class Command(BaseCommand):
         csr.close()
         con.close()
 
-    def downloadInvFile(self):
-        debug("DanaGibson", 0, "Download New CSV from DanaGibson FTP")
-
-        host = "18.206.49.64"
-        port = 22
-        username = "jamieyoung"
-        password = "JY123!"
-
-        try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug("DanaGibson", 2, "Connection to DanaGibson FTP Server Failed")
-            return False
-
-        try:
-            sftp.chdir(path='/jamieyoung')
-            files = sftp.listdir()
-        except:
-            debug("DanaGibson", 1, "No New Inventory File")
-            return False
-
-        for file in files:
-            if "EDI" in file:
-                continue
-            sftp.get(file, FILEDIR + '/files/jamieyoung-inventory.csv')
-            sftp.remove(file)
-
-        sftp.close()
-
-        debug("DanaGibson", 0, "DanaGibson FTP Inventory Download Completed")
-        return True
-
     def updateStock(self):
-        if not self.downloadInvFile():
-            return
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Dana Gibson'")
+        csr.execute(
+            "DELETE FROM ProductInventory WHERE Brand = 'Dana Gibson'")
         con.commit()
 
-        f = open(FILEDIR + '/files/jamieyoung-inventory.csv', "rt")
-        cr = csv.reader(f)
-
-        index = 0
-        for row in cr:
-            index += 1
-            if index == 1:
-                continue
-
-            mpn = row[1]
-            try:
-                product = DanaGibson.objects.get(mpn=mpn)
-            except:
-                continue
-
+        products = DanaGibson.objects.all()
+        for product in products:
             sku = product.sku
-
-            stock = int(row[2])
-
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Dana Gibson')".format(
-                    sku, stock, ""))
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Dana Gibson')".format(
+                    sku, 5, product.boDate))
                 con.commit()
                 debug("DanaGibson", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
+                      "Updated inventory for {} to {}.".format(sku, product.boDate))
             except Exception as e:
                 print(e)
                 debug(
-                    "DanaGibson", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
-
-        csr.close()
-        con.close()
+                    "DanaGibson", 2, "Error Updating inventory for {} to {}.".format(sku, product.boDate))
 
     def updatePrice(self):
         con = pymysql.connect(host=db_host, user=db_username,
