@@ -8,6 +8,7 @@ import paramiko
 import pymysql
 import xlrd
 import csv
+import time
 
 from library import debug, common, shopify, markup
 
@@ -52,7 +53,10 @@ class Command(BaseCommand):
             self.updateTags()
 
         if "updateStock" in options['functions']:
-            self.updateStock()
+            while True:
+                self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
 
         if "updatePrice" in options['functions']:
             self.updatePrice()
@@ -696,7 +700,7 @@ class Command(BaseCommand):
 
             try:
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jamie Young')".format(
-                    sku, stock, ""))
+                    sku, stock, product.boDate.replace("Lead Time:", "").strip()))
                 con.commit()
                 debug("JamieYoung", 0,
                       "Updated inventory for {} to {}.".format(sku, stock))

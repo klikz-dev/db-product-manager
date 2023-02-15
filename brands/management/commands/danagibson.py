@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 features += "Maximum Wattage: {}<br>".format(
                     sh.cell_value(i, 28))
             if sh.cell_value(i, 29) != "":
-                features += "Bulb Base Type: {}<br>".format(
+                features += "Bulb Base Type: {}".format(
                     sh.cell_value(i, 29))
 
             material = str(sh.cell_value(i, 19)).strip()
@@ -325,7 +325,7 @@ class Command(BaseCommand):
                     desc += "{}<br/><br/>".format(
                         product.description)
                 if product.collection != None and product.collection != "":
-                    desc += "Collection: {}<br/><br/>".format(
+                    desc += "Collection: {}<br/>".format(
                         product.collection)
 
                 if product.width != None and product.width != "" and float(product.width) != 0:
@@ -333,16 +333,13 @@ class Command(BaseCommand):
                 if product.height != None and product.height != "" and float(product.height) != 0:
                     desc += "Height: {} in<br/>".format(product.height)
                 if product.depth != None and product.depth != "" and float(product.depth) != 0:
-                    desc += "Depth: {} in<br/><br/>".format(product.depth)
-
+                    desc += "Depth: {} in<br/>".format(product.depth)
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
                 if product.finish != None and product.finish != "":
                     desc += "Finish: {}<br/>".format(product.finish)
-
                 if product.features != None and product.features != "":
-                    desc += "Feature: {}<br/><br/>".format(product.features)
-
+                    desc += "Feature: {}<br/>".format(product.features)
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
                         product.country)
@@ -457,7 +454,7 @@ class Command(BaseCommand):
                     desc += "{}<br/><br/>".format(
                         product.description)
                 if product.collection != None and product.collection != "":
-                    desc += "Collection: {}<br/><br/>".format(
+                    desc += "Collection: {}<br/>".format(
                         product.collection)
 
                 if product.width != None and product.width != "" and float(product.width) != 0:
@@ -465,16 +462,13 @@ class Command(BaseCommand):
                 if product.height != None and product.height != "" and float(product.height) != 0:
                     desc += "Height: {} in<br/>".format(product.height)
                 if product.depth != None and product.depth != "" and float(product.depth) != 0:
-                    desc += "Depth: {} in<br/><br/>".format(product.depth)
-
+                    desc += "Depth: {} in<br/>".format(product.depth)
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
                 if product.finish != None and product.finish != "":
                     desc += "Finish: {}<br/>".format(product.finish)
-
                 if product.features != None and product.features != "":
-                    desc += "Feature: {}<br/><br/>".format(product.features)
-
+                    desc += "Feature: {}<br/>".format(product.features)
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
                         product.country)
@@ -614,7 +608,7 @@ class Command(BaseCommand):
             sku = product.sku
             try:
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Dana Gibson')".format(
-                    sku, 5, product.boDate))
+                    sku, 5, product.boDate.replace("Lead Time:", "").strip()))
                 con.commit()
                 debug("DanaGibson", 0,
                       "Updated inventory for {} to {}.".format(sku, product.boDate))
