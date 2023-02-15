@@ -46,7 +46,6 @@ class Command(BaseCommand):
 
         if "addNew" in options['functions']:
             self.addNew()
-            self.updateTags()
 
         if "updateExisting" in options['functions']:
             self.updateExisting()
@@ -695,6 +694,11 @@ class Command(BaseCommand):
                     price = 19.99
                     priceTrade = 16.99
                 priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
