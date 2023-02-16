@@ -76,9 +76,6 @@ class Command(BaseCommand):
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
 
-        if "fixAllImages" in options['functions']:
-            self.fixAllImages()
-
         if "roomset" in options['functions']:
             self.roomset()
 
@@ -1102,16 +1099,14 @@ class Command(BaseCommand):
             if "http" in product.thumbnail:
                 common.picdownload2(product.thumbnail, str(
                     product.productId) + ".jpg")
+            else:
+                urllib.request.urlretrieve("ftp://decbest:mArker999@file.kravet.com{}".format(
+                    product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
+                debug("Image", 0, "Downloaded thumbnail {}.jpg".format(
+                    product.productId))
 
         csr.close()
         con.close()
-
-    def fixAllImages(self):
-        products = Kravet.objects.all()
-        for product in products:
-            if "http" in product.thumbnail:
-                common.picdownload2(product.thumbnail, str(
-                    product.productId) + ".jpg")
 
     def updateStock(self):
         if not self.downloadcsv():
