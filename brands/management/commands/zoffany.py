@@ -630,13 +630,13 @@ class Command(BaseCommand):
         # Mural Subtypes
         murals = []
 
-        wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master.xlsx")
-        sh = wb.sheet_by_index(2)
+        # wb = xlrd.open_workbook(
+        #     FILEDIR + "/files/zoffany-master-2.18.23.xlsx")
+        # sh = wb.sheet_by_index(2)
 
-        for i in range(1, sh.nrows):
-            mpn = str(sh.cell_value(i, 1))
-            murals.append(mpn)
+        # for i in range(1, sh.nrows):
+        #     mpn = str(sh.cell_value(i, 1))
+        #     murals.append(mpn)
 
         products = Zoffany.objects.all()
         for product in products:
