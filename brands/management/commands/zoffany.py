@@ -81,7 +81,7 @@ class Command(BaseCommand):
         Zoffany.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master-2.1.23.xlsx")
+            FILEDIR + "/files/zoffany-master-2.18.23.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
@@ -293,11 +293,6 @@ class Command(BaseCommand):
                 if product.status == False or product.productId != None:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("Zoffany", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -362,6 +357,11 @@ class Command(BaseCommand):
                     price = 19.99
                     priceTrade = 16.99
                 priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
@@ -431,11 +431,6 @@ class Command(BaseCommand):
                 if product.status == False or product.productId == None:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("Zoffany", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -482,7 +477,6 @@ class Command(BaseCommand):
                 cost = product.cost
                 msrp = product.msrp
                 map = product.map
-
                 try:
                     if msrp != None and msrp > 0:
                         price = common.formatprice(msrp, 1)
@@ -501,6 +495,11 @@ class Command(BaseCommand):
                     price = 19.99
                     priceTrade = 16.99
                 priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
