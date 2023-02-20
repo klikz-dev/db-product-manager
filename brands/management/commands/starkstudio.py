@@ -332,6 +332,11 @@ class Command(BaseCommand):
 
                 priceSample = 10
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -396,9 +401,9 @@ class Command(BaseCommand):
                     continue
 
                 name = " | ".join(
-                    (product.brand, product.pattern, product.color, product.ptype))
+                    (product.brand, product.pattern, product.color, product.dimension, product.ptype))
                 title = " ".join(
-                    (product.brand, product.pattern, product.color, product.ptype))
+                    (product.brand, product.pattern, product.color, product.dimension, product.ptype))
                 description = title
                 vname = title
                 hassample = 1
@@ -415,24 +420,19 @@ class Command(BaseCommand):
 
                 if product.width != None and product.width != "" and float(product.width) != 0:
                     desc += "Width: {} in<br/>".format(product.width)
-                if product.height != None and product.height != "" and float(product.height) != 0:
-                    desc += "Height: {} in<br/>".format(product.height)
-                if product.depth != None and product.depth != "" and float(product.depth) != 0:
-                    desc += "Depth: {} in<br/><br/>".format(product.depth)
+                if product.length != None and product.length != "" and float(product.length) != 0:
+                    desc += "Height: {} in<br/>".format(product.length)
+                if product.dimension != None and product.dimension != "":
+                    desc += "Total Dimensions: {}<br/><br/>".format(
+                        product.dimension)
 
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
-                if product.care != None and product.care != "":
-                    desc += "Finish: {}<br/>".format(product.care)
-
-                if product.features != None and product.features != "":
-                    desc += "Feature: {}<br/><br/>".format(product.features)
-                if product.specs != None and product.specs != "":
-                    desc += "Feature: {}<br/><br/>".format(product.specs)
 
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
                         product.country)
+
                 if product.usage != None and product.usage != "":
                     desc += "Usage: {}<br/>".format(product.usage)
                 if product.ptype != None and product.ptype != "":
@@ -449,24 +449,13 @@ class Command(BaseCommand):
                 if price < 19.99:
                     price = 19.99
                     priceTrade = 16.99
-                priceSample = 5
 
-                try:
-                    productType = Type.objects.get(name=product.ptype)
-                except Type.DoesNotExist:
-                    productType = Type.objects.get(name="Accents")
+                priceSample = 10
 
-                if productType.parentTypeId == 0:
-                    ptype = productType.name
-                else:
-                    parentType = Type.objects.get(
-                        typeId=productType.parentTypeId)
-                    if parentType.parentTypeId == 0:
-                        ptype = parentType.name
-                    else:
-                        rootType = Type.objects.get(
-                            typeId=parentType.parentTypeId)
-                        ptype = rootType.name
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
@@ -476,7 +465,7 @@ class Command(BaseCommand):
                     sq(desc),
                     sq(title),
                     sq(description),
-                    sq(ptype),
+                    sq(product.ptype),
                     sq(vname),
                     hassample,
                     product.cost,

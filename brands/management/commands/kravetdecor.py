@@ -365,6 +365,11 @@ class Command(BaseCommand):
                                 typeId=parentType.parentTypeId)
                             ptype = rootType.name
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -447,12 +452,6 @@ class Command(BaseCommand):
                 if product.productId == None:
                     continue
 
-                # Update Mirrors, Accents, Wall Art, Chandeliers
-                if product.ptype == "Mirrors" or product.ptype == "Accents" or product.ptype == "Wall Art" or product.ptype == "Chandeliers":
-                    pass
-                else:
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -480,16 +479,10 @@ class Command(BaseCommand):
 
                 if product.features != None and product.features != "":
                     desc += "Feature: {}<br/><br/>".format(product.features)
-
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
-                if product.disclaimer != None and product.disclaimer != "":
-                    desc += "Disclaimer: {}<br/>".format(product.disclaimer)
                 if product.care != None and product.care != "":
                     desc += "Product Care: {}<br/><br/>".format(product.care)
-
-                if product.specs != None and product.specs != "":
-                    desc += "Specs: {}<br/><br/>".format(product.specs)
 
                 if product.country != None and product.country != "":
                     desc += "Country of Origin: {}<br/>".format(
@@ -512,18 +505,28 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
-                productType = Type.objects.get(name=product.ptype)
-                if productType.parentTypeId == 0:
-                    ptype = productType.name
+                if "Pillow" in product.ptype:
+                    ptype = "Pillows"
+                elif product.ptype == "Benches & Ottomans":
+                    ptype = "Furniture"
                 else:
-                    parentType = Type.objects.get(
-                        typeId=productType.parentTypeId)
-                    if parentType.parentTypeId == 0:
-                        ptype = parentType.name
+                    productType = Type.objects.get(name=product.ptype)
+                    if productType.parentTypeId == 0:
+                        ptype = productType.name
                     else:
-                        rootType = Type.objects.get(
-                            typeId=parentType.parentTypeId)
-                        ptype = rootType.name
+                        parentType = Type.objects.get(
+                            typeId=productType.parentTypeId)
+                        if parentType.parentTypeId == 0:
+                            ptype = parentType.name
+                        else:
+                            rootType = Type.objects.get(
+                                typeId=parentType.parentTypeId)
+                            ptype = rootType.name
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),

@@ -323,6 +323,11 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -434,7 +439,8 @@ class Command(BaseCommand):
                     price = common.formatprice(product.map, 1)
                     priceTrade = common.formatprice(cost, markup_trade)
                     if product.ptype == "Pillow":
-                        priceTrade = common.formatprice(cost, markup_pillow_trade)
+                        priceTrade = common.formatprice(
+                            cost, markup_pillow_trade)
                 except:
                     debug("Materialworks", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -444,6 +450,11 @@ class Command(BaseCommand):
                     price = 19.99
                     priceTrade = 16.99
                 priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),

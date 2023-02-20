@@ -263,11 +263,6 @@ class Command(BaseCommand):
                 if product.status == False or product.productId != None:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("Phillip Jeffries", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -316,6 +311,11 @@ class Command(BaseCommand):
                     price = 19.99
                     priceTrade = 16.99
                 priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
@@ -384,25 +384,6 @@ class Command(BaseCommand):
                 if product.status == False or product.productId == None:
                     continue
 
-                if product.thumbnail == None or product.thumbnail == "":
-                    debug("Phillip Jeffries", 1,
-                          "No product Image for MPN: {}".format(product.mpn))
-                    continue
-
-                if product.minimum > 7:  # Update Small minimum products
-                    continue
-
-                if product.minimum < 5:
-                    minimum = 12
-                elif product.minimum == 5:
-                    minimum = 10
-                elif product.minimum == 6:
-                    minimum = 12
-                elif product.minimum == 7:
-                    minimum = 14
-                else:
-                    print("Error: Minimum: {}")
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -452,6 +433,11 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -469,7 +455,7 @@ class Command(BaseCommand):
                     priceSample,
                     sq(product.pattern),
                     sq(product.color),
-                    minimum,
+                    product.minimum,
                     sq(product.increment),
                     sq(product.uom),
                     sq(product.usage),

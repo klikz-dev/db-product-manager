@@ -49,6 +49,9 @@ class Command(BaseCommand):
         if "addNew" in options['functions']:
             self.addNew()
 
+        if "updateExisting" in options['functions']:
+            self.updateExisting()
+
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
@@ -239,10 +242,131 @@ class Command(BaseCommand):
                 if (product.productId != None and product.productId != "") or product.status == False:
                     continue
 
-                # if product.thumbnail == None or product.thumbnail == "":
-                #     debug("Maxwell", 1,
-                #           "No product Image for MPN: {}".format(product.mpn))
-                #     continue
+                name = " | ".join((product.brand, product.pattern,
+                                  product.color, product.ptype))
+                title = " ".join((product.brand, product.pattern,
+                                 product.color, product.ptype))
+                description = title
+                vname = title
+                hassample = 1
+                gtin = ""
+                weight = 1
+
+                desc = ""
+                if product.description != None and product.description != "":
+                    desc += "{}<br/><br/>".format(
+                        product.description)
+                if product.collection != None and product.collection != "":
+                    desc += "Collection: {}<br/><br/>".format(
+                        product.collection)
+                if product.width != None and product.width != "":
+                    desc += "Width: {}<br/>".format(product.width)
+                if product.height != None and product.height != "":
+                    desc += "Height: {}<br/>".format(product.height)
+                if product.hr != None and product.hr != "":
+                    desc += "Horizontal Repeat: {}<br/>".format(product.hr)
+                if product.vr != None and product.vr != "":
+                    desc += "Vertical Repeat: {}<br/>".format(product.vr)
+                if product.rollLength != None and product.rollLength != "" and float(product.rollLength) != 0:
+                    if "Yard" in product.uom:
+                        pass
+                    else:
+                        desc += "Roll Length: {} yds<br/>".format(
+                            product.rollLength)
+                if product.content != None and product.content != "":
+                    desc += "Content: {}<br/>".format(product.content)
+                if product.usage != None and product.usage != "":
+                    desc += "Usage: {}<br/><br/>".format(product.usage)
+                if product.feature != None and product.feature != "":
+                    desc += "{}<br/><br/>".format(product.feature)
+                if product.ptype != None and product.ptype != "":
+                    desc += "{} {}".format(product.brand, product.ptype)
+
+                cost = product.cost
+                try:
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(cost, markup_trade)
+                except:
+                    debug("Maxwell", 2,
+                          "Price Error: SKU: {}".format(product.sku))
+                    continue
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+                priceSample = 5
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
+                csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
+                    sq(product.sku),
+                    sq(name),
+                    sq(product.manufacturer),
+                    sq(product.mpn),
+                    sq(desc),
+                    sq(title),
+                    sq(description),
+                    sq(product.ptype),
+                    sq(vname),
+                    hassample,
+                    cost,
+                    price,
+                    priceTrade,
+                    priceSample,
+                    sq(product.pattern),
+                    sq(product.color),
+                    product.minimum,
+                    sq(product.increment),
+                    sq(product.uom),
+                    sq(product.usage),
+                    sq(product.collection),
+                    sq(str(gtin)),
+                    weight
+                ))
+                con.commit()
+
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                productId = shopify.NewProductBySku(product.sku, con)
+                if productId == None:
+                    continue
+
+                product.productId = productId
+                product.save()
+
+                if product.thumbnail and product.thumbnail.strip() != "":
+                    try:
+                        common.picdownload2(
+                            product.thumbnail, "{}.jpg".format(productId))
+                    except:
+                        pass
+
+                debug("Maxwell", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    productId, product.sku, title, product.ptype, price))
+
+            except Exception as e:
+                print(e)
+
+        csr.close()
+        con.close()
+
+    def updateExisting(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Maxwell.objects.all()
+
+        for product in products:
+            try:
+                if product.productId == None or product.productId == "" or product.status == False:
+                    continue
 
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
@@ -298,6 +422,11 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -330,12 +459,11 @@ class Command(BaseCommand):
                 continue
 
             try:
-                productId = shopify.NewProductBySku(product.sku, con)
-                if productId == None:
-                    continue
+                productId = product.productId
 
-                product.productId = productId
-                product.save()
+                csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(productId))
+                con.commit()
 
                 if product.thumbnail and product.thumbnail.strip() != "":
                     try:

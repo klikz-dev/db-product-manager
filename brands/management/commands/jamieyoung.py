@@ -387,6 +387,11 @@ class Command(BaseCommand):
                             typeId=parentType.parentTypeId)
                         ptype = rootType.name
 
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
+
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -469,12 +474,6 @@ class Command(BaseCommand):
                 if product.productId == None:
                     continue
 
-                # Update Mirrors, Accents, Wall Art, Chandeliers
-                if product.ptype == "Mirrors" or product.ptype == "Accents" or product.ptype == "Wall Art" or product.ptype == "Chandeliers":
-                    pass
-                else:
-                    continue
-
                 name = " | ".join((product.brand, product.pattern,
                                   product.color, product.ptype))
                 title = " ".join((product.brand, product.pattern,
@@ -523,7 +522,7 @@ class Command(BaseCommand):
 
                 try:
                     price = common.formatprice(product.map, 1)
-                    priceTrade = common.formatprice(product.cost, markup_price)
+                    priceTrade = common.formatprice(product.cost, markup_trade)
                 except:
                     debug("JamieYoung", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -546,6 +545,11 @@ class Command(BaseCommand):
                         rootType = Type.objects.get(
                             typeId=parentType.parentTypeId)
                         ptype = rootType.name
+
+                if product.collection != None and product.collection != "":
+                    csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        sq(product.sku), sq(product.collection)))
+                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
