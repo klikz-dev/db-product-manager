@@ -297,7 +297,7 @@ class Command(BaseCommand):
                 csr.execute(
                     "SELECT Status FROM Orders WHERE OrderNumber = {}".format(orderNumber))
                 extStatus = (csr.fetchone())[0]
-                if extStatus == "New":
+                if extStatus == "New" or extStatus == None or extStatus == "":
                     newStatus = "Kravet EDI"
                 else:
                     newStatus = extStatus + ", Kravet EDI"

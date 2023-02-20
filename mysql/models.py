@@ -192,6 +192,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     CovingtonSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    CoutureOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    CoutureSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     ElaineSmithOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     ElaineSmithSample = models.CharField(
@@ -247,6 +251,10 @@ class PORecord(models.Model):
     SeabrookOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     SeabrookSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    StarkStudioOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    StarkStudioSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     StoutOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
