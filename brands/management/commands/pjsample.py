@@ -175,7 +175,7 @@ class Command(BaseCommand):
                                 "address1": order.shippingAddress1,
                                 "address2": order.shippingAddress2,
                                 "zip": order.shippingZip,
-                                "country": order.shippingCountry,
+                                "country": 'US',
                                 "city": order.shippingCity,
                                 "state": order.shippingState,
                                 "phone": order.shippingPhone

@@ -21,9 +21,8 @@ db_password = env('MYSQL_PASSWORD')
 db_name = env('MYSQL_DATABASE')
 db_port = int(env('MYSQL_PORT'))
 
-markup_price2 = markup.brewster2
-markup_trade1 = markup.brewster_trade1
-markup_trade2 = markup.brewster_trade2
+markup_price = markup.brewster
+markup_trade = markup.brewster_trade
 
 debug = debug.debug
 sq = common.sq
@@ -678,14 +677,10 @@ class Command(BaseCommand):
                 cost = product.cost
                 map = product.map
                 try:
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(cost, markup_trade)
                     if map > 0:
-                        # 10/24 From Bk - make brewster pricing to be exactly same as MAP
-                        # price = common.formatprice(map, 1)
                         price = map
-                        priceTrade = common.formatprice(cost, markup_trade1)
-                    else:
-                        price = common.formatprice(cost, markup_price2)
-                        priceTrade = common.formatprice(cost, markup_trade2)
                 except:
                     debug("Brewster", 1, "Price Error: SKU: {}".format(product.sku))
                     continue
@@ -812,14 +807,10 @@ class Command(BaseCommand):
                 cost = product.cost
                 map = product.map
                 try:
+                    price = common.formatprice(cost, markup_price)
+                    priceTrade = common.formatprice(cost, markup_trade)
                     if map > 0:
-                        # 10/24 From Bk - make brewster pricing to be exactly same as MAP
-                        # price = common.formatprice(map, 1)
                         price = map
-                        priceTrade = common.formatprice(cost, markup_trade1)
-                    else:
-                        price = common.formatprice(cost, markup_price2)
-                        priceTrade = common.formatprice(cost, markup_trade2)
                 except:
                     debug("Brewster", 1, "Price Error: SKU: {}".format(product.sku))
                     continue
@@ -1033,14 +1024,10 @@ class Command(BaseCommand):
 
             map = product.map
             try:
+                newPrice = common.formatprice(newCost, markup_price)
+                newPriceTrade = common.formatprice(newCost, markup_trade)
                 if map > 0:
-                    # 10/24 From Bk - make brewster pricing to be exactly same as MAP
-                    # newPrice = common.formatprice(map, 1)
                     newPrice = map
-                    newPriceTrade = common.formatprice(newCost, markup_trade1)
-                else:
-                    newPrice = common.formatprice(newCost, markup_price2)
-                    newPriceTrade = common.formatprice(newCost, markup_trade2)
             except:
                 debug("Brewster", 1, "Price Error: SKU: {}".format(product.sku))
                 continue

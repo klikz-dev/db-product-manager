@@ -1,11 +1,8 @@
 #!/usr/bin/python
 
 # Brewster
-brewster1 = "MAP"
-brewster_trade1 = 1.3  # If MAP provided
-
-brewster2 = 1.4  # If MAP is NOT provided
-brewster_trade2 = 1.3  # If MAP NOT provided
+brewster = 1.4  # If MAP is NOT provided
+brewster_trade = 1.3  # If MAP provided
 
 # Couture Lamps
 couturelamps = "MAP"
@@ -68,10 +65,6 @@ mindthegap_pillow_trade = 1.3
 phillipjeffries = 1.5
 phillipjeffries_trade = 1.3
 
-# P/K Lifestyles
-# pklifestyles = "MAP" # Markup 2.0
-# pklifestyles_trade = 1.1
-
 # Pindler
 pindler = 1.4
 pindler_trade = 1
@@ -79,10 +72,6 @@ pindler_trade = 1
 # Premier Prints
 premierprints = 3
 premierprints_trade = 2
-
-# Ralph Lauren
-# ralphLauren = 1.4
-# ralphLauren_trade = 1
 
 # Scalamandre
 scalamandre = 1.5
