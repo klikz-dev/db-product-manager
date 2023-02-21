@@ -36,6 +36,13 @@ api_url = "https://{}:{}@decoratorsbest.myshopify.com".format(
 
 FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
+    env('shopify_api_version'))
+SHOPIFY_ORDER_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_order_token'),
+    'Content-Type': 'application/json'
+}
+
 
 class Command(BaseCommand):
     help = 'Build Seabrook Database'
@@ -276,8 +283,8 @@ class Command(BaseCommand):
         for row in csr.fetchall():
             vids.append(row[0])
 
-        r = s.get(
-            api_url + '/admin/api/{}/orders.json?status=any&name={}&fields=id,line_items'.format(api_version, orderNumber))
+        r = s.get("{}/orders.json?status=any&name={}&fields=id,line_items".format(
+            SHOPIFY_API_URL, orderNumber), headers=SHOPIFY_ORDER_API_HEADER)
         j = json.loads(r.text)
 
         if j['orders'] == None or len(j['orders']) == 0:
