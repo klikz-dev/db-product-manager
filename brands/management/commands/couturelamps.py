@@ -379,11 +379,6 @@ class Command(BaseCommand):
                             typeId=parentType.parentTypeId)
                         ptype = rootType.name
 
-                if product.collection != None and product.collection != "":
-                    csr.execute("CALL AddToProductCollection ({}, {})".format(
-                        sq(product.sku), sq(product.collection)))
-                    con.commit()
-
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -519,11 +514,6 @@ class Command(BaseCommand):
                         rootType = Type.objects.get(
                             typeId=parentType.parentTypeId)
                         ptype = rootType.name
-
-                if product.collection != None and product.collection != "":
-                    csr.execute("CALL AddToProductCollection ({}, {})".format(
-                        sq(product.sku), sq(product.collection)))
-                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),

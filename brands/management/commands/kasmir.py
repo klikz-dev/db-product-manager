@@ -322,11 +322,6 @@ class Command(BaseCommand):
                 if product.increment != None and product.increment != "":
                     increment = product.increment
 
-                if product.collection != None and product.collection != "":
-                    csr.execute("CALL AddToProductCollection ({}, {})".format(
-                        sq(product.sku), sq(product.collection)))
-                    con.commit()
-
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
                     sq(name),
@@ -450,11 +445,6 @@ class Command(BaseCommand):
                 increment = ""
                 if product.increment != None and product.increment != "":
                     increment = product.increment
-
-                if product.collection != None and product.collection != "":
-                    csr.execute("CALL AddToProductCollection ({}, {})".format(
-                        sq(product.sku), sq(product.collection)))
-                    con.commit()
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),

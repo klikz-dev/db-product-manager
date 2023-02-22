@@ -176,7 +176,7 @@ class ProductData:
 
         _spt = curtags.split(',')
         for k in range(0, len(_spt)):
-            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0:
+            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0 or _spt[k].strip().find('Rebuy_') == 0:
                 tags.append(_spt[k].strip())
         # Hiplee ends
 
@@ -374,14 +374,6 @@ def NewProductBySku(sku, con):
     # Product Tag
     tags = pd.ProductTag()
 
-    # Product Collection Tag
-    csr.execute(
-        "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(sku)))
-    productCollection = csr.fetchone()
-    if productCollection != None:
-        collection = productCollection[0]
-        tags.append("Collection:{}".format(collection))
-
     # Product Metafields
     pMeta = pd.ProductMetafield()
 
@@ -568,14 +560,6 @@ def UpdateProductToShopify(productID, key, password, con):
         published = pd.published
         tags = pd.ProductTag()
         pMeta = pd.ProductMetafield()
-
-        # Product Collection Tag
-        csr.execute(
-            "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(sku)))
-        productCollection = csr.fetchone()
-        if productCollection != None:
-            collection = productCollection[0]
-            tags.append("Collection:{}".format(collection))
 
         p = {
             "body_html": body,
