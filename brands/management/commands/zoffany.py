@@ -81,15 +81,15 @@ class Command(BaseCommand):
         Zoffany.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/zoffany-master-2.18.23.xlsx")
+            FILEDIR + "/files/zoffany-master.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
             try:
-                mpn = str(sh.cell_value(i, 1))
+                mpn = str(sh.cell_value(i, 2))
 
-                pattern = str(sh.cell_value(i, 7)).strip()
-                color = str(sh.cell_value(i, 8))
+                pattern = str(sh.cell_value(i, 8)).strip()
+                color = str(sh.cell_value(i, 9))
 
                 sku = "ZOF {}".format(mpn)
 
@@ -99,10 +99,10 @@ class Command(BaseCommand):
                 except Zoffany.DoesNotExist:
                     pass
 
-                brand = str(sh.cell_value(i, 20)).lower().capitalize()
-                collection = str(sh.cell_value(i, 6)).lower().capitalize()
+                brand = str(sh.cell_value(i, 21)).lower().capitalize()
+                collection = str(sh.cell_value(i, 7)).lower().capitalize()
 
-                ptype = str(sh.cell_value(i, 11))
+                ptype = str(sh.cell_value(i, 12))
                 if ptype == "WP":
                     ptype = "Wallpaper"
                 elif ptype == "FB":
@@ -113,16 +113,16 @@ class Command(BaseCommand):
 
                 try:
                     price = round(float(
-                        str(sh.cell_value(i, 3)).replace('$', '').strip()), 2)
-                    map = round(float(
                         str(sh.cell_value(i, 4)).replace('$', '').strip()), 2)
-                    msrp = round(float(
+                    map = round(float(
                         str(sh.cell_value(i, 5)).replace('$', '').strip()), 2)
+                    msrp = round(float(
+                        str(sh.cell_value(i, 6)).replace('$', '').strip()), 2)
                 except:
                     debug("Zoffany", 1, "Produt price error {}".format(mpn))
                     continue
 
-                uom = str(sh.cell_value(i, 10))
+                uom = str(sh.cell_value(i, 11))
                 if uom.lower() == "yard" or uom.lower() == "y":
                     uom = "Per Yard"
                 elif uom.lower() == "roll" or uom.lower() == "r":
@@ -140,34 +140,34 @@ class Command(BaseCommand):
                 # Zoffany has no increment. 1/19 from Barbara
                 increment = ''
 
-                usage = str(sh.cell_value(i, 12)).lower().capitalize()
-                category = str(sh.cell_value(i, 9)).lower().capitalize()
+                usage = str(sh.cell_value(i, 13)).lower().capitalize()
+                category = str(sh.cell_value(i, 10)).lower().capitalize()
 
                 try:
-                    width = round(float(sh.cell_value(i, 17)), 2)
+                    width = round(float(sh.cell_value(i, 18)), 2)
                 except:
                     width = 0
                 try:
-                    rollLength = round(float(sh.cell_value(i, 16)), 2)
+                    rollLength = round(float(sh.cell_value(i, 17)), 2)
                 except:
                     rollLength = 0
                 try:
-                    hr = round(float(sh.cell_value(i, 19)), 2)
+                    hr = round(float(sh.cell_value(i, 20)), 2)
                 except:
                     hr = 0
                 try:
-                    vr = round(float(sh.cell_value(i, 18)), 2)
+                    vr = round(float(sh.cell_value(i, 19)), 2)
                 except:
                     vr = 0
-                match = str(sh.cell_value(i, 13)).lower().capitalize()
-                reversible = str(sh.cell_value(i, 14))
+                match = str(sh.cell_value(i, 14)).lower().capitalize()
+                reversible = str(sh.cell_value(i, 15))
                 if reversible == "Y":
                     feature = "Reversible: No"
                 else:
                     feature = "Reversible: No"
                 weight = 1
-                description = str(sh.cell_value(i, 24))
-                picLink = str(sh.cell_value(i, 23))
+                description = str(sh.cell_value(i, 25))
+                picLink = str(sh.cell_value(i, 24))
 
                 manufacturer = "{} {}".format(brand, ptype)
 
@@ -630,13 +630,15 @@ class Command(BaseCommand):
         # Mural Subtypes
         murals = []
 
-        # wb = xlrd.open_workbook(
-        #     FILEDIR + "/files/zoffany-master-2.18.23.xlsx")
-        # sh = wb.sheet_by_index(2)
+        wb = xlrd.open_workbook(
+            FILEDIR + "/files/zoffany-master.xlsx")
+        sh = wb.sheet_by_index(0)
 
-        # for i in range(1, sh.nrows):
-        #     mpn = str(sh.cell_value(i, 1))
-        #     murals.append(mpn)
+        for i in range(1, sh.nrows):
+            mpn = str(sh.cell_value(i, 2))
+            note = str(sh.cell_value(i, 0))
+            if "Mural" in note:
+                murals.append(mpn)
 
         products = Zoffany.objects.all()
         for product in products:
