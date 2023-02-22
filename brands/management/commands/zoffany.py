@@ -632,17 +632,12 @@ class Command(BaseCommand):
 
         products = Zoffany.objects.all()
         for product in products:
-            # Rebuy Tagging
-            if product.collection != None and product.collection != "":
-                csr.execute("CALL AddToProductCollection ({}, {})".format(
-                    sq(product.sku), sq(product.collection)))
-                con.commit()
-
             sku = product.sku
 
             category = product.category
             style = product.style
             colors = product.colors
+            collection = product.collection
 
             if category != None and category != "":
                 cat = str(category).strip()
@@ -678,6 +673,14 @@ class Command(BaseCommand):
 
                 debug("York", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq('Murals')))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToProductCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Zoffany", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

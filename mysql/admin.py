@@ -209,17 +209,6 @@ class ProductManufacturerAdmin(admin.ModelAdmin):
 
 
 class ProductCollectionAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     fields = ['sku', 'collection']
 
     list_display = ('sku', 'collection')
