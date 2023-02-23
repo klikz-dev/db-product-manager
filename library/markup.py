@@ -24,6 +24,10 @@ elainesmith_trade = 1.3
 jamieyoung = "MAP"  # Markup 2 - 2.3
 jamieyoung_trade = 1.25
 
+# Jaipur Living
+jaipurliving = 2
+jaipurliving_trade = 1.25
+
 # JF Fabrics
 jffabrics = 1.75  # x MAP
 jffabrics_trade = 1

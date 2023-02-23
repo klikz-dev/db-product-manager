@@ -67,7 +67,7 @@ class Command(BaseCommand):
                     ######################################################
                     ########### Comment below for Scalamandre ############
                     ######################################################
-                    img = resizeimage.resize_cover(img, [scalew, scalew])
+                    # img = resizeimage.resize_cover(img, [scalew, scalew])
                     ######################################################
 
                     img.save(join(PATH_OUT, f), img.format)

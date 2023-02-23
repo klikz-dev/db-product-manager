@@ -480,6 +480,84 @@ class JamieYoung(models.Model):
         return self.mpn
 
 
+class JaipurLiving(models.Model):
+    class Meta:
+        verbose_name = "Jaipur Living"
+        verbose_name_plural = "Jaipur Living"
+
+    mpn = models.CharField(max_length=200)
+    sku = models.CharField(max_length=200, default=None, null=True, blank=True)
+    name = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    pattern = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ptype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    manufacturer = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    collection = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    description = models.CharField(
+        max_length=2000, default=None, null=True, blank=True)
+    width = models.FloatField(default=0)
+    length = models.FloatField(default=0)
+    height = models.FloatField(default=0)
+    features = models.CharField(
+        max_length=1000, default=None, null=True, blank=True)
+    material = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    care = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    country = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    usage = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    weight = models.FloatField(default=1)
+    upc = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    uom = models.CharField(max_length=200, default=None, null=True, blank=True)
+    minimum = models.IntegerField(default=1)
+    increment = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    colors = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
+
+    status = models.BooleanField(default=True)
+    stock = models.IntegerField(default=0)
+    boDate = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    thumbnail = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    roomsets = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    productId = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.mpn
+
+
 class JFFabrics(models.Model):
     class Meta:
         verbose_name = "JF Fabrics"

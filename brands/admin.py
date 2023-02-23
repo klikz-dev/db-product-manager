@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, TresTintas, York, Zoffany
+from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -133,6 +133,31 @@ class JamieYoungAdmin(admin.ModelAdmin):
          'brand', 'ptype', 'manufacturer', 'collection']}),
         ('Description', {'fields': [
          'description', 'width', 'height', 'depth', 'features', 'material', 'disclaimer', 'care', 'specs', 'country', 'usage', 'weight', 'upc']}),
+        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['style', 'colors', 'category']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
+        ('Image', {'fields': ['thumbnail', 'roomsets']}),
+        ('Shipify Product', {'fields': ['productId']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
+                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
+
+    list_filter = ['ptype', 'status', 'uom',
+                   'manufacturer', 'collection']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+
+
+class JaipurLivingAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['mpn', 'sku']}),
+        ('Identities', {'fields': ['name', 'pattern', 'color']}),
+        ('Collection', {'fields': [
+         'brand', 'ptype', 'manufacturer', 'collection']}),
+        ('Description', {'fields': [
+         'description', 'width', 'length', 'height', 'features', 'material', 'care', 'country', 'usage', 'weight', 'upc']}),
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
@@ -287,7 +312,6 @@ class MadcapCottageAdmin(admin.ModelAdmin):
 
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
                     'cost', 'msrp', 'map', 'uom', 'width', 'productId', 'status', 'stock')
-    # list_display = ('productId', 'title')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
 
@@ -631,6 +655,7 @@ admin.site.register(Covington, CovingtonAdmin)
 admin.site.register(DanaGibson, DanaGibsonAdmin)
 admin.site.register(ElaineSmith, ElaineSmithAdmin)
 admin.site.register(JamieYoung, JamieYoungAdmin)
+admin.site.register(JaipurLiving, JaipurLivingAdmin)
 admin.site.register(JFFabrics, JFFabricsAdmin)
 admin.site.register(Kasmir, KasmirAdmin)
 admin.site.register(Kravet, KravetAdmin)
