@@ -176,7 +176,7 @@ class ProductData:
 
         _spt = curtags.split(',')
         for k in range(0, len(_spt)):
-            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0 or _spt[k].strip().find('Rebuy_') == 0:
+            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0:
                 tags.append(_spt[k].strip())
         # Hiplee ends
 
@@ -190,6 +190,20 @@ class ProductData:
                     tags.append(st)
             else:
                 tags.append(value)
+
+        # Rebuy Tags
+        self.csr.execute(
+            "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(self.sku)))
+        for tag in self.csr.fetchall():
+            tagName = tag[0]
+            tags.append("Rebuy_collection_{}".format(tagName))
+
+        self.csr.execute(
+            "SELECT T.Name FROM Tag T JOIN ProductTag PT ON T.TagID = PT.TagID JOIN Product P ON PT.SKU = P.SKU WHERE T.ParentTagID = 3 AND P.SKU = {}".format(sq(self.sku)))
+        for tag in self.csr.fetchall():
+            tagName = tag[0]
+            tags.append("Rebuy_color_{}".format(tagName))
+        # Rebuy Tags End
 
         return tags
 

@@ -38,6 +38,17 @@ class EditCategory(models.Model):
         db_table = "EditCategory"
 
 
+class EditCollection(models.Model):
+    sku = models.CharField(max_length=200, primary_key=True)
+    collection = models.CharField(max_length=5000)
+
+    updatedAt = models.DateTimeField()
+
+    class Meta:
+        managed = True
+        db_table = "EditCollection"
+
+
 class EditColor(models.Model):
     sku = models.CharField(max_length=200, primary_key=True)
     color = models.CharField(max_length=2000)

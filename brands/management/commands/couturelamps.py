@@ -574,6 +574,7 @@ class Command(BaseCommand):
             style = product.style
             colors = product.colors
             subtypes = "{}, {}".format(product.ptype, product.pattern)
+            collection = product.collection
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
@@ -598,6 +599,14 @@ class Command(BaseCommand):
 
                 debug("CoutureLamps", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("CoutureLamps", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

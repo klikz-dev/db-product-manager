@@ -312,7 +312,8 @@ class Command(BaseCommand):
                     price = common.formatprice(product.map, 1)
                     priceTrade = common.formatprice(cost, markup_trade)
                     if product.ptype == "Pillow":
-                        priceTrade = common.formatprice(cost, markup_pillow_trade)
+                        priceTrade = common.formatprice(
+                            cost, markup_pillow_trade)
                 except:
                     debug("Materialworks", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -530,7 +531,8 @@ class Command(BaseCommand):
                 newPrice = common.formatprice(product.map, 1)
                 newPriceTrade = common.formatprice(newCost, markup_trade)
                 if product.ptype == "Pillow":
-                    newPriceTrade = common.formatprice(newCost, markup_pillow_trade)
+                    newPriceTrade = common.formatprice(
+                        newCost, markup_pillow_trade)
             except:
                 debug("Materialworks", 1,
                       "Price Error: SKU: {}".format(product.sku))
@@ -648,6 +650,7 @@ class Command(BaseCommand):
             style = product.style
             category = product.category
             colors = product.colors
+            collection = product.collection
 
             if style != None and style != "":
                 sty = str(style).strip()
@@ -675,6 +678,14 @@ class Command(BaseCommand):
 
                 debug("Materialworks", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Materialworks", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

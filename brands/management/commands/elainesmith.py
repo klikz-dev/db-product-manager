@@ -579,6 +579,7 @@ class Command(BaseCommand):
             style = product.style
             category = product.category
             colors = product.colors
+            collection = product.collection
 
             if style != None and style != "":
                 sty = str(style).strip()
@@ -606,6 +607,14 @@ class Command(BaseCommand):
 
                 debug("Elaine Smith", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Elaine Smith", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

@@ -769,6 +769,7 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.colors
+            collection = product.collection
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
@@ -793,6 +794,14 @@ class Command(BaseCommand):
 
                 debug("Scalamandre", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Scalamandre", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

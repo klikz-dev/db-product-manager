@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EditSize, Manufacturer, Admin, CustomEmail, EditCategory, EditColor, EditStyle, EditSubtype, PORecord
+from .models import EditSize, Manufacturer, Admin, CustomEmail, EditCategory, EditCollection, EditColor, EditStyle, EditSubtype, PORecord
 from .models import ProductManufacturer, PendingNewProduct, PendingUpdateProduct, PendingUpdatePublish, PendingUpdatePrice
 from .models import PendingUpdateTag, ProductInventory, ProductSubcategory, ProductSubtype, ProductTag, ProductCollection, Tag, Type
 
@@ -70,6 +70,16 @@ class EditCategoryAdmin(admin.ModelAdmin):
     list_display = ('sku', 'category', 'isManual')
 
     search_fields = ['sku', 'category']
+
+
+class EditCollectionAdmin(admin.ModelAdmin):
+    fields = ['sku', 'collection']
+
+    ordering = ['-updatedAt']
+
+    list_display = ('sku', 'collection')
+
+    search_fields = ['sku', 'collection']
 
 
 class EditColorAdmin(admin.ModelAdmin):
@@ -593,6 +603,7 @@ class TypeAdmin(admin.ModelAdmin):
 admin.site.register(Admin, AdminAdmin)
 admin.site.register(CustomEmail, CustomEmailAdmin)
 admin.site.register(EditCategory, EditCategoryAdmin)
+admin.site.register(EditCollection, EditCollectionAdmin)
 admin.site.register(EditColor, EditColorAdmin)
 admin.site.register(EditStyle, EditStyleAdmin)
 admin.site.register(EditSubtype, EditSubtypeAdmin)

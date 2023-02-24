@@ -626,6 +626,7 @@ class Command(BaseCommand):
             style = product.style
             category = product.category
             colors = product.colors
+            collection = product.collection
 
             if style != None and style != "":
                 sty = str(style).strip()
@@ -642,66 +643,10 @@ class Command(BaseCommand):
                     sq(sku), sq(cat)))
                 con.commit()
 
-                debug("Covington", 0, "Added Category. SKU: {}, Category: {}".format(
-                    sku, sq(cat)))
-
-            if colors != None and colors != "":
-                col = str(colors).strip()
-                csr.execute("CALL AddToEditColor ({}, {})".format(
-                    sq(sku), sq(col)))
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
                 con.commit()
 
-                debug("Covington", 0,
-                      "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
-
-        csr.close()
-        con.close()
-
-    def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/covington/")
-        print(fnames)
-        for fname in fnames:
-            try:
-                pattern = fname.split(" ")[0]
-                color = fname.split(" ")[1].split(".")[0]
-
-                product = Covington.objects.get(pattern=pattern, color=color)
-                productId = product.productId
-
-                if productId != None and productId != "":
-                    copyfile(FILEDIR + "/files/images/covington/" + fname, FILEDIR +
-                             "/../../images/product/{}.jpg".format(productId))
-
-                os.remove(FILEDIR + "/files/images/covington/" + fname)
-            except:
-                continue
-
-    def roomset(self):
-        fnames = os.listdir(FILEDIR + "/files/images/covington/")
-
-        for fname in fnames:
-            try:
-                if "_" in fname:
-                    mpn = fname.split("_")[0]
-                    roomId = int(fname.split("_")[1].split(".")[0]) + 1
-
-                    product = Covington.objects.get(mpn=mpn)
-                    productId = product.productId
-
-                    if productId != None and productId != "":
-                        copyfile(FILEDIR + "/files/images/covington/" + fname, FILEDIR +
-                                 "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
-
-                        debug("Covington", 0, "Roomset Image {}_{}.jpg".format(
-                            productId, roomId))
-
-                        os.remove(
-                            FILEDIR + "/files/images/covington/" + fname)
-                    else:
-                        print("No product found with MPN: {}".format(mpn))
-                else:
-                    continue
-
-            except Exception as e:
-                print(e)
-                continue
+                debug("Covington", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))

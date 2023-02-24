@@ -574,19 +574,10 @@ class Command(BaseCommand):
         for product in products:
             sku = product.sku
 
-            # category = product.category
             style = product.style
             colors = product.colors
             subtypes = "{}, {}".format(product.ptype, product.pattern)
-
-            # Hide Category for JY. 1/25/23 from BK.
-            # if category != None and category != "":
-            #     csr.execute("CALL AddToEditCategory ({}, {})".format(
-            #         sq(sku), sq(category)))
-            #     con.commit()
-
-            #     debug("KravetDecor", 0, "Added Category. SKU: {}, Category: {}".format(
-            #         sku, sq(category)))
+            collection = product.collection
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
@@ -611,6 +602,14 @@ class Command(BaseCommand):
 
                 debug("KravetDecor", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("KravetDecor", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

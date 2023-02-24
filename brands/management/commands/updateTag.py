@@ -41,14 +41,14 @@ class Command(BaseCommand):
         for product in products:
             productID = product[0]
             if 1 == 1:
-                try:
-                    shopify.UpdateTagBodyToShopify(productID, con)
-                    debug("Shopify", 0,
-                          "Updated Pending Product Tag : {}".format(productID))
-                except:
-                    debug(
-                        "Shopify", 1, "Failed Updating Pending Product Tag : {}".format(productID))
-                    continue
+                # try:
+                shopify.UpdateTagBodyToShopify(productID, con)
+                debug("Shopify", 0,
+                      "Updated Pending Product Tag : {}".format(productID))
+            # except:
+            #     debug(
+            #         "Shopify", 1, "Failed Updating Pending Product Tag : {}".format(productID))
+            #     continue
 
         csr.close()
         con.close()

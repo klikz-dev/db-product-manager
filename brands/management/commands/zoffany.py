@@ -671,11 +671,11 @@ class Command(BaseCommand):
                     sq(sku), sq(str('Murals').strip())))
                 con.commit()
 
-                debug("York", 0,
+                debug("Zoffany", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq('Murals')))
 
             if collection != None and collection != "":
-                csr.execute("CALL AddToProductCollection ({}, {})".format(
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
                     sq(sku), sq(collection)))
                 con.commit()
 

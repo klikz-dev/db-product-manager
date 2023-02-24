@@ -549,6 +549,7 @@ class Command(BaseCommand):
 
             category = product.category
             color = product.colors
+            collection = product.collection
 
             if category != None and category != "":
                 cat = str(category).strip()
@@ -567,6 +568,14 @@ class Command(BaseCommand):
 
                 debug("Maxwell", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(col)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Maxwell", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

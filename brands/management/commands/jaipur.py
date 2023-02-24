@@ -61,6 +61,9 @@ class Command(BaseCommand):
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
+        if "images" in options['functions']:
+            self.images()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -398,18 +401,21 @@ class Command(BaseCommand):
                     priceTrade = 16.99
                 priceSample = 5
 
-                productType = Type.objects.get(name=product.ptype)
-                if productType.parentTypeId == 0:
-                    ptype = productType.name
-                else:
-                    parentType = Type.objects.get(
-                        typeId=productType.parentTypeId)
-                    if parentType.parentTypeId == 0:
-                        ptype = parentType.name
+                try:
+                    productType = Type.objects.get(name=product.ptype)
+                    if productType.parentTypeId == 0:
+                        ptype = productType.name
                     else:
-                        rootType = Type.objects.get(
-                            typeId=parentType.parentTypeId)
-                        ptype = rootType.name
+                        parentType = Type.objects.get(
+                            typeId=productType.parentTypeId)
+                        if parentType.parentTypeId == 0:
+                            ptype = parentType.name
+                        else:
+                            rootType = Type.objects.get(
+                                typeId=parentType.parentTypeId)
+                            ptype = rootType.name
+                except:
+                    ptype = product.name
 
                 csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
                     sq(product.sku),
@@ -449,25 +455,6 @@ class Command(BaseCommand):
 
                 product.productId = productId
                 product.save()
-
-                if product.thumbnail and product.thumbnail.strip() != "":
-                    try:
-                        common.picdownload2(
-                            product.thumbnail, "{}.jpg".format(product.productId))
-                    except Exception as e:
-                        print(e)
-                        pass
-
-                if product.roomsets and product.roomsets.strip() != "":
-                    idx = 2
-                    for roomset in product.roomsets.split("|"):
-                        try:
-                            common.roomdownload(
-                                roomset, "{}_{}.jpg".format(product.productId, idx))
-                            idx = idx + 1
-                        except Exception as e:
-                            print(e)
-                            pass
 
                 debug("JaipurLiving", 0, "Created New product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
                     productId, product.sku, title, product.ptype, price))
@@ -624,6 +611,7 @@ class Command(BaseCommand):
             style = product.style
             colors = product.colors
             subtypes = "{}, {}".format(product.ptype, product.pattern)
+            collection = product.collection
 
             if style != None and style != "":
                 csr.execute("CALL AddToEditStyle ({}, {})".format(
@@ -648,6 +636,14 @@ class Command(BaseCommand):
 
                 debug("JaipurLiving", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("JaipurLiving", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()
@@ -802,3 +798,37 @@ class Command(BaseCommand):
 
         csr.close()
         con.close()
+
+    def images(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'JF Fabrics'")
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        products = JaipurLiving.objects.all()
+        for product in products:
+            if product.productId == None or product.productId in hasImage:
+                continue
+
+            if product.thumbnail and product.thumbnail.strip() != "":
+                try:
+                    common.picdownload2(
+                        product.thumbnail, "{}.jpg".format(product.productId))
+                except Exception as e:
+                    print(e)
+                    pass
+
+            if product.roomsets and product.roomsets.strip() != "":
+                idx = 2
+                for roomset in product.roomsets.split("|"):
+                    try:
+                        common.roomdownload(
+                            roomset, "{}_{}.jpg".format(product.productId, idx))
+                        idx = idx + 1
+                    except Exception as e:
+                        print(e)
+                        pass

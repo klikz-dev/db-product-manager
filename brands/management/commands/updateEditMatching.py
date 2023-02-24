@@ -243,6 +243,7 @@ class Command(BaseCommand):
             self.editStyle()
             self.editSubtype()
             self.editSize()
+            self.editCollection()
 
             debug("Shopify", 0, "Finished Process. Waiting for next run.")
             time.sleep(3600)
@@ -450,6 +451,34 @@ class Command(BaseCommand):
         con.commit()
 
         csr.execute("DELETE FROM EditSize")
+        con.commit()
+
+        csr.close()
+        con.close()
+
+    def editCollection(self):
+        con = pymysql.connect(host=db_host, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        csr.execute(
+            "DELETE FROM EditCollection WHERE SKU IN (SELECT SKU FROM Product WHERE ProductID IS NULL)")
+        con.commit()
+
+        csr.execute("SELECT SKU, Collection FROM EditCollection")
+        for row in csr.fetchall():
+            sku = row[0]
+            collection = row[1]
+
+            csr.execute("CALL AddToProductCollection ({}, {})".format(
+                        common.sq(sku), common.sq(collection)))
+
+        csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
+                                                            AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
+                                                            AND SKU IN (SELECT SKU FROM EditCollection)""")
+        con.commit()
+
+        csr.execute("DELETE FROM EditCollection")
         con.commit()
 
         csr.close()

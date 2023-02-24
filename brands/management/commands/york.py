@@ -756,6 +756,7 @@ class Command(BaseCommand):
             style = product.style
             colors = product.colors
             subtypes = ""
+            collection = product.collection
 
             if "mural" in product.pattern.lower():
                 subtypes = "Murals"
@@ -791,6 +792,14 @@ class Command(BaseCommand):
 
                 debug("York", 0,
                       "Added Subtype. SKU: {}, Subtype: {}".format(sku, sq(subtypes)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("York", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()

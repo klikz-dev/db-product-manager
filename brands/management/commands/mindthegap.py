@@ -130,7 +130,8 @@ class Command(BaseCommand):
 
             style = "Global, {}, {}, {}".format(usage, collection, description)
             colors = color
-            category = "Boho, {}, {}, {}".format(usage, collection, description)
+            category = "Boho, {}, {}, {}".format(
+                usage, collection, description)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -213,9 +214,11 @@ class Command(BaseCommand):
 
             country = str(wallpaperSheet.cell_value(i, 15))
 
-            style = "Global, {}, {}, {}".format(str(wallpaperSheet.cell_value(i, 8)), collection, description)
+            style = "Global, {}, {}, {}".format(
+                str(wallpaperSheet.cell_value(i, 8)), collection, description)
             colors = color
-            category = "Boho, {}, {}, {}".format(str(wallpaperSheet.cell_value(i, 8)), collection, description)
+            category = "Boho, {}, {}, {}".format(
+                str(wallpaperSheet.cell_value(i, 8)), collection, description)
 
             manufacturer = "{} {}".format(brand, ptype)
 
@@ -447,7 +450,8 @@ class Command(BaseCommand):
                     price = common.formatprice(cost, markup_price)
                     priceTrade = common.formatprice(product.cost, markup_trade)
                     if product.ptype == "Pillow":
-                        priceTrade = common.formatprice(product.cost, markup_pillow_trade)
+                        priceTrade = common.formatprice(
+                            product.cost, markup_pillow_trade)
                 except:
                     debug("Mindthegap", 1,
                           "Price Error: SKU: {}".format(product.sku))
@@ -659,7 +663,8 @@ class Command(BaseCommand):
                 newPrice = common.formatprice(newCost, markup_price)
                 newPriceTrade = common.formatprice(newCost, markup_trade)
                 if product.ptype == "Pillow":
-                    newPriceTrade = common.formatprice(newCost, markup_pillow_trade)
+                    newPriceTrade = common.formatprice(
+                        newCost, markup_pillow_trade)
             except:
                 debug("Mindthegap", 1,
                       "Price Error: SKU: {}".format(product.sku))
@@ -757,6 +762,7 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.colors
+            collection = product.collection
 
             if category != None and category != "":
                 csr.execute("CALL AddToEditCategory ({}, {})".format(
@@ -781,6 +787,14 @@ class Command(BaseCommand):
 
                 debug("Mindthegap", 0,
                       "Added Color. SKU: {}, Color: {}".format(sku, sq(colors)))
+
+            if collection != None and collection != "":
+                csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    sq(sku), sq(collection)))
+                con.commit()
+
+                debug("Mindthegap", 0, "Added Collection. SKU: {}, Collection: {}".format(
+                    sku, sq(collection)))
 
         csr.close()
         con.close()
