@@ -940,10 +940,17 @@ class Command(BaseCommand):
         con.close()
 
     def fixImages(self):
-        # collections = Brewster.objects.values_list(
-        #     'collection', flat=True).distinct()
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
 
-        collections = ['Fable']
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Brewster'")
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        collections = Brewster.objects.values_list(
+            'collection', flat=True).distinct()
 
         for collection in collections:
             # Socket is closed error. Re initialize the socket per collection
@@ -968,7 +975,7 @@ class Command(BaseCommand):
                 productId = product.productId
                 collection = product.collection
                 mpn = product.mpn
-                if productId == None or productId == "":
+                if productId == None or productId == "" or productId in hasImage:
                     continue
 
                 try:

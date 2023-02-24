@@ -67,12 +67,6 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             self.image()
 
-        if "updateStock" in options['functions']:
-            while True:
-                self.updateStock()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
-
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()

@@ -133,6 +133,7 @@ class Command(BaseCommand):
 
                 try:
                     JFFabrics.objects.get(mpn=mpn)
+                    debug("JF Fabrics", 1, "Duplicated MPN: {}".format(mpn))
                     continue
                 except JFFabrics.DoesNotExist:
                     pass

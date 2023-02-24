@@ -59,6 +59,10 @@ class Command(BaseCommand):
         if "bestSellers" in options['functions']:
             self.bestSellers()
 
+        if "main" in options['functions']:
+            self.getProducts()
+            self.getProductIds()
+
     def getProducts(self):
         Seabrook.objects.all().delete()
 
