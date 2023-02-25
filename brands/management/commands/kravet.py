@@ -547,7 +547,7 @@ class Command(BaseCommand):
                 product.productId = productID
                 product.save()
 
-                if published == 1 and product.status == False:
+                if published == 1 and (product.status == False or product.ptype == 'Wallpaper'):
                     csr.execute(
                         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
                     con.commit()
