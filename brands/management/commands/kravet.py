@@ -559,7 +559,7 @@ class Command(BaseCommand):
                     debug(
                         "Kravet", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
-                if published == 0 and product.status == True and product.cost != None:
+                if published == 0 and product.status == True and product.cost != None and product.ptype != 'Wallpaper':
                     csr.execute(
                         "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
                     con.commit()
@@ -723,13 +723,10 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        # Update All Products
-        products = Kravet.objects.all()
+        # products = Kravet.objects.all()
+        products = Kravet.objects.filter(ptype="Wallpaper")
 
-        # Update Specific products
-        # products = Kravet.objects.filter(collection="COLE & SON NEW CONTEMPORARY II")
-
-        for product in products:
+        for index, product in enumerate(products):
             try:
                 if product.status == False or product.productId == None:
                     continue
@@ -840,8 +837,8 @@ class Command(BaseCommand):
                     "CALL AddToPendingUpdateProduct ({})".format(productId))
                 con.commit()
 
-                debug("Kravet", 0, "Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
-                    productId, product.sku, title, product.ptype, price))
+                debug("Kravet", 0, "{}/{}: Updated Existing product ProductID: {}, SKU: {}, Title: {}, Type: {}, Price: {}".format(
+                    index, len(products), productId, product.sku, title, product.ptype, price))
 
             except Exception as e:
                 print(e)
