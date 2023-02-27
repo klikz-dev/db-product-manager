@@ -547,7 +547,7 @@ class Command(BaseCommand):
                 product.productId = productID
                 product.save()
 
-                if published == 1 and (product.status == False or product.ptype == 'Wallpaper'):
+                if published == 1 and product.status == False:
                     csr.execute(
                         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
                     con.commit()
@@ -559,7 +559,7 @@ class Command(BaseCommand):
                     debug(
                         "Kravet", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
-                if published == 0 and product.status == True and product.cost != None and product.ptype != 'Wallpaper':
+                if published == 0 and product.status == True and product.cost != None:
                     csr.execute(
                         "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
                     con.commit()
