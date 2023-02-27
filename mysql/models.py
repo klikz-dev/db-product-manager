@@ -178,19 +178,14 @@ class PendingUpdateTag(models.Model):
 
 
 class PORecord(models.Model):
-    KravetEDI = models.CharField(
-        max_length=200, primary_key=True)
-    YorkEDI = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    FabricutEDI = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    RalphLaurenEDI = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
-    ClarenceHouseEDI = models.CharField(
-        max_length=200, default=None, null=True, blank=True)
     SampleReminder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     SampleReminder2 = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    KravetEDI = models.CharField(
+        max_length=200, primary_key=True)
+    YorkEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     BrewsterEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -206,6 +201,10 @@ class PORecord(models.Model):
     CoutureOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     CoutureSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    DanaGibsonOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    DanaGibsonSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     ElaineSmithOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
