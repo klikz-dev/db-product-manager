@@ -7,7 +7,6 @@ import os
 import paramiko
 import pymysql
 import xlrd
-import csv
 import time
 
 from library import debug, common, shopify, markup
@@ -683,9 +682,6 @@ class Command(BaseCommand):
         return True
 
     def updateStock(self):
-        if not self.downloadInvFile():
-            return
-
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
@@ -694,35 +690,18 @@ class Command(BaseCommand):
             "DELETE FROM ProductInventory WHERE Brand = 'Jaipur Living'")
         con.commit()
 
-        f = open(FILEDIR + '/files/jaipurliving-inventory.csv', "rt")
-        cr = csv.reader(f)
-
-        index = 0
-        for row in cr:
-            index += 1
-            if index == 1:
-                continue
-
-            mpn = row[1]
+        products = JaipurLiving.objects.all()
+        for product in products:
             try:
-                product = JaipurLiving.objects.get(mpn=mpn)
-            except:
-                continue
-
-            sku = product.sku
-
-            stock = int(row[2])
-
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jaipur Living')".format(
-                    sku, stock, product.boDate.replace("Lead Time:", "").strip()))
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Jaipur Living')".format(
+                    product.sku, 5, ''))
                 con.commit()
                 debug("JaipurLiving", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
+                      "Updated inventory for {} to {}.".format(product.sku, 5))
             except Exception as e:
                 print(e)
                 debug(
-                    "JaipurLiving", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
+                    "JaipurLiving", 2, "Error Updating inventory for {} to {}.".format(product.sku, 5))
 
         csr.close()
         con.close()
@@ -805,9 +784,9 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         hasImage = []
-        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Jaipur Living'")
-        for row in csr.fetchall():
-            hasImage.append(str(row[0]))
+        # csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = 'Jaipur Living'")
+        # for row in csr.fetchall():
+        #     hasImage.append(str(row[0]))
 
         products = JaipurLiving.objects.all()
         for product in products:
