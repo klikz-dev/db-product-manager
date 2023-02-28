@@ -559,7 +559,7 @@ class Command(BaseCommand):
                     debug(
                         "Kravet", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
 
-                if published == 0 and product.status == True and product.cost != None:
+                if published == 0 and product.status == True:
                     csr.execute(
                         "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
                     con.commit()
