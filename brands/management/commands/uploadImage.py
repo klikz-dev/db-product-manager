@@ -65,9 +65,9 @@ class Command(BaseCommand):
                     debug("Image", 1, "Ignored image {}. Size too small".format(f))
                 else:
                     ######################################################
-                    ########### Comment below for Scalamandre ############
+                    #### Comment below for Scalamandre & Decor Brands ####
                     ######################################################
-                    # img = resizeimage.resize_cover(img, [scalew, scalew])
+                    img = resizeimage.resize_cover(img, [scalew, scalew])
                     ######################################################
 
                     img.save(join(PATH_OUT, f), img.format)
