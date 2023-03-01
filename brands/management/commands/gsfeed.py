@@ -113,25 +113,25 @@ class Command(BaseCommand):
             sku = row[0]
 
             # Check Stock
-            # try:
-            #     username = 'decoratorsbest'
-            #     password = '5iXrwa8X!ZjRT'
-            #     url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
-            #         username, password, sku)
+            try:
+                username = 'decoratorsbest'
+                password = '5iXrwa8X!ZjRT'
+                url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
+                    username, password, sku)
 
-            #     payload = {}
-            #     headers = {}
+                payload = {}
+                headers = {}
 
-            #     response = requests.request(
-            #         "GET", url, headers=headers, data=payload)
-            #     stockInfo = json.loads(response.text)
-            #     print(stockInfo['Quantity'])
+                response = requests.request(
+                    "GET", url, headers=headers, data=payload)
+                stockInfo = json.loads(response.text)
+                print(stockInfo['Quantity'])
 
-            #     if int(stockInfo['Quantity']) < 1:
-            #         continue
-            # except Exception as e:
-            #     print(e)
-            #     continue
+                if int(stockInfo['Quantity']) < 1:
+                    continue
+            except Exception as e:
+                print(e)
+                continue
             ############
 
             title = self.formatter("{} - {}".format(row[1].title(), sku))
