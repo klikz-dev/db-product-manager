@@ -127,7 +127,7 @@ class Command(BaseCommand):
                 '¥', '').replace('…', '').replace('„', '').title()
             color = str(row[5]).strip().replace('', '').replace(
                 '¥', '').replace('…', '').replace('„', '').title()
-            ptype = str(row[0]).strip().title()
+            ptype = str(row[0]).strip().upper()
 
             if pattern == "" or color == "" or ptype == "":
                 continue
@@ -138,6 +138,8 @@ class Command(BaseCommand):
                 continue
             except Schumacher.DoesNotExist:
                 pass
+            except:
+                continue
 
             collection = str(row[2]).replace("Collection Name", "").strip()
             if "STAPETER" in collection:
@@ -161,12 +163,12 @@ class Command(BaseCommand):
                 ptype = "Rug"
                 usage = "RUGS & CARPETS"
                 pattern = pattern.replace("Rug", "").strip()
+            elif "THROW" in pattern:
+                ptype = "Throw"
+                usage = "Throw"
             else:
                 ptype = ptype.title()
                 usage = ptype
-            if "Throw" in pattern:
-                ptype = "Throw"
-                usage = "Throw"
 
             price = float(row[7])
 
@@ -493,7 +495,7 @@ class Command(BaseCommand):
 
         products = Schumacher.objects.all()
         products = Schumacher.objects.filter(
-            Q(manufacturer="Schumacher Rug") | Q(manufacturer="Schumacher Throw"))
+            Q(manufacturer="Schumacher Wallpaper") | Q(manufacturer="Schumacher Pillow"))
 
         for product in products:
             try:
