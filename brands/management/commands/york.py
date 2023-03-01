@@ -815,9 +815,13 @@ class Command(BaseCommand):
                     product = York.objects.get(mpn=mpn)
                     productId = product.productId
 
+                    idx = 2
+                    if "RS2" in fname:
+                        idx = 3
+
                     if productId != None and productId != "":
                         copyfile(FILEDIR + "/files/images/york/" + fname, FILEDIR +
-                                 "/../../images/roomset/{}_2.jpg".format(productId))
+                                 "/../../images/roomset/{}_{}.jpg".format(productId, idx))
                 else:
                     mpn = fname.split(".")[0]
                     product = York.objects.get(mpn=mpn)
