@@ -95,10 +95,6 @@ class Command(BaseCommand):
                         SELECT P.SKU FROM Product P JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
                         WHERE (P.Name LIKE '%Disney%' AND M.Brand = 'York')
                       )
-                      AND P.SKU NOT IN (
-                        SELECT P.SKU FROM Product P JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID JOIN Type T ON P.ProductTypeID = T.TypeID
-                        WHERE (T.Name = 'Wallpaper' AND M.Brand = 'Kravet')
-                      )
                       """)
 
         f.write('<?xml version="1.0"?>')
