@@ -679,7 +679,7 @@ class Command(BaseCommand):
         con.close()
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/starkstudio/stark/")
+        fnames = os.listdir(FILEDIR + "/files/images/starkstudio/")
 
         products = StarkStudio.objects.all()
         for product in products:
@@ -698,25 +698,25 @@ class Command(BaseCommand):
                 if productStr in imageStr or imageStr in productStr:
                     if "_CL" in fname:
                         print("Roomset 2: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_2.jpg".format(product.productId))
 
                     elif "_ALT1" in fname:
                         print("Roomset 3: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_3.jpg".format(product.productId))
 
                     elif "_ALT2" in fname:
                         print("Roomset 4: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_4.jpg".format(product.productId))
 
                     elif "_RM" in fname:
                         print("Roomset 5: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_5.jpg".format(product.productId))
 
                     else:
                         print("Product: {}".format(fname))
-                        copyfile(FILEDIR + "/files/images/starkstudio/stark/" + fname, FILEDIR +
+                        copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/product/{}.jpg".format(product.productId))
