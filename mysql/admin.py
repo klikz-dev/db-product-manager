@@ -282,17 +282,6 @@ class ProductCollectionAdmin(admin.ModelAdmin):
 
 
 class PendingNewProductAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     fields = ['sku']
 
     list_display = ('sku',)
@@ -301,17 +290,6 @@ class PendingNewProductAdmin(admin.ModelAdmin):
 
 
 class PendingUpdateProductAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     fields = ['productId']
 
     list_display = ('productId',)
@@ -320,17 +298,6 @@ class PendingUpdateProductAdmin(admin.ModelAdmin):
 
 
 class PendingUpdatePublishAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     fields = ['productId']
 
     list_display = ('productId',)
@@ -339,17 +306,6 @@ class PendingUpdatePublishAdmin(admin.ModelAdmin):
 
 
 class PendingUpdatePriceAdmin(admin.ModelAdmin):
-    # actions = None
-
-    # def has_delete_permission(self, request, obj=None):
-    #     return False
-
-    # def has_add_permission(self, request):
-    #     return False
-
-    # def has_change_permission(self, request, obj=None):
-    #     return False
-
     fields = ['productId']
 
     list_display = ('productId',)
@@ -358,17 +314,6 @@ class PendingUpdatePriceAdmin(admin.ModelAdmin):
 
 
 class PendingUpdateTagAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     fields = ['productId']
 
     list_display = ('productId',)
