@@ -391,6 +391,8 @@ class Command(BaseCommand):
                   "Success to get product details for MPN: {}".format(mpn))
 
     def getPillowProducts(self):
+        Kravet.objects.filter(ptype="Pillow").delete()
+
         wb = xlrd.open_workbook(FILEDIR + "/files/kravet-pillow.xlsx")
         sh = wb.sheet_by_index(1)
 
@@ -405,7 +407,9 @@ class Command(BaseCommand):
 
                 pattern = str(sh.cell_value(i, 1)).replace(
                     "Pillow", "").strip()
-                color = str(sh.cell_value(i, 7)).replace(";", "/")
+                color = mpn.split(".")[1].title()
+                colors = str(sh.cell_value(i, 7)).replace(";", "/")
+                colors = "{} {}".format(color, colors)
 
                 brand = "Kravet"
 
@@ -485,7 +489,7 @@ class Command(BaseCommand):
                     usage=usage,
                     category=categoryList,
                     style=categoryList,
-                    colors=color,
+                    colors=colors,
                     width=width,
                     height=height,
                     size=size,
@@ -727,7 +731,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         # products = Kravet.objects.all()
-        products = Kravet.objects.filter(ptype="Wallpaper")
+        products = Kravet.objects.filter(ptype="Pillow")
 
         for index, product in enumerate(products):
             try:
