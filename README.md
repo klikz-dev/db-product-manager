@@ -23,6 +23,10 @@ X11Forwarding no
 
 3. sudo service sshd restart
 
+4. sudo mkdir /var/sftp/username/username
+
+5. sudo chown username: /var/sftp/username/username
+
 ---
 
 # SSHD Config
