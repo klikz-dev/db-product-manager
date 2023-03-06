@@ -1261,6 +1261,9 @@ class Command(BaseCommand):
             try:
                 fabric = Kravet.objects.get(
                     pattern=pillow.pattern, color=pillow.color, ptype="Fabric")
+                shopifyProduct = ShopifyProduct.objects.get(
+                    productId=fabric.productId)
+                handle = shopifyProduct.handle
             except Kravet.DoesNotExist:
                 debug("Kravet", 1, "Matching Fabric not found for pillow Pattern: {} and Color: {}".format(
                     pillow.pattern, pillow.color))
@@ -1280,7 +1283,7 @@ class Command(BaseCommand):
                             "namespace": "product",
                             "key": "fabric_id",
                             "type": "single_line_text_field",
-                            "value": fabric.productId
+                            "value": handle
                         }
                     })
 
@@ -1303,7 +1306,7 @@ class Command(BaseCommand):
                         "namespace": "product",
                         "key": "fabric_id",
                         "type": "single_line_text_field",
-                        "value": fabric.productId
+                        "value": handle
                     }
                 })
 
