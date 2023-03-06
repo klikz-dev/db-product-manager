@@ -62,6 +62,9 @@ class Command(BaseCommand):
             self.updateExisting()
 
         if "updatePrice" in options['functions']:
+            self.getProducts()
+            self.getPillowProducts()
+            self.getProductIds()
             self.updatePrice()
 
         if "updateTags" in options['functions']:
