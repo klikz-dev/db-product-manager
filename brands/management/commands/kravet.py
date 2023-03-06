@@ -244,19 +244,19 @@ class Command(BaseCommand):
             if pattern == "" or color == "":
                 continue
 
-            try:
-                Kravet.objects.get(pattern=pattern, color=color)
-                debug("Kravet", 1, "Duplicated Product MPN: {}".format(mpn))
-                continue
-            except Kravet.DoesNotExist:
-                pass
-
             if row[17] == "WALLCOVERING":
                 ptype = "Wallpaper"
             elif row[17] == "TRIM":
                 ptype = "Trim"
             else:
                 ptype = "Fabric"
+
+            try:
+                Kravet.objects.get(pattern=pattern, color=color, ptype=ptype)
+                debug("Kravet", 1, "Duplicated Product MPN: {}".format(mpn))
+                continue
+            except Kravet.DoesNotExist:
+                pass
 
             usage = row[17]
 

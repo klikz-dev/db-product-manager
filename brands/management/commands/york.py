@@ -192,6 +192,10 @@ class Command(BaseCommand):
 
                 pattern = pattern.title()
                 color = color.title()
+
+                if pattern == "" or color == "":
+                    continue
+
                 try:
                     York.objects.get(pattern=pattern, color=color)
                     debug("York", 1, "Duplicated MPN: {}, Brand: {}".format(mpn, brand))

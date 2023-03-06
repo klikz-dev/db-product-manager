@@ -154,8 +154,29 @@ class Command(BaseCommand):
             if pattern == "" or color == "":
                 continue
 
+            usage = row['WEARCODE']
+            if ptype == "Fabric":
+                if "drapery" in usage.lower():
+                    usage = "Drapery"
+                elif "upholstery" in usage.lower():
+                    usage = "Upholstery"
+                elif "multi" in usage.lower():
+                    usage = "Multipurpose"
+                else:
+                    usage = "Fabric"
+            elif ptype == "Wallpaper":
+                usage = "Wallcovering"
+            elif ptype == "Trim":
+                usage = "Trimming"
+            elif ptype == "Pillow":
+                usage = "Pillow"
+            else:
+                debug("Scalamandre", 2, "Type Error: SKU: {}".format(sku))
+                continue
+
             try:
-                Scalamandre.objects.get(pattern=pattern, color=color)
+                Scalamandre.objects.get(
+                    pattern=pattern, color=color, ptype=ptype)
                 debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Scalamandre.DoesNotExist:
@@ -215,26 +236,6 @@ class Command(BaseCommand):
             except:
                 content = ""
                 pass
-
-            usage = row['WEARCODE']
-            if ptype == "Fabric":
-                if "drapery" in usage.lower():
-                    usage = "Drapery"
-                elif "upholstery" in usage.lower():
-                    usage = "Upholstery"
-                elif "multi" in usage.lower():
-                    usage = "Multipurpose"
-                else:
-                    usage = "Fabric"
-            elif ptype == "Wallpaper":
-                usage = "Wallcovering"
-            elif ptype == "Trim":
-                usage = "Trimming"
-            elif ptype == "Pillow":
-                usage = "Pillow"
-            else:
-                debug("Scalamandre", 2, "Type Error: SKU: {}".format(sku))
-                continue
 
             price = row['NETPRICE']
 
