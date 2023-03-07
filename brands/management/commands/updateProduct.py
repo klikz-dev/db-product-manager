@@ -21,11 +21,6 @@ aws_secret_key = env('aws_secret_key')
 debug = debug.debug
 backup = common.backup
 
-key = ["f9082681e6acd5bd8a8c2978ba532069", "4bdf9e51ed7f0f19ee085389a0f9a80e", "a78bf3ad26d7658a90372ccb27bb2d37", "1ae43619d655ce6c5ac4028b8e599856",
-       "d3939b7a7b6bc395162a2fa7f6f42b90", "8214a8348537e4182f301b0335d154fc", "f94b3da7a1d912fcadb9bbf4fa07988e", "47d3703d18c0336d5870da407c7bc775"]
-pwd = ["b1a65ad943d8fe9af823a5873bc2e9c2", "6661c4aff9f6b49181c7978399ac3c85", "1b3010cb679ad4675f43ad3fdb392db1", "89e14eb8b2eb5cb42e1bbb625c71afff",
-       "56510a0fcc0bf5cf2054f522304ca4a1", "14a81c69bd8b994a534cef122f10cb33", "d6214de72b2319ecb75e031a35832823", "447810ad2fc57d8db9909d307ebab734"]
-
 
 class Command(BaseCommand):
     help = 'Backup Database'
@@ -50,9 +45,7 @@ class Command(BaseCommand):
             productID = product[0]
 
             try:
-                idx = random.randrange(0, len(key))
-                shopify.UpdateProductToShopify(
-                    productID, key[idx], pwd[idx], con)
+                shopify.UpdateProductToShopify(productID, con)
                 debug("Shopify", 0,
                       "Updated Pending Product : {}".format(productID))
             except Exception as e:

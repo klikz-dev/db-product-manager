@@ -133,7 +133,8 @@ class Command(BaseCommand):
                 continue
 
             try:
-                Schumacher.objects.get(pattern=pattern, color=color)
+                Schumacher.objects.get(
+                    pattern=pattern, color=color, ptype=ptype)
                 debug("Schumacher", 1, "Duplicated Product MPN: {}".format(mpn))
                 continue
             except Schumacher.DoesNotExist:
@@ -145,6 +146,8 @@ class Command(BaseCommand):
             if "STAPETER" in collection:
                 collection = "BORÃSTAPETER"
                 brand = "BORÃSTAPETER"
+
+            collection = collection.title()
 
             if "FABRIC" == ptype:
                 ptype = "Fabric"
@@ -163,12 +166,14 @@ class Command(BaseCommand):
                 ptype = "Rug"
                 usage = "RUGS & CARPETS"
                 pattern = pattern.replace("Rug", "").strip()
-            elif "THROW" in pattern:
-                ptype = "Throw"
-                usage = "Throw"
             else:
                 ptype = ptype.title()
                 usage = ptype
+
+            if "Throw" in pattern:
+                ptype = "Throw"
+                usage = "Throw"
+                pattern = pattern.replace("Throw", "").strip()
 
             price = float(row[7])
 
@@ -494,8 +499,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         products = Schumacher.objects.all()
-        products = Schumacher.objects.filter(
-            Q(manufacturer="Schumacher Wallpaper") | Q(manufacturer="Schumacher Pillow"))
+        products = Schumacher.objects.filter(Q(ptype="Throw"))
 
         for product in products:
             try:

@@ -9,7 +9,7 @@ from datetime import datetime
 
 from shopify.models import Product
 
-from library import debug
+from library import debug, common
 
 import environ
 env = environ.Env()
@@ -527,14 +527,13 @@ def UploadImageToShopify(src):
     con.close()
 
 
-def UpdateProductToShopify(productID, key, password, con):
+def UpdateProductToShopify(productID, con):
     s = requests.Session()
     csr = con.cursor()
     csr.execute(
-        "SELECT SKU, Published FROM Product WHERE ProductID = {}".format(productID))
+        "SELECT SKU FROM Product WHERE ProductID = {}".format(productID))
     try:
         upd = csr.fetchone()
-        pub = upd[1]
         sku = upd[0]
 
         pd = ProductData(con, sku)
@@ -575,6 +574,9 @@ def UpdateProductToShopify(productID, key, password, con):
         tags = pd.ProductTag()
         pMeta = pd.ProductMetafield()
 
+        # Generate a new handle
+        handle = common.fmt(title).lower().replace(" ", "-")
+
         p = {
             "body_html": body,
             "options": [
@@ -585,6 +587,7 @@ def UpdateProductToShopify(productID, key, password, con):
             "product_type": ptype,
             "tags": ",".join(tags),
             "title": title,
+            "handle": handle,
             "vendor": manu,
             "metafields": pMeta
         }
