@@ -1133,28 +1133,57 @@ class Command(BaseCommand):
         csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet'")
         con.commit()
 
-        f = open(FILEDIR + "/files/item_info.csv", "rb")
+        # f = open(FILEDIR + "/files/item_info.csv", "rb")
+        # cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        # for row in cr:
+        #     temp = row[0].strip().split(".")
+
+        #     if len(temp) != 3 or temp[2] != "0":
+        #         continue
+        #     if row[12] == "LEATHER - 100%":
+        #         continue
+
+        #     mpn = row[0].strip()
+        #     stock = int(float(row[46]))
+        #     stockNote = row[47]
+
+        #     try:
+        #         product = Kravet.objects.get(mpn=mpn)
+        #     except Kravet.DoesNotExist:
+        #         continue
+
+        #     sku = product.sku
+        #     if stock < 3:
+        #         stock = 0
+        #     leadtime = "{} days".format(stockNote)
+
+        #     try:
+        #         csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet')".format(
+        #             sku, stock, leadtime))
+        #         con.commit()
+        #         debug("Kravet", 0,
+        #               "Updated inventory for {} to {}.".format(sku, stock))
+        #     except Exception as e:
+        #         print(e)
+        #         debug(
+        #             "Kravet", 1, "Error Updating inventory for {} to {}.".format(sku, stock))
+
+        f = open(FILEDIR + "/files/curated_onhand_info.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
         for row in cr:
-            temp = row[0].strip().split(".")
-
-            if len(temp) != 3 or temp[2] != "0":
-                continue
-            if row[12] == "LEATHER - 100%":
+            if row[0] == "Item":
                 continue
 
-            mpn = row[0].strip()
-            stock = int(float(row[46]))
-            stockNote = row[47]
+            mpn = str(row[0]).strip()
+            stock = int(row[1])
+            stockNote = row[2]
 
             try:
                 product = Kravet.objects.get(mpn=mpn)
-            except Kravet.DoesNotExist:
+            except Exception as e:
                 continue
 
             sku = product.sku
-            if stock < 3:
-                stock = 0
             leadtime = "{} days".format(stockNote)
 
             try:
@@ -1166,7 +1195,7 @@ class Command(BaseCommand):
             except Exception as e:
                 print(e)
                 debug(
-                    "Kravet", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
+                    "Kravet", 1, "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
