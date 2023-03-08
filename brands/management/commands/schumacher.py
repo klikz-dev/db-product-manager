@@ -10,6 +10,8 @@ import paramiko
 import time
 import csv
 import codecs
+import requests
+import json
 
 from library import debug, common, shopify, markup
 
@@ -29,6 +31,13 @@ debug = debug.debug
 sq = common.sq
 
 FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
+    env('shopify_api_version'))
+SHOPIFY_PRODUCT_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_product_token'),
+    'Content-Type': 'application/json'
+}
 
 
 class Command(BaseCommand):
@@ -61,6 +70,9 @@ class Command(BaseCommand):
 
         if "fixImages" in options['functions']:
             self.fixImages()
+
+        if "pillowSample" in options['functions']:
+            self.pillowSample()
 
         if "main" in options['functions']:
             while True:
@@ -856,3 +868,70 @@ class Command(BaseCommand):
                             str(roomset).strip(), "{}_{}.jpg".format(productId, idx + 1))
                     except Exception as e:
                         print(e)
+
+    def pillowSample(self):
+        s = requests.Session()
+
+        pillows = Schumacher.objects.filter(ptype="Pillow")
+        for pillow in pillows:
+            try:
+                fabric = Schumacher.objects.get(
+                    pattern=pillow.pattern, color=pillow.color, ptype="Fabric")
+                shopifyProduct = ShopifyProduct.objects.get(
+                    productId=fabric.productId)
+                handle = shopifyProduct.handle
+            except Schumacher.DoesNotExist:
+                debug("Schumacher", 1, "Matching Fabric not found for pillow Pattern: {} and Color: {}".format(
+                    pillow.pattern, pillow.color))
+                continue
+
+            productId = pillow.productId
+
+            response = s.get("{}/products/{}/metafields.json".format(SHOPIFY_API_URL,
+                                                                     productId), headers=SHOPIFY_PRODUCT_API_HEADER)
+            data = json.loads(response.text)
+
+            isFabricLinked = False
+            for metafield in data['metafields']:
+                if metafield['key'] == "fabric_id":
+                    payload = json.dumps({
+                        "metafield": {
+                            "namespace": "product",
+                            "key": "fabric_id",
+                            "type": "single_line_text_field",
+                            "value": handle
+                        }
+                    })
+
+                    response = s.put("{}/products/{}/metafields/{}.json".format(
+                        SHOPIFY_API_URL, productId, metafield['id']), headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
+
+                    if response.status_code == 200:
+                        debug("Schumacher", 0, "Fabric link has been updated successfully. Pillow: {}, Fabric: {}".format(
+                            productId, fabric.productId))
+                    else:
+                        debug("Schumacher", 1, "Metafield Update API error. {}".format(
+                            response.text))
+
+                    isFabricLinked = True
+                    break
+
+            if not isFabricLinked:
+                payload = json.dumps({
+                    "metafield": {
+                        "namespace": "product",
+                        "key": "fabric_id",
+                        "type": "single_line_text_field",
+                        "value": handle
+                    }
+                })
+
+                response = s.post("{}/products/{}/metafields.json".format(
+                    SHOPIFY_API_URL, productId), headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
+
+                if response.status_code == 201:
+                    debug("Schumacher", 0, "Fabric has been linked successfully. Pillow: {}, Fabric: {}".format(
+                        productId, fabric.productId))
+                else:
+                    debug("Schumacher", 1, "Metafield Create API error. {}".format(
+                        response.text))
