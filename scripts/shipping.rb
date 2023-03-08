@@ -24,6 +24,8 @@ end
 if has_large_item
   Input.shipping_rates.delete_if { |shipping_rate| shipping_rate.name != 'White Glove Shipping'}
 else
+  Input.shipping_rates.delete_if { |shipping_rate| shipping_rate.name == 'White Glove Shipping'}
+
   if cartTotal > limit && !hasAllFreeSamples
     if customer
       if customer.tags.include?(tag)
