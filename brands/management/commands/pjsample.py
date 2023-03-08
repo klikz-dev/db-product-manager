@@ -247,7 +247,7 @@ class Command(BaseCommand):
         # Order Confirmation
         print("Order Confirmation")
         r = requests.get(
-            API_URL + '/api/orders/complete.json?type=sample&limit=20&offset=0',
+            API_URL + '/api/orders/complete.json?type=sample&limit=100&offset=0',
             headers={
                 'cookie': API_COOKIE,
                 'accept-encoding': 'gzip, deflate, br',
