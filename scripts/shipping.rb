@@ -15,13 +15,9 @@ Input.cart.line_items.each do |line_item|
   cartNum += line_item.quantity
 end
 
-has_large_item = false
-large_item_types = ["Rug", "Furniture", "Lighting", "Decor", "Mirrors", "Accents", "Wall Art", "Table Top"]
-if Input.cart.line_items.all? { |line_item| large_item_types.include?(line_item.variant.product.product_type) }
-  has_large_item = true
-end
+has_white_glove_tag = Input.cart.line_items.all? { |line_item| line_item.variant.product.tags.include?("White Glove") }
 
-if has_large_item
+if has_white_glove_tag
   Input.shipping_rates.delete_if { |shipping_rate| shipping_rate.name != 'White Glove Shipping'}
 else
   Input.shipping_rates.delete_if { |shipping_rate| shipping_rate.name == 'White Glove Shipping'}
