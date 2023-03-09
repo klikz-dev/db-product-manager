@@ -74,6 +74,9 @@ class Command(BaseCommand):
         if "pillowSample" in options['functions']:
             self.pillowSample()
 
+        if "whiteGlove" in options['functions']:
+            self.whiteGlove()
+
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -935,3 +938,52 @@ class Command(BaseCommand):
                 else:
                     debug("Schumacher", 1, "Metafield Create API error. {}".format(
                         response.text))
+
+    def whiteGlove(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        f = open(FILEDIR + "/files/schumacher-master.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+
+        for row in cr:
+            if row[0] == "Category":
+                continue
+
+            try:
+                mpn = int(row[3])
+                sku = "SCH {}".format(mpn)
+            except:
+                mpn = str(row[3]).strip()
+                sku = "SCH {}".format(str(mpn).replace("'", ""))
+
+            try:
+                product = Schumacher.objects.get(sku=sku)
+            except Schumacher.DoesNotExist:
+                continue
+
+            try:
+                shippingWidth = float(product.width.replace('"', ''))
+            except:
+                shippingWidth = 0
+
+            try:
+                shippingLength = float(product.height.replace('"', ''))
+            except:
+                shippingLength = 0
+
+            if shippingWidth > 107 or shippingLength > 107:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("White Glove")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('Schumacher', 0,
+                      "Added to White Glove. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()

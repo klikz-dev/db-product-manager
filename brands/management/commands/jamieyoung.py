@@ -61,6 +61,9 @@ class Command(BaseCommand):
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
+        if "whiteGlove" in options['functions']:
+            self.whiteGlove()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -783,6 +786,42 @@ class Command(BaseCommand):
             else:
                 debug("JamieYoung", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
+
+        csr.close()
+        con.close()
+
+    def whiteGlove(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        wb = xlrd.open_workbook(FILEDIR + '/files/jamieyoung-master.xlsx')
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            mpn = str(sh.cell_value(i, 0)).strip()
+
+            try:
+                product = JamieYoung.objects.get(mpn=mpn)
+            except JamieYoung.DoesNotExist:
+                continue
+
+            try:
+                shippingMethod = str(sh.cell_value(i, 35)).strip()
+            except:
+                continue
+
+            if "Ltl" in shippingMethod and product.productId != None:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("White Glove")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('JamieYoung', 0,
+                      "Added to White Glove. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()

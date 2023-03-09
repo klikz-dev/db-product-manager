@@ -124,20 +124,9 @@ class Command(BaseCommand):
 
             description = str(sh.cell_value(i, 4)).strip()
 
-            try:
-                width = round(float(sh.cell_value(i, 13)), 2)
-            except:
-                width = 0
-
-            try:
-                height = round(float(sh.cell_value(i, 14)), 2)
-            except:
-                height = 0
-
-            try:
-                depth = round(float(sh.cell_value(i, 15)), 2)
-            except:
-                depth = 0
+            width = str(sh.cell_value(i, 13))
+            height = str(sh.cell_value(i, 16))
+            depth = str(sh.cell_value(i, 15))
 
             material = str(sh.cell_value(i, 6)).strip()
             care = str(sh.cell_value(i, 5)).strip()
@@ -324,12 +313,12 @@ class Command(BaseCommand):
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
 
-                if product.width != None and product.width != "" and float(product.width) != 0:
-                    desc += "Width: {} in<br/>".format(product.width)
-                if product.height != None and product.height != "" and float(product.height) != 0:
-                    desc += "Height: {} in<br/>".format(product.height)
-                if product.depth != None and product.depth != "" and float(product.depth) != 0:
-                    desc += "Depth: {} in<br/><br/>".format(product.depth)
+                if product.width != None and product.width != "":
+                    desc += "Width: {}<br/>".format(product.width)
+                if product.height != None and product.height != "":
+                    desc += "Height: {}<br/>".format(product.height)
+                if product.depth != None and product.depth != "":
+                    desc += "Depth: {}<br/><br/>".format(product.depth)
 
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)
@@ -460,12 +449,12 @@ class Command(BaseCommand):
                     desc += "Collection: {}<br/><br/>".format(
                         product.collection)
 
-                if product.width != None and product.width != "" and float(product.width) != 0:
-                    desc += "Width: {} in<br/>".format(product.width)
-                if product.height != None and product.height != "" and float(product.height) != 0:
-                    desc += "Height: {} in<br/>".format(product.height)
-                if product.depth != None and product.depth != "" and float(product.depth) != 0:
-                    desc += "Depth: {} in<br/><br/>".format(product.depth)
+                if product.width != None and product.width != "":
+                    desc += "Width: {}<br/>".format(product.width)
+                if product.height != None and product.height != "":
+                    desc += "Height: {}<br/>".format(product.height)
+                if product.depth != None and product.depth != "":
+                    desc += "Depth: {}<br/><br/>".format(product.depth)
 
                 if product.material != None and product.material != "":
                     desc += "Material: {}<br/>".format(product.material)

@@ -115,9 +115,12 @@ class CoutureLamps(models.Model):
 
     description = models.CharField(
         max_length=2000, default=None, null=True, blank=True)
-    width = models.FloatField(default=1)
-    height = models.FloatField(default=1)
-    depth = models.FloatField(default=1)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    height = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    depth = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     material = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     care = models.CharField(

@@ -52,16 +52,16 @@ class Command(BaseCommand):
             self.updateTags()
 
         if "updateStock" in options['functions']:
-            while True:
-                self.updateStock()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.updateStock()
 
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
         if "images" in options['functions']:
             self.images()
+
+        if "whiteGlove" in options['functions']:
+            self.whiteGlove()
 
         if "main" in options['functions']:
             self.getProducts()
@@ -811,3 +811,52 @@ class Command(BaseCommand):
                     except Exception as e:
                         print(e)
                         pass
+
+    def whiteGlove(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        wb = xlrd.open_workbook(FILEDIR + '/files/jaipurliving-master.xlsx')
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            mpn = str(sh.cell_value(i, 7)).strip()
+
+            try:
+                product = JaipurLiving.objects.get(mpn=mpn)
+            except JaipurLiving.DoesNotExist:
+                continue
+
+            try:
+                shippingWidth = float(sh.cell_value(i, 86))
+            except:
+                shippingWidth = 0
+
+            try:
+                shippingLength = float(sh.cell_value(i, 85))
+            except:
+                shippingLength = 0
+
+            try:
+                shippingWeight = float(sh.cell_value(i, 88))
+            except:
+                shippingWeight = 0
+
+            # print("Width: {}, Length: {}, Weight: {}".format(
+            #     shippingWidth, shippingLength, shippingWeight))
+
+            if shippingWidth > 107 or shippingLength > 107 or shippingWeight > 149:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("White Glove")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('JaipurLiving', 0,
+                      "Added to White Glove. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()

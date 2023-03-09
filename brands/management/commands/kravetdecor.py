@@ -62,6 +62,9 @@ class Command(BaseCommand):
         if "updatePrice" in options['functions']:
             self.updatePrice()
 
+        if "whiteGlove" in options['functions']:
+            self.whiteGlove()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -739,6 +742,45 @@ class Command(BaseCommand):
             else:
                 debug("KravetDecor", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
+
+        csr.close()
+        con.close()
+
+    def whiteGlove(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        f = open(FILEDIR + "/files/kravet-decor-master.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+
+        for row in cr:
+            if row[0] == "sku":
+                continue
+
+            mpn = str(row[0]).strip()
+
+            try:
+                product = KravetDecor.objects.get(mpn=mpn)
+            except KravetDecor.DoesNotExist:
+                continue
+
+            try:
+                shippingMethod = str(row[17]).strip()
+            except:
+                continue
+
+            if "White Glove" in shippingMethod and product.productId != None:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(product.sku), sq("White Glove")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('KravetDecor', 0,
+                      "Added to White Glove. SKU: {}".format(product.sku))
 
         csr.close()
         con.close()

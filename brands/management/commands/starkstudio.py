@@ -61,6 +61,9 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             self.image()
 
+        if "whiteGlove" in options['functions']:
+            self.whiteGlove()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -720,3 +723,41 @@ class Command(BaseCommand):
                         print("Product: {}".format(fname))
                         copyfile(FILEDIR + "/files/images/starkstudio/" + fname, FILEDIR +
                                  "/../../images/product/{}.jpg".format(product.productId))
+
+    def whiteGlove(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        wb = xlrd.open_workbook(FILEDIR + '/files/stark-studio-master.xlsx')
+
+        for index in [0, 1, 2]:
+            sh = wb.sheet_by_index(index)
+
+            for i in range(2, sh.nrows):
+                mpn = str(sh.cell_value(i, 4)).strip()
+
+                try:
+                    product = StarkStudio.objects.get(mpn=mpn)
+                except StarkStudio.DoesNotExist:
+                    continue
+
+                try:
+                    shippingMethod = str(sh.cell_value(i, 17)).strip()
+                except:
+                    continue
+
+                if "White Glove" in shippingMethod and product.productId != None:
+                    csr.execute("CALL AddToProductTag ({}, {})".format(
+                        sq(product.sku), sq("White Glove")))
+                    con.commit()
+
+                    csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                        product.productId))
+                    con.commit()
+
+                    debug('StarkStudio', 0,
+                          "Added to White Glove. SKU: {}".format(product.sku))
+
+        csr.close()
+        con.close()
