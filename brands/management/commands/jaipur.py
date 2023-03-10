@@ -7,6 +7,8 @@ import os
 import paramiko
 import pymysql
 import xlrd
+import urllib.request
+import csv
 import time
 
 from library import debug, common, shopify, markup
@@ -66,6 +68,12 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
+
+        if "updateStock" in options['functions']:
+            while True:
+                self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
 
     def downloadDatasheet(self):
         debug("JaipurLiving", 0, "Download Master Datasheet from JaipurLiving FTP")
@@ -648,40 +656,21 @@ class Command(BaseCommand):
         con.close()
 
     def downloadInvFile(self):
-        debug("JaipurLiving", 0, "Download New CSV from JaipurLiving FTP")
-
-        host = "18.206.49.64"
-        port = 22
-        username = "jaipurliving"
-        password = "JY123!"
-
         try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug("JaipurLiving", 2, "Connection to JaipurLiving FTP Server Failed")
+            urllib.request.urlretrieve(
+                "ftp://jrinventory:JRInv2775@fingerprinti.com/Jaipur inventory feed.csv", FILEDIR + "/files/jaipurliving-inventory.csv")
+        except Exception as e:
+            debug("JaipurLiving", 2, "Download Failed. Exiting")
+            print(e)
             return False
 
-        try:
-            sftp.chdir(path='/jaipurliving')
-            files = sftp.listdir()
-        except:
-            debug("JaipurLiving", 1, "No New Inventory File")
-            return False
-
-        for file in files:
-            if "EDI" in file:
-                continue
-            sftp.get(file, FILEDIR + '/files/jaipurliving-inventory.csv')
-            sftp.remove(file)
-
-        sftp.close()
-
-        debug("JaipurLiving", 0, "JaipurLiving FTP Inventory Download Completed")
+        debug("JaipurLiving", 0, "Download Completed")
         return True
 
     def updateStock(self):
+        if not self.downloadInvFile():
+            return
+
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
@@ -690,18 +679,32 @@ class Command(BaseCommand):
             "DELETE FROM ProductInventory WHERE Brand = 'Jaipur Living'")
         con.commit()
 
-        products = JaipurLiving.objects.all()
-        for product in products:
+        f = open(FILEDIR + '/files/jaipurliving-inventory.csv', "rt")
+        cr = csv.reader(f)
+
+        for row in cr:
+            mpn = row[1]
+
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Jaipur Living')".format(
-                    product.sku, 5, ''))
+                product = JaipurLiving.objects.get(mpn=mpn)
+            except:
+                continue
+
+            sku = product.sku
+            stock = int(row[5])
+            # boDate = "Next Arriving ETA: {}".format(str(row[6]).strip())
+            boDate = ""
+
+            try:
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Jaipur Living')".format(
+                    sku, stock, boDate))
                 con.commit()
                 debug("JaipurLiving", 0,
-                      "Updated inventory for {} to {}.".format(product.sku, 5))
+                      "Updated inventory for {} to {}.".format(sku, stock))
             except Exception as e:
                 print(e)
                 debug(
-                    "JaipurLiving", 2, "Error Updating inventory for {} to {}.".format(product.sku, 5))
+                    "JaipurLiving", 2, "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
