@@ -120,6 +120,7 @@ class Command(BaseCommand):
                     print(e)
                     debug("PJ EDI", 2, "Adding Item {} to Cart has been failed. PO: {}".format(
                         mpn, orderNumber))
+                    return
 
             try:
                 # Update Billing
