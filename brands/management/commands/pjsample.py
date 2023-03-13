@@ -9,6 +9,7 @@ import os
 import time
 import itertools
 import pymysql
+import urllib3
 
 from library import debug, common
 
@@ -29,10 +30,11 @@ FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # API credentials
 API_URL = 'https://www.phillipjeffries.com'
-API_COOKIE = '__utmz=198764782.1676364716.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _gcl_au=1.1.796977913.1676364717; _tt_enable_cookie=1; _ttp=OaImm8shp1H2v6fYNNP8obg1y2E; _fbp=fb.1.1676364718240.2061779072; _pin_unauth=dWlkPU5qTTVPREZqWkRRdFlqazBZeTAwTkRBNUxUazJPRGd0Wm1ZMk5qVm1NRGxqTm1FeQ; hubspotutk=8e23cf84c2f5cdc40931199164511e28; __hs_cookie_cat_pref=1:true,2:true,3:true; _hjSessionUser_1552480=eyJpZCI6IjA5YmUzOTZhLWFiNjQtNTU0NC04ZWJhLTk4ODllOWJlZmE4YyIsImNyZWF0ZWQiOjE2NzYzNjQ3MTg3ODMsImV4aXN0aW5nIjp0cnVlfQ==; 6286=8b37cdf646cc2717d949306576222229; remember_me_token=cMrRDFdmn5JLIbLOtWdc_g; __utma=198764782.1219712163.1676364716.1678310072.1678648187.20; __utmc=198764782; __utmt=1; _gid=GA1.2.1288574999.1678648189; ln_or=eyIxMDQ2MDk4IjoiZCJ9; _hjIncludedInSessionSample_1552480=1; _hjSession_1552480=eyJpZCI6Ijc5MTAwNTlmLWJmYTktNGEzMy1hNDAzLTMzMzEwOTJmYWI4NyIsImNyZWF0ZWQiOjE2Nzg2NDgxOTM5NDUsImluU2FtcGxlIjp0cnVlfQ==; _hjAbsoluteSessionInProgress=0; __hstc=105233308.8e23cf84c2f5cdc40931199164511e28.1676364719308.1678310077678.1678648197653.21; __hssrc=1; _gat=1; __utmb=198764782.5.10.1678648187; _dd_s=logs=1&id=dc6a2fa5-957e-474c-928f-632638a65280&created=1678648193412&expire=1678649296314; return_to=https%3A%2F%2Fwww.phillipjeffries.com%2Fshop%2FCARD-NAT-ARROW2%2F071; _ga_KWQMVELYQV=GS1.1.1678648187.21.1.1678648398.59.0.0; _ga=GA1.2.2049969643.1676364717; _gat_UA-123650249-3=1; _phillip_jeffries_session=SUJrZHdrc0l1S3pTMTUwVnZsYm1tMnBpRzFvNytNa2dUemU4S3lrU2ZRdm02Wlc4U2lNb0kvSVdsd1YzSjFXSnVDMXAvZDBwN0Y5OUVEMjYxUG5xVmR0NzlkU3FwTGN5eHpWTDRuWVNQZU1jM0kvREhoTWh4UnF3YVFVVGJ5bDBMTkVCa1hqNzNCUHJjSmUrYnNCc1R6bWU4alVOUmR4d05VRnE1YTY1Z2g1bE5Yb3BxcytGY2RLWE0rQWs2QUN4S0JWSCt0bFEzK3YvS283aUw4cDcwbjR0RFhJT29idTdvUFZnR1o5K1lzU3FrQ0ExVy9OazgwWWZQSXVBRUkvMkVjdVNFdmJPdkVtMk5YRGZxdjlqcTEzcWZZZXZuUDE2eVNrUmp3SGF6aUlFY0RFNWh2TFBEOTAxelJKV1B2MkdaNTc5U1kwQjlxWnJQVzRCZG5YNXZvek5sTDhiNWIzMXc3VXI3MHZiUGtYakhWYXlRc1dmU0hIK21MY1Q3QjFCYXN1MFhBSFVhRVVSN1YrN21tZTkvT0JOYjQrNzM0UFlJdUhob2g2Szc0TTdTZmpwMHorNnlEUnJ5allCUjNWMWhIcWpJaHozUWtUUy95WkNXTExRcWJrQkxwTVl1SW1RQjE5TmJOSFpDaHgwWVgza1JVWVY0K2Y5alc2ZjhlUC8yQWp1ZUl1bW5TNVZudjM1TzB2VVVERWE1aVlKY3J1U3pSalNJSFNLMmJIeWV1V2t3NEs3SWtKWEJzTVVCU0dTZHM1NkNhRHJCbk9BN25tbWNVbEg4eDRFVkxMRFo1TkNmdGJHcW11TVhzcWErRS93WmNGb1BhcngrK2NvdU4wUHV4cXhuTTRtczZ3SExxR2tHTjkvRnZiblFndUxTOW1ybGFsaGRjMUloQytEbjE2LzUyUUlUenQzeHNDV1ZMMEZwcUcrTWRGNUM3a1JVQ1dEdWVJbGNKSmZZNWExTzR2M1dIV002cmlOMnM4Y3JNZGlnbkFrQWFWd3NKSGMyV2FzdENxMWErNHpRUmJnUTduNGc5Vi9mck0xMHhVYzd6emk4aEhHUjBCa1U2WEZGSDRlK3crWU5MamQ0MjJrRk1yWjhrUUlTYjZQSGNLY2ZEaTlGZXlSRk92VU53YjBybjhkL1ZsQVF1VmduYzg9LS0zZEt4QWRMUkE2bGVCekJGOGhzbkNBPT0%3D--6bc7646e2495d5c3699b46758b67f1cfdda26279; __hssc=105233308.6.1678648197653'
-API_TOKEN = 'Mop4Jz/Y4d150mm+ZCkMX1fjIqS9mhMS2IHGGfeXHabEbPUPmi9ilITIe9G6faSyKRQGcKnhy2jWceOKbh/1Ww=='
+API_COOKIE = '__utmz=198764782.1676364716.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _gcl_au=1.1.796977913.1676364717; _tt_enable_cookie=1; _ttp=OaImm8shp1H2v6fYNNP8obg1y2E; _fbp=fb.1.1676364718240.2061779072; _pin_unauth=dWlkPU5qTTVPREZqWkRRdFlqazBZeTAwTkRBNUxUazJPRGd0Wm1ZMk5qVm1NRGxqTm1FeQ; hubspotutk=8e23cf84c2f5cdc40931199164511e28; __hs_cookie_cat_pref=1:true,2:true,3:true; _hjSessionUser_1552480=eyJpZCI6IjA5YmUzOTZhLWFiNjQtNTU0NC04ZWJhLTk4ODllOWJlZmE4YyIsImNyZWF0ZWQiOjE2NzYzNjQ3MTg3ODMsImV4aXN0aW5nIjp0cnVlfQ==; 6286=8b37cdf646cc2717d949306576222229; remember_me_token=cMrRDFdmn5JLIbLOtWdc_g; _gid=GA1.2.1288574999.1678648189; ln_or=eyIxMDQ2MDk4IjoiZCJ9; _gat_UA-123650249-3=1; __utma=198764782.1219712163.1676364716.1678648187.1678686095.21; __utmc=198764782; __utmt=1; _hjIncludedInSessionSample_1552480=1; _hjSession_1552480=eyJpZCI6IjFjNjc4ZTA3LTkxYTEtNDY1MS05NzRiLWUzYmYzMmJlMjU1ZiIsImNyZWF0ZWQiOjE2Nzg2ODYwOTY5MzgsImluU2FtcGxlIjp0cnVlfQ==; _hjAbsoluteSessionInProgress=1; __hstc=105233308.8e23cf84c2f5cdc40931199164511e28.1676364719308.1678648197653.1678686101593.22; __hssrc=1; return_to=https%3A%2F%2Fwww.phillipjeffries.com%2Fshop%2FCARD-NAT-ARROW2%2F071; __utmb=198764782.4.10.1678686095; _ga_KWQMVELYQV=GS1.1.1678686094.22.1.1678686133.21.0.0; _ga=GA1.2.2049969643.1676364717; _phillip_jeffries_session=TmxkanY5QzVvaXhHdGZEVVBpd20xbWtPQVVsQzRrYW8rN2U0dWdvOUh5N0c4VHBWVWwxYm8xNTFaMDdGN1JjVUFaNVZyR0VWd2RZQXlQMjAyenJhTGN4ejhFTzNEZndhL2F0YU5sb1BSUGNkdWZiSnVvcUttZi9xSG9xcFI2TW9qVC9Wa0ZjQVVRV2RGTmZPanlyZEtpZlhrVS9IUFNnaEV6U2E3ZmdKb1JsS1pJR2xEZHFvU1ZqYkR6Vlh3SG1qdWZJS1dPeFhEZWRuNWlMaEVMY282bmYyMzlxZzNIeEhaZC9DYTZtOVdicEhwcXRwenNINVl6LzdNVG1PUk1rRi8zQ2psZ1Y4ZVhWSzFkbEhDQ2ZZK2lSVjJTSjdvenZGK0JGMW5SdnkySFpOVXBFaUswVmQ4TnNoNGxOMktZYXphMFYxR1kwNnJUcGNKNVcrMHRtNjF3Z1JURE1PKzVWb1NwWWRSTnplb2FsMjN3azh0VjJ2VjNya1JneDFpVGJzZWlFR2RTN05zZWVyVWVKdTE5anhSTzR6Z012YzczWFJhYVc0VTRQU3RFQmtrMTdRdnVwZDJCWGlMc2l5UTVicGNHK2NSSW01N3EyYXNXaUxGZ1pkejRkMTlRcy94T2Z5SG5jUTlQMWVnQnNrdVRXRlorNXY1aEpuYmdqRzgvT3hzSmpjMVQ3blAzbjlMUHNYcE5Fa0ZPdzB2SXFkdWVuSnJBM3BiMnlVYXhra3c2UXhqSkhGMzZQNmN0cG1qVUJ4UU5TZHFDcHc3M25ULzVjNGJyWTFpVHU2ME1JTVlkbCtoQzVUTVBvcWcyeE9RWmN2SFVFOW9tVG5YQ3U2bml0VHFXeERJbE5VTXB2YWlYRnlnRG5VQk81Yk1ZZFo1ZnJ4QkxTbVRhSUxUYkN6dmZXWXBCWVdxZmpOcDZ6UmNOZ3dFYjkrUFJEOXJuSEhBZEZsTzRXdDhFTWhkQ1hjcFlqZG00VmRXZjlaR3R6RGZZYmprWGRNNU52aG9rZmduTkZZa1RGV2ZzV2tJVmd4K2krNVBQQ2NkZG4rT3YyelVPa2NVaGw4Q2I0L2dzcFZQcnhCUDBiSnoyeFBleVVSZ0JDVWRabXR0L1lpeUJuMDR1c2NSZ1ZSRlJRd3lWTmtIRWwzdVhrR2E3ZkMvWFU9LS1waTNjbWZoRVhlRFplS2Q3YzdIUXBRPT0%3D--b55c684ceda36babc8b7708065ceca41338f8897; __hssc=105233308.3.1678686101593; _dd_s=logs=1&id=333202fb-ebc1-43ef-8a61-af61883a6f28&created=1678686097620&expire=1678687039345'
+API_TOKEN = '4cNIV8F24n9mX5pPu+oTVPXLhK1iU0lKvH0VfmluY3eVO3yR0rxQx8D529qCOzY3yPq/1SJkLnfDLEIxG7eRAg=='
 API_CONTENT_TYPE = 'application/json;charset=UTF-8'
 API_ACCEPT_TYPE = 'application/json, text/javascript'
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Command(BaseCommand):
@@ -103,7 +105,8 @@ class Command(BaseCommand):
                             'cookie': API_COOKIE,
                             'x-csrf-token': API_TOKEN,
                             'content-type': API_CONTENT_TYPE,
-                            'accept': API_ACCEPT_TYPE
+                            'accept': API_ACCEPT_TYPE,
+                            'origin': API_URL
                         },
                         data=json.dumps({
                             "product": {
@@ -111,7 +114,8 @@ class Command(BaseCommand):
                                 "id": mpn
                             },
                             "quantity": 1
-                        })
+                        }),
+                        verify=False
                     )
                     j = json.loads(r.text)
                     print(j)
@@ -153,7 +157,8 @@ class Command(BaseCommand):
                         "email": "orders@decoratorsbest.com",
                         "second_email": "",
                         "is_direct": "D"
-                    })
+                    }),
+                    verify=False
                 )
                 j = json.loads(r.text)
                 print(j)
@@ -198,7 +203,8 @@ class Command(BaseCommand):
                             "shipping_type": "commercial",
                             "replenishment": False
                         }
-                    })
+                    }),
+                    verify=False
                 )
                 j = json.loads(r.text)
                 print(j)
@@ -212,7 +218,8 @@ class Command(BaseCommand):
                         'x-csrf-token': API_TOKEN,
                         'content-type': API_CONTENT_TYPE,
                         'accept': API_ACCEPT_TYPE
-                    }
+                    },
+                    verify=False
                 )
                 j = json.loads(r.text)
                 print(j)
@@ -255,7 +262,8 @@ class Command(BaseCommand):
                 'accept-encoding': 'gzip, deflate, br',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
             },
-            data={}
+            data={},
+            verify=False
         )
         j = json.loads(r.text)
 
