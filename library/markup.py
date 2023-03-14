@@ -70,7 +70,7 @@ phillipjeffries = 1.5
 phillipjeffries_trade = 1.3
 
 # Pindler
-pindler = 1.4
+pindler = 1.5
 pindler_trade = 1
 
 # Premier Prints
