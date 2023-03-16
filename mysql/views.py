@@ -14,6 +14,6 @@ class InventoryViewSet(viewsets.ModelViewSet):
         try:
             sku = self.request.query_params.get('sku')
             inventory = common.inventory(sku)
-            return Response({"inventory": inventory})
+            return Response(inventory)
         except Exception as e:
             return Response({"error": str(e)})
