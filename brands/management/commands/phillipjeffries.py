@@ -8,11 +8,6 @@ import requests
 import xlrd
 import json
 import math
-import paramiko
-import sys
-import csv
-import codecs
-import time
 
 from library import debug, common, shopify, markup
 
@@ -49,12 +44,6 @@ class Command(BaseCommand):
 
         if "updatePrice" in options['functions']:
             self.updatePrice()
-
-        if "updateStock" in options['functions']:
-            while True:
-                self.updateStock()
-                print("Completed. Waiting for next run")
-                time.sleep(86400)
 
         if "addNew" in options['functions']:
             self.addNew()
@@ -604,97 +593,6 @@ class Command(BaseCommand):
                     debug(1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                         productId, cost, price, priceTrade))
                     continue
-
-        csr.close()
-        con.close()
-
-    def downloadcsv(self):
-        debug("Phillip Jeffries", 0,
-              "Download New Inventory File from Phillip Jeffries FTP")
-
-        host = "34.203.121.151"
-        port = 22
-        username = "db-pj"
-        password = "DecorPJ123!"
-
-        try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug("Phillip Jeffries", 2,
-                  "Connection to Phillip Jeffries FTP Server Failed")
-            return False
-
-        try:
-            sftp.get("inventory.csv", FILEDIR + '/files/pj-inventory.csv')
-            sftp.close()
-        except Exception as e:
-            print(e)
-            debug("Phillip Jeffries", 1, "No Inventory File")
-            return
-
-        debug("Phillip Jeffries", 0,
-              "Phillip Jeffries FTP Inventory Download Completed")
-        return True
-
-    def updateStock(self):
-        if not self.downloadcsv():
-            sys.exit(2)
-
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Phillip Jeffries'")
-        con.commit()
-
-        f = open(FILEDIR + "/files/pj-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
-
-        index = 0
-        for row in cr:
-            index += 1
-            if index == 1:
-                continue
-
-            mpn = str(row[0])
-            if mpn[0] != '0':
-                try:
-                    mpn = int(float(mpn))
-                except:
-                    pass
-
-            sku = "PJ {}".format(mpn)
-
-            stockval = 0
-            try:
-                stockval = int(float(row[1]))
-            except:
-                stockval = 0
-
-            # Save to Product data
-            try:
-                product = PhillipJeffries.objects.get(sku=sku)
-                product.stock = stockval
-                product.save()
-            except:
-                pass
-
-        products = PhillipJeffries.objects.all()
-        for product in products:
-            sku = product.sku
-            stockval = product.stock
-
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', '{}')".format(
-                    sku, stockval, "Contact Customer Service to check stock.", 'Phillip Jeffries'))
-                con.commit()
-                print("Updated inventory for {} to {}.".format(sku, stockval))
-            except Exception as e:
-                print(e)
-                print("Error Updating inventory for {} to {}.".format(sku, stockval))
 
         csr.close()
         con.close()
