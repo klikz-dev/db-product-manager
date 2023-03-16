@@ -62,12 +62,8 @@ class Command(BaseCommand):
             self.roomset()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updatePrice()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
 
     def getProducts(self):
         Maxwell.objects.all().delete()
