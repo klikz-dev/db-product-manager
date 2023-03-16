@@ -7,6 +7,7 @@ import html
 import os
 import datetime
 import re
+import cgi
 
 from library import debug, common
 
@@ -153,6 +154,7 @@ class Command(BaseCommand):
                 "<br/>", " ").replace("<br>", " ").replace("<br />", ""))
             if desc == "":
                 desc = title
+            desc = cgi.escape(desc)
 
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
                 "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
@@ -215,6 +217,9 @@ class Command(BaseCommand):
                 category = "Home & Garden > Decor"
                 productType = "Home & Garden > Decor"
 
+            category = cgi.escape(category)
+            productType = cgi.escape(productType)
+
             # Material
             material = ""
             lines = self.fmt(bodyHTML.replace(
@@ -222,6 +227,7 @@ class Command(BaseCommand):
             for line in lines:
                 if "Material:" in line:
                     material = line.replace("Material:", "").strip()
+            material = cgi.escape(self.fmt(material))
 
             # Fix blank style
             if style == "":
