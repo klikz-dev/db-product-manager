@@ -210,6 +210,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ElaineSmithSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    JaipurLivingOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    JaipurLivingSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     JamieYoungOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     JamieYoungSample = models.CharField(
