@@ -80,13 +80,8 @@ class Command(BaseCommand):
             self.bestSellers()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updateStock()
-
-                print("Finished Updating Inventory. Waiting for next run.")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
 
     def testAPI(self):
         testType = "product"
@@ -718,34 +713,6 @@ class Command(BaseCommand):
 
         debug("York", 0, "York FTP Inventory Download Completed")
         return True
-
-    def updateStock(self):
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'York'")
-        con.commit()
-
-        products = York.objects.all()
-
-        for product in products:
-            sku = product.sku
-            stock = product.stock
-
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 2, '{}', 'York')".format(
-                    sku, stock, ""))
-                con.commit()
-                debug("York", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
-            except Exception as e:
-                print(e)
-                debug("York", 2,
-                      "Error Updating inventory for {} to {}.".format(sku, stock))
-
-        csr.close()
-        con.close()
 
     def updateTags(self):
         con = pymysql.connect(host=db_host, port=db_port, user=db_username,
