@@ -58,9 +58,6 @@ class Command(BaseCommand):
         if "updateExisting" in options['functions']:
             self.updateExisting()
 
-        if "updateStock" in options['functions']:
-            self.updateStock()
-
         if "updateTags" in options['functions']:
             self.updateTags()
 
@@ -68,13 +65,8 @@ class Command(BaseCommand):
             self.updateSizeTags()
 
         if "main" in options['functions']:
-            while True:
-                self.getProducts()
-                self.getProductIds()
-                self.updateStock()
-
-                print("Completed. Waiting for next run")
-                time.sleep(86400)
+            self.getProducts()
+            self.getProductIds()
 
     def downloadcsv(self):
         try:
@@ -196,19 +188,6 @@ class Command(BaseCommand):
                     'id': mpn, 'key': 'aeba0d7a-9518-4299-b06d-46ab828e3288'})
                 j = json.loads(rq.content)
 
-                stock = j["result"][0]["avail"]
-
-                boqtyArray = j["result"][0]["poqty"]
-                bodueArray = j["result"][0]["podue"]
-                if len(boqtyArray) > 0:
-                    boqty = float(boqtyArray[0])
-                else:
-                    boqty = 0
-                if len(bodueArray) > 0:
-                    bodue = bodueArray[0]
-                else:
-                    bodue = None
-
                 uom = j["result"][0]["uom"]
                 if uom == "YARD":
                     uom = "Per Yard"
@@ -235,9 +214,6 @@ class Command(BaseCommand):
                 else:
                     status = False
 
-                product.stock = int(float(stock))
-                product.boqty = boqty
-                product.bodue = bodue
                 product.uom = uom
                 product.cost = price
                 product.map = map
@@ -651,42 +627,6 @@ class Command(BaseCommand):
             else:
                 debug("Stout", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                     shopifyProduct.productId, newPrice, newPriceTrade))
-
-        csr.close()
-        con.close()
-
-    def updateStock(self):
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Stout'")
-        con.commit()
-
-        products = Stout.objects.all()
-
-        for product in products:
-            sku = product.sku
-            stock = product.stock
-            bodue = product.bodue
-            if bodue == None:
-                bodue = ""
-
-            try:
-                if "MARCUS WILLIAM" in product.collection:
-                    csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Stout')".format(
-                        sku, stock, "2-3 weeks"))
-                    con.commit()
-                else:
-                    csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Stout')".format(
-                        sku, stock, bodue))
-                    con.commit()
-                debug("Stout", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
-            except Exception as e:
-                print(e)
-                debug("Stout", 1,
-                      "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
