@@ -6,10 +6,9 @@ import pymysql
 import html
 import os
 import datetime
-import requests
-import json
+import re
 
-from library import debug
+from library import debug, common
 
 import environ
 env = environ.Env()
@@ -43,7 +42,7 @@ class Command(BaseCommand):
                 self.upload()
                 time.sleep(36400)
 
-    def formatter(self, s):
+    def fmt(self, s):
         if s != None and s != "":
             allowedCharaters = [" ", ",", ".", "'", "\"", "*",
                                 "(", ")", "$", "&", "-", "=", "+", "/", "!", "%", "^", "@", ":", ";", "{", "}", "[", "]", "?"]
@@ -64,38 +63,44 @@ class Command(BaseCommand):
             os.remove(FEEDDIR)
         f = open(FEEDDIR, "w+")
 
-        csr.execute("""SELECT P.SKU, P.Title AS PName, P.Handle, PI.ImageURL, M.Name as Manufacturer, PV.Price * PV.MinimumQuantity AS Price, T.Name AS Type, 
-                      (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=2 AND PT.SKU = P.SKU LIMIT 1) AS DesignStyle,
-                      (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=3 AND PT.SKU = P.SKU LIMIT 1) AS Color,
-                      PV.Weight,
-                      PV.GTIN,
-                      P.ManufacturerPartNumber,
-                      P.BodyHTML,
-                      PV.Cost,
-                      PV.Price as SPrice,
-                      P.ProductID,
-                      P.Pattern
-                      FROM Product P
-                      LEFT JOIN ProductImage PI ON P.ProductID = PI.ProductID
-                      LEFT JOIN ProductVariant PV ON P.ProductID = PV.ProductID
-                      LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU
-                      LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
-                      LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
-                      WHERE PI.ImageIndex = 1
-                      AND M.Brand NOT IN ("Fabricut", "Scalamandre", "P/K Lifestyles", "Clarence House", "Noir", "Studio Zen", "Cyan", "Global Views", "Olympus Minerals", "Robert Allen", "Nature's Decoration", "Duralee")
-                      AND M.Name NOT IN ("Aviva Stanoff Wallpaper", "Missoni Wallpaper", "Patina Vie Wallpaper", "Kravet Pillow")
-                      AND PV.Cost != 0
-                      AND P.Published = 1
-                      AND P.ManufacturerPartNumber <> ''
-                      AND PV.IsDefault=1
-                      AND PV.Published=1
-                      AND M.Published=1
-                      AND P.Name NOT LIKE '%Borders'
-                      AND P.SKU NOT IN (
-                        SELECT P.SKU FROM Product P JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
-                        WHERE (P.Name LIKE '%Disney%' AND M.Brand = 'York')
-                      )
-                      """)
+        csr.execute("""
+                    SELECT 
+                        P.SKU,
+                        P.Title AS PName,
+                        P.Handle,
+                        PI.ImageURL,
+                        M.Name as Manufacturer,
+                        PV.Price * PV.MinimumQuantity AS Price,
+                        T.Name AS Type,
+                        (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=2 AND PT.SKU = P.SKU LIMIT 1) AS DesignStyle,
+                        (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=3 AND PT.SKU = P.SKU LIMIT 1) AS Color,
+                        PV.Weight,
+                        PV.GTIN,
+                        P.ManufacturerPartNumber,
+                        P.BodyHTML,
+                        PV.Cost,
+                        PV.Price as SPrice,
+                        P.ProductID,
+                        P.Pattern,
+                        PV.MinimumQuantity
+                    FROM Product P
+                        LEFT JOIN ProductImage PI ON P.ProductID = PI.ProductID
+                        LEFT JOIN ProductVariant PV ON P.ProductID = PV.ProductID
+                        LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU
+                        LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+                        LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
+                    WHERE PI.ImageIndex = 1
+                        AND M.Published=1
+                        AND M.Brand NOT IN ("Scalamandre")
+                        AND M.Name NOT IN ("Aviva Stanoff Wallpaper", "Missoni Wallpaper", "Patina Vie Wallpaper", "Kravet Pillow")
+                        AND P.Published = 1
+                        AND P.ManufacturerPartNumber <> ''
+                        AND P.Name NOT LIKE '%Borders'
+                        AND P.Name NOT LIKE '%Disney'
+                        AND PV.IsDefault=1
+                        AND PV.Published=1
+                        AND PV.Cost != 0
+                    """)
 
         f.write('<?xml version="1.0"?>')
         f.write('<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">')
@@ -104,72 +109,70 @@ class Command(BaseCommand):
         f.write('<link>https://www.decoratorsbest.com</link>')
         f.write('<description>DecoratorsBest</description>')
 
-        count = 0
-        for row in csr.fetchall():
-            sku = row[0]
+        rows = csr.fetchall()
+        total = len(rows)
+        added = 0
+        skiped = 0
 
-            # Check Stock
+        for row in rows:
+            sku = self.fmt(str(row[0]))
+            pName = self.fmt(str(row[1]))
+            handle = str(row[2])
+            imageURL = str(row[3])
+            brand = self.fmt(str(row[4]))
+            price = round(float(row[5]), 2)
+            ptype = self.fmt(str(row[6]))
+            style = self.fmt(str(row[7]))
+            color = self.fmt(str(row[8]))
+            weight = round(float(row[9]), 2)
+            gtin = self.fmt(str(row[10]))
+            mpn = self.fmt(str(row[11]))
+            bodyHTML = str(row[12])
+            cost = round(float(row[13]), 2)
+            sprice = round(float(row[14]), 2)
+            productID = str(row[15])
+            pattern = self.fmt(str(row[16]))
+            minQty = int(row[17])
+
             try:
-                username = 'decoratorsbest'
-                password = '5iXrwa8X!ZjRT'
-                url = "https://legacy.decoratorsbestom.com/inventory.php?user={}&password={}&sku={}".format(
-                    username, password, sku)
-
-                payload = {}
-                headers = {}
-
-                response = requests.request(
-                    "GET", url, headers=headers, data=payload)
-                stockInfo = json.loads(response.text)
-                print(stockInfo['Quantity'])
-
-                if int(stockInfo['Quantity']) < 1:
+                inventory = common.inventory(sku)
+                if inventory["quantity"] < int(minQty):
+                    debug("GS", 1, "Ignore SKU: {}. Out of Stock. Stock: {}".format(
+                        sku, inventory["quantity"]))
+                    skiped += 1
                     continue
             except Exception as e:
-                print(e)
+                debug("GS", 1, "Ignore SKU: {}. inventory error: {}".format(
+                    sku, str(e)))
+                skiped += 1
                 continue
-            ############
 
-            title = self.formatter("{} - {}".format(row[1].title(), sku))
-            desc = self.formatter(row[12].replace(
-                "<br/>", " ").replace("<br>", " "))
+            title = "{} - {}".format(pName.title(), sku)
+
+            desc = self.fmt(bodyHTML.replace(
+                "<br/>", " ").replace("<br>", " ").replace("<br />", ""))
             if desc == "":
                 desc = title
-            handle = row[2]
-            imageURL = row[3]
 
-            brand = self.formatter(row[4])
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
                 "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
-
-            price = row[5]
-            sprice = row[14]
-            cost = row[13]
-            productID = row[15]
 
             # Ignore Brewster Peel & Stick
             if brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper":
                 if "Peel & Stick" in title:
+                    debug("GS", 1, "Ignore SKU: {}. Brewster Peel & Stick".format(sku))
+                    skiped += 1
                     continue
             ##############################
 
             # Skip word "get"
-            getInText = False
-            for word in title.split():
-                if "get" == word.lower():
-                    getInText = True
-            for word in desc.split():
-                if "get" == word.lower():
-                    getInText = True
-
-            if getInText:
+            if bool(re.search(r'\bget\b', title + ' ' + desc, re.IGNORECASE)):
                 debug("GS", 1, "Ignore SKU: {}. Get in the text".format(sku))
+                skiped += 1
                 continue
             #################
 
-            debug("GS", 0, "Writing -- ProductID: {}, SKU: {}, Brand: {}, Cost: {}".format(
-                productID, sku, brand, price))
-
+            # Price
             priceForRange = price
             if priceForRange > 300:
                 priceRange = "300+"
@@ -192,12 +195,7 @@ class Command(BaseCommand):
 
             margin = (sprice - cost) / cost
 
-            ptype = row[6]
-            style = self.formatter(row[7])
-            color = self.formatter(row[8])
-            weight = row[9]
-            gtin = row[10]
-            mpn = row[11]
+            # Type and Category
             if ptype == "Fabric":
                 category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Textiles > Fabric"
                 productType = "Home & Garden > Bed and Living Room > Home Fabric"
@@ -215,62 +213,52 @@ class Command(BaseCommand):
                 productType = "Home & Garden > Bed and Living Room > Home Furniture"
             else:
                 category = "Home & Garden > Decor"
-                productType = ""
-            count = count + 1
-
-            category = self.formatter(category)
-            productType = self.formatter(productType)
+                productType = "Home & Garden > Decor"
 
             # Material
             material = ""
-            bodyHTML = self.formatter(str(row[12]).replace(
-                "<br />", "<br/>").replace("<br/>", "<br>"))
-            lines = bodyHTML.split("<br>")
+            lines = self.fmt(bodyHTML.replace(
+                "<br />", "<br/>").replace("<br/>", "<br>")).split("<br>")
             for line in lines:
                 if "Material:" in line:
                     material = line.replace("Material:", "").strip()
 
-            # Pattern
+            # Fix blank style
             if style == "":
-                style = self.formatter(row[16])
+                style = pattern
 
             f.write('<item>')
             f.write('<g:id>{}</g:id>'.format(sku))
             f.write('<g:item_group_id>{}</g:item_group_id>'.format(productID))
             f.write('<g:title>{}</g:title>'.format(title))
             f.write('<g:description>{}</g:description>'.format(desc))
-            if category != '':
-                f.write(
-                    '<g:google_product_category>{}</g:google_product_category>'.format(category))
+            f.write(
+                '<g:google_product_category>{}</g:google_product_category>'.format(category))
             f.write(
                 '<g:link>https://www.decoratorsbest.com/products/{}</g:link>'.format(handle))
             f.write('<g:image_link>{}</g:image_link>'.format(imageURL))
             f.write('<g:availability>in stock</g:availability>')
-
-            test_list = ['FI72111', 'DL2968', 'TR4237MC', 'RRD1027N',
-                         'TR4236MC', 'TR4235MC', 'TR4232MC', 'TR4234MC', 'RRD1027N']
-            if gtin != None and gtin != '' and gtin != 0:
-                if any(ext in sku for ext in test_list):
-                    print("Invalid gtin SKU's")
-                else:
-                    f.write('<g:gtin>{}</g:gtin>'.format(gtin))
+            f.write('<g:gtin>{}</g:gtin>'.format(gtin))
             f.write('<g:price>{} USD</g:price>'.format(price))
             f.write('<g:brand>{}</g:brand>'.format(brand))
             f.write('<g:mpn>{}</g:mpn>'.format(mpn))
-            if productType != '':
-                f.write('<g:product_type>{}</g:product_type>'.format(productType))
+            f.write('<g:product_type>{}</g:product_type>'.format(productType))
             f.write('<g:condition>new</g:condition>')
             f.write('<g:color>{}</g:color>'.format(color))
             f.write('<g:pattern>{}</g:pattern>'.format(style))
             f.write('<g:shipping_weight>{} lb</g:shipping_weight>'.format(weight))
-            if material != '':
-                f.write('<g:material>{}</g:material>'.format(material))
+            f.write('<g:material>{}</g:material>'.format(material))
             f.write('<g:custom_label_0>{}</g:custom_label_0>'.format(ptype))
             f.write('<g:custom_label_1>{}</g:custom_label_1>'.format(brand))
             f.write('<g:custom_label_2>{}</g:custom_label_2>'.format(priceRange))
             f.write(
                 '<g:custom_label_3>{}</g:custom_label_3>'.format("{}%".format(int(margin*100))))
             f.write('</item>\n')
+
+            # Write Line
+            added += 1
+            debug("GS", 0, "Added: {}, Skiped: {}, Total: {}, Brand: {}, SKU: {}".format(
+                added, skiped, total, brand, sku))
 
         f.write('</channel>')
         f.write('</rss>')
