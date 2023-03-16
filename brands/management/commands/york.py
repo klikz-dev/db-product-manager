@@ -268,14 +268,6 @@ class Command(BaseCommand):
                 if row['QuickShip'] == 'Y':
                     quickship = True
 
-                try:
-                    reqStock = requests.get(
-                        "{}/stock.php/{}".format(API_BASE_URL, mpn))
-                    resStock = json.loads(reqStock.text)
-                    stock = int(resStock["results"][0]["amount"])
-                except:
-                    stock = 0
-
                 # Tagging
                 keywords = "{}, {}, {}, {}, {}".format(
                     collectionName, category, style, description, feature)
@@ -307,7 +299,6 @@ class Command(BaseCommand):
                     map=map,
                     minimum=minimum,
                     increment=increment,
-                    stock=stock,
                     status=status,
                     statusText=statusText,
                     quickship=quickship,
