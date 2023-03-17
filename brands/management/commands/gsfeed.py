@@ -7,7 +7,6 @@ import html
 import os
 import datetime
 import re
-import html
 
 from library import debug, common
 
@@ -154,7 +153,6 @@ class Command(BaseCommand):
                 "<br/>", " ").replace("<br>", " ").replace("<br />", ""))
             if desc == "":
                 desc = title
-            desc = html.escape(desc)
 
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
                 "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
@@ -216,9 +214,6 @@ class Command(BaseCommand):
             else:
                 category = "Home & Garden > Decor"
                 productType = "Home & Garden > Decor"
-
-            category = html.escape(category)
-            productType = html.escape(productType)
 
             # Material
             material = ""
