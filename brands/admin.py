@@ -467,7 +467,7 @@ class ScalamandreAdmin(admin.ModelAdmin):
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'stock', 'stockText']}),
+        ('Availability', {'fields': ['status', 'sampleStatus', 'stock', 'stockText']}),
         ('Image', {'fields': ['thumbnail', 'roomset']}),
         ('Shipify Product', {'fields': ['productId']}),
     ]
@@ -475,7 +475,7 @@ class ScalamandreAdmin(admin.ModelAdmin):
     list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
                     'cost', 'msrp', 'map', 'uom', 'pieceSize', 'width', 'productId', 'status', 'stock')
 
-    list_filter = ['ptype', 'status', 'uom',
+    list_filter = ['ptype', 'status', 'sampleStatus', 'uom',
                    'manufacturer', 'collection', 'pieceSize']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']

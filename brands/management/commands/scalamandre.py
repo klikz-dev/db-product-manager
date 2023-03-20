@@ -88,6 +88,9 @@ class Command(BaseCommand):
         if "pillowSample" in options['functions']:
             self.pillowSample()
 
+        if "discoSamples" in options['functions']:
+            self.discoSamples()
+
         if "main" in options['functions']:
             while True:
                 self.getProducts()
@@ -166,6 +169,19 @@ class Command(BaseCommand):
             if pattern == "" or color == "":
                 continue
 
+            if "FABR" in row['CATEGORY']:
+                ptype = "Fabric"
+            elif "WALL" in row['CATEGORY']:
+                ptype = "Wallpaper"
+            elif "TRIM" in row['CATEGORY']:
+                ptype = "Trim"
+            elif "PILL" in row['CATEGORY']:
+                ptype = "Pillow"
+            else:
+                debug("Scalamandre", 2,
+                      "Product Type Error. Type: {}".format(row['CATEGORY']))
+                continue
+
             usage = row['WEARCODE']
             if ptype == "Fabric":
                 if "drapery" in usage.lower():
@@ -193,19 +209,6 @@ class Command(BaseCommand):
                 continue
             except Scalamandre.DoesNotExist:
                 pass
-
-            if "FABR" in row['CATEGORY']:
-                ptype = "Fabric"
-            elif "WALL" in row['CATEGORY']:
-                ptype = "Wallpaper"
-            elif "TRIM" in row['CATEGORY']:
-                ptype = "Trim"
-            elif "PILL" in row['CATEGORY']:
-                ptype = "Pillow"
-            else:
-                debug("Scalamandre", 2,
-                      "Product Type Error. Type: {}".format(row['CATEGORY']))
-                continue
 
             try:
                 collection = row['WEB COLLECTION NAME']
@@ -310,6 +313,10 @@ class Command(BaseCommand):
             except:
                 continue
 
+            sampleStatus = False
+            if row['SAMPLE_STATUS'] == 1:
+                sampleStatus = True
+
             manufacturer = "{} {}".format(brand, ptype)
 
             # Tagging
@@ -342,6 +349,7 @@ class Command(BaseCommand):
                     colors=color,
                     cost=price,
                     status=status,
+                    sampleStatus=sampleStatus,
                     stock=stock,
                     stockText=stockText,
                     thumbnail=picLink,
@@ -992,3 +1000,29 @@ class Command(BaseCommand):
                 else:
                     debug("Scalamandre", 1, "Metafield Create API error. {}".format(
                         response.text))
+
+    def discoSamples(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Scalamandre.objects.all()
+        for product in products:
+            sku = product.sku
+
+            if not product.productId:
+                continue
+
+            if not product.sampleStatus:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(sku), sq("NoSample")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('Scalamandre', 0, "Added No Sample Tag. SKU: {}".format(sku))
+
+        csr.close()
+        con.close()

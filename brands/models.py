@@ -1503,6 +1503,7 @@ class Scalamandre(models.Model):
     map = models.FloatField(default=0)
 
     status = models.BooleanField(default=True)
+    sampleStatus = models.BooleanField(default=True)
     stock = models.IntegerField(default=0)
     stockText = models.CharField(
         max_length=200, default=None, null=True, blank=True)
