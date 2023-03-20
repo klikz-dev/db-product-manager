@@ -83,7 +83,7 @@ scalamandre_pillow = 1.4
 scalamandre_trade = 1.3
 
 # Schumacher
-schumacher = 1.4
+schumacher = 1.5
 schumacher_trade = 1.25
 
 # Seabrook
