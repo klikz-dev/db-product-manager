@@ -215,6 +215,9 @@ class Command(BaseCommand):
                 category = "Home & Garden > Decor"
                 productType = "Home & Garden > Decor"
 
+            category = self.fmt(category)
+            productType = self.fmt(productType)
+
             # Material
             material = ""
             lines = self.fmt(bodyHTML.replace(
