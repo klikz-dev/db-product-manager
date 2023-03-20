@@ -82,7 +82,7 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
-            self.updateTags()
+            self.updatePrice()
 
     def getProducts(self):
         Mindthegap.objects.all().delete()
