@@ -7,7 +7,8 @@ import os
 import paramiko
 import pymysql
 import xlrd
-import csv
+import time
+from datetime import datetime
 from shutil import copyfile
 
 from library import debug, common, shopify, markup
@@ -60,6 +61,12 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             self.image()
+
+        if "updateStock" in options['functions']:
+            while True:
+                self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
 
         if "main" in options['functions']:
             self.getProducts()
@@ -605,8 +612,8 @@ class Command(BaseCommand):
 
         host = "18.206.49.64"
         port = 22
-        username = "couturelamps"
-        password = "JY123!"
+        username = "couture"
+        password = "Couture123!"
 
         try:
             transport = paramiko.Transport((host, port))
@@ -617,16 +624,14 @@ class Command(BaseCommand):
             return False
 
         try:
-            sftp.chdir(path='/couturelamps')
+            sftp.chdir(path='/couture')
             files = sftp.listdir()
         except:
             debug("CoutureLamps", 1, "No New Inventory File")
             return False
 
         for file in files:
-            if "EDI" in file:
-                continue
-            sftp.get(file, FILEDIR + '/files/couturelamps-inventory.csv')
+            sftp.get(file, FILEDIR + '/files/couture-lamps-inventory.xlsm')
             sftp.remove(file)
 
         sftp.close()
@@ -635,8 +640,8 @@ class Command(BaseCommand):
         return True
 
     def updateStock(self):
-        # if not self.downloadInvFile():
-        #     return
+        if not self.downloadInvFile():
+            return
 
         con = pymysql.connect(host=db_host, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -646,19 +651,34 @@ class Command(BaseCommand):
             "DELETE FROM ProductInventory WHERE Brand = 'Couture'")
         con.commit()
 
-        products = CoutureLamps.objects.all()
-        for product in products:
-            sku = product.sku
+        wb = xlrd.open_workbook(FILEDIR + '/files/couture-lamps-inventory.xlsm')
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            mpn = str(sh.cell_value(i, 0)).strip()
+            stock = int(sh.cell_value(i, 1))
+
+            boDate = sh.cell_value(i, 2)
+            if boDate:
+                date_tuple = xlrd.xldate_as_tuple(boDate, wb.datemode)
+                date_obj = datetime(*date_tuple)
+                boDate = date_obj.date()
+
             try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 3, '{}', 'Couture')".format(
-                    sku, 5, product.boDate))
+                product = CoutureLamps.objects.get(mpn=mpn)
+            except CoutureLamps.DoesNotExist:
+                continue
+
+            try:
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Couture')".format(
+                    product.sku, stock, boDate))
                 con.commit()
                 debug("CoutureLamps", 0,
-                      "Updated inventory for {} to {}.".format(sku, product.boDate))
+                      "Updated inventory for {} to {}. boDate: {}".format(product.sku, stock, boDate))
             except Exception as e:
                 print(e)
                 debug(
-                    "CoutureLamps", 2, "Error Updating inventory for {} to {}.".format(sku, product.boDate))
+                    "CoutureLamps", 2, "Error Updating inventory for {} to {}.".format(product.sku, stock))
 
         csr.close()
         con.close()
