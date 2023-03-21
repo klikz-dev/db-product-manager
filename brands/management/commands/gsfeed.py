@@ -137,13 +137,13 @@ class Command(BaseCommand):
             try:
                 inventory = common.inventory(sku)
                 if inventory["quantity"] < int(minQty):
-                    debug("GS", 1, "Ignore SKU: {}. Out of Stock. Stock: {}".format(
-                        sku, inventory["quantity"]))
+                    debug("GS", 1, "Added: {}, Skiped: {}, Total: {}, Ignore SKU: {}. Out of Stock. Stock: {}".format(
+                        added, skiped, total, sku, inventory["quantity"]))
                     skiped += 1
                     continue
             except Exception as e:
-                debug("GS", 1, "Ignore SKU: {}. inventory error: {}".format(
-                    sku, str(e)))
+                debug("GS", 1, "Added: {}, Skiped: {}, Total: {}, Ignore SKU: {}. inventory error: {}".format(
+                    added, skiped, total, sku, str(e)))
                 skiped += 1
                 continue
 
@@ -160,14 +160,16 @@ class Command(BaseCommand):
             # Ignore Brewster Peel & Stick
             if brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper":
                 if "Peel & Stick" in title:
-                    debug("GS", 1, "Ignore SKU: {}. Brewster Peel & Stick".format(sku))
+                    debug("GS", 1, "Added: {}, Skiped: {}, Total: {}, Ignore SKU: {}. Brewster Peel & Stick".format(
+                        added, skiped, total, sku))
                     skiped += 1
                     continue
             ##############################
 
             # Skip word "get"
             if bool(re.search(r'\bget\b', title + ' ' + desc, re.IGNORECASE)):
-                debug("GS", 1, "Ignore SKU: {}. Get in the text".format(sku))
+                debug("GS", 1, "Added: {}, Skiped: {}, Total: {}, Ignore SKU: {}. Get in the text".format(
+                    added, skiped, total, sku))
                 skiped += 1
                 continue
             #################
