@@ -116,7 +116,7 @@ class Command(BaseCommand):
 
         for row in rows:
             sku = self.fmt(str(row[0]))
-            pName = self.fmt(str(row[1]))
+            pName = self.fmt(str(row[1]).title())
             handle = str(row[2])
             imageURL = str(row[3])
             brand = self.fmt(str(row[4]))
@@ -147,7 +147,7 @@ class Command(BaseCommand):
                 skiped += 1
                 continue
 
-            title = "{} - {}".format(pName.title(), sku)
+            title = "{} - {}".format(pName, sku)
 
             desc = self.fmt(bodyHTML.replace(
                 "<br/>", " ").replace("<br>", " ").replace("<br />", ""))
@@ -197,23 +197,23 @@ class Command(BaseCommand):
 
             # Type and Category
             if ptype == "Fabric":
-                category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Textiles > Fabric"
-                productType = "Home & Garden > Bed and Living Room > Home Fabric"
+                category = "Arts & Entertainment / Hobbies & Creative Arts / Arts & Crafts / Art & Crafting Materials / Textiles / Fabric"
+                productType = "Home & Garden / Bed and Living Room / Home Fabric"
             elif ptype == "Wallpaper":
-                category = "Home & Garden > Decor > Wallpaper"
-                productType = "Home & Garden > Bed and Living Room > Home Wallpaper"
+                category = "Home & Garden / Decor / Wallpaper"
+                productType = "Home & Garden / Bed and Living Room / Home Wallpaper"
             elif ptype == "Pillow":
-                category = "Home & Garden > Decor > Pillow"
-                productType = "Home & Garden > Bed and Living Room > Home Pillow"
+                category = "Home & Garden / Decor / Pillow"
+                productType = "Home & Garden / Bed and Living Room / Home Pillow"
             elif ptype == "Trim":
-                category = "Home & Garden > Decor > Trim"
-                productType = "Home & Garden > Bed and Living Room > Home Trim"
+                category = "Home & Garden / Decor / Trim"
+                productType = "Home & Garden / Bed and Living Room / Home Trim"
             elif ptype == "Furniture":
-                category = "Home & Garden > Decor > Furniture"
-                productType = "Home & Garden > Bed and Living Room > Home Furniture"
+                category = "Home & Garden / Decor / Furniture"
+                productType = "Home & Garden / Bed and Living Room / Home Furniture"
             else:
-                category = "Home & Garden > Decor"
-                productType = "Home & Garden > Decor"
+                category = "Home & Garden / Decor"
+                productType = "Home & Garden / Decor"
 
             category = self.fmt(category)
             productType = self.fmt(productType)
