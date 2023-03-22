@@ -1,6 +1,5 @@
 import os
 import datetime
-import time
 import pytz
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -8,7 +7,8 @@ import csv
 
 from library import debug
 from monitor.models import NoOrderCustomers, Profit
-from shopify.models import Customer, Line_Item, Order, Address
+from shopify.models import Customer, Line_Item, Order, Address, Product
+from brands.models import Scalamandre
 
 debug = debug.debug
 utc = pytz.UTC
@@ -33,12 +33,8 @@ class Command(BaseCommand):
         if "exportCustomers" in options['functions']:
             self.exportCustomers()
 
-        if "main" in options['functions']:
-            while True:
-                self.noOrder()
-                self.profit()
-                print("Completed process. Waiting for next run.")
-                time.sleep(86400)
+        if "scalaSKUs" in options['functions']:
+            self.scalaSKUs()
 
     def fm(self, string):
         if string == None:
@@ -188,3 +184,41 @@ class Command(BaseCommand):
                 price=order.orderTotal,
                 date=order.orderDate
             )
+
+    def scalaSKUs(self):
+        scalas = Scalamandre.objects.exclude(productId=None)
+
+        with open(FILEDIR + '/files/scala-active-skus.csv', 'w', newline='') as csvfile:
+            poWriter = csv.DictWriter(csvfile, fieldnames=[
+                'sku',
+                'link',
+                'status'
+            ])
+
+            poWriter.writerow({
+                'sku': 'SKU',
+                'link': 'DecoratorsBest Link',
+                'status': 'Status'
+            })
+
+            for scala in scalas:
+                try:
+                    product = Product.objects.get(productId=scala.productId)
+                except Product.DoesNotExist:
+                    continue
+
+                sku = scala.mpn
+                handle = product.handle
+                published = product.published
+
+                status = "Active"
+                if not published:
+                    status = "Inactive"
+
+                poWriter.writerow({
+                    'sku': sku,
+                    'link': "https://www.decoratorsbest.com/products/{}".format(handle),
+                    'status': status
+                })
+
+                print("{}, {}, {}".format(sku, handle, status))
