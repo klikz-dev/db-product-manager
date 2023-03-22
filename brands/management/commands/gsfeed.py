@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 
 import boto3
-import time
 import pymysql
 import html
 import os
@@ -37,10 +36,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if "main" in options['functions']:
-            while True:
-                self.feed()
-                self.upload()
-                time.sleep(36400)
+            self.feed()
 
     def fmt(self, s):
         if s != None and s != "":
@@ -272,6 +268,11 @@ class Command(BaseCommand):
 
         csr.close()
         con.close()
+
+        if added > skiped:
+            self.upload()
+        else:
+            debug("GS", 2, "Feeds are getting ignored due to the inventory error. added: {}, skiped: {}".format(added, skiped))
 
     def upload(self):
         now = datetime.datetime.now()
