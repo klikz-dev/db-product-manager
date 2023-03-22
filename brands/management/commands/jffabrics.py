@@ -133,7 +133,7 @@ class Command(BaseCommand):
                 mpn = mpn.replace("-", "_")
 
                 sku = "JF {}".format(
-                    str(sh.cell_value(i, 4)).replace(".0", ""))
+                    int(str(sh.cell_value(i, 4)).replace(".0", "")))
                 if sku in discoSkus:
                     debug("JF Fabrics", 1,
                           "SKU: {} has been discontinued".format(sku))
@@ -316,11 +316,6 @@ class Command(BaseCommand):
                     upb = upb + 1
                     debug(
                         "JF Fabrics", 0, "Disabled product -- ProductID: {}, SKU: {}".format(productID, sku))
-
-            # temp.
-            csr.execute(
-                "CALL AddToPendingUpdatePublish ({})".format(productID))
-            con.commit()
 
         debug("JF Fabrics", 0, "Total {} Products. Published {} Products, Unpublished {} Products.".format(
             total, pb, upb))
