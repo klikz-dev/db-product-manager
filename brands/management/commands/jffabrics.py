@@ -61,9 +61,17 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             self.image()
 
-        if "main" in options['functions']:
+        if "updateStock" in options['functions']:
             while True:
                 self.updateStock()
+                print("Completed process. Waiting for next run.")
+                time.sleep(86400)
+
+        if "main" in options['functions']:
+            while True:
+                self.getProducts()
+                self.getProductIds()
+                self.updatePrice()
                 print("Completed process. Waiting for next run.")
                 time.sleep(86400)
 
@@ -98,7 +106,7 @@ class Command(BaseCommand):
             sku = "JF {}".format(mpn)
             discoSkus.append(sku)
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master-2.2.23.xls")
+        wb = xlrd.open_workbook(FILEDIR + "/files/jffabrics-master.xls")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
