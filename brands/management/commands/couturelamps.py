@@ -647,11 +647,12 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Couture'")
-        con.commit()
+        # csr.execute(
+        #     "DELETE FROM ProductInventory WHERE Brand = 'Couture'")
+        # con.commit()
 
-        wb = xlrd.open_workbook(FILEDIR + '/files/couture-lamps-inventory.xlsm')
+        wb = xlrd.open_workbook(
+            FILEDIR + '/files/couture-lamps-inventory.xlsm')
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):

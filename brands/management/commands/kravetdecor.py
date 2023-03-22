@@ -646,8 +646,8 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
-        con.commit()
+        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
+        # con.commit()
 
         f = open(FILEDIR + "/files/curated_onhand_info.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))

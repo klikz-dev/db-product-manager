@@ -524,8 +524,8 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Tres Tintas'")
-        con.commit()
+        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Tres Tintas'")
+        # con.commit()
 
         products = TresTintas.objects.all()
 

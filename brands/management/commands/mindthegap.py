@@ -838,8 +838,8 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Mindthegap'")
-        con.commit()
+        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Mindthegap'")
+        # con.commit()
 
         host = "18.206.49.64"
         port = 22

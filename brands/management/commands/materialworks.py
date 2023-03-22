@@ -614,9 +614,9 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Materialworks'")
-        con.commit()
+        # csr.execute(
+        #     "DELETE FROM ProductInventory WHERE Brand = 'Materialworks'")
+        # con.commit()
 
         f = open(FILEDIR + '/files/materialworks-inventory.csv', "rt")
         cr = csv.reader(f)

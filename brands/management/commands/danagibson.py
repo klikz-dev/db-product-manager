@@ -608,9 +608,9 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Dana Gibson'")
-        con.commit()
+        # csr.execute(
+        #     "DELETE FROM ProductInventory WHERE Brand = 'Dana Gibson'")
+        # con.commit()
 
         products = DanaGibson.objects.all()
         for product in products:

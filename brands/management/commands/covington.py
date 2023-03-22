@@ -57,12 +57,6 @@ class Command(BaseCommand):
         if "updateStock" in options['functions']:
             self.updateStock()
 
-        if "image" in options['functions']:
-            self.image()
-
-        if "roomset" in options['functions']:
-            self.roomset()
-
         if "updateStock" in options['functions']:
             while True:
                 self.updateStock()
@@ -585,8 +579,8 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Covington'")
-        con.commit()
+        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Covington'")
+        # con.commit()
 
         f = open(FILEDIR + '/files/covington-inventory.csv', "rt")
         cr = csv.reader(f)

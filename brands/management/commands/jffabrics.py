@@ -702,9 +702,9 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'JFF' or Brand = 'JF Fabrics'")
-        con.commit()
+        # csr.execute(
+        #     "DELETE FROM ProductInventory WHERE Brand = 'JFF' or Brand = 'JF Fabrics'")
+        # con.commit()
 
         wb = xlrd.open_workbook(FILEDIR + '/files/jffabrics-inventory.xlsx')
         sh = wb.sheet_by_index(0)
@@ -727,10 +727,10 @@ class Command(BaseCommand):
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', '{}')".format(
                     sku, stockval, "", 'JF Fabrics'))
                 con.commit()
-                print("Updated inventory for {} to {}.".format(sku, stock))
+                print("Updated inventory for {} to {}.".format(sku, stockval))
             except Exception as e:
                 print(e)
-                print("Error Updating inventory for {} to {}.".format(sku, stock))
+                print("Error Updating inventory for {} to {}.".format(sku, stockval))
 
         csr.close()
         con.close()

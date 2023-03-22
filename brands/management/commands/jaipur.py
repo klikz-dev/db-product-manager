@@ -675,9 +675,9 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        csr.execute(
-            "DELETE FROM ProductInventory WHERE Brand = 'Jaipur Living'")
-        con.commit()
+        # csr.execute(
+        #     "DELETE FROM ProductInventory WHERE Brand = 'Jaipur Living'")
+        # con.commit()
 
         f = open(FILEDIR + '/files/jaipurliving-inventory.csv', "rt")
         cr = csv.reader(f)
