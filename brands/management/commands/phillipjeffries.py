@@ -61,13 +61,14 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
+            self.updatePrice()
 
     def getProducts(self):
         s = requests.Session()
 
         PhillipJeffries.objects.all().delete()
 
-        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master.xlsx")
+        wb = xlrd.open_workbook(FILEDIR + "/files/pj-master-2023.03.27.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
