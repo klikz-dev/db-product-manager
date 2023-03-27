@@ -46,6 +46,7 @@ colorDict = {
     'prussian': 'Blue',
     'royal': 'Blue',
     'sapphire': 'Blue',
+    'sky': 'Blue',
     'aqua': 'Blue/Green',
     'azure': 'Blue/Green',
     'caribbean': 'Blue/Green',
