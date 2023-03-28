@@ -202,6 +202,8 @@ class Command(BaseCommand):
                 str(wallpaperSheet.cell_value(i, 6)).replace("$", ""))
             msrp = float(
                 str(wallpaperSheet.cell_value(i, 7)).replace("$", ""))
+            
+            cost = cost / 2 # 03/28/23 from MTG. Discount 50%. Issue with Wallpaper datasheet of 3/20.
 
             minimum = 1
             increment = ""
