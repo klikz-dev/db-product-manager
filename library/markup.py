@@ -69,6 +69,10 @@ mindthegap_pillow_trade = 1.3
 phillipjeffries = 1.5
 phillipjeffries_trade = 1.3
 
+# Phillips
+phillips = 1.5
+phillips_trade = 1.1
+
 # Pindler
 pindler = 1.5
 pindler_trade = 1

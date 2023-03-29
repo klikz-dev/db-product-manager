@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, TresTintas, York, Zoffany
+from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, TresTintas, York, Zoffany, Feed
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -467,7 +467,8 @@ class ScalamandreAdmin(admin.ModelAdmin):
         ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['style', 'colors', 'category']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'sampleStatus', 'stock', 'stockText']}),
+        ('Availability', {'fields': [
+         'status', 'sampleStatus', 'stock', 'stockText']}),
         ('Image', {'fields': ['thumbnail', 'roomset']}),
         ('Shipify Product', {'fields': ['productId']}),
     ]
@@ -648,6 +649,32 @@ class ZoffanyAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
+class FeedAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ('Primary Keys', {'fields': ['mpn', 'sku',
+         'upc', 'pattern', 'color', 'productId']}),
+        ('Categorization', {'fields': [
+         'brand', 'type', 'manufacturer', 'collection']}),
+        ('Main Information', {'fields': [
+         'description', 'usage', 'disclaimer']}),
+        ('Additional Information', {'fields': ['width', 'length', 'height', 'size', 'dimension',
+         'repeatH', 'repeatV', 'repeat', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
+        ('Measurement', {'fields': ['uom', 'minimum', 'increment']}),
+        ('Tagging', {'fields': ['colors', 'tags']}),
+        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
+        ('Availability', {'fields': [
+         'statusP', 'statusS', 'stockP', 'stockS']}),
+        ('Assets', {'fields': ['thumbnail', 'roomsets']}),
+    ]
+
+    list_display = ('mpn', 'sku', 'upc', 'pattern', 'color', 'productId', 'brand', 'type',
+                    'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'stockP', 'stockS')
+
+    list_filter = ['brand', 'type', 'manufacturer', 'uom', 'statusP', 'statusS']
+
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+
+
 # Register Models
 admin.site.register(Brewster, BrewsterAdmin)
 admin.site.register(CoutureLamps, CoutureLampsAdmin)
@@ -665,6 +692,7 @@ admin.site.register(MadcapCottage, MadcapCottageAdmin)
 admin.site.register(Maxwell, MaxwellAdmin)
 admin.site.register(Mindthegap, MindthegapAdmin)
 admin.site.register(PhillipJeffries, PhillipJeffriesAdmin)
+admin.site.register(Feed, FeedAdmin)
 admin.site.register(Pindler, PindlerAdmin)
 admin.site.register(Pklifestyles, PklifestylesAdmin)
 admin.site.register(PremierPrints, PremierPrintsAdmin)
