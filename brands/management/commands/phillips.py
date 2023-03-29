@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
+from brands.models import Feed
 
 import os
 import requests
 import json
 import pymysql
 
-from library import database, debug, common, markup
+from library import database, debug, shopify, markup, common
 
 import environ
 env = environ.Env()
@@ -35,8 +36,14 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        if "getProducts" in options['functions']:
-            self.getProducts()
+        if "feed" in options['functions']:
+            self.feed()
+
+        if "sync" in options['functions']:
+            self.sync()
+
+        if "add" in options['functions']:
+            self.add()
 
     def __init__(self):
         response = requests.request(
@@ -54,14 +61,15 @@ class Command(BaseCommand):
         data = json.loads(response.text)
         self.token = data['data']['token']
 
-        self.log = debug.debug
+        self.con = pymysql.connect(host=db_host, user=db_username,
+                                   passwd=db_password, db=db_name, connect_timeout=5)
+        self.databaseManager = database.DatabaseManager(self.con)
 
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        self.databaseManager = database.DatabaseManager(con)
+    def __del__(self):
+        self.con.close()
 
     def fetchFeed(self):
-        self.log("Phillips", 0, "Started fetching data from the supplier")
+        debug.debug("Phillips", 0, "Started fetching data from the supplier")
 
         # Get Product Types
         types = {}
@@ -114,7 +122,7 @@ class Command(BaseCommand):
                         sku = "PC {}".format(mpn)
                         upc = row['upc']
                         pattern = row['desc']
-                        color = row['descspec']
+                        color = str(row['descspec']).replace(",", "")
 
                         # Categorization
                         brand = "Phillips"
@@ -182,8 +190,10 @@ class Command(BaseCommand):
                         roomsets = []
                         for roomset in row['assets']['images']['details']:
                             roomsets.append(roomset['url'])
+                        for roomset in row['assets']['images']['lifestyle']:
+                            roomsets.append(roomset['url'])
                     except Exception as e:
-                        self.log("Phillips", 1, str(e))
+                        debug.debug("Phillips", 1, str(e))
                         continue
 
                     product = {
@@ -231,9 +241,59 @@ class Command(BaseCommand):
             else:
                 break
 
-        self.log("Phillips", 0, "Finished fetching data from the supplier")
+        debug.debug("Phillips", 0, "Finished fetching data from the supplier")
         return products
 
-    def getProducts(self):
+    def downloadImages(self, productId, thumbnail, roomsets):
+        if thumbnail and thumbnail.strip() != "":
+            try:
+                common.picdownload2(thumbnail, "{}.jpg".format(productId))
+            except Exception as e:
+                debug.debug("Phillips", 1, str(e))
+
+        if len(roomsets) > 0:
+            idx = 2
+            for roomset in roomsets:
+                try:
+                    common.roomdownload(
+                        roomset, "{}_{}.jpg".format(productId, idx))
+                    idx = idx + 1
+                except Exception as e:
+                    debug.debug("Phillips", 1, str(e))
+
+    def feed(self):
         products = self.fetchFeed()
         self.databaseManager.writeFeed("Phillips", products)
+
+    def sync(self):
+        self.databaseManager.statusSync("Phillips")
+
+    def add(self):
+        products = Feed.objects.filter(brand="Phillips")
+
+        for product in products:
+            try:
+                createdInDatabase = self.databaseManager.createProduct(
+                    "Phillips", product)
+                if not createdInDatabase:
+                    continue
+            except Exception as e:
+                debug.debug("Phillips", 1, str(e))
+                continue
+
+            try:
+                productId = shopify.NewProductBySku(product.sku, self.con)
+                if productId == None:
+                    continue
+
+                product.productId = productId
+                product.save()
+
+                self.downloadImages(
+                    productId, product.thumbnail, product.roomsets)
+
+                debug.debug("Phillips", 0, "Created New product ProductID: {}, SKU: {}".format(
+                    productId, product.sku))
+
+            except Exception as e:
+                debug.debug("Phillips", 1, str(e))

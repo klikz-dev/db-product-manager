@@ -174,7 +174,7 @@ class Command(BaseCommand):
         csr = con.cursor()
 
         productIDs = [
-            '2075636006979'
+            '6871124443182'
         ]
 
         for productID in productIDs:
