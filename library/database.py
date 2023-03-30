@@ -296,3 +296,40 @@ class DatabaseManager:
         self.con.commit()
 
         return True
+
+    def updateTags(self, brand, category=True):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            sku = product.sku
+
+            colors = product.colors
+            tags = ", ".join((product.type, product.pattern, product.tags))
+            collection = product.collection
+
+            if tags != None and tags != "":
+                if category:
+                    self.csr.execute("CALL AddToEditCategory ({}, {})".format(
+                        common.sq(sku), common.sq(tags)))
+                    self.con.commit()
+
+                self.csr.execute("CALL AddToEditStyle ({}, {})".format(
+                    common.sq(sku), common.sq(tags)))
+                self.con.commit()
+
+                self.csr.execute("CALL AddToEditSubtype ({}, {})".format(
+                    common.sq(sku), common.sq(str(tags).strip())))
+                self.con.commit()
+
+            if colors != None and colors != "":
+                self.csr.execute("CALL AddToEditColor ({}, {})".format(
+                    common.sq(sku), common.sq(colors)))
+                self.con.commit()
+
+            if collection != None and collection != "":
+                self.csr.execute("CALL AddToEditCollection ({}, {})".format(
+                    common.sq(sku), common.sq(collection)))
+                self.con.commit()
+
+            debug.debug("DatabaseManager", 0,
+                  "Added Tags for Brand: {}, SKU: {}".format(brand, sku))

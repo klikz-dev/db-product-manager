@@ -268,6 +268,9 @@ class Command(BaseCommand):
                         common.sq(sku), common.sq(colorDict[key])))
                     con.commit()
 
+                    print("Color tag: {} for product: {}".format(
+                        colorDict[key], sku))
+
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
                                                             AND SKU IN (SELECT SKU FROM EditColor)
@@ -305,7 +308,7 @@ class Command(BaseCommand):
                         common.sq(sku), common.sq(c)))
                     con.commit()
 
-                    print("Added product tag: {} for product: {}".format(c, sku))
+                    print("Category tag: {} for product: {}".format(c, sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
@@ -342,6 +345,8 @@ class Command(BaseCommand):
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(s)))
                     con.commit()
+
+                    print("Style tag: {} for product: {}".format(s, sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
@@ -405,7 +410,7 @@ class Command(BaseCommand):
                             common.sq(sku), value['id']))
                         con.commit()
 
-                        print("Added product subtype tag: {} for product: {}. ParentType: {}".format(
+                        print("Subtype tag: {} for product: {}. ParentType: {}".format(
                             value['id'], sku, value['parent']))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
@@ -439,11 +444,17 @@ class Command(BaseCommand):
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(sizeDict[key])))
                     con.commit()
+
+                    print("Size tag: {} for product: {}".format(sizeDict[key], sku))
+
                     isLumbar = False
+
             if isLumbar:
                 csr.execute("CALL AddToProductTag ({}, {})".format(
                     common.sq(sku), common.sq('Lumbar')))
                 con.commit()
+
+                print("Size tag: {} for product: {}".format("Lumbar", sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
@@ -473,6 +484,8 @@ class Command(BaseCommand):
 
             csr.execute("CALL AddToProductCollection ({}, {})".format(
                         common.sq(sku), common.sq(collection)))
+            
+            print("Collection tag: {} for product: {}".format(collection, sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)
