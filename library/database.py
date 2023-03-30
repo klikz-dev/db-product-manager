@@ -306,6 +306,7 @@ class DatabaseManager:
             colors = product.colors
             tags = ", ".join((product.type, product.pattern, product.tags))
             collection = product.collection
+            statusS = product.statusS
 
             if tags != None and tags != "":
                 if category:
@@ -331,5 +332,14 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
+            if not statusS and product.productId != None and product.productId != "":
+                self.csr.execute("CALL AddToProductTag ({}, {})".format(
+                    common.sq(product.sku), common.sq("NoSample")))
+                self.con.commit()
+
+                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                self.con.commit()
+
             debug.debug("DatabaseManager", 0,
-                  "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
+                        "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
