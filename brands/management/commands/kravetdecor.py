@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from brands.models import KravetDecor
+from brands.models import KravetDecor, Kravet
 from shopify.models import Product as ShopifyProduct
 from mysql.models import Type
 
@@ -646,9 +646,6 @@ class Command(BaseCommand):
                               passwd=db_password, db=db_name, connect_timeout=5)
         csr = con.cursor()
 
-        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet Decor'")
-        # con.commit()
-
         f = open(FILEDIR + "/files/curated_onhand_info.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
 
@@ -658,12 +655,14 @@ class Command(BaseCommand):
 
             mpn = str(row[0]).strip()
             stock = int(row[1])
+            stockNote = row[2]
+            leadtime = "{} days".format(stockNote)
 
             try:
                 product = KravetDecor.objects.get(mpn=mpn)
 
                 csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet Decor')".format(
-                    product.sku, stock, product.boDate))
+                    product.sku, stock, leadtime))
                 con.commit()
                 debug("KravetDecor", 0,
                       "Updated inventory for {} to {}.".format(product.sku, stock))
@@ -671,6 +670,19 @@ class Command(BaseCommand):
                 print(e)
                 debug(
                     "KravetDecor", 1, "Error Updating inventory for {} to {}.".format(product.sku, stock))
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+
+                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet')".format(
+                    product.sku, stock, leadtime))
+                con.commit()
+                debug("Kravet", 0,
+                      "Updated inventory for {} to {}.".format(product.sku, stock))
+            except Exception as e:
+                print(e)
+                debug(
+                    "Kravet", 1, "Error Updating inventory for {} to {}.".format(product.sku, stock))
 
         csr.close()
         con.close()

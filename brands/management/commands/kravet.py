@@ -102,12 +102,6 @@ class Command(BaseCommand):
             self.replaceImages()
             self.getProductIds()
 
-        if "updateStock" in options['functions']:
-            while True:
-                self.updateStock()
-                print("Completed stock update process. Waiting for next run.")
-                time.sleep(43200)
-
     def downloadcsv(self):
 
         if os.path.isfile(FILEDIR + "/files/item_info.csv"):
@@ -1118,84 +1112,6 @@ class Command(BaseCommand):
                     product.thumbnail), FILEDIR + "/../../images/product/{}.jpg".format(product.productId))
                 debug("Image", 0, "Downloaded thumbnail {}.jpg".format(
                     product.productId))
-
-        csr.close()
-        con.close()
-
-    def updateStock(self):
-        if not self.downloadcsv():
-            return
-
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
-        csr = con.cursor()
-
-        # csr.execute("DELETE FROM ProductInventory WHERE Brand = 'Kravet'")
-        # con.commit()
-
-        f = open(FILEDIR + "/files/item_info.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            temp = row[0].strip().split(".")
-
-            if len(temp) != 3 or temp[2] != "0":
-                continue
-            if row[12] == "LEATHER - 100%":
-                continue
-
-            mpn = row[0].strip()
-            stock = int(float(row[46]))
-            stockNote = row[47]
-
-            try:
-                product = Kravet.objects.get(mpn=mpn)
-            except Kravet.DoesNotExist:
-                continue
-
-            sku = product.sku
-            if stock < 3:
-                stock = 0
-            leadtime = "{} days".format(stockNote)
-
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet')".format(
-                    sku, stock, leadtime))
-                con.commit()
-                debug("Kravet", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
-            except Exception as e:
-                print(e)
-                debug(
-                    "Kravet", 1, "Error Updating inventory for {} to {}.".format(sku, stock))
-
-        f = open(FILEDIR + "/files/curated_onhand_info.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            if row[0] == "Item":
-                continue
-
-            mpn = str(row[0]).strip()
-            stock = int(row[1])
-            stockNote = row[2]
-
-            try:
-                product = Kravet.objects.get(mpn=mpn)
-            except Exception as e:
-                continue
-
-            sku = product.sku
-            leadtime = "{} days".format(stockNote)
-
-            try:
-                csr.execute("CALL UpdateProductInventory ('{}', {}, 1, '{}', 'Kravet')".format(
-                    sku, stock, leadtime))
-                con.commit()
-                debug("Kravet", 0,
-                      "Updated inventory for {} to {}.".format(sku, stock))
-            except Exception as e:
-                print(e)
-                debug(
-                    "Kravet", 1, "Error Updating inventory for {} to {}.".format(sku, stock))
 
         csr.close()
         con.close()
