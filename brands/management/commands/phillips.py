@@ -51,6 +51,9 @@ class Command(BaseCommand):
         if "tag" in options['functions']:
             processor.tag()
 
+        if "sample" in options['functions']:
+            processor.sample()
+
 
 class Processor:
     def __init__(self):
@@ -319,6 +322,9 @@ class Processor:
 
     def tag(self):
         self.databaseManager.updateTags(BRAND, False)
+
+    def sample(self):
+        self.databaseManager.sample(BRAND)
 
     def inventory(self, mpn):
         try:

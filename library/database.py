@@ -306,7 +306,6 @@ class DatabaseManager:
             colors = product.colors
             tags = ", ".join((product.type, product.pattern, product.tags))
             collection = product.collection
-            statusS = product.statusS
 
             if tags != None and tags != "":
                 if category:
@@ -332,7 +331,14 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
-            if not statusS and product.productId != None and product.productId != "":
+            debug.debug("DatabaseManager", 0,
+                        "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
+
+    def sample(self, brand):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            if not product.statusS and product.productId:
                 self.csr.execute("CALL AddToProductTag ({}, {})".format(
                     common.sq(product.sku), common.sq("NoSample")))
                 self.con.commit()
@@ -341,5 +347,5 @@ class DatabaseManager:
                     product.productId))
                 self.con.commit()
 
-            debug.debug("DatabaseManager", 0,
-                        "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
+                debug.debug("DatabaseManager", 0,
+                            "Disable sample for Brand: {}, SKU: {}".format(brand, product.sku))
