@@ -38,18 +38,21 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
+        processor = Processor()
         if "feed" in options['functions']:
-            self.feed()
+            processor.feed()
 
         if "sync" in options['functions']:
-            self.sync()
+            processor.sync()
 
         if "add" in options['functions']:
-            self.add()
+            processor.add()
 
         if "tag" in options['functions']:
-            self.tag()
+            processor.tag()
 
+
+class Processor:
     def __init__(self):
         response = requests.request(
             "POST",
@@ -316,3 +319,41 @@ class Command(BaseCommand):
 
     def tag(self):
         self.databaseManager.updateTags(BRAND, False)
+
+    def inventory(self, mpn):
+        try:
+            response = requests.request(
+                "GET",
+                "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/inventory".format(
+                    mpn),
+                headers={
+                    'x-api-key': API_KEY,
+                    'Authorization': "Bearer {}".format(self.token)
+                }
+            )
+            data = json.loads(response.text)
+            stock = data['data']['qtyavailable']
+        except Exception as e:
+            debug.debug(BRAND, 1, str(e))
+            stock = 0
+
+        try:
+            response = requests.request(
+                "GET",
+                "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/leadtime".format(
+                    mpn),
+                headers={
+                    'x-api-key': API_KEY,
+                    'Authorization': "Bearer {}".format(self.token)
+                }
+            )
+            data = json.loads(response.text)
+            leadtime = data['data']['leadtime'][0]['message']
+        except Exception as e:
+            debug.debug(BRAND, 1, str(e))
+            leadtime = ""
+
+        return {
+            'stock': stock,
+            'leadtime': leadtime
+        }
