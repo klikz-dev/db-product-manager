@@ -36,6 +36,9 @@ class Command(BaseCommand):
         if "scalaSKUs" in options['functions']:
             self.scalaSKUs()
 
+        if "decoratorsbestFabric" in options['functions']:
+            self.decoratorsbestFabric()
+
     def fm(self, string):
         if string == None:
             return ""
@@ -222,3 +225,33 @@ class Command(BaseCommand):
                 })
 
                 print("{}, {}, {}".format(sku, handle, status))
+
+    def decoratorsbestFabric(self):
+        products = Product.objects.filter(Q(title__icontains="Decoratorsbest") & Q(
+            title__icontains="Fabric") & Q(published=1))
+
+        with open(FILEDIR + '/files/decoratorsbest-fabrics.csv', 'w', newline='') as csvfile:
+            poWriter = csv.DictWriter(csvfile, fieldnames=[
+                'sku',
+                'title',
+                'link'
+            ])
+
+            poWriter.writerow({
+                'sku': 'SKU',
+                'title': 'Product Name',
+                'link': 'Link'
+            })
+
+            for product in products:
+                sku = product.sku
+                title = product.title
+                handle = product.handle
+
+                poWriter.writerow({
+                    'sku': sku,
+                    'title': title,
+                    'link': "https://www.decoratorsbest.com/products/{}".format(handle)
+                })
+
+                print("{}, {}, {}".format(sku, title, handle))
