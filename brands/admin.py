@@ -652,7 +652,7 @@ class ZoffanyAdmin(admin.ModelAdmin):
 class FeedAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Primary Keys', {'fields': ['mpn', 'sku',
-         'upc', 'pattern', 'color', 'productId']}),
+         'upc', 'pattern', 'color', 'title', 'productId']}),
         ('Categorization', {'fields': [
          'brand', 'type', 'manufacturer', 'collection']}),
         ('Main Information', {'fields': [
@@ -670,7 +670,8 @@ class FeedAdmin(admin.ModelAdmin):
     list_display = ('mpn', 'sku', 'upc', 'pattern', 'color', 'productId', 'brand', 'type',
                     'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'stockP', 'stockS')
 
-    list_filter = ['brand', 'type', 'manufacturer', 'uom', 'statusP', 'statusS']
+    list_filter = ['brand', 'type', 'manufacturer',
+                   'uom', 'statusP', 'statusS']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 

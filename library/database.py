@@ -28,6 +28,7 @@ class DatabaseManager:
                     upc=product.get('upc', ""),
                     pattern=product.get('pattern'),
                     color=product.get('color'),
+                    title=product.get('title', ""),
                     brand=product.get('brand'),
                     type=product.get('type'),
                     manufacturer=product.get('manufacturer'),
@@ -75,27 +76,6 @@ class DatabaseManager:
         debug.debug("DatabaseManager", 0, "Finished writing {} feeds to our database. Total: {}, Success: {}, Failed: {}".format(
             brand, total, success, failed))
 
-    def fetchType(self, typeText):
-        try:
-            productType = Type.objects.get(name=typeText)
-            if productType.parentTypeId == 0:
-                ptype = productType.name
-            else:
-                parentType = Type.objects.get(
-                    typeId=productType.parentTypeId)
-                if parentType.parentTypeId == 0:
-                    ptype = parentType.name
-                else:
-                    rootType = Type.objects.get(
-                        typeId=parentType.parentTypeId)
-                    ptype = rootType.name
-        except Type.DoesNotExist:
-            debug.debug("DatabaseManager", 1,
-                        "Unknown product type: {}".format(typeText))
-            ptype = ""
-
-        return ptype
-
     def statusSync(self, brand, fullSync=False):
         debug.debug("DatabaseManager", 0,
                     "Started status sync for {}".format(brand))
@@ -118,7 +98,7 @@ class DatabaseManager:
                 product.productId = productID
                 product.save()
 
-                if published == 1 and product.status == False:
+                if published == 1 and product.statusP == False:
                     self.csr.execute(
                         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
                     self.con.commit()
@@ -130,7 +110,7 @@ class DatabaseManager:
                     debug.debug(
                         "DatabaseManager", 0, "Disabled product -- Brand: {}, ProductID: {}, mpn: {}".format(brand, productID, mpn))
 
-                if published == 0 and product.status == True and product.cost != None:
+                if published == 0 and product.statusP == True and product.cost != None:
                     self.csr.execute(
                         "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
                     self.con.commit()
@@ -167,10 +147,17 @@ class DatabaseManager:
         if product.statusP == False or product.productId != None:
             return False
 
-        name = " | ".join(
-            (product.manufacturer, product.pattern, product.color, product.type))
-        title = " ".join(
-            (product.manufacturer, product.pattern, product.color, product.type))
+        if product.title != "":
+            name = " | ".join(
+                (product.manufacturer, product.title))
+            title = " ".join(
+                (product.manufacturer, product.title))
+        else:
+            name = " | ".join(
+                (product.manufacturer, product.pattern, product.color, product.type))
+            title = " ".join(
+                (product.manufacturer, product.pattern, product.color, product.type))
+
         description = title
         vname = title
         hassample = 1
@@ -221,7 +208,8 @@ class DatabaseManager:
                 bodyHTML += "{}: {}<br/>".format(spec['key'], spec['value'])
         if len(product.features) > 0:
             for feature in product.features:
-                bodyHTML += "{}<br/><br/>".format(feature)
+                bodyHTML += "{}<br/>".format(feature)
+        bodyHTML += "<br/>"
 
         if product.country != "":
             bodyHTML += "Country of Origin: {}<br/>".format(
@@ -229,7 +217,7 @@ class DatabaseManager:
         if product.usage != "":
             bodyHTML += "Usage: {}<br/>".format(product.usage)
         else:
-            bodyHTML += "Usage: {}<br/>".format(product.type)
+            bodyHTML += "Usage: {}<br/><br/>".format(product.type)
 
         bodyHTML += "{} {}".format(product.manufacturer, product.type)
 

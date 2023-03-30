@@ -123,18 +123,28 @@ class Command(BaseCommand):
                         upc = row['upc']
                         pattern = row['desc']
                         color = str(row['descspec']).replace(",", "")
+                        if color == "":
+                            color = row['description']['color'][0]
+                        title = " ".join((pattern, color))
 
                         # Categorization
                         brand = "Phillips"
 
                         typeText = types.get(row['class']['category'], "")
-                        if typeText == "Bowls / Vessels":
-                            typeText = "Bowls"
-                        if typeText == "Consoles / Sofa Tables":
-                            typeText = "Consoles"
-                        type = self.databaseManager.fetchType(typeText)
-                        if type == "":
-                            type = "Furniture"
+                        if typeText == "" or typeText == "Abstract" or typeText == "Animals":
+                            type = "Decor"
+                        elif typeText == "Pedestals" or typeText == "Seating" or typeText == "Figures" or typeText == "Framed":
+                            type = "Accents"
+                        elif typeText == "Bowls / Vessels":
+                            type = "Bowls"
+                        elif typeText == "Consoles / Sofa Tables":
+                            type = "Consoles"
+                        elif typeText == "Dining Tables":
+                            type = "Dining Chairs"
+                        elif typeText == "Hanging Lamps":
+                            type = "Accent Lamps"
+                        else:
+                            type = typeText
 
                         manufacturer = "Phillips"
 
@@ -167,7 +177,7 @@ class Command(BaseCommand):
                         minimum = row['price']['factor']
 
                         # Tagging
-                        tags = "{}, {}".format(", ".join(row['tags']), type)
+                        tags = ", ".join((typeText, ", ".join(row['tags'])))
                         colors = ", ".join(row['description']['color'])
 
                         # Pricing
@@ -202,6 +212,7 @@ class Command(BaseCommand):
                         'upc': upc,
                         'pattern': pattern,
                         'color': color,
+                        'title': title,
 
                         'brand': brand,
                         'type': type,

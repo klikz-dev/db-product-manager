@@ -2059,6 +2059,8 @@ class Feed(models.Model):
         max_length=200, default=None, null=True, blank=True)
     color = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    title = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     productId = models.CharField(
         max_length=200, default=None, null=True, blank=True)
 
