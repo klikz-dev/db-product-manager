@@ -64,6 +64,7 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
+            self.updatePrice()
 
     def getProducts(self):
         Maxwell.objects.all().delete()
@@ -106,7 +107,7 @@ class Command(BaseCommand):
                 minimum = 1
                 increment = ""
 
-                cost = float(row['discounted_price'])
+                cost = float(row['price'])
                 msrp = 0
                 map = 0
 
