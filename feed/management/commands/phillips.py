@@ -71,7 +71,7 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
-        debug.debug(BRAND, 0, "Started fetching data from the supplier")
+        debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
         # Get Product Types
         types = {}
@@ -257,7 +257,7 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def downloadImages(self, productId, thumbnail, roomsets):
+    def image(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
             try:
                 common.picdownload2(thumbnail, "{}.jpg".format(productId))
@@ -299,8 +299,8 @@ class Processor:
                     product.sku, self.con)
                 product.save()
 
-                self.downloadImages(
-                    product.productId, product.thumbnail, product.roomsets)
+                self.image(product.productId,
+                           product.thumbnail, product.roomsets)
 
                 debug.debug(BRAND, 0, "Created New product ProductID: {}, SKU: {}".format(
                     product.productId, product.sku))

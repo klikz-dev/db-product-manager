@@ -17,7 +17,7 @@ class FeedAdmin(admin.ModelAdmin):
         ('Tagging', {'fields': ['colors', 'tags']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
         ('Availability', {'fields': [
-         'statusP', 'statusS', 'stockP', 'stockS']}),
+         'statusP', 'statusS', 'stockP', 'stockS', 'stockNote', 'shipping']}),
         ('Assets', {'fields': ['thumbnail', 'roomsets']}),
     ]
 

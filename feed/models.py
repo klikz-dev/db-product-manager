@@ -75,8 +75,13 @@ class Feed(models.Model):
 
     statusP = models.BooleanField(default=False)
     statusS = models.BooleanField(default=False)
+
     stockP = models.IntegerField(default=0)
     stockS = models.IntegerField(default=0)
+    stockNote = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    shipping = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     thumbnail = models.CharField(
         max_length=200, default=None, null=True, blank=True)

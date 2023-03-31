@@ -1,5 +1,5 @@
 from library import debug, common, const
-from brands.models import Feed
+from feed.models import Feed
 from mysql.models import Type
 
 
@@ -349,3 +349,19 @@ class DatabaseManager:
 
                 debug.debug("DatabaseManager", 0,
                             "Disable sample for Brand: {}, SKU: {}".format(brand, product.sku))
+
+    def shipping(self, brand):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            if not "White Glove" in product.shipping and product.productId:
+                self.csr.execute("CALL AddToProductTag ({}, {})".format(
+                    common.sq(product.sku), common.sq("White Glove")))
+                self.con.commit()
+
+                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                self.con.commit()
+
+                debug.debug("DatabaseManager", 0,
+                            "White Glove shipping for Brand: {}, SKU: {}".format(brand, product.sku))

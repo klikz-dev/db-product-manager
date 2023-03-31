@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, TresTintas, York, Zoffany, Feed
+from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -529,31 +529,6 @@ class SeabrookAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
-class StarkStudioAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': [
-         'brand', 'ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'length', 'dimension', 'material', 'country', 'usage', 'weight', 'upc']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomsets']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
-
-    list_filter = ['ptype', 'status', 'uom',
-                   'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
 class StoutAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['mpn', 'sku']}),
@@ -649,33 +624,6 @@ class ZoffanyAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
-class FeedAdmin(admin.ModelAdmin):
-    fieldsets = [
-        ('Primary Keys', {'fields': ['mpn', 'sku',
-         'upc', 'pattern', 'color', 'title', 'productId']}),
-        ('Categorization', {'fields': [
-         'brand', 'type', 'manufacturer', 'collection']}),
-        ('Main Information', {'fields': [
-         'description', 'usage', 'disclaimer']}),
-        ('Additional Information', {'fields': ['width', 'length', 'height', 'size', 'dimension',
-         'repeatH', 'repeatV', 'repeat', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
-        ('Measurement', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['colors', 'tags']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': [
-         'statusP', 'statusS', 'stockP', 'stockS']}),
-        ('Assets', {'fields': ['thumbnail', 'roomsets']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'upc', 'pattern', 'color', 'productId', 'brand', 'type',
-                    'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'stockP', 'stockS')
-
-    list_filter = ['brand', 'type', 'manufacturer',
-                   'uom', 'statusP', 'statusS']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
 # Register Models
 admin.site.register(Brewster, BrewsterAdmin)
 admin.site.register(CoutureLamps, CoutureLampsAdmin)
@@ -693,14 +641,12 @@ admin.site.register(MadcapCottage, MadcapCottageAdmin)
 admin.site.register(Maxwell, MaxwellAdmin)
 admin.site.register(Mindthegap, MindthegapAdmin)
 admin.site.register(PhillipJeffries, PhillipJeffriesAdmin)
-admin.site.register(Feed, FeedAdmin)
 admin.site.register(Pindler, PindlerAdmin)
 admin.site.register(Pklifestyles, PklifestylesAdmin)
 admin.site.register(PremierPrints, PremierPrintsAdmin)
 admin.site.register(Scalamandre, ScalamandreAdmin)
 admin.site.register(Schumacher, SchumacherAdmin)
 admin.site.register(Seabrook, SeabrookAdmin)
-admin.site.register(StarkStudio, StarkStudioAdmin)
 admin.site.register(Stout, StoutAdmin)
 admin.site.register(TresTintas, TresTintasAdmin)
 admin.site.register(York, YorkAdmin)
