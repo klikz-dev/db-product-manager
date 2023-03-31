@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 from mysql.models import ProductInventory, ProductManufacturer
 from shopify.models import Product
-from brands.management.commands.phillips import Processor as PhillipsProcessor
+from feed.management.commands.phillips import Processor as PhillipsProcessor
 
 
 def inventory(sku):

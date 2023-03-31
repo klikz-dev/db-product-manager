@@ -1,26 +1,12 @@
 from django.core.management.base import BaseCommand
 from brands.models import Feed
 
-import os
+import environ
 import requests
 import json
 import pymysql
 
-from library import database, debug, shopify, markup, common
-
-import environ
-env = environ.Env()
-
-db_host = env('MYSQL_HOST')
-db_username = env('MYSQL_USER')
-db_password = env('MYSQL_PASSWORD')
-db_name = env('MYSQL_DATABASE')
-db_port = int(env('MYSQL_PORT'))
-
-markup_price = markup.starkstudio
-markup_trade = markup.starkstudio_trade
-
-FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from library import database, debug, shopify, common
 
 
 API_BASE_URL = "https://step-up-production.ue.r.appspot.com/v1"
@@ -75,8 +61,10 @@ class Processor:
         data = json.loads(response.text)
         self.token = data['data']['token']
 
-        self.con = pymysql.connect(host=db_host, user=db_username,
-                                   passwd=db_password, db=db_name, connect_timeout=5)
+        env = environ.Env()
+        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
+            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
+
         self.databaseManager = database.DatabaseManager(self.con)
 
     def __del__(self):
