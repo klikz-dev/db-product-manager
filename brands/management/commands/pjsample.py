@@ -30,8 +30,8 @@ FILEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # API credentials
 API_URL = 'https://www.phillipjeffries.com'
-API_COOKIE = '__utmz=198764782.1676364716.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _gcl_au=1.1.796977913.1676364717; _tt_enable_cookie=1; _ttp=OaImm8shp1H2v6fYNNP8obg1y2E; _fbp=fb.1.1676364718240.2061779072; _pin_unauth=dWlkPU5qTTVPREZqWkRRdFlqazBZeTAwTkRBNUxUazJPRGd0Wm1ZMk5qVm1NRGxqTm1FeQ; hubspotutk=8e23cf84c2f5cdc40931199164511e28; __hs_cookie_cat_pref=1:true,2:true,3:true; _hjSessionUser_1552480=eyJpZCI6IjA5YmUzOTZhLWFiNjQtNTU0NC04ZWJhLTk4ODllOWJlZmE4YyIsImNyZWF0ZWQiOjE2NzYzNjQ3MTg3ODMsImV4aXN0aW5nIjp0cnVlfQ==; 6286=8b37cdf646cc2717d949306576222229; remember_me_token=cMrRDFdmn5JLIbLOtWdc_g; _gid=GA1.2.1288574999.1678648189; ln_or=eyIxMDQ2MDk4IjoiZCJ9; _gat_UA-123650249-3=1; __utma=198764782.1219712163.1676364716.1678648187.1678686095.21; __utmc=198764782; __utmt=1; _hjIncludedInSessionSample_1552480=1; _hjSession_1552480=eyJpZCI6IjFjNjc4ZTA3LTkxYTEtNDY1MS05NzRiLWUzYmYzMmJlMjU1ZiIsImNyZWF0ZWQiOjE2Nzg2ODYwOTY5MzgsImluU2FtcGxlIjp0cnVlfQ==; _hjAbsoluteSessionInProgress=1; __hstc=105233308.8e23cf84c2f5cdc40931199164511e28.1676364719308.1678648197653.1678686101593.22; __hssrc=1; return_to=https%3A%2F%2Fwww.phillipjeffries.com%2Fshop%2FCARD-NAT-ARROW2%2F071; __utmb=198764782.4.10.1678686095; _ga_KWQMVELYQV=GS1.1.1678686094.22.1.1678686133.21.0.0; _ga=GA1.2.2049969643.1676364717; _phillip_jeffries_session=TmxkanY5QzVvaXhHdGZEVVBpd20xbWtPQVVsQzRrYW8rN2U0dWdvOUh5N0c4VHBWVWwxYm8xNTFaMDdGN1JjVUFaNVZyR0VWd2RZQXlQMjAyenJhTGN4ejhFTzNEZndhL2F0YU5sb1BSUGNkdWZiSnVvcUttZi9xSG9xcFI2TW9qVC9Wa0ZjQVVRV2RGTmZPanlyZEtpZlhrVS9IUFNnaEV6U2E3ZmdKb1JsS1pJR2xEZHFvU1ZqYkR6Vlh3SG1qdWZJS1dPeFhEZWRuNWlMaEVMY282bmYyMzlxZzNIeEhaZC9DYTZtOVdicEhwcXRwenNINVl6LzdNVG1PUk1rRi8zQ2psZ1Y4ZVhWSzFkbEhDQ2ZZK2lSVjJTSjdvenZGK0JGMW5SdnkySFpOVXBFaUswVmQ4TnNoNGxOMktZYXphMFYxR1kwNnJUcGNKNVcrMHRtNjF3Z1JURE1PKzVWb1NwWWRSTnplb2FsMjN3azh0VjJ2VjNya1JneDFpVGJzZWlFR2RTN05zZWVyVWVKdTE5anhSTzR6Z012YzczWFJhYVc0VTRQU3RFQmtrMTdRdnVwZDJCWGlMc2l5UTVicGNHK2NSSW01N3EyYXNXaUxGZ1pkejRkMTlRcy94T2Z5SG5jUTlQMWVnQnNrdVRXRlorNXY1aEpuYmdqRzgvT3hzSmpjMVQ3blAzbjlMUHNYcE5Fa0ZPdzB2SXFkdWVuSnJBM3BiMnlVYXhra3c2UXhqSkhGMzZQNmN0cG1qVUJ4UU5TZHFDcHc3M25ULzVjNGJyWTFpVHU2ME1JTVlkbCtoQzVUTVBvcWcyeE9RWmN2SFVFOW9tVG5YQ3U2bml0VHFXeERJbE5VTXB2YWlYRnlnRG5VQk81Yk1ZZFo1ZnJ4QkxTbVRhSUxUYkN6dmZXWXBCWVdxZmpOcDZ6UmNOZ3dFYjkrUFJEOXJuSEhBZEZsTzRXdDhFTWhkQ1hjcFlqZG00VmRXZjlaR3R6RGZZYmprWGRNNU52aG9rZmduTkZZa1RGV2ZzV2tJVmd4K2krNVBQQ2NkZG4rT3YyelVPa2NVaGw4Q2I0L2dzcFZQcnhCUDBiSnoyeFBleVVSZ0JDVWRabXR0L1lpeUJuMDR1c2NSZ1ZSRlJRd3lWTmtIRWwzdVhrR2E3ZkMvWFU9LS1waTNjbWZoRVhlRFplS2Q3YzdIUXBRPT0%3D--b55c684ceda36babc8b7708065ceca41338f8897; __hssc=105233308.3.1678686101593; _dd_s=logs=1&id=333202fb-ebc1-43ef-8a61-af61883a6f28&created=1678686097620&expire=1678687039345'
-API_TOKEN = '4cNIV8F24n9mX5pPu+oTVPXLhK1iU0lKvH0VfmluY3eVO3yR0rxQx8D529qCOzY3yPq/1SJkLnfDLEIxG7eRAg=='
+API_COOKIE = '__utmz=198764782.1676364716.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); _gcl_au=1.1.796977913.1676364717; _tt_enable_cookie=1; _ttp=OaImm8shp1H2v6fYNNP8obg1y2E; _fbp=fb.1.1676364718240.2061779072; _pin_unauth=dWlkPU5qTTVPREZqWkRRdFlqazBZeTAwTkRBNUxUazJPRGd0Wm1ZMk5qVm1NRGxqTm1FeQ; hubspotutk=8e23cf84c2f5cdc40931199164511e28; __hs_cookie_cat_pref=1:true,2:true,3:true; _hjSessionUser_1552480=eyJpZCI6IjA5YmUzOTZhLWFiNjQtNTU0NC04ZWJhLTk4ODllOWJlZmE4YyIsImNyZWF0ZWQiOjE2NzYzNjQ3MTg3ODMsImV4aXN0aW5nIjp0cnVlfQ==; 6286=8b37cdf646cc2717d949306576222229; remember_me_token=cMrRDFdmn5JLIbLOtWdc_g; __utma=198764782.1219712163.1676364716.1678686095.1680286559.22; __utmc=198764782; _gid=GA1.2.1853960080.1680286561; ln_or=eyIxMDQ2MDk4IjoiZCJ9; _hjSession_1552480=eyJpZCI6IjA2NjhlYjY2LTk4MjEtNDQyMi1hMGY0LWY3YmNjNmQxZTlmNiIsImNyZWF0ZWQiOjE2ODAyODY1NjM3MzIsImluU2FtcGxlIjp0cnVlfQ==; _hjAbsoluteSessionInProgress=0; __hstc=105233308.8e23cf84c2f5cdc40931199164511e28.1676364719308.1678686101593.1680286568778.23; __hssrc=1; _hjIncludedInSessionSample_1552480=1; _gat_UA-123650249-3=1; __utmt=1; _ga_KWQMVELYQV=GS1.1.1680286560.24.1.1680287260.45.0.0; _ga=GA1.2.2049969643.1676364717; return_to=https%3A%2F%2Fwww.phillipjeffries.com%2Fshop%2Fwallcoverings; _phillip_jeffries_session=YXpZZktRRCtrdjF4dUFsMjNZazhQMjd6WXEyRVFQWDZ6SCtSV1M1Tk1lNXFJMllzTlcreWNkRllRTDJJU0F3RjZXRm5MdVE0RlAxS0VOejZRM3REWldKaHljNUh4VDUzYU9pYi9xZVMrSzJZdTFialVVNUJ6YXA1bS8ra01ZL25GV0ZaaUd6NXRmVUxRdXNOUDhwT2ZyZU9SbHBrR2JDc3RDZ1pFSUNvN1FkcGM4YWhzUDFycHpLVlpHbC9WRVI2K2ZBTm90MFY3TmdsWE1sNTBNVkF0ZXpiMjRLa0V6Y1ZZaTk3dnBpN1NXcHJjM2Q0OStOMGdDaksyV2dnZnpTU1hkWDVoWGx4SjNpUTVoWGFLUDNIblpkQStBRU5WRmJ4S1luQ3p6bCtxYnlQYXFUK2haUzl2V2dYaXFUdjNOV0lNSXN4M3ZsTlEyUjBvZTNCMHA5dkZvZzRhcmh4eU9tSi9mSm0yT1NXeHZrUXRWUDN5NUJQTXRDb3dsZ0FmeXc4MHlMamFSRzBkTzJ2dTJ6c0lVNlN5cC9ua001Z3NNcmVNTEFOUUtlQmNKblovZXd0ZGhlVzk4OXVjdkxuY2FQUC9nNFp2b0pmQkZYcTAwWi9Lai83OWdoNFJXRGdsNktTaVJTTGNqejI4YzJaYkRxL1p5N1VqeHR3YWdkNER2RjhFbVFYWVZVMkZyQW9hYzhqMS9lNkhBbzJXRGhLK25tVWovZ1JhT0FiZVdpWEQ3UU5YV1RBQTFtaVA4amNLQ3YzZ2pWR21WNzdTMVF5MitESFpMWmNzVDRhclNKMWVHYmc3dnFPZWxpQzhoNTlYbDc5SjVMN2VnMG1aN2syQmNKQkxNRC8wblhIUHF0eElrbVdtUkVnbVExaG8rTkx2eWpkUFJ5SmUrREhGb0F5SEJuMkVSR25iUjhzdVFYZzVxTXlXYkxBRXZ5MGVJTUEyeWFLOWZJM1JZcUI3Y3JBSVF0UTJwMmVwQXFXSTV0L0owWHNTc2w4NGR6d2xQT1IvTjkzMnpaMEZod0tNWlFSczN4a2E3MVJTb09HUU9BT1g4amp5d0p1TkFCNzVRZHBHblhpdENxUlBFdTZuZ0E0dTB4djRxcFFwT1BMUWNSbUhYOHkwMmh0SC9DQmhlaWNqS1dmQ0ZaZ3NMUDBtb2s9LS00TjVzbkRUNDNkRCtwblJER0NkR09RPT0%3D--d0cfee19c3257cd7a36b04837d8bb269a44232b0; __hssc=105233308.4.1680286568778; __utmb=198764782.5.10.1680286559'
+API_TOKEN = 'AnfaWgmnFeRpWbKYLybCKqjLPo+iTqE2/1Z8UtKYCMZ3cbqg3TVpFPnikSnz6v4loAyvKps9hMoGdJFHbinq/Q=='
 API_CONTENT_TYPE = 'application/json;charset=UTF-8'
 API_ACCEPT_TYPE = 'application/json, text/javascript'
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -117,6 +117,11 @@ class Command(BaseCommand):
                         }),
                         verify=False
                     )
+                    if r.status_code == 401:
+                        debug("PJ EDI", 2, "PJ Token expired. Please refresh!".format(
+                            mpn, orderNumber))
+                        return
+
                     j = json.loads(r.text)
                     print(j)
                     time.sleep(3)
@@ -160,6 +165,11 @@ class Command(BaseCommand):
                     }),
                     verify=False
                 )
+                if r.status_code == 401:
+                    debug("PJ EDI", 2, "PJ Token expired. Please refresh!".format(
+                        mpn, orderNumber))
+                    return
+                
                 j = json.loads(r.text)
                 print(j)
 
@@ -206,6 +216,11 @@ class Command(BaseCommand):
                     }),
                     verify=False
                 )
+                if r.status_code == 401:
+                    debug("PJ EDI", 2, "PJ Token expired. Please refresh!".format(
+                        mpn, orderNumber))
+                    return
+                
                 j = json.loads(r.text)
                 print(j)
 
