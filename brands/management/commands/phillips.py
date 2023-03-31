@@ -48,6 +48,9 @@ class Command(BaseCommand):
         if "add" in options['functions']:
             processor.add()
 
+        if "update" in options['functions']:
+            processor.update()
+
         if "tag" in options['functions']:
             processor.tag()
 
@@ -304,18 +307,39 @@ class Processor:
                 continue
 
             try:
-                productId = shopify.NewProductBySku(product.sku, self.con)
-                if productId == None:
-                    continue
-
-                product.productId = productId
+                product.productId = shopify.NewProductBySku(
+                    product.sku, self.con)
                 product.save()
 
                 self.downloadImages(
-                    productId, product.thumbnail, product.roomsets)
+                    product.productId, product.thumbnail, product.roomsets)
 
                 debug.debug(BRAND, 0, "Created New product ProductID: {}, SKU: {}".format(
-                    productId, product.sku))
+                    product.productId, product.sku))
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+
+    def update(self):
+        products = Feed.objects.filter(brand=BRAND)
+
+        for product in products:
+            try:
+                createdInDatabase = self.databaseManager.createProduct(
+                    BRAND, product)
+                if not createdInDatabase:
+                    continue
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            try:
+                self.csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(product.productId))
+                self.con.commit()
+
+                debug.debug(BRAND, 0, "Updated the product ProductID: {}, SKU: {}".format(
+                    product.productId, product.sku))
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
