@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from brands.models import Feed
+from feed.models import Feed
 
 import os
 import environ
@@ -7,7 +7,7 @@ import pymysql
 import xlrd
 from shutil import copyfile
 
-from library import database, debug, shopify, common
+from library import database, debug, shopify
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -40,6 +40,9 @@ class Command(BaseCommand):
 
         if "sample" in options['functions']:
             processor.sample()
+
+        if "shipping" in options['functions']:
+            processor.shipping()
 
 
 class Processor:
@@ -129,11 +132,8 @@ class Processor:
 
                     statusP = True
                     statusS = False
-                    try:
-                        stockNote = str(sh.cell_value(
-                            i, 21)).strip().capitalize()
-                    except:
-                        stockNote = ""
+                    stockNote = str(sh.cell_value(i, 21)).strip().capitalize()
+                    shipping = str(sh.cell_value(i, 17)).strip().lower()
 
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
@@ -169,7 +169,8 @@ class Processor:
 
                     'statusP': statusP,
                     'statusS': statusS,
-                    'stockNote': stockNote
+                    'stockNote': stockNote,
+                    'shipping': shipping
                 }
                 products.append(product)
 

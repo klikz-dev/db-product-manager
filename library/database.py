@@ -63,6 +63,8 @@ class DatabaseManager:
                     statusS=product.get('statusS', False),
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),
+                    stockNote=product.get('stockNote', 0),
+                    shipping=product.get('shipping', 0),
                     thumbnail=product.get('thumbnail', ""),
                     roomsets=product.get('roomsets', [])
                 )
@@ -354,7 +356,7 @@ class DatabaseManager:
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
-            if not "White Glove" in product.shipping and product.productId:
+            if "white glove" in product.shipping and product.productId:
                 self.csr.execute("CALL AddToProductTag ({}, {})".format(
                     common.sq(product.sku), common.sq("White Glove")))
                 self.con.commit()

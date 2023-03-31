@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from brands.models import Feed
+from feed.models import Feed
 
 import environ
 import requests
