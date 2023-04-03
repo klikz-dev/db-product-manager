@@ -2,6 +2,7 @@ import requests
 import requests
 import json
 import xml.etree.ElementTree as ET
+from urllib.parse import quote
 
 from mysql.models import ProductInventory, ProductManufacturer
 from shopify.models import Product
@@ -25,7 +26,7 @@ def inventory(sku):
             response = requests.request(
                 "GET",
                 "https://www.e-designtrade.com/api/stock_onhand.asp?user=DBEST767&password=b1028H47kkr&pattern={}&color={}".format(
-                    product.pattern, product.color),
+                    quote(product.pattern), quote(product.color)),
                 headers={
                     'Authorization': 'Token d71bcdc1b60d358e01182da499fd16664a27877a',
                     'Cookie': 'ASPSESSIONIDAURDSCBS=MECPGHNBKCFFKBBBKKAEJOGO'
