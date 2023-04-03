@@ -22,6 +22,14 @@ class DatabaseManager:
         failed = 0
         for product in products:
             try:
+                Feed.objects.get(manufacturer=product.get('manufacturer'), type=product.get(
+                    'type'), pattern=product.get('pattern'), color=product.get('color'))
+                debug.debug("DatabaseManager", 1, "Duplicated Feed MPN: {}".format(product.get('mpn')))
+                continue
+            except Feed.DoesNotExist:
+                pass
+
+            try:
                 feed = Feed.objects.create(
                     mpn=product.get('mpn'),
                     sku=product.get('sku'),
@@ -46,6 +54,7 @@ class DatabaseManager:
                     repeatV=product.get('repeatV', 0),
                     repeat=product.get('repeat', ""),
                     content=product.get('content', ""),
+                    match=product.get('content', ""),
                     material=product.get('material', ""),
                     finish=product.get('finish', ""),
                     care=product.get('care', ""),
@@ -63,10 +72,11 @@ class DatabaseManager:
                     map=product.get('map', 0),
                     statusP=product.get('statusP', False),
                     statusS=product.get('statusS', False),
+                    whiteShip=product.get('whiteShip', False),
+                    quickShip=product.get('quickShip', False),
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),
                     stockNote=product.get('stockNote', 0),
-                    shipping=product.get('shipping', 0),
                     thumbnail=product.get('thumbnail', ""),
                     roomsets=product.get('roomsets', [])
                 )
@@ -150,6 +160,12 @@ class DatabaseManager:
     def createProduct(self, brand, product, formatPrice=True):
         if product.statusP == False or product.productId != None:
             return False
+        
+        ptype = product.type
+        manufacturer = product.manufacturer
+
+        if ptype in manufacturer:
+            manufacturer = str(manufacturer).replace(ptype, "").strip()
 
         if product.title != "":
             name = " | ".join(
@@ -158,9 +174,9 @@ class DatabaseManager:
                 (product.manufacturer, product.title))
         else:
             name = " | ".join(
-                (product.manufacturer, product.pattern, product.color, product.type))
+                (product.manufacturer, product.pattern, product.color, ptype))
             title = " ".join(
-                (product.manufacturer, product.pattern, product.color, product.type))
+                (product.manufacturer, product.pattern, product.color, ptype))
 
         description = title
         vname = title
@@ -204,6 +220,8 @@ class DatabaseManager:
 
         if product.content != "":
             bodyHTML += "Content: {}<br/>".format(product.content)
+        if product.match != "":
+            bodyHTML += "Content: {}<br/>".format(product.match)
         if product.material != "":
             bodyHTML += "Material: {}<br/>".format(product.material)
         if product.finish != "":
@@ -225,16 +243,16 @@ class DatabaseManager:
         if product.usage != "":
             bodyHTML += "Usage: {}<br/>".format(product.usage)
         else:
-            bodyHTML += "Usage: {}<br/><br/>".format(product.type)
+            bodyHTML += "Usage: {}<br/><br/>".format(ptype)
 
-        bodyHTML += "{} {}".format(product.manufacturer, product.type)
+        bodyHTML += "{} {}".format(manufacturer, ptype)
 
         try:
             useMAP = const.markup[brand]["useMAP"]
             consumerMarkup = const.markup[brand]["consumer"]
             tradeMarkup = const.markup[brand]["trade"]
 
-            if useMAP:
+            if useMAP and product.map > 0:
                 if formatPrice:
                     price = common.formatprice(product.map, 1)
                 else:
@@ -351,13 +369,37 @@ class DatabaseManager:
             except Exception as e:
                 debug.debug(brand, 1, str(e))
 
-    def updateStock(self, brand, stocks, stockType = 1):
+    def downloadImage(self, productId, thumbnail, roomsets):
+        if thumbnail and thumbnail.strip() != "":
+            try:
+                common.picdownload2(thumbnail, "{}.jpg".format(productId))
+            except Exception as e:
+                debug.debug("DatabaseManager", 1, str(e))
+
+        if len(roomsets) > 0:
+            idx = 2
+            for roomset in roomsets:
+                try:
+                    common.roomdownload(
+                        roomset, "{}_{}.jpg".format(productId, idx))
+                    idx = idx + 1
+                except Exception as e:
+                    debug.debug("DatabaseManager", 1, str(e))
+
+    def downloadImages(self, brand):
+        products = Feed.objects.filter(brand=brand)
+        for product in products:
+            self.downloadImage(product.productId,
+                               product.thumbnail, product.roomsets)
+
+    def updateStock(self, brand, stocks, stockType=1):
         for stock in stocks:
             try:
-                self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(stock['sku'], stock['quantity'], stockType, stock['note'], brand))
+                self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(
+                    stock['sku'], stock['quantity'], stockType, stock['note'], brand))
                 self.con.commit()
                 debug.debug(brand, 0,
-                      "Updated inventory. {}.".format(stock))
+                            "Updated inventory. {}.".format(stock))
             except Exception as e:
                 debug.debug(brand, 1, str(e))
 
@@ -414,11 +456,11 @@ class DatabaseManager:
                 debug.debug("DatabaseManager", 0,
                             "Disable sample for Brand: {}, SKU: {}".format(brand, product.sku))
 
-    def shipping(self, brand):
+    def whiteShip(self, brand):
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
-            if ("white glove" in product.shipping.lower() or "ltl" in product.shipping.lower()) and product.productId:
+            if product.whiteShip and product.productId:
                 self.csr.execute("CALL AddToProductTag ({}, {})".format(
                     common.sq(product.sku), common.sq("White Glove")))
                 self.con.commit()
@@ -429,3 +471,19 @@ class DatabaseManager:
 
                 debug.debug("DatabaseManager", 0,
                             "White Glove shipping for Brand: {}, SKU: {}".format(brand, product.sku))
+
+    def quickShip(self, brand):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            if product.quickShip and product.productId:
+                self.csr.execute("CALL AddToProductTag ({}, {})".format(
+                    common.sq(product.sku), common.sq("Quick Ship")))
+                self.con.commit()
+
+                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                self.con.commit()
+
+                debug.debug("DatabaseManager", 0,
+                            "Quick shipping for Brand: {}, SKU: {}".format(brand, product.sku))

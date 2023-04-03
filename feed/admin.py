@@ -12,17 +12,17 @@ class FeedAdmin(admin.ModelAdmin):
         ('Main Information', {'fields': [
          'description', 'usage', 'disclaimer']}),
         ('Additional Information', {'fields': ['width', 'length', 'height', 'size', 'dimension', 'yards',
-         'repeatH', 'repeatV', 'repeat', 'content', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
+         'repeatH', 'repeatV', 'repeat', 'content', 'match', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
         ('Measurement', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['colors', 'tags']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
         ('Availability', {'fields': [
-         'statusP', 'statusS', 'stockP', 'stockS', 'stockNote', 'shipping']}),
+         'statusP', 'statusS', 'quickShip', 'whiteShip', 'stockP', 'stockS', 'stockNote']}),
         ('Assets', {'fields': ['thumbnail', 'roomsets']}),
     ]
 
     list_display = ('mpn', 'sku', 'upc', 'pattern', 'color', 'productId', 'brand', 'type',
-                    'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'stockP', 'stockS')
+                    'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'whiteShip', 'quickShip', 'stockP', 'stockS')
 
     list_filter = ['brand', 'type', 'manufacturer',
                    'uom', 'statusP', 'statusS']

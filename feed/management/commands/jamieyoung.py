@@ -300,7 +300,7 @@ class Processor:
         self.databaseManager.sample(BRAND)
 
     def shipping(self):
-        self.databaseManager.shipping(BRAND)
+        self.databaseManager.whiteShip(BRAND)
 
     def inventory(self):
         stocks = []

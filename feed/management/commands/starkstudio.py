@@ -115,14 +115,16 @@ class Processor:
                         cost = round(
                             float(str(sh.cell_value(i, 5)).replace("$", "")), 2)
                     except:
-                        debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
+                        debug.debug(
+                            BRAND, 1, "Produt Cost error {}".format(mpn))
                         continue
 
                     try:
                         map = round(
                             float(str(sh.cell_value(i, 6)).replace("$", "")), 2)
                     except:
-                        debug.debug(BRAND, 1, "Produt MAP error {}".format(mpn))
+                        debug.debug(
+                            BRAND, 1, "Produt MAP error {}".format(mpn))
                         continue
 
                     # Tagging
@@ -132,7 +134,9 @@ class Processor:
                     statusP = True
                     statusS = False
                     stockNote = str(sh.cell_value(i, 21)).strip().capitalize()
-                    shipping = str(sh.cell_value(i, 17)).strip().lower()
+                    whiteShip = False
+                    if "white glove" in product.shipping.lower() or "ltl" in product.shipping.lower():
+                        whiteShip = True
 
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
@@ -169,7 +173,7 @@ class Processor:
                     'statusP': statusP,
                     'statusS': statusS,
                     'stockNote': stockNote,
-                    'shipping': shipping
+                    'whiteShip': whiteShip
                 }
                 products.append(product)
 
@@ -237,7 +241,7 @@ class Processor:
         self.databaseManager.sample(BRAND)
 
     def shipping(self):
-        self.databaseManager.shipping(BRAND)
+        self.databaseManager.whiteShip(BRAND)
 
     def inventory(self, mpn):
         stockNote = ""
