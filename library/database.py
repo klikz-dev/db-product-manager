@@ -1,4 +1,4 @@
-from library import debug, common, const
+from library import debug, common, const, shopify
 from feed.models import Feed
 from mysql.models import Type
 
@@ -299,6 +299,62 @@ class DatabaseManager:
 
         return True
 
+    def createProducts(self, brand):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            try:
+                createdInDatabase = self.createProduct(brand, product)
+                if not createdInDatabase:
+                    continue
+            except Exception as e:
+                debug.debug(brand, 1, str(e))
+                continue
+
+            try:
+                product.productId = shopify.NewProductBySku(
+                    product.sku, self.con)
+                product.save()
+
+                debug.debug(brand, 0, "Created New product ProductID: {}, SKU: {}".format(
+                    product.productId, product.sku))
+
+            except Exception as e:
+                debug.debug(brand, 1, str(e))
+
+    def updateProducts(self, brand):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            try:
+                createdInDatabase = self.createProduct(brand, product)
+                if not createdInDatabase:
+                    continue
+            except Exception as e:
+                debug.debug(brand, 1, str(e))
+                continue
+
+            try:
+                self.csr.execute(
+                    "CALL AddToPendingUpdateProduct ({})".format(product.productId))
+                self.con.commit()
+
+                debug.debug(brand, 0, "Updated the product ProductID: {}, SKU: {}".format(
+                    product.productId, product.sku))
+
+            except Exception as e:
+                debug.debug(brand, 1, str(e))
+
+    def updateStock(self, brand, stocks, stockType = 1):
+        for stock in stocks:
+            try:
+                self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(stock['sku'], stock['quantity'], stockType, stock['note'], brand))
+                self.con.commit()
+                debug.debug(brand, 0,
+                      "Updated inventory. {}.".format(stock))
+            except Exception as e:
+                debug.debug(brand, 1, str(e))
+
     def updateTags(self, brand, category=True):
         products = Feed.objects.filter(brand=brand)
 
@@ -356,7 +412,7 @@ class DatabaseManager:
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
-            if "white glove" in product.shipping and product.productId:
+            if ("white glove" in product.shipping.lower() or "ltl" in product.shipping.lower()) and product.productId:
                 self.csr.execute("CALL AddToProductTag ({}, {})".format(
                     common.sq(product.sku), common.sq("White Glove")))
                 self.con.commit()

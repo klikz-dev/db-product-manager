@@ -115,15 +115,14 @@ class Processor:
                         cost = round(
                             float(str(sh.cell_value(i, 5)).replace("$", "")), 2)
                     except:
-                        debug("StarkStudio", 1,
-                              "Produt Cost error {}".format(mpn))
+                        debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
                         continue
 
                     try:
                         map = round(
                             float(str(sh.cell_value(i, 6)).replace("$", "")), 2)
                     except:
-                        debug("StarkStudio", 1, "Produt MAP error {}".format(mpn))
+                        debug.debug(BRAND, 1, "Produt MAP error {}".format(mpn))
                         continue
 
                     # Tagging
@@ -226,55 +225,10 @@ class Processor:
         self.databaseManager.statusSync(BRAND)
 
     def add(self):
-        products = Feed.objects.filter(brand=BRAND)
-
-        for product in products:
-            try:
-                createdInDatabase = self.databaseManager.createProduct(
-                    BRAND, product)
-                if not createdInDatabase:
-                    continue
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            try:
-                product.productId = shopify.NewProductBySku(
-                    product.sku, self.con)
-                product.save()
-
-                self.downloadImages(
-                    product.productId, product.thumbnail, product.roomsets)
-
-                debug.debug(BRAND, 0, "Created New product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+        self.databaseManager.createProducts(BRAND)
 
     def update(self):
-        products = Feed.objects.filter(brand=BRAND)
-
-        for product in products:
-            try:
-                createdInDatabase = self.databaseManager.createProduct(
-                    BRAND, product)
-                if not createdInDatabase:
-                    continue
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            try:
-                self.csr.execute(
-                    "CALL AddToPendingUpdateProduct ({})".format(product.productId))
-                self.con.commit()
-
-                debug.debug(BRAND, 0, "Updated the product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+        self.databaseManager.updateProducts(BRAND)
 
     def tag(self):
         self.databaseManager.updateTags(BRAND, False)
