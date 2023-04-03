@@ -60,6 +60,9 @@ class Command(BaseCommand):
         if "fixMissingImages" in options['functions']:
             self.fixMissingImages()
 
+        if "discoSamples" in options['functions']:
+            self.discoSamples()
+
         if "main" in options['functions']:
             self.getProducts()
             self.getProductIds()
@@ -677,6 +680,33 @@ class Command(BaseCommand):
                         product.thumbnail, "{}.jpg".format(product.productId))
                 except:
                     pass
+
+        csr.close()
+        con.close()
+
+    def discoSamples(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Pindler.objects.all()
+        for product in products:
+            sku = product.sku
+
+            if not product.productId:
+                continue
+
+            # if not product.sampleStatus:
+            if True:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(sku), sq("NoSample")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('Scalamandre', 0, "Added No Sample Tag. SKU: {}".format(sku))
 
         csr.close()
         con.close()

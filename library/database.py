@@ -41,9 +41,11 @@ class DatabaseManager:
                     height=product.get('height', 0),
                     size=product.get('size', ""),
                     dimension=product.get('dimension', ""),
+                    yards=product.get('yards', 0),
                     repeatH=product.get('repeatH', 0),
                     repeatV=product.get('repeatV', 0),
                     repeat=product.get('repeat', ""),
+                    content=product.get('content', ""),
                     material=product.get('material', ""),
                     finish=product.get('finish', ""),
                     care=product.get('care', ""),
@@ -190,6 +192,8 @@ class DatabaseManager:
             bodyHTML += "Size: {}<br/>".format(product.size)
         if product.dimension != "":
             bodyHTML += "Dimension: {}<br/>".format(product.dimension)
+        if float(product.yards) > 0:
+            bodyHTML += "Roll Length: {} yds<br/>".format(product.yards)
 
         if float(product.repeatH) > 0:
             bodyHTML += "Horizontal Repeat: {} in<br/>".format(product.repeatH)
@@ -198,6 +202,8 @@ class DatabaseManager:
         if product.repeat != "":
             bodyHTML += "Repeat: {}<br/>".format(product.repeat)
 
+        if product.content != "":
+            bodyHTML += "Content: {}<br/>".format(product.content)
         if product.material != "":
             bodyHTML += "Material: {}<br/>".format(product.material)
         if product.finish != "":

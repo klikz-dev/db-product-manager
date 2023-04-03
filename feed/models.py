@@ -37,12 +37,15 @@ class Feed(models.Model):
         max_length=200, default=None, null=True, blank=True)  # explains width x length
     dimension = models.CharField(
         max_length=200, default=None, null=True, blank=True)  # explains width x length x height
+    yards = models.FloatField(default=0, null=True, blank=True)  # yards per roll
 
     repeatH = models.FloatField(default=0, null=True, blank=True)
     repeatV = models.FloatField(default=0, null=True, blank=True)
     repeat = models.CharField(
         max_length=200, default=None, null=True, blank=True)  # explains repeatH x repeatV
 
+    content = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     material = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     finish = models.CharField(

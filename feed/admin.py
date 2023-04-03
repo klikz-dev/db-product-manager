@@ -11,8 +11,8 @@ class FeedAdmin(admin.ModelAdmin):
          'brand', 'type', 'manufacturer', 'collection']}),
         ('Main Information', {'fields': [
          'description', 'usage', 'disclaimer']}),
-        ('Additional Information', {'fields': ['width', 'length', 'height', 'size', 'dimension',
-         'repeatH', 'repeatV', 'repeat', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
+        ('Additional Information', {'fields': ['width', 'length', 'height', 'size', 'dimension', 'yards',
+         'repeatH', 'repeatV', 'repeat', 'content', 'material', 'finish', 'care', 'specs', 'features', 'weight', 'country']}),
         ('Measurement', {'fields': ['uom', 'minimum', 'increment']}),
         ('Tagging', {'fields': ['colors', 'tags']}),
         ('Pricing', {'fields': ['cost', 'msrp', 'map']}),

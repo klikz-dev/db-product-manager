@@ -1013,7 +1013,8 @@ class Command(BaseCommand):
             if not product.productId:
                 continue
 
-            if not product.sampleStatus:
+            # if not product.sampleStatus:
+            if True:
                 csr.execute("CALL AddToProductTag ({}, {})".format(
                     sq(sku), sq("NoSample")))
                 con.commit()

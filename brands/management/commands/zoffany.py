@@ -67,6 +67,9 @@ class Command(BaseCommand):
         if "bestSellers" in options['functions']:
             self.bestSellers()
 
+        if "discoSamples" in options['functions']:
+            self.discoSamples()
+
         if "updateStock" in options['functions']:
             while True:
                 self.updateStock()
@@ -861,6 +864,33 @@ class Command(BaseCommand):
             con.commit()
 
             debug('Zoffany', 0, "Added to Best selling. SKU: {}".format(sku))
+
+        csr.close()
+        con.close()
+
+    def discoSamples(self):
+        con = pymysql.connect(host=db_host, port=db_port, user=db_username,
+                              passwd=db_password, db=db_name, connect_timeout=5)
+        csr = con.cursor()
+
+        products = Zoffany.objects.all()
+        for product in products:
+            sku = product.sku
+
+            if not product.productId:
+                continue
+
+            # if not product.sampleStatus:
+            if True:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    sq(sku), sq("NoSample")))
+                con.commit()
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
+
+                debug('Scalamandre', 0, "Added No Sample Tag. SKU: {}".format(sku))
 
         csr.close()
         con.close()
