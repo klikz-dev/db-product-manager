@@ -44,11 +44,11 @@ class Command(BaseCommand):
         if "tag" in options['functions']:
             processor.tag()
 
-        if "sample" in options['functions']:
-            processor.sample()
+        if "white" in options['functions']:
+            processor.white()
 
-        if "shipping" in options['functions']:
-            processor.shipping()
+        if "quick" in options['functions']:
+            processor.quick()
 
 
 class Processor:
@@ -64,22 +64,22 @@ class Processor:
 
     def test(self):
         try:
-            reqCollections = requests.get(
-                "{}/collections.php".format(API_BASE_URL))
-            resCollections = json.loads(reqCollections.text)
-            collections = resCollections['results']
+            reqProduct = requests.get(
+                "{}/product.php/{}".format(API_BASE_URL, "OI0731"))
+            resProduct = json.loads(reqProduct.text)
+            # product = resProduct['results'][0]
         except Exception as e:
             debug.debug(BRAND, 1, str(e))
             return
 
-        print(collections)
+        print(resProduct)
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
         try:
             reqCollections = requests.get(
-                "{}/collections.php".format(API_BASE_URL))
+                "{}/product.php".format(API_BASE_URL))
             resCollections = json.loads(reqCollections.text)
             collections = resCollections['results']
         except Exception as e:
@@ -281,7 +281,7 @@ class Processor:
         return products
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "/files/images/york/")
+        fnames = os.listdir(FILEDIR + "images/york/")
         for fname in fnames:
             try:
                 if "_" in fname:
@@ -330,10 +330,14 @@ class Processor:
         self.databaseManager.createProducts(BRAND)
 
     def update(self):
-        self.databaseManager.updateProducts(BRAND)
+        products = Feed.objects.filter(brand=BRAND)
+        self.databaseManager.updateProducts(BRAND, products)
+
+    def tag(self):
+        self.databaseManager.updateTags(BRAND)
 
     def white(self):
-        self.databaseManager.whiteShip(BRAND, False)
+        self.databaseManager.whiteShip(BRAND)
 
     def quick(self):
-        self.databaseManager.quickShip(BRAND, False)
+        self.databaseManager.quickShip(BRAND)

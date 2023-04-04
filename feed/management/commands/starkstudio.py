@@ -35,6 +35,12 @@ class Command(BaseCommand):
         if "update" in options['functions']:
             processor.update()
 
+        if "price" in options['functions']:
+            processor.price()
+
+        if "image" in options['functions']:
+            processor.image()
+
         if "tag" in options['functions']:
             processor.tag()
 
@@ -59,6 +65,35 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
+        # Price Update Manual
+        prices = {}
+        wb = xlrd.open_workbook(FILEDIR + 'stark-studio-price.xlsx')
+        sh = wb.sheet_by_index(0)
+        for i in range(2, sh.nrows):
+            # Primary Keys
+            mpn = str(sh.cell_value(i, 3)).strip()
+            # Pricing
+            try:
+                cost = round(
+                    float(str(sh.cell_value(i, 4)).replace("$", "")), 2)
+            except:
+                debug.debug(
+                    BRAND, 1, "Produt Cost error {}".format(mpn))
+                continue
+
+            try:
+                map = round(
+                    float(str(sh.cell_value(i, 5)).replace("$", "")), 2)
+            except:
+                debug.debug(
+                    BRAND, 1, "Produt MAP error {}".format(mpn))
+                continue
+
+            prices[mpn] = {
+                'cost': cost,
+                'map': map
+            }
+
         # Get Product Feed
         products = []
 
@@ -68,14 +103,21 @@ class Processor:
             for i in range(2, sh.nrows):
                 try:
                     # Primary Keys
+                    mpn_origin = str(sh.cell_value(i, 3)).strip()
                     mpn = str(sh.cell_value(i, 4)).strip()
                     sku = "SS {}".format(mpn)
                     try:
                         upc = int(sh.cell_value(i, 2))
                     except:
                         upc = ""
-                    pattern = str(sh.cell_value(i, 0)).split("-")[0].strip()
-                    color = str(sh.cell_value(i, 1)).strip()
+
+                    if "-" in str(sh.cell_value(i, 0)):
+                        pattern = str(sh.cell_value(i, 0)).split(
+                            "-")[0].strip()
+                        color = str(sh.cell_value(i, 0)).split("-")[1].strip()
+                    else:
+                        pattern = str(sh.cell_value(i, 0)).strip()
+                        color = str(sh.cell_value(i, 1)).strip()
 
                     # Categorization
                     brand = BRAND
@@ -127,15 +169,19 @@ class Processor:
                             BRAND, 1, "Produt MAP error {}".format(mpn))
                         continue
 
+                    if mpn_origin in prices:
+                        cost = prices[mpn_origin]['cost']
+                        map = prices[mpn_origin]['map']
+
                     # Tagging
                     tags = description
-                    colors = color
+                    colors = str(sh.cell_value(i, 1)).strip()
 
                     statusP = True
                     statusS = False
                     stockNote = str(sh.cell_value(i, 21)).strip().capitalize()
                     whiteShip = False
-                    if "white glove" in product.shipping.lower() or "ltl" in product.shipping.lower():
+                    if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
                         whiteShip = True
 
                 except Exception as e:
@@ -181,7 +227,7 @@ class Processor:
         return products
 
     def image(self):
-        imageDir = FILEDIR + "images/starkstudio/"
+        imageDir = FILEDIR + "images/stark/"
 
         products = Feed.objects.filter(brand=BRAND)
         for product in products:
@@ -189,13 +235,7 @@ class Processor:
                 ",", "").replace("/", " ").lower()
 
             for fname in os.listdir(imageDir):
-                try:
-                    imageStr = fname.lower().replace(
-                        ".jpg", "").split(" ", 1)[1]
-                except:
-                    imageStr = fname.lower().replace(".jpg", "")
-
-                if productStr in imageStr or imageStr in productStr:
+                if productStr in fname.lower() or product.pattern in fname.lower():
                     if "_CL" in fname:
                         print("Roomset 2: {}".format(fname))
                         copyfile(imageDir + fname, FILEDIR +
@@ -230,6 +270,9 @@ class Processor:
 
     def add(self):
         self.databaseManager.createProducts(BRAND)
+
+    def price(self):
+        self.databaseManager.updatePrices(BRAND, False)
 
     def update(self):
         self.databaseManager.updateProducts(BRAND)

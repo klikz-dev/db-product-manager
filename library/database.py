@@ -22,14 +22,6 @@ class DatabaseManager:
         failed = 0
         for product in products:
             try:
-                Feed.objects.get(manufacturer=product.get('manufacturer'), type=product.get(
-                    'type'), pattern=product.get('pattern'), color=product.get('color'))
-                debug.debug("DatabaseManager", 1, "Duplicated Feed MPN: {}".format(product.get('mpn')))
-                continue
-            except Feed.DoesNotExist:
-                pass
-
-            try:
                 feed = Feed.objects.create(
                     mpn=product.get('mpn'),
                     sku=product.get('sku'),
@@ -157,10 +149,8 @@ class DatabaseManager:
         debug.debug("DatabaseManager", 0,
                     "Finished status sync for {}. total: {}, published: {}, unpublished: {}".format(brand, total, pb, upb))
 
-    def createProduct(self, brand, product, formatPrice=True):
-        if product.statusP == False or product.productId != None:
-            return False
-        
+    def createProduct(self, brand, product, formatPrice):
+
         ptype = product.type
         manufacturer = product.manufacturer
 
@@ -168,15 +158,13 @@ class DatabaseManager:
             manufacturer = str(manufacturer).replace(ptype, "").strip()
 
         if product.title != "":
-            name = " | ".join(
-                (product.manufacturer, product.title))
-            title = " ".join(
-                (product.manufacturer, product.title))
+            name = " | ".join((manufacturer, product.title))
+            title = " ".join((manufacturer, product.title))
         else:
             name = " | ".join(
-                (product.manufacturer, product.pattern, product.color, ptype))
+                (manufacturer, product.pattern, product.color, ptype))
             title = " ".join(
-                (product.manufacturer, product.pattern, product.color, ptype))
+                (manufacturer, product.pattern, product.color, ptype))
 
         description = title
         vname = title
@@ -323,12 +311,16 @@ class DatabaseManager:
 
         return True
 
-    def createProducts(self, brand):
+    def createProducts(self, brand, formatPrice=True):
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
+            if product.statusP == False or product.productId != None:
+                return False
+
             try:
-                createdInDatabase = self.createProduct(brand, product)
+                createdInDatabase = self.createProduct(
+                    brand, product, formatPrice)
                 if not createdInDatabase:
                     continue
             except Exception as e:
@@ -346,12 +338,14 @@ class DatabaseManager:
             except Exception as e:
                 debug.debug(brand, 1, str(e))
 
-    def updateProducts(self, brand):
-        products = Feed.objects.filter(brand=brand)
-
+    def updateProducts(self, brand, products, formatPrice=True):
         for product in products:
+            if product.statusP == False or product.productId == None:
+                return False
+
             try:
-                createdInDatabase = self.createProduct(brand, product)
+                createdInDatabase = self.createProduct(
+                    brand, product, formatPrice)
                 if not createdInDatabase:
                     continue
             except Exception as e:
@@ -368,6 +362,75 @@ class DatabaseManager:
 
             except Exception as e:
                 debug.debug(brand, 1, str(e))
+
+    def updatePrices(self, brand, formatPrice=True):
+        products = Feed.objects.filter(brand=brand)
+
+        for product in products:
+            cost = product.cost
+            productId = product.productId
+
+            if productId != "" and productId != None:
+                try:
+                    useMAP = const.markup[brand]["useMAP"]
+                    consumerMarkup = const.markup[brand]["consumer"]
+                    tradeMarkup = const.markup[brand]["trade"]
+
+                    if useMAP and product.map > 0:
+                        if formatPrice:
+                            price = common.formatprice(product.map, 1)
+                        else:
+                            price = product.map
+                    else:
+                        if formatPrice:
+                            price = common.formatprice(
+                                product.cost, consumerMarkup)
+                        else:
+                            price = product.cost * consumerMarkup
+
+                    if formatPrice:
+                        priceTrade = common.formatprice(
+                            product.cost, tradeMarkup)
+                    else:
+                        priceTrade = product.cost * tradeMarkup
+                except Exception as e:
+                    debug.debug("DatabaseManager", 1, str(e))
+                    return False
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+
+                try:
+                    self.csr.execute("SELECT PV1.Cost, PV1.Price, PV2.Price AS TradePrice FROM ProductVariant PV1, ProductVariant PV2 WHERE PV1.ProductID = {} AND PV2.ProductID = {} AND PV1.IsDefault = 1 AND PV2.Name LIKE 'Trade - %' AND PV1.Cost IS NOT NULL AND PV2.Cost IS NOT NULL".format(productId, productId))
+                    tmp = self.csr.fetchone()
+                    if tmp == None:
+                        debug.debug(
+                            "DatabaseManager", 1, "Variant not found: ProductId: {}".format(productId))
+                        continue
+
+                    oCost = float(tmp[0])
+                    oPrice = float(tmp[1])
+                    oTrade = float(tmp[2])
+
+                    if cost != oCost or price != oPrice or priceTrade != oTrade:
+                        self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                            productId, cost, price, priceTrade))
+                        self.con.commit()
+                        self.csr.execute(
+                            "CALL AddToPendingUpdatePrice ({})".format(productId))
+                        self.con.commit()
+
+                        debug.debug("DatabaseManager", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                            productId, cost, price, priceTrade))
+                    else:
+                        debug.debug("DatabaseManager", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                            productId, price, priceTrade))
+
+                except:
+                    debug.debug("DatabaseManager", 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                        productId, cost, price, priceTrade))
+                    continue
 
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
@@ -476,14 +539,15 @@ class DatabaseManager:
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
-            if product.quickShip and product.productId:
-                self.csr.execute("CALL AddToProductTag ({}, {})".format(
-                    common.sq(product.sku), common.sq("Quick Ship")))
-                self.con.commit()
+            if product.productId:
+                if product.quickShip:
+                    self.csr.execute("CALL AddToProductTag ({}, {})".format(
+                        common.sq(product.sku), common.sq("Quick Ship")))
+                    self.con.commit()
 
-                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
-                    product.productId))
-                self.con.commit()
+                    self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                        product.productId))
+                    self.con.commit()
 
-                debug.debug("DatabaseManager", 0,
-                            "Quick shipping for Brand: {}, SKU: {}".format(brand, product.sku))
+                    debug.debug("DatabaseManager", 0,
+                                "Quick shipping for Brand: {}, SKU: {}".format(brand, product.sku))
