@@ -65,7 +65,7 @@ class Processor:
     def test(self):
         try:
             reqProduct = requests.get(
-                "{}/product.php/{}".format(API_BASE_URL, "OI0731"))
+                "{}/collections.php".format(API_BASE_URL))
             resProduct = json.loads(reqProduct.text)
             # product = resProduct['results'][0]
         except Exception as e:
