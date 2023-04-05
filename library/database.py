@@ -316,7 +316,7 @@ class DatabaseManager:
 
         for product in products:
             if product.statusP == False or product.productId != None:
-                return False
+                continue
 
             try:
                 createdInDatabase = self.createProduct(
@@ -331,6 +331,9 @@ class DatabaseManager:
                 product.productId = shopify.NewProductBySku(
                     product.sku, self.con)
                 product.save()
+
+                self.downloadImage(product.productId,
+                                   product.thumbnail, product.roomsets)
 
                 debug.debug(brand, 0, "Created New product ProductID: {}, SKU: {}".format(
                     product.productId, product.sku))

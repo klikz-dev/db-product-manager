@@ -340,7 +340,7 @@ class Processor:
         self.databaseManager.updateTags(BRAND)
 
     def white(self):
-        self.databaseManager.whiteShip(BRAND)
+        self.databaseManager.customTags(BRAND, "whiteShip", "White Glove")
 
     def quick(self):
-        self.databaseManager.quickShip(BRAND)
+        self.databaseManager.customTags(BRAND, "quickShip", "Quick Ship")

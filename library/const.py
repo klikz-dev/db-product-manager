@@ -18,5 +18,10 @@ markup = {
         "useMAP": False,
         "consumer": 1.5,
         "trade": 1.3,
+    },
+    "Surya": {
+        "useMAP": True,
+        "consumer": 1.5,
+        "trade": 1.3,
     }
 }
