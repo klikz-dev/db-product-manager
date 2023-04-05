@@ -503,51 +503,24 @@ class DatabaseManager:
             debug.debug("DatabaseManager", 0,
                         "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
 
-    def sample(self, brand):
-        products = Feed.objects.filter(brand=brand)
-
-        for product in products:
-            if not product.statusS and product.productId:
-                self.csr.execute("CALL AddToProductTag ({}, {})".format(
-                    common.sq(product.sku), common.sq("NoSample")))
-                self.con.commit()
-
-                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
-                    product.productId))
-                self.con.commit()
-
-                debug.debug("DatabaseManager", 0,
-                            "Disable sample for Brand: {}, SKU: {}".format(brand, product.sku))
-
-    def whiteShip(self, brand):
-        products = Feed.objects.filter(brand=brand)
-
-        for product in products:
-            if product.whiteShip and product.productId:
-                self.csr.execute("CALL AddToProductTag ({}, {})".format(
-                    common.sq(product.sku), common.sq("White Glove")))
-                self.con.commit()
-
-                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
-                    product.productId))
-                self.con.commit()
-
-                debug.debug("DatabaseManager", 0,
-                            "White Glove shipping for Brand: {}, SKU: {}".format(brand, product.sku))
-
-    def quickShip(self, brand):
+    def customTags(self, brand, statusKey, tag):
         products = Feed.objects.filter(brand=brand)
 
         for product in products:
             if product.productId:
-                if product.quickShip:
+                if product[statusKey]:
                     self.csr.execute("CALL AddToProductTag ({}, {})".format(
-                        common.sq(product.sku), common.sq("Quick Ship")))
+                        common.sq(product.sku), common.sq(tag)))
                     self.con.commit()
-
-                    self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
-                        product.productId))
+                    debug.debug("DatabaseManager", 0, "{} Tag has been applied to the {} product {}".format(
+                        tag, brand, product.sku))
+                else:
+                    self.csr.execute("CALL RemoveFromProductTag ({}, {})".format(
+                        common.sq(product.sku), common.sq(tag)))
                     self.con.commit()
+                    debug.debug("DatabaseManager", 0, "{} Tag has been removed from the {} product {}".format(
+                        tag, brand, product.sku))
 
-                    debug.debug("DatabaseManager", 0,
-                                "Quick shipping for Brand: {}, SKU: {}".format(brand, product.sku))
+                self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                self.con.commit()

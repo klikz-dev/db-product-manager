@@ -21,11 +21,11 @@ class FeedAdmin(admin.ModelAdmin):
         ('Assets', {'fields': ['thumbnail', 'roomsets']}),
     ]
 
-    list_display = ('mpn', 'sku', 'upc', 'pattern', 'color', 'productId', 'brand', 'type',
-                    'manufacturer', 'collection', 'cost', 'msrp', 'map', 'statusP', 'statusS', 'whiteShip', 'quickShip', 'stockP', 'stockS')
+    list_display = ('mpn', 'sku', 'pattern', 'color', 'productId', 'type',
+                    'manufacturer', 'collection', 'cost', 'map', 'statusP', 'statusS')
 
     list_filter = ['brand', 'type', 'manufacturer',
-                   'uom', 'statusP', 'statusS']
+                   'uom', 'statusP', 'statusS', 'whiteShip', 'quickShip']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
