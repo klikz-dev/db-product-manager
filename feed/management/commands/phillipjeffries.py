@@ -39,6 +39,9 @@ class Command(BaseCommand):
         if "update" in options['functions']:
             processor.update()
 
+        if "price" in options['functions']:
+            processor.price()
+
         if "tag" in options['functions']:
             processor.tag()
 
@@ -79,7 +82,7 @@ class Processor:
                               ).replace("NEW - ", "").strip()
                 color = str(data["name"]).replace(
                     pattern, "").replace("-", "").replace(pattern, "").strip()
-            
+
                 if pattern == "" or color == "":
                     continue
 
@@ -204,7 +207,7 @@ class Processor:
         self.databaseManager.updateProducts(BRAND, products)
 
     def price(self):
-        self.databaseManager.updatePrices(BRAND, False)
+        self.databaseManager.updatePrices(BRAND)
 
     def tag(self):
         self.databaseManager.updateTags(BRAND)

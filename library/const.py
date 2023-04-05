@@ -13,5 +13,10 @@ markup = {
         "useMAP": True,
         "consumer": 2.22,
         "trade": 1.25,
+    },
+    "Phillip Jeffries": {
+        "useMAP": False,
+        "consumer": 1.5,
+        "trade": 1.3,
     }
 }
