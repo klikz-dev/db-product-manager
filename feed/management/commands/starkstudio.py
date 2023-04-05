@@ -5,9 +5,12 @@ import os
 import environ
 import pymysql
 import xlrd
+import csv
+import time
+import paramiko
 from shutil import copyfile
 
-from library import database, debug, shopify
+from library import database, debug
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -49,6 +52,15 @@ class Command(BaseCommand):
 
         if "shipping" in options['functions']:
             processor.shipping()
+
+        if "inventory" in options['functions']:
+            while True:
+                processor.feed()
+                processor.sync()
+                processor.inventory()
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -92,6 +104,35 @@ class Processor:
             prices[mpn] = {
                 'cost': cost,
                 'map': map
+            }
+
+        # Stock
+        self.downloadInvFile()
+        stocks = {}
+        f = open(FILEDIR + 'stark-studio-inventory.csv', "rt")
+        cr = csv.reader(f)
+        for row in cr:
+            try:
+                mpn = row[0]
+                quantity = int(row[1])
+
+                statusP = True
+                if int(row[5]) == 1:
+                    statusP = False
+
+                statusS = False
+                if int(row[7]) == 1:
+                    statusS = True
+
+                product = Feed.objects.get(mpn=mpn)
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            stocks[mpn] = {
+                'stockP': quantity,
+                'statusP': statusP,
+                'statusS': statusS
             }
 
         # Get Product Feed
@@ -169,10 +210,6 @@ class Processor:
                             BRAND, 1, "Produt MAP error {}".format(mpn))
                         continue
 
-                    if mpn_origin in prices:
-                        cost = prices[mpn_origin]['cost']
-                        map = prices[mpn_origin]['map']
-
                     # Tagging
                     tags = description
                     colors = str(sh.cell_value(i, 1)).strip()
@@ -183,6 +220,16 @@ class Processor:
                     whiteShip = False
                     if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
                         whiteShip = True
+
+                    # Custom Stock and Price data
+                    if mpn_origin in prices:
+                        cost = prices[mpn_origin]['cost']
+                        map = prices[mpn_origin]['map']
+
+                    if mpn_origin in stocks:
+                        statusS = stocks[mpn_origin]['statusS']
+                        statusP = stocks[mpn_origin]['statusP']
+                        stockP = stocks[mpn_origin]['stockP']
 
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
@@ -218,6 +265,8 @@ class Processor:
 
                     'statusP': statusP,
                     'statusS': statusS,
+
+                    'stockP': stockP,
                     'stockNote': stockNote,
                     'whiteShip': whiteShip
                 }
@@ -286,15 +335,51 @@ class Processor:
     def shipping(self):
         self.databaseManager.whiteShip(BRAND)
 
-    def inventory(self, mpn):
-        stockNote = ""
-        try:
-            product = Feed.objects.get(mpn=mpn)
-            stockNote = product.stockNote
-        except Exception as e:
-            debug.debug(BRAND, 1, str(e))
+    def downloadInvFile(self):
+        debug.debug(BRAND, 0, "Download New CSV from {} FTP".format(BRAND))
 
-        return {
-            'stock': 5,
-            'leadtime': stockNote
-        }
+        host = "18.206.49.64"
+        port = 22
+        username = "stark"
+        password = "Stark123!"
+
+        try:
+            transport = paramiko.Transport((host, port))
+            transport.connect(username=username, password=password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except:
+            debug.debug(
+                BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
+            return False
+
+        try:
+            sftp.chdir(path='/stark')
+            files = sftp.listdir()
+        except:
+            debug.debug(BRAND, 1, "No New Inventory File")
+            return False
+
+        for file in files:
+            if "EDI" in file:
+                continue
+            sftp.get(file, FILEDIR + 'stark-studio-inventory.csv')
+            sftp.remove(file)
+
+        sftp.close()
+
+        debug.debug(BRAND, 0, "FTP Inventory Download Completed".format(BRAND))
+        return True
+
+    def inventory(self):
+        stocks = []
+
+        products = Feed.objects.filter(brand=BRAND)
+        for product in products:
+            stock = {
+                'sku': product.sku,
+                'quantity': product.stockP,
+                'note': product.stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(BRAND, stocks, 1)
