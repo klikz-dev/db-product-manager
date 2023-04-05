@@ -44,6 +44,9 @@ class Command(BaseCommand):
         if "tag" in options['functions']:
             processor.tag()
 
+        if "image" in options['functions']:
+            processor.image()
+
         if "white" in options['functions']:
             processor.white()
 

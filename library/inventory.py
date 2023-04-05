@@ -7,7 +7,6 @@ from urllib.parse import quote
 from mysql.models import ProductInventory, ProductManufacturer
 from shopify.models import Product
 from feed.management.commands.phillips import Processor as PhillipsProcessor
-from feed.management.commands.starkstudio import Processor as StarkProcessor
 
 
 def inventory(sku):
@@ -188,22 +187,6 @@ def inventory(sku):
     elif manufacturer.brand == "Phillips":
         try:
             processor = PhillipsProcessor()
-            response = processor.inventory(product.manufacturerPartNumber)
-
-            return {
-                "brand": manufacturer.brand,
-                "sku": sku,
-                "quantity": response['stock'],
-                "type": 1,
-                "note": response['leadtime']
-            }
-        except Exception as e:
-            noStock["error"] = str(e)
-            return noStock
-
-    elif manufacturer.brand == "Stark Studio":
-        try:
-            processor = StarkProcessor()
             response = processor.inventory(product.manufacturerPartNumber)
 
             return {

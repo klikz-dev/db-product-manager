@@ -123,8 +123,6 @@ class Processor:
                 statusS = False
                 if int(row[7]) == 1:
                     statusS = True
-
-                product = Feed.objects.get(mpn=mpn)
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
                 continue
