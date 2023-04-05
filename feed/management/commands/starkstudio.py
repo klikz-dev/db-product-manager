@@ -54,6 +54,9 @@ class Command(BaseCommand):
             processor.shipping()
 
         if "inventory" in options['functions']:
+            processor.inventory()
+
+        if "main" in options['functions']:
             while True:
                 processor.feed()
                 processor.sync()

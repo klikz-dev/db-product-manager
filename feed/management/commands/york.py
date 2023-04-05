@@ -82,7 +82,7 @@ class Processor:
 
         try:
             reqCollections = requests.get(
-                "{}/product.php".format(API_BASE_URL))
+                "{}/collections.php".format(API_BASE_URL))
             resCollections = json.loads(reqCollections.text)
             collections = resCollections['results']
         except Exception as e:
