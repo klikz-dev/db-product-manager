@@ -1,6 +1,7 @@
 from library import debug, common, const, shopify
 from feed.models import Feed
 from mysql.models import Type
+import urllib
 
 
 class DatabaseManager:
@@ -438,7 +439,8 @@ class DatabaseManager:
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
             try:
-                common.picdownload2(thumbnail, "{}.jpg".format(productId))
+                common.picdownload2(str(thumbnail).replace(
+                    " ", "%20"), "{}.jpg".format(productId))
             except Exception as e:
                 debug.debug("DatabaseManager", 1, str(e))
 
@@ -446,15 +448,24 @@ class DatabaseManager:
             idx = 2
             for roomset in roomsets:
                 try:
-                    common.roomdownload(
-                        roomset, "{}_{}.jpg".format(productId, idx))
+                    common.roomdownload(str(roomset).replace(
+                        " ", "%20"), "{}_{}.jpg".format(productId, idx))
                     idx = idx + 1
                 except Exception as e:
                     debug.debug("DatabaseManager", 1, str(e))
 
-    def downloadImages(self, brand):
+    def downloadImages(self, brand, missingOnly=True):
+        hasImage = []
+
+        self.csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(brand))
+        for row in self.csr.fetchall():
+            hasImage.append(str(row[0]))
+
         products = Feed.objects.filter(brand=brand)
         for product in products:
+            if missingOnly and (product.productId == None or product.productId in hasImage):
+                continue
+
             self.downloadImage(product.productId,
                                product.thumbnail, product.roomsets)
 
