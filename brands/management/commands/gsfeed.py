@@ -7,7 +7,7 @@ import os
 import datetime
 import re
 
-from library import debug, common
+from library import debug, common, inventory
 
 import environ
 env = environ.Env()
@@ -131,10 +131,10 @@ class Command(BaseCommand):
             minQty = int(row[17])
 
             try:
-                inventory = common.inventory(sku)
-                if inventory["quantity"] < int(minQty):
+                stock = inventory.inventory(sku)
+                if stock["quantity"] < int(minQty):
                     debug("GS", 1, "Added: {}, Skiped: {}, Total: {}, Ignore SKU: {}. Out of Stock. Stock: {}".format(
-                        added, skiped, total, sku, inventory["quantity"]))
+                        added, skiped, total, sku, stock["quantity"]))
                     skiped += 1
                     continue
             except Exception as e:
