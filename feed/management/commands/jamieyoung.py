@@ -49,7 +49,8 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 processor.inventory()
-                print("Finished process. Waiting for next run. {}:{}".format(BRAND, options['functions']))
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
                 time.sleep(86400)
 
 
@@ -153,7 +154,8 @@ class Processor:
                     msrp = 0
 
                 # Tagging
-                tags = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(), ", ".join(features), collection, description)
+                tags = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(
+                ), ", ".join(features), collection, description)
                 colors = color
 
                 statusP = True
@@ -162,10 +164,12 @@ class Processor:
                 shipping = str(sh.cell_value(i, 35)).strip()
 
                 # Image
-                thumbnail = str(sh.cell_value(i, 49)).strip().replace("dl=0", "dl=1")
+                thumbnail = str(sh.cell_value(
+                    i, 49)).strip().replace("dl=0", "dl=1")
                 roomsets = []
                 for id in range(50, 63):
-                    roomset = str(sh.cell_value(i, id)).strip().replace("dl=0", "dl=1")
+                    roomset = str(sh.cell_value(i, id)
+                                  ).strip().replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
 
@@ -177,7 +181,8 @@ class Processor:
                 for typeword in ptypeTmp.split(" "):
                     pattern = pattern.replace(typeword, "")
 
-                pattern = pattern.replace("**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
+                pattern = pattern.replace(
+                    "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
                 ##############
 
             except Exception as e:
@@ -259,7 +264,8 @@ class Processor:
             transport.connect(username=username, password=password)
             sftp = paramiko.SFTPClient.from_transport(transport)
         except:
-            debug.debug(BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
+            debug.debug(
+                BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
             return False
 
         try:
@@ -297,10 +303,10 @@ class Processor:
         self.databaseManager.updateTags(BRAND, False)
 
     def sample(self):
-        self.databaseManager.sample(BRAND)
+        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
 
     def shipping(self):
-        self.databaseManager.whiteShip(BRAND)
+        self.databaseManager.customTags(BRAND, "whiteShip", "White Glove")
 
     def inventory(self):
         stocks = []

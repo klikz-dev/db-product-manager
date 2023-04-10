@@ -81,8 +81,11 @@ class Feed(models.Model):
 
     statusP = models.BooleanField(default=False)
     statusS = models.BooleanField(default=False)
+
     quickShip = models.BooleanField(default=False)
     whiteShip = models.BooleanField(default=False)
+    bestSeller = models.BooleanField(default=False)
+    outlet = models.BooleanField(default=False)
 
     stockP = models.IntegerField(default=0)
     stockS = models.IntegerField(default=0)

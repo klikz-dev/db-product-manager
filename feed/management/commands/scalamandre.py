@@ -327,10 +327,10 @@ class Processor:
         self.databaseManager.updateTags(BRAND, False)
 
     def sample(self):
-        self.databaseManager.sample(BRAND)
+        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
 
     def shipping(self):
-        self.databaseManager.shipping(BRAND)
+        self.databaseManager.customTags(BRAND, "whiteShip", "White Glove")
 
     def inventory(self):
         stocks = []

@@ -336,7 +336,7 @@ class Processor:
         self.databaseManager.updateTags(BRAND, False)
 
     def sample(self):
-        self.databaseManager.sample(BRAND)
+        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
 
     def inventory(self, mpn):
         try:
