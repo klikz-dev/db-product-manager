@@ -1,29 +1,38 @@
 from library import debug, common, const, shopify
-from feed.models import Feed
+from feed.models import JamieYoung, Kravet, Surya
 from mysql.models import Type
-import urllib
 
 
 class DatabaseManager:
-    def __init__(self, con):
+    def __init__(self, con, brand):
         self.con = con
         self.csr = self.con.cursor()
+        self.brand = brand
+
+        if brand == "JamieYoung":
+            self.Feed = JamieYoung
+        elif brand == "Kravet":
+            self.Feed = Kravet
+        elif brand == "Surya":
+            self.Feed = Surya
+        else:
+            raise ValueError(f"Unknown Brand {brand}")
 
     def __del__(self):
         self.csr.close()
 
-    def writeFeed(self, brand, products: list):
-        debug.debug("DatabaseManager", 0,
-                    "Started writing {} feeds to our database".format(brand))
+    def writeFeed(self, products: list):
+        debug.debug(self.brand, 0,
+                    "Started writing {} feeds to our database".format(self.brand))
 
-        Feed.objects.filter(brand=brand).delete()
+        self.Feed.objects.all().delete()
 
         total = len(products)
         success = 0
         failed = 0
         for product in products:
             try:
-                feed = Feed.objects.create(
+                feed = self.Feed.objects.create(
                     mpn=product.get('mpn'),
                     sku=product.get('sku'),
                     upc=product.get('upc', ""),
@@ -77,20 +86,19 @@ class DatabaseManager:
                 print("Brand: {}, MPN: {}".format(feed.brand, feed.mpn))
             except Exception as e:
                 failed += 1
-                debug.debug("DatabaseManager", 1, str(e))
+                debug.debug(self.brand, 1, str(e))
                 continue
 
-        debug.debug("DatabaseManager", 0, "Finished writing {} feeds to our database. Total: {}, Success: {}, Failed: {}".format(
-            brand, total, success, failed))
+        debug.debug(self.brand, 0, "Finished writing {} feeds to our database. Total: {}, Success: {}, Failed: {}".format(
+            self.brand, total, success, failed))
 
-    def statusSync(self, brand, fullSync=False):
-        debug.debug("DatabaseManager", 0,
-                    "Started status sync for {}".format(brand))
+    def statusSync(self, fullSync=False):
+        debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
 
-        self.csr.execute("""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
+        self.csr.execute(f"""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
-                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{}')""".format(brand))
+                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')""")
         rows = self.csr.fetchall()
 
         total, pb, upb = len(rows), 0, 0
@@ -101,7 +109,7 @@ class DatabaseManager:
             published = row[2]
 
             try:
-                product = Feed.objects.get(mpn=mpn)
+                product = self.Feed.objects.get(mpn=mpn)
                 product.productId = productID
                 product.save()
 
@@ -115,7 +123,7 @@ class DatabaseManager:
 
                     upb = upb + 1
                     debug.debug(
-                        "DatabaseManager", 0, "Disabled product -- Brand: {}, ProductID: {}, mpn: {}".format(brand, productID, mpn))
+                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
 
                 if published == 0 and product.statusP == True and product.cost != None:
                     self.csr.execute(
@@ -127,9 +135,9 @@ class DatabaseManager:
 
                     pb = pb + 1
                     debug.debug(
-                        "DatabaseManager", 0, "Enabled product -- Brand: {}, ProductID: {}, mpn: {}".format(brand, productID, mpn))
+                        self.brand, 0, f"Enabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
 
-            except Feed.DoesNotExist:
+            except self.Feed.DoesNotExist:
                 if published == 1:
                     self.csr.execute(
                         "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
@@ -140,17 +148,17 @@ class DatabaseManager:
 
                     upb = upb + 1
                     debug.debug(
-                        "DatabaseManager", 0, "Disabled product -- Brand: {}, ProductID: {}, mpn: {}".format(brand, productID, mpn))
+                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
 
             if fullSync:
                 self.csr.execute(
                     "CALL AddToPendingUpdatePublish ({})".format(productID))
                 self.con.commit()
 
-        debug.debug("DatabaseManager", 0,
-                    "Finished status sync for {}. total: {}, published: {}, unpublished: {}".format(brand, total, pb, upb))
+        debug.debug(
+            self.brand, 0, f"Finished status sync for {self.brand}. total: {total}, published: {pb}, unpublished: {upb}")
 
-    def createProduct(self, brand, product, formatPrice):
+    def createProduct(self, product, formatPrice):
 
         ptype = product.type
         manufacturer = product.manufacturer
@@ -237,9 +245,9 @@ class DatabaseManager:
         bodyHTML += "{} {}".format(manufacturer, ptype)
 
         try:
-            useMAP = const.markup[brand]["useMAP"]
-            consumerMarkup = const.markup[brand]["consumer"]
-            tradeMarkup = const.markup[brand]["trade"]
+            useMAP = const.markup[self.brand]["useMAP"]
+            consumerMarkup = const.markup[self.brand]["consumer"]
+            tradeMarkup = const.markup[self.brand]["trade"]
 
             if useMAP and product.map > 0:
                 if formatPrice:
@@ -257,7 +265,7 @@ class DatabaseManager:
             else:
                 priceTrade = product.cost * tradeMarkup
         except Exception as e:
-            debug.debug("DatabaseManager", 1, str(e))
+            debug.debug(self.brand, 1, str(e))
             return False
 
         if price < 19.99:
@@ -279,7 +287,7 @@ class DatabaseManager:
                         typeId=parentType.parentTypeId)
                     ptype = rootType.name
         except Type.DoesNotExist:
-            debug.debug("DatabaseManager", 1,
+            debug.debug(self.brand, 1,
                         "Unknown product type: {}".format(product.type))
             return False
 
@@ -312,8 +320,8 @@ class DatabaseManager:
 
         return True
 
-    def createProducts(self, brand, formatPrice=True):
-        products = Feed.objects.filter(brand=brand)
+    def createProducts(self, formatPrice=True):
+        products = self.Feed.objects.all()
 
         for product in products:
             if product.statusP == False or product.productId != None:
@@ -321,11 +329,11 @@ class DatabaseManager:
 
             try:
                 createdInDatabase = self.createProduct(
-                    brand, product, formatPrice)
+                    product, formatPrice)
                 if not createdInDatabase:
                     continue
             except Exception as e:
-                debug.debug(brand, 1, str(e))
+                debug.debug(self.brand, 1, str(e))
                 continue
 
             try:
@@ -336,24 +344,24 @@ class DatabaseManager:
                 self.downloadImage(product.productId,
                                    product.thumbnail, product.roomsets)
 
-                debug.debug(brand, 0, "Created New product ProductID: {}, SKU: {}".format(
+                debug.debug(self.brand, 0, "Created New product ProductID: {}, SKU: {}".format(
                     product.productId, product.sku))
 
             except Exception as e:
-                debug.debug(brand, 1, str(e))
+                debug.debug(self.brand, 1, str(e))
 
-    def updateProducts(self, brand, products, formatPrice=True):
+    def updateProducts(self, products, formatPrice=True):
         for product in products:
             if product.statusP == False or product.productId == None:
                 return False
 
             try:
                 createdInDatabase = self.createProduct(
-                    brand, product, formatPrice)
+                    self.brand, product, formatPrice)
                 if not createdInDatabase:
                     continue
             except Exception as e:
-                debug.debug(brand, 1, str(e))
+                debug.debug(self.brand, 1, str(e))
                 continue
 
             try:
@@ -361,14 +369,14 @@ class DatabaseManager:
                     "CALL AddToPendingUpdateProduct ({})".format(product.productId))
                 self.con.commit()
 
-                debug.debug(brand, 0, "Updated the product ProductID: {}, SKU: {}".format(
+                debug.debug(self.brand, 0, "Updated the product ProductID: {}, SKU: {}".format(
                     product.productId, product.sku))
 
             except Exception as e:
-                debug.debug(brand, 1, str(e))
+                debug.debug(self.brand, 1, str(e))
 
-    def updatePrices(self, brand, formatPrice=True):
-        products = Feed.objects.filter(brand=brand)
+    def updatePrices(self, formatPrice=True):
+        products = self.Feed.objects.all()
 
         for product in products:
             cost = product.cost
@@ -376,13 +384,13 @@ class DatabaseManager:
 
             if productId != "" and productId != None:
                 try:
-                    useMAP = const.markup[brand]["useMAP"]
-                    if product.type == "Pillow" and "consumer_pillow" in const.markup[brand]:
-                        consumerMarkup = const.markup[brand]["consumer_pillow"]
-                        tradeMarkup = const.markup[brand]["trade_pillow"]
+                    useMAP = const.markup[self.brand]["useMAP"]
+                    if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
+                        consumerMarkup = const.markup[self.brand]["consumer_pillow"]
+                        tradeMarkup = const.markup[self.brand]["trade_pillow"]
                     else:
-                        consumerMarkup = const.markup[brand]["consumer"]
-                        tradeMarkup = const.markup[brand]["trade"]
+                        consumerMarkup = const.markup[self.brand]["consumer"]
+                        tradeMarkup = const.markup[self.brand]["trade"]
 
                     if useMAP and product.map > 0:
                         if formatPrice:
@@ -402,7 +410,7 @@ class DatabaseManager:
                     else:
                         priceTrade = product.cost * tradeMarkup
                 except Exception as e:
-                    debug.debug("DatabaseManager", 1, str(e))
+                    debug.debug(self.brand, 1, str(e))
                     return False
 
                 if price < 19.99:
@@ -429,14 +437,14 @@ class DatabaseManager:
                             "CALL AddToPendingUpdatePrice ({})".format(productId))
                         self.con.commit()
 
-                        debug.debug("DatabaseManager", 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                        debug.debug(self.brand, 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                             productId, cost, price, priceTrade))
                     else:
-                        debug.debug("DatabaseManager", 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
+                        debug.debug(self.brand, 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
                             productId, price, priceTrade))
 
                 except:
-                    debug.debug("DatabaseManager", 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
+                    debug.debug(self.brand, 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
                         productId, cost, price, priceTrade))
                     continue
 
@@ -446,7 +454,7 @@ class DatabaseManager:
                 common.picdownload2(str(thumbnail).replace(
                     " ", "%20"), "{}.jpg".format(productId))
             except Exception as e:
-                debug.debug("DatabaseManager", 1, str(e))
+                debug.debug(self.brand, 1, str(e))
 
         if len(roomsets) > 0:
             idx = 2
@@ -456,16 +464,16 @@ class DatabaseManager:
                         " ", "%20"), "{}_{}.jpg".format(productId, idx))
                     idx = idx + 1
                 except Exception as e:
-                    debug.debug("DatabaseManager", 1, str(e))
+                    debug.debug(self.brand, 1, str(e))
 
-    def downloadImages(self, brand, missingOnly=True):
+    def downloadImages(self, missingOnly=True):
         hasImage = []
 
-        self.csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(brand))
+        self.csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(self.brand))
         for row in self.csr.fetchall():
             hasImage.append(str(row[0]))
 
-        products = Feed.objects.filter(brand=brand)
+        products = self.Feed.objects.all()
         for product in products:
             if missingOnly and (product.productId == None or product.productId in hasImage):
                 continue
@@ -473,19 +481,19 @@ class DatabaseManager:
             self.downloadImage(product.productId,
                                product.thumbnail, product.roomsets)
 
-    def updateStock(self, brand, stocks, stockType=1):
+    def updateStock(self, stocks, stockType=1):
         for stock in stocks:
             try:
                 self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(
-                    stock['sku'], stock['quantity'], stockType, stock['note'], brand))
+                    stock['sku'], stock['quantity'], stockType, stock['note'], self.brand))
                 self.con.commit()
-                debug.debug(brand, 0,
+                debug.debug(self.brand, 0,
                             "Updated inventory. {}.".format(stock))
             except Exception as e:
-                debug.debug(brand, 1, str(e))
+                debug.debug(self.brand, 1, str(e))
 
-    def updateTags(self, brand, category=True):
-        products = Feed.objects.filter(brand=brand)
+    def updateTags(self, category=True):
+        products = self.Feed.objects.all()
 
         for product in products:
             sku = product.sku
@@ -518,11 +526,11 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
-            debug.debug("DatabaseManager", 0,
-                        "Added Tags for Brand: {}, SKU: {}".format(brand, sku))
+            debug.debug(self.brand, 0,
+                        "Added Tags for Brand: {}, SKU: {}".format(self.brand, sku))
 
-    def customTags(self, brand, statusKey, tag):
-        products = Feed.objects.filter(brand=brand)
+    def customTags(self, statusKey, tag):
+        products = self.Feed.objects.all()
 
         for product in products:
             if product.productId:
@@ -530,14 +538,14 @@ class DatabaseManager:
                     self.csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(product.sku), common.sq(tag)))
                     self.con.commit()
-                    debug.debug("DatabaseManager", 0, "{} Tag has been applied to the {} product {}".format(
-                        tag, brand, product.sku))
+                    debug.debug(self.brand, 0, "{} Tag has been applied to the {} product {}".format(
+                        tag, self.brand, product.sku))
                 else:
                     self.csr.execute("CALL RemoveFromProductTag ({}, {})".format(
                         common.sq(product.sku), common.sq(tag)))
                     self.con.commit()
-                    debug.debug("DatabaseManager", 0, "{} Tag has been removed from the {} product {}".format(
-                        tag, brand, product.sku))
+                    debug.debug(self.brand, 0, "{} Tag has been removed from the {} product {}".format(
+                        tag, self.brand, product.sku))
 
                 self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
                     product.productId))

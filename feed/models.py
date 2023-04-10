@@ -100,9 +100,26 @@ class Feed(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = "Feed"
-        verbose_name_plural = "Feeds"
-
     def __str__(self):
         return self.mpn
+
+    class Meta:
+        abstract = True
+
+
+class Kravet(Feed):
+    class Meta:
+        verbose_name = "Kravet"
+        verbose_name_plural = "Kravet"
+
+
+class JamieYoung(Feed):
+    class Meta:
+        verbose_name = "Jamie Young"
+        verbose_name_plural = "Jamie Young"
+
+
+class Surya(Feed):
+    class Meta:
+        verbose_name = "Surya"
+        verbose_name_plural = "Surya"

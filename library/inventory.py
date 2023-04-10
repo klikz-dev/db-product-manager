@@ -20,32 +20,32 @@ def inventory(sku):
         noStock["error"] = str(e)
         return noStock
 
-    if manufacturer.brand == "Kravet" and manufacturer.name != "Kravet Pillow":
-        try:
-            response = requests.request(
-                "GET",
-                "https://www.e-designtrade.com/api/stock_onhand.asp?user=DBEST767&password=b1028H47kkr&pattern={}&color={}".format(
-                    quote(product.pattern), quote(product.color)),
-                headers={
-                    'Authorization': 'Token d71bcdc1b60d358e01182da499fd16664a27877a',
-                    'Cookie': 'ASPSESSIONIDAURDSCBS=MECPGHNBKCFFKBBBKKAEJOGO'
-                }
-            )
-            data = ET.fromstring(response.content)
-            onhand_qty = data.find('ONHAND_QTY').text
-            lead_time = data.find('LEAD_TIME').text
+    # if manufacturer.brand == "Kravet" and manufacturer.name != "Kravet Pillow":
+    #     try:
+    #         response = requests.request(
+    #             "GET",
+    #             "https://www.e-designtrade.com/api/stock_onhand.asp?user=DBEST767&password=b1028H47kkr&pattern={}&color={}".format(
+    #                 quote(product.pattern), quote(product.color)),
+    #             headers={
+    #                 'Authorization': 'Token d71bcdc1b60d358e01182da499fd16664a27877a',
+    #                 'Cookie': 'ASPSESSIONIDAURDSCBS=MECPGHNBKCFFKBBBKKAEJOGO'
+    #             }
+    #         )
+    #         data = ET.fromstring(response.content)
+    #         onhand_qty = data.find('ONHAND_QTY').text
+    #         lead_time = data.find('LEAD_TIME').text
 
-            return {
-                "brand": manufacturer.brand,
-                "sku": sku,
-                "quantity": int(float(onhand_qty)),
-                "type": 1,
-                "note": "{} days".format(lead_time)
-            }
-        except Exception as e:
-            noStock["error"] = str(e)
-            noStock["data"] = str(response.content)
-            return noStock
+    #         return {
+    #             "brand": manufacturer.brand,
+    #             "sku": sku,
+    #             "quantity": int(float(onhand_qty)),
+    #             "type": 1,
+    #             "note": "{} days".format(lead_time)
+    #         }
+    #     except Exception as e:
+    #         noStock["error"] = str(e)
+    #         noStock["data"] = str(response.content)
+    #         return noStock
 
     if manufacturer.brand == "Maxwell":
         try:

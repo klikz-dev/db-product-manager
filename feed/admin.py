@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Feed
+from .models import Kravet, JamieYoung, Surya
 
 
 class FeedAdmin(admin.ModelAdmin):
@@ -30,4 +30,16 @@ class FeedAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
-admin.site.register(Feed, FeedAdmin)
+@admin.register(Kravet)
+class KravetAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(JamieYoung)
+class JamieYoungAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(Surya)
+class SuryaAdmin(FeedAdmin):
+    pass
