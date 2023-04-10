@@ -68,6 +68,13 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
+        # Discontinued
+        discontinued_mpns = []
+        wb = xlrd.open_workbook(FILEDIR + 'jamieyoung-discontinued.xlsx')
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            discontinued_mpns.append(str(sh.cell_value(i, 0)).strip())
+
         # Get Product Feed
         products = []
 
@@ -77,6 +84,10 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = str(sh.cell_value(i, 0)).strip()
+                if mpn in discontinued_mpns:
+                    debug.debug(BRAND, 1, f"Item discontinued: {mpn}")
+                    continue
+
                 sku = "JY {}".format(mpn)
                 try:
                     upc = int(sh.cell_value(i, 8))

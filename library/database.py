@@ -377,8 +377,12 @@ class DatabaseManager:
             if productId != "" and productId != None:
                 try:
                     useMAP = const.markup[brand]["useMAP"]
-                    consumerMarkup = const.markup[brand]["consumer"]
-                    tradeMarkup = const.markup[brand]["trade"]
+                    if product.type == "Pillow" and "consumer_pillow" in const.markup[brand]:
+                        consumerMarkup = const.markup[brand]["consumer_pillow"]
+                        tradeMarkup = const.markup[brand]["trade_pillow"]
+                    else:
+                        consumerMarkup = const.markup[brand]["consumer"]
+                        tradeMarkup = const.markup[brand]["trade"]
 
                     if useMAP and product.map > 0:
                         if formatPrice:

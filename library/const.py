@@ -23,5 +23,12 @@ markup = {
         "useMAP": True,
         "consumer": 1.5,
         "trade": 1.3,
+    },
+    "Kravet": {
+        "useMAP": True,
+        "consumer": 1.5,
+        "trade": 1,
+        "consumer_pillow": 1.75,
+        "trade_pillow": 1.3,
     }
 }

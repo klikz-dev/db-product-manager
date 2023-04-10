@@ -43,11 +43,11 @@ class Command(BaseCommand):
         if "tag" in options['functions']:
             processor.tag()
 
+        if "price" in options['functions']:
+            processor.price()
+
         if "sample" in options['functions']:
             processor.sample()
-
-        if "shipping" in options['functions']:
-            processor.shipping()
 
 
 class Processor:
@@ -117,7 +117,7 @@ class Processor:
                 if len(keys) != 3 or keys[2] != "0":
                     continue
 
-                brand_mapping = {
+                manufacturer_mapping = {
                     "LEE JOFA": ("Lee Jofa", "LJ"),
                     "LEE JOFA MODERN": ("Lee Jofa", "LJ"),
                     "FIRED EARTH": ("Lee Jofa", "LJ"),
@@ -144,11 +144,11 @@ class Processor:
                     "CLARKE AND CLARKE": ("Clarke & Clarke", "CC")
                 }
 
-                brand = row[3]
-                if brand in brand_mapping:
-                    brand, code_prefix = brand_mapping[brand]
+                manufacturer = row[3]
+                if manufacturer in manufacturer_mapping:
+                    manufacturer, code_prefix = manufacturer_mapping[manufacturer]
                     sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
-                    if brand == "Winfield Thybony":
+                    if manufacturer == "Winfield Thybony":
                         r = requests.get(
                             f"http://www.winfieldthybony.com/home/products/details?sku={sku.replace('WF ', '')}")
                         soup = BeautifulSoup(r.content, "lxml")
@@ -164,7 +164,7 @@ class Processor:
                             pass
                 else:
                     debug.debug(
-                        BRAND, 1, f"Brand Error for MPN: {mpn}, Brand: {brand}")
+                        BRAND, 1, f"Brand Error for MPN: {mpn}, Brand: {manufacturer}")
                     continue
 
                 sku = sku.replace("'", "")
@@ -181,7 +181,9 @@ class Processor:
                     continue
 
                 # Categorization
-                mapping = {
+                brand = BRAND
+
+                type_mapping = {
                     "WALLCOVERING": "Wallpaper",
                     "TRIM": "Trim",
                     "UPHOLSTERY": "Fabric",
@@ -189,11 +191,11 @@ class Processor:
                     "MULTIPURPOSE": "Fabric"
                 }
 
-                type = mapping.get(row[17])
+                type = type_mapping.get(row[17])
                 if type is None:
                     debug.debug(BRAND, 1, f"Unknown product type {row[17]}")
 
-                manufacturer = f"{brand} {type}"
+                manufacturer = f"{manufacturer} {type}"
 
                 collection = row[16]
 
@@ -481,6 +483,9 @@ class Processor:
 
     def tag(self):
         self.databaseManager.updateTags(BRAND, False)
+
+    def price(self):
+        self.databaseManager.updatePrices(BRAND)
 
     def image(self):
         self.databaseManager.downloadImages(BRAND)
