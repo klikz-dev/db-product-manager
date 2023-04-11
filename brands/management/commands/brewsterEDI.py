@@ -162,13 +162,18 @@ class Command(BaseCommand):
                 for row in rows:
                     orderNumber = row[0]
                     orderDate = row[1]
-                    name = row[2]
+                    name = str(row[2]).strip()
 
-                    address1 = row[3].replace("\n", "")
-                    address2 = row[4]
+                    address1 = str(row[3]).replace("\n", "").strip()
+                    address2 = str(row[4]).strip()
                     if "," in address1:
                         address2 = str(address1).split(",")[1]
                         address1 = str(address1).split(",")[0]
+
+                    if name == "" or address1 == "":
+                        debug(
+                            "Brewster EDI", 2,  f"Ignoring {orderNumber} because Name or Address is missing.")
+                        continue
 
                     suite = row[5]
                     city = row[6]
@@ -431,7 +436,8 @@ class Command(BaseCommand):
                         if ref == "None":
                             ref = ""
                         if refNumber not in ref:
-                            newRef = "{}\nBrewster EDI: {}".format(ref, refNumber)
+                            newRef = "{}\nBrewster EDI: {}".format(
+                                ref, refNumber)
 
                             csr.execute("UPDATE Orders SET ReferenceNumber = {} WHERE OrderNumber = {}".format(
                                 sq(newRef), PONumber))

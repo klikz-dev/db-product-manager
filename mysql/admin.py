@@ -14,6 +14,7 @@ PO_RECORDS = [
     'BrewsterEDI',
     'SchumacherEDI',
     'ScalamandreEDI',
+    'PhillipsEDI',
 
     'CovingtonOrder',
     'CovingtonSample',

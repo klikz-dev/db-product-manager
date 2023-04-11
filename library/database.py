@@ -1,5 +1,5 @@
 from library import debug, common, const, shopify
-from feed.models import JamieYoung, Kravet, Surya
+from feed.models import JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, StarkStudio, Surya, York
 from mysql.models import Type
 
 
@@ -13,8 +13,18 @@ class DatabaseManager:
             self.Feed = JamieYoung
         elif brand == "Kravet":
             self.Feed = Kravet
+        elif brand == "Phillip Jeffries":
+            self.Feed = PhillipJeffries
+        elif brand == "Phillips":
+            self.Feed = Phillips
+        elif brand == "Scalamandre":
+            self.Feed = Scalamandre
+        elif brand == "Stark Studio":
+            self.Feed = StarkStudio
         elif brand == "Surya":
             self.Feed = Surya
+        elif brand == "York":
+            self.Feed = York
         else:
             raise ValueError(f"Unknown Brand {brand}")
 
@@ -23,7 +33,7 @@ class DatabaseManager:
 
     def writeFeed(self, products: list):
         debug.debug(self.brand, 0,
-                    "Started writing {} feeds to our database".format(self.brand))
+                    f"Started writing {self.brand} feeds to our database")
 
         self.Feed.objects.all().delete()
 
@@ -83,14 +93,14 @@ class DatabaseManager:
                     roomsets=product.get('roomsets', [])
                 )
                 success += 1
-                print("Brand: {}, MPN: {}".format(feed.brand, feed.mpn))
+                print(f"Brand: {feed.brand}, MPN: {feed.mpn}")
             except Exception as e:
                 failed += 1
                 debug.debug(self.brand, 1, str(e))
                 continue
 
-        debug.debug(self.brand, 0, "Finished writing {} feeds to our database. Total: {}, Success: {}, Failed: {}".format(
-            self.brand, total, success, failed))
+        debug.debug(
+            self.brand, 0, f"Finished writing {self.brand} feeds to our database. Total: {total}, Success: {success}, Failed: {failed}")
 
     def statusSync(self, fullSync=False):
         debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
@@ -550,3 +560,184 @@ class DatabaseManager:
                 self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
                     product.productId))
                 self.con.commit()
+
+    def getOrders(self):
+        ediName = f"{self.brand}EDI"
+        ediStatus = f"{self.brand} EDI"
+
+        self.csr.execute(f"""SELECT DISTINCT
+                    O.OrderNumber AS OrderNumber, 
+                    DATE_FORMAT(O.CreatedAt, '%d-%b-%y') AS OrderDate, 
+                    CONCAT(O.ShippingFirstName, ' ', O.ShippingLastName) AS Name,
+                    O.ShippingAddress1 AS Address1,
+                    O.ShippingAddress2 AS Address2,
+                    O.ShippingCompany AS Suite,
+                    O.ShippingCity AS City,
+                    O.ShippingState AS State,
+                    '' AS County,
+                    O.ShippingZip AS Zip,
+                    CASE
+                        WHEN O.ShippingCountry = 'United States' THEN 'US'
+                        WHEN O.ShippingCountry = 'Canada' THEN 'CA'
+                        WHEN O.ShippingCountry = 'Australia' THEN 'AU'
+                        WHEN O.ShippingCountry = 'United Kingdom' THEN 'UK'
+                        WHEN O.ShippingCountry = 'Finland' THEN 'FI'
+                        WHEN O.ShippingCountry = 'Egypt' THEN 'EG'
+                        WHEN O.ShippingCountry = 'China' THEN 'CN'
+                        WHEN O.ShippingCountry = 'France' THEN 'FR'
+                        WHEN O.ShippingCountry = 'Germany' THEN 'DE'
+                        WHEN O.ShippingCountry = 'Mexico' THEN 'MX'
+                        WHEN O.ShippingCountry = 'Russia' THEN 'RU'
+                        WHEN O.ShippingCountry = 'Ireland' THEN 'IE'
+                        WHEN O.ShippingCountry = 'Greece' THEN 'GR'
+                        ELSE O.ShippingCountry
+                    END AS Country,
+
+                    CASE
+                        WHEN O.ShippingMethod LIKE '%2nd Day%' THEN 'UPS2'
+                        WHEN O.ShippingMethod LIKE '%2-day%' THEN 'UPS2'
+                        WHEN O.ShippingMethod LIKE '%Overnight%' THEN 'UPSN'
+                        WHEN O.ShippingMethod LIKE '%Next Day%' THEN 'UPSN'
+                    ELSE 'UPSG'
+                    END AS ShippingMethod,
+
+                    O.OrderNote AS ShipInstruction,
+                    CONCAT('DecoratorsBest/', O.ShippingLastName) AS PackInstruction,
+                    O.ShopifyOrderID,
+                    O.ShippingPhone
+
+                    FROM Orders_ShoppingCart OS JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Orders O ON OS.ShopifyOrderID = O.ShopifyOrderID
+
+                    WHERE PV.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')
+                        AND O.OrderNumber > (SELECT {ediName} FROM PORecord)
+                        AND O.Status NOT LIKE '%Hold%'
+                        AND O.Status NOT LIKE '%Back Order%'
+                        AND O.Status NOT LIKE '%Cancel%'
+                        AND O.Status NOT LIKE '%Processed%'
+                        AND O.Status NOT LIKE '%CFA%'
+                        AND O.Status NOT LIKE '%Call Manufacturer%'
+                        AND O.Status NOT LIKE '%{ediStatus}%'
+
+                    ORDER BY O.OrderNumber ASC""")
+
+        orders = []
+        for row in self.csr.fetchall():
+            po = int(row[0])
+            orderDate = str(row[1]).strip()
+
+            name = str(row[2]).strip()
+
+            address1 = str(row[3]).replace("\n", "").strip()
+            address2 = str(row[4]).strip()
+            if "," in address1:
+                address2 = str(address1).split(",")[1].strip()
+                address1 = str(address1).split(",")[0].strip()
+            if address2 == None or address2 == '':
+                address2 = ''
+
+            city = str(row[6]).strip()
+            state = str(row[7]).strip()
+            zip = str(row[9]).strip()
+            country = str(row[10]).strip()
+            phone = str(row[15]).strip()
+
+            shippingMethod = str(row[11]).strip()
+
+            shipInstruction = str(row[12]).replace('\n', ' ')
+            packInstruction = str(row[13]).replace('\n', ' ')
+            instructions = ""
+            if shipInstruction:
+                instructions += f"Ship Instruction: {shipInstruction}\n\r"
+            if packInstruction:
+                instructions += f"Pack Instruction: {packInstruction}"
+
+            self.csr.execute(f"""SELECT P.ManufacturerPartNumber AS Item, CASE WHEN PV.Name LIKE '%Sample - %' THEN 'Sample' ELSE REPLACE(PV.Pricing, 'Per ', '') END AS UOM, OS.Quantity, P.SKU, PV.Cost
+                            FROM Orders O JOIN Orders_ShoppingCart OS ON O.ShopifyOrderID = OS.ShopifyOrderID JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Product P ON P.ProductID = PV.ProductID
+                            WHERE PV.SKU IN (SELECT SKU
+                                                FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+                                                WHERE M.Brand = '{self.brand}')
+                            AND O.OrderNumber = {po}""")
+
+            items = []
+            for item in self.csr.fetchall():
+                mpn = str(item[0])
+                uom = str(item[1])
+                quantity = int(item[2])
+
+                if "Sample" == uom:
+                    uom = "MM (Sample)"
+                elif "Yard" == uom:
+                    uom = "YD"
+                elif "Roll" == uom:
+                    uom = "RL"
+                elif "Square Foot" == uom:
+                    uom = "SQF"
+                else:
+                    uom = "EA"
+
+                items.append({
+                    'mpn': mpn,
+                    'uom': uom,
+                    'quantity': quantity,
+                })
+
+            orders.append({
+                'po': po,
+                'orderDate': orderDate,
+                'name': name,
+                'address1': address1,
+                'address2': address2,
+                'city': city,
+                'state': state,
+                'zip': zip,
+                'country': country,
+                'phone': phone,
+                'shippingMethod': shippingMethod,
+                'instructions': instructions,
+                'items': items,
+            })
+
+        return orders
+
+    def updateEDIOrderStatus(self, orderNumber):
+        ediStatus = f"{self.brand} EDI"
+
+        self.csr.execute(
+            f"SELECT Status FROM Orders WHERE OrderNumber = {orderNumber}")
+        extStatus = (self.csr.fetchone())[0]
+        if extStatus == "New":
+            newStatus = f"{ediStatus}"
+        else:
+            newStatus = f"{extStatus}, {ediStatus}"
+
+        self.csr.execute(
+            f"UPDATE Orders SET Status = {common.sq(newStatus)} WHERE OrderNumber = {orderNumber}")
+        self.con.commit()
+
+    def updatePORecord(self, lastPO):
+        ediName = f"{self.brand}EDI"
+
+        self.csr.execute(f"UPDATE PORecord SET {ediName} = {lastPO}")
+        self.con.commit()
+
+    def updateRefNumber(self, orderNumber, refNumber):
+        ediStatus = f"{self.brand} EDI"
+
+        self.csr.execute(
+            f"SELECT ReferenceNumber FROM Orders WHERE OrderNumber = '{orderNumber}'")
+
+        try:
+            ref = str((self.csr.fetchone())[0])
+            if ref == "None":
+                ref = ""
+
+            print(ref)
+
+            if refNumber not in ref:
+                newRef = f"{ref}\n{ediStatus}: {refNumber}"
+
+                self.csr.execute(
+                    f"UPDATE Orders SET ReferenceNumber = {common.sq(newRef)} WHERE OrderNumber = {orderNumber}")
+                self.con.commit()
+        except Exception as e:
+            debug.debug(self.brand, str(e))

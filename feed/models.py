@@ -107,19 +107,49 @@ class Feed(models.Model):
         abstract = True
 
 
-class Kravet(Feed):
-    class Meta:
-        verbose_name = "Kravet"
-        verbose_name_plural = "Kravet"
-
-
 class JamieYoung(Feed):
     class Meta:
         verbose_name = "Jamie Young"
         verbose_name_plural = "Jamie Young"
 
 
+class Kravet(Feed):
+    class Meta:
+        verbose_name = "Kravet"
+        verbose_name_plural = "Kravet"
+
+
+class PhillipJeffries(Feed):
+    class Meta:
+        verbose_name = "Phillip Jeffries"
+        verbose_name_plural = "Phillip Jeffries"
+
+
+class Phillips(Feed):
+    class Meta:
+        verbose_name = "Phillips"
+        verbose_name_plural = "Phillips"
+
+
+class Scalamandre(Feed):
+    class Meta:
+        verbose_name = "Scalamandre"
+        verbose_name_plural = "Scalamandre"
+
+
+class StarkStudio(Feed):
+    class Meta:
+        verbose_name = "Stark Studio"
+        verbose_name_plural = "Stark Studio"
+
+
 class Surya(Feed):
     class Meta:
         verbose_name = "Surya"
         verbose_name_plural = "Surya"
+
+
+class York(Feed):
+    class Meta:
+        verbose_name = "York"
+        verbose_name_plural = "York"

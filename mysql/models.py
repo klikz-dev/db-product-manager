@@ -193,6 +193,8 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ScalamandreEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    PhillipsEDI = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     CovingtonOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)

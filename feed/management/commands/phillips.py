@@ -43,6 +43,9 @@ class Command(BaseCommand):
         if "sample" in options['functions']:
             processor.sample()
 
+        if "order" in options['functions']:
+            processor.order()
+
 
 class Processor:
     def __init__(self):
@@ -65,7 +68,7 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con)
+        self.databaseManager = database.DatabaseManager(self.con, BRAND)
 
     def __del__(self):
         self.con.close()
@@ -276,18 +279,17 @@ class Processor:
 
     def feed(self):
         products = self.fetchFeed()
-        self.databaseManager.writeFeed(BRAND, products)
+        self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync(BRAND)
+        self.databaseManager.statusSync()
 
     def add(self):
         products = Feed.objects.filter(brand=BRAND)
 
         for product in products:
             try:
-                createdInDatabase = self.databaseManager.createProduct(
-                    BRAND, product)
+                createdInDatabase = self.databaseManager.createProduct(product)
                 if not createdInDatabase:
                     continue
             except Exception as e:
@@ -313,8 +315,7 @@ class Processor:
 
         for product in products:
             try:
-                createdInDatabase = self.databaseManager.createProduct(
-                    BRAND, product)
+                createdInDatabase = self.databaseManager.createProduct(product)
                 if not createdInDatabase:
                     continue
             except Exception as e:
@@ -333,10 +334,10 @@ class Processor:
                 debug.debug(BRAND, 1, str(e))
 
     def tag(self):
-        self.databaseManager.updateTags(BRAND, False)
+        self.databaseManager.updateTags(False)
 
     def sample(self):
-        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
+        self.databaseManager.customTags("statusS", "NoSample")
 
     def inventory(self, mpn):
         try:
@@ -375,3 +376,75 @@ class Processor:
             'stock': stock,
             'leadtime': leadtime
         }
+
+    def order(self):
+        orders = self.databaseManager.getOrders()
+
+        lastPO = -1
+        for order in orders:
+            # try:
+            if True:
+                items = []
+                for item in order['items']:
+                    items.append({
+                        'itemno': item['mpn'],
+                        'qtyorder': item['quantity']
+                    })
+
+                body = {
+                    'reference': f"PO #{order['po']}",
+                    'shipto': {
+                        'shipname': order['name'],
+                        'address': " ".join((order['address1'], order['address2'])),
+                        'city': order['city'],
+                        'state': order['state'],
+                        'zip': order['zip'],
+                        'country': order['country'],
+                        'phone': order['phone'],
+                        'fax': '',
+                        'email': '',
+                    },
+                    'shipcontact': {
+                        'name': "DecoratorsBest Orders Department",
+                        'email': 'purchasing@decoratorsbest.com',
+                        'phone': ''
+                    },
+                    'items': items
+                }
+
+                print(json.dumps(body))
+
+                response = requests.request(
+                    "POST",
+                    "{}{}".format(API_BASE_URL, "/ecomm/orders"),
+                    headers={
+                        'x-api-key': API_KEY,
+                        'Authorization': "Bearer {}".format(self.token)
+                    },
+                    data=json.dumps(body)
+                )
+
+                print(response)
+                print(response.text)
+
+                data = json.loads(response.text)
+
+                print(data)
+
+                ref = data['data']['_id']
+
+                if ref:
+                    self.databaseManager.updateEDIOrderStatus(order['po'])
+                    self.databaseManager.updateRefNumber(order['po'], ref)
+                    lastPO = order['po']
+                else:
+                    debug.debug(BRAND, 2, f"Failed to submit PO {order['po']}")
+                    break
+            # except Exception as e:
+            #     debug.debug(BRAND, 2, str(e))
+            #     break
+
+        print(lastPO)
+
+        if lastPO != -1:
+            self.databaseManager.updatePORecord(lastPO)
