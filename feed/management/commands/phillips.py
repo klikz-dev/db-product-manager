@@ -382,8 +382,7 @@ class Processor:
 
         lastPO = -1
         for order in orders:
-            # try:
-            if True:
+            try:
                 items = []
                 for item in order['items']:
                     items.append({
@@ -399,7 +398,7 @@ class Processor:
                         'city': order['city'],
                         'state': order['state'],
                         'zip': order['zip'],
-                        'country': order['country'],
+                        'country': "USA",
                         'phone': order['phone'],
                         'fax': '',
                         'email': '',
@@ -412,8 +411,6 @@ class Processor:
                     'items': items
                 }
 
-                print(json.dumps(body))
-
                 response = requests.request(
                     "POST",
                     "{}{}".format(API_BASE_URL, "/ecomm/orders"),
@@ -424,12 +421,7 @@ class Processor:
                     data=json.dumps(body)
                 )
 
-                print(response)
-                print(response.text)
-
                 data = json.loads(response.text)
-
-                print(data)
 
                 ref = data['data']['_id']
 
@@ -437,12 +429,15 @@ class Processor:
                     self.databaseManager.updateEDIOrderStatus(order['po'])
                     self.databaseManager.updateRefNumber(order['po'], ref)
                     lastPO = order['po']
+
+                    debug.debug(
+                        BRAND, 0, f"Successfully processed order {order['po']}. Got ref: {ref}")
                 else:
                     debug.debug(BRAND, 2, f"Failed to submit PO {order['po']}")
                     break
-            # except Exception as e:
-            #     debug.debug(BRAND, 2, str(e))
-            #     break
+            except Exception as e:
+                debug.debug(BRAND, 2, str(e))
+                break
 
         print(lastPO)
 
