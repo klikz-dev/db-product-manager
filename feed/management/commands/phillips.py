@@ -1,12 +1,11 @@
 from django.core.management.base import BaseCommand
-from feed.models import Feed
 
 import environ
 import requests
 import json
 import pymysql
 
-from library import database, debug, shopify, common
+from library import database, debug, common
 
 
 API_BASE_URL = "https://step-up-production.ue.r.appspot.com/v1"
@@ -285,53 +284,10 @@ class Processor:
         self.databaseManager.statusSync()
 
     def add(self):
-        products = Feed.objects.filter(brand=BRAND)
-
-        for product in products:
-            try:
-                createdInDatabase = self.databaseManager.createProduct(product)
-                if not createdInDatabase:
-                    continue
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            try:
-                product.productId = shopify.NewProductBySku(
-                    product.sku, self.con)
-                product.save()
-
-                self.image(product.productId,
-                           product.thumbnail, product.roomsets)
-
-                debug.debug(BRAND, 0, "Created New product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+        self.databaseManager.createProducts()
 
     def update(self):
-        products = Feed.objects.filter(brand=BRAND)
-
-        for product in products:
-            try:
-                createdInDatabase = self.databaseManager.createProduct(product)
-                if not createdInDatabase:
-                    continue
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            try:
-                self.csr.execute(
-                    "CALL AddToPendingUpdateProduct ({})".format(product.productId))
-                self.con.commit()
-
-                debug.debug(BRAND, 0, "Updated the product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+        self.databaseManager.updateProducts()
 
     def tag(self):
         self.databaseManager.updateTags(False)

@@ -78,6 +78,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'main.sqlite3',
+        'OPTIONS': {
+            'timeout': 60,
+        }
     },
     'shopify': {
         'ENGINE': 'django.db.backends.mysql',

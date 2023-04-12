@@ -72,7 +72,7 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con)
+        self.databaseManager = database.DatabaseManager(self.con, BRAND)
 
     def __del__(self):
         self.con.close()
@@ -313,28 +313,28 @@ class Processor:
 
     def feed(self):
         products = self.fetchFeed()
-        self.databaseManager.writeFeed(BRAND, products)
+        self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync(BRAND)
+        self.databaseManager.statusSync()
 
     def add(self):
-        self.databaseManager.createProducts(BRAND)
+        self.databaseManager.createProducts()
 
     def price(self):
-        self.databaseManager.updatePrices(BRAND, False)
+        self.databaseManager.updatePrices(False)
 
     def update(self):
-        self.databaseManager.updateProducts(BRAND)
+        self.databaseManager.updateProducts()
 
     def tag(self):
-        self.databaseManager.updateTags(BRAND, False)
+        self.databaseManager.updateTags(False)
 
     def sample(self):
-        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
+        self.databaseManager.customTags("statusS", "NoSample")
 
     def shipping(self):
-        self.databaseManager.customTags(BRAND, "whiteShip", "White Glove")
+        self.databaseManager.customTags("whiteShip", "White Glove")
 
     def downloadInvFile(self):
         debug.debug(BRAND, 0, "Download New CSV from {} FTP".format(BRAND))
@@ -383,4 +383,4 @@ class Processor:
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(BRAND, stocks, 1)
+        self.databaseManager.updateStock(stocks, 1)

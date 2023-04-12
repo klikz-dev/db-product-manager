@@ -52,7 +52,7 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con)
+        self.databaseManager = database.DatabaseManager(self.con, BRAND)
 
     def __del__(self):
         self.con.close()
@@ -194,23 +194,23 @@ class Processor:
 
     def feed(self):
         products = self.fetchFeed()
-        self.databaseManager.writeFeed(BRAND, products)
+        self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync(BRAND)
+        self.databaseManager.statusSync()
 
     def add(self):
-        self.databaseManager.createProducts(BRAND)
+        self.databaseManager.createProducts()
 
     def update(self):
-        products = Feed.objects.filter(brand=BRAND)
-        self.databaseManager.updateProducts(BRAND, products)
+        products = Feed.objects.all()
+        self.databaseManager.updateProducts(products)
 
     def price(self):
-        self.databaseManager.updatePrices(BRAND)
+        self.databaseManager.updatePrices()
 
     def tag(self):
-        self.databaseManager.updateTags(BRAND)
+        self.databaseManager.updateTags()
 
     def cutFee(self):
-        self.databaseManager.customTags(BRAND, "cutFee", "Cut Fee")
+        self.databaseManager.customTags("cutFee", "Cut Fee")

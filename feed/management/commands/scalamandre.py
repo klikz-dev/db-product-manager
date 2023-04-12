@@ -54,7 +54,8 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 processor.inventory()
-                print("Finished process. Waiting for next run. {}:{}".format(BRAND, options['functions']))
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
                 time.sleep(86400)
 
 
@@ -64,10 +65,10 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con)
+        self.databaseManager = database.DatabaseManager(self.con, BRAND)
 
         r = requests.post("{}/Auth/authenticate".format(API_ADDRESS), headers={'Content-Type': 'application/json'},
-                        data=json.dumps({"Username": API_USERNAME, "Password": API_PASSWORD}))
+                          data=json.dumps({"Username": API_USERNAME, "Password": API_PASSWORD}))
         j = json.loads(r.text)
         self.token = j['Token']
 
@@ -112,7 +113,8 @@ class Processor:
                 elif "PILL" in type:
                     type = "Pillow"
                 else:
-                    debug.debug(BRAND, 1, "Unknown product type: {}".format(type))
+                    debug.debug(
+                        BRAND, 1, "Unknown product type: {}".format(type))
                     continue
 
                 manufacturer = str(row['BRAND']).strip()
@@ -183,7 +185,8 @@ class Processor:
                     continue
 
                 # Tagging
-                tags = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(), ", ".join(features), collection, description)
+                tags = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(
+                ), ", ".join(features), collection, description)
                 colors = color
 
                 statusP = True
@@ -192,10 +195,12 @@ class Processor:
                 shipping = str(sh.cell_value(i, 35)).strip()
 
                 # Image
-                thumbnail = str(sh.cell_value(i, 49)).strip().replace("dl=0", "dl=1")
+                thumbnail = str(sh.cell_value(
+                    i, 49)).strip().replace("dl=0", "dl=1")
                 roomsets = []
                 for id in range(50, 63):
-                    roomset = str(sh.cell_value(i, id)).strip().replace("dl=0", "dl=1")
+                    roomset = str(sh.cell_value(i, id)
+                                  ).strip().replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
 
@@ -207,7 +212,8 @@ class Processor:
                 for typeword in ptypeTmp.split(" "):
                     pattern = pattern.replace(typeword, "")
 
-                pattern = pattern.replace("**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
+                pattern = pattern.replace(
+                    "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
                 ##############
 
             except Exception as e:
@@ -289,7 +295,8 @@ class Processor:
             transport.connect(username=username, password=password)
             sftp = paramiko.SFTPClient.from_transport(transport)
         except:
-            debug.debug(BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
+            debug.debug(
+                BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
             return False
 
         try:
@@ -312,25 +319,25 @@ class Processor:
 
     def feed(self):
         products = self.fetchFeed()
-        self.databaseManager.writeFeed(BRAND, products)
+        self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync(BRAND)
+        self.databaseManager.statusSync()
 
     def add(self):
-        self.databaseManager.createProducts(BRAND)
+        self.databaseManager.createProducts()
 
     def update(self):
-        self.databaseManager.updateProducts(BRAND)
+        self.databaseManager.updateProducts()
 
     def tag(self):
-        self.databaseManager.updateTags(BRAND, False)
+        self.databaseManager.updateTags(False)
 
     def sample(self):
-        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
+        self.databaseManager.customTags("statusS", "NoSample")
 
     def shipping(self):
-        self.databaseManager.customTags(BRAND, "whiteShip", "White Glove")
+        self.databaseManager.customTags("whiteShip", "White Glove")
 
     def inventory(self):
         stocks = []
@@ -357,4 +364,4 @@ class Processor:
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(BRAND, stocks, 1)
+        self.databaseManager.updateStock(stocks, 1)

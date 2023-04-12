@@ -470,25 +470,25 @@ class Processor:
 
     def feed(self):
         products = self.fetchFeed()
-        self.databaseManager.writeFeed(BRAND, products)
+        self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync(BRAND)
+        self.databaseManager.statusSync()
 
     def add(self):
-        self.databaseManager.createProducts(BRAND)
+        self.databaseManager.createProducts()
 
     def update(self):
-        self.databaseManager.updateProducts(BRAND)
+        self.databaseManager.updateProducts()
 
     def tag(self):
-        self.databaseManager.updateTags(BRAND, False)
+        self.databaseManager.updateTags(False)
 
     def price(self):
-        self.databaseManager.updatePrices(BRAND)
+        self.databaseManager.updatePrices()
 
     def image(self):
-        self.databaseManager.downloadImages(BRAND)
+        self.databaseManager.downloadImages()
 
     def sample(self):
-        self.databaseManager.customTags(BRAND, "statusS", "NoSample")
+        self.databaseManager.customTags("statusS", "NoSample")
