@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from feed.models import Kravet
 
 import os
 import environ
@@ -473,22 +474,24 @@ class Processor:
         self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync()
+        self.databaseManager.statusSync(fullSync=False)
 
     def add(self):
-        self.databaseManager.createProducts()
+        self.databaseManager.createProducts(formatPrice=True)
 
     def update(self):
-        self.databaseManager.updateProducts()
+        products = Kravet.objects.all()
+        self.databaseManager.updateProducts(
+            products=products, formatPrice=True)
 
     def tag(self):
-        self.databaseManager.updateTags(False)
+        self.databaseManager.updateTags(category=True)
 
     def price(self):
-        self.databaseManager.updatePrices()
+        self.databaseManager.updatePrices(formatPrice=True)
 
     def image(self):
-        self.databaseManager.downloadImages()
+        self.databaseManager.downloadImages(missingOnly=True)
 
     def sample(self):
-        self.databaseManager.customTags("statusS", "NoSample")
+        self.databaseManager.customTags(key="statusS", tag="NoSample")

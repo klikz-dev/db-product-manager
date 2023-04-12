@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from feed.models import Feed
+from feed.models import PhillipJeffries
 
 import os
 import environ
@@ -197,20 +197,21 @@ class Processor:
         self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync()
+        self.databaseManager.statusSync(fullSync=False)
 
     def add(self):
-        self.databaseManager.createProducts()
+        self.databaseManager.createProducts(formatPrice=True)
 
     def update(self):
-        products = Feed.objects.all()
-        self.databaseManager.updateProducts(products)
+        products = PhillipJeffries.objects.all()
+        self.databaseManager.updateProducts(
+            products=products, formatPrice=True)
 
     def price(self):
-        self.databaseManager.updatePrices()
+        self.databaseManager.updatePrices(formatPrice=True)
 
     def tag(self):
-        self.databaseManager.updateTags()
+        self.databaseManager.updateTags(category=True)
 
     def cutFee(self):
-        self.databaseManager.customTags("cutFee", "Cut Fee")
+        self.databaseManager.customTags(key="cutFee", tag="Cut Fee")

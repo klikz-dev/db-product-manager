@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from feed.models import Feed
+from feed.models import JamieYoung
 
 import os
 import environ
@@ -332,9 +332,11 @@ class Processor:
                 mpn = row[1]
                 quantity = int(row[2])
 
-                product = Feed.objects.get(mpn=mpn)
+                product = JamieYoung.objects.get(mpn=mpn)
+            except JamieYoung.DoesNotExist:
+                continue
             except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+                print(str(e))
                 continue
 
             stock = {

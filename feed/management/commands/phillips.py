@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from feed.models import Phillips
 
 import environ
 import requests
@@ -281,19 +282,24 @@ class Processor:
         self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync()
+        self.databaseManager.statusSync(fullSync=False)
 
     def add(self):
-        self.databaseManager.createProducts()
+        self.databaseManager.createProducts(formatPrice=False)
 
     def update(self):
-        self.databaseManager.updateProducts()
+        products = Phillips.objects.all()
+        self.databaseManager.updateProducts(
+            products=products, formatPrice=False)
+
+    def price(self):
+        self.databaseManager.updatePrices(formatPrice=False)
 
     def tag(self):
-        self.databaseManager.updateTags(False)
+        self.databaseManager.updateTags(category=False)
 
     def sample(self):
-        self.databaseManager.customTags("statusS", "NoSample")
+        self.databaseManager.customTags(key="statusS", tag="NoSample")
 
     def inventory(self, mpn):
         try:

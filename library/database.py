@@ -9,7 +9,7 @@ class DatabaseManager:
         self.csr = self.con.cursor()
         self.brand = brand
 
-        if brand == "JamieYoung":
+        if brand == "Jamie Young":
             self.Feed = JamieYoung
         elif brand == "Kravet":
             self.Feed = Kravet
@@ -539,12 +539,12 @@ class DatabaseManager:
             debug.debug(self.brand, 0,
                         "Added Tags for Brand: {}, SKU: {}".format(self.brand, sku))
 
-    def customTags(self, statusKey, tag):
+    def customTags(self, key, tag):
         products = self.Feed.objects.all()
 
         for product in products:
             if product.productId:
-                if product[statusKey]:
+                if product[key]:
                     self.csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(product.sku), common.sq(tag)))
                     self.con.commit()

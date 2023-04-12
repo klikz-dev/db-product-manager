@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from feed.models import Feed
+from feed.models import York
 
 import os
 import environ
@@ -40,6 +40,9 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor.update()
+
+        if "price" in options['functions']:
+            processor.price()
 
         if "tag" in options['functions']:
             processor.tag()
@@ -291,8 +294,8 @@ class Processor:
                     mpn = fname.split("_")[0]
 
                     try:
-                        product = Feed.objects.get(mpn=mpn)
-                    except Feed.DoesNotExist:
+                        product = York.objects.get(mpn=mpn)
+                    except York.DoesNotExist:
                         continue
 
                     productId = product.productId
@@ -308,8 +311,8 @@ class Processor:
                     mpn = fname.split(".")[0]
 
                     try:
-                        product = Feed.objects.get(mpn=mpn)
-                    except Feed.DoesNotExist:
+                        product = York.objects.get(mpn=mpn)
+                    except York.DoesNotExist:
                         continue
 
                     productId = product.productId
@@ -327,17 +330,20 @@ class Processor:
         self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync()
+        self.databaseManager.statusSync(fullSync=False)
 
     def add(self):
-        self.databaseManager.createProducts()
+        self.databaseManager.createProducts(formatPrice=True)
 
     def update(self):
-        products = Feed.objects.all()
-        self.databaseManager.updateProducts(products)
+        products = York.objects.all()
+        self.databaseManager.updateProducts(products, formatPrice=True)
+
+    def price(self):
+        self.databaseManager.updatePrices(formatPrice=True)
 
     def tag(self):
-        self.databaseManager.updateTags()
+        self.databaseManager.updateTags(category=True)
 
     def white(self):
         self.databaseManager.customTags("whiteShip", "White Glove")

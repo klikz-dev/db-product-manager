@@ -47,22 +47,25 @@ class ProductData:
                     FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID LEFT JOIN Type T ON P.ProductTypeID = T.TypeID LEFT JOIN ProductVariant PV ON P.SKU = PV.SKU
                     WHERE PV.IsDefault = 1 AND P.SKU = {}""".format(sq(sku)))
         product = self.csr.fetchone()
-        self.productID = product[0]
-        self.mpn = product[1].upper()
-        self.body = product[2]
+        if product:
+            self.productID = product[0]
+            self.mpn = product[1].upper()
+            self.body = product[2]
 
-        self.title = product[3].title()
-        self.description = product[4]
-        self.published = product[5]
-        self.price = product[6]
-        self.ptype = product[7]
-        self.pattern = product[8]
-        self.color = product[9]
-        self.collection = product[10]
-        self.manufacturer = product[11]
-        self.isOutlet = product[12]
-        self.createdAt = product[13]
-        self.brand = product[14]
+            self.title = product[3].title()
+            self.description = product[4]
+            self.published = product[5]
+            self.price = product[6]
+            self.ptype = product[7]
+            self.pattern = product[8]
+            self.color = product[9]
+            self.collection = product[10]
+            self.manufacturer = product[11]
+            self.isOutlet = product[12]
+            self.createdAt = product[13]
+            self.brand = product[14]
+        else:
+            raise ValueError(f"SKU {sku} not found")
 
     def ProductTag(self):
         price = self.price
@@ -192,18 +195,16 @@ class ProductData:
                 tags.append(value)
 
         # Rebuy Tags
+        tags.append("Rebuy_color_{}".format(self.color))
+
         self.csr.execute(
             "SELECT Collection FROM ProductCollection WHERE SKU = {}".format(sq(self.sku)))
-        for tag in self.csr.fetchall():
-            tagName = tag[0]
-            tags.append("Rebuy_collection_{}".format(tagName))
-
-        # self.csr.execute(
-        #     "SELECT T.Name FROM Tag T JOIN ProductTag PT ON T.TagID = PT.TagID JOIN Product P ON PT.SKU = P.SKU WHERE T.ParentTagID = 3 AND P.SKU = {}".format(sq(self.sku)))
-        # for tag in self.csr.fetchall():
-        #     tagName = tag[0]
-        #     tags.append("Rebuy_color_{}".format(tagName))
-        tags.append("Rebuy_color_{}".format(self.color))
+        row = self.csr.fetchone()
+        if row:
+            collection = row[0]
+            tags.append("Rebuy_collection_{}".format(collection))
+            tags.append("Rebuy_Recommendation_{}_{}".format(
+                collection, self.color))
         # Rebuy Tags End
 
         return tags

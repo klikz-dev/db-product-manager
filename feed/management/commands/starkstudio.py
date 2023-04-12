@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from feed.models import Feed
+from feed.models import StarkStudio
 
 import os
 import environ
@@ -279,7 +279,7 @@ class Processor:
     def image(self):
         imageDir = FILEDIR + "images/stark/"
 
-        products = Feed.objects.filter(brand=BRAND)
+        products = StarkStudio.objects.all()
         for product in products:
             productStr = "{} {}".format(product.pattern, product.color).replace(
                 ",", "").replace("/", " ").lower()
@@ -374,7 +374,7 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        products = Feed.objects.filter(brand=BRAND)
+        products = StarkStudio.objects.filter(brand=BRAND)
         for product in products:
             stock = {
                 'sku': product.sku,
