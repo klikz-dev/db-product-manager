@@ -140,7 +140,7 @@ class Processor:
                     manufacturer = "Scalamandre"
                 elif "Old World Weavers" in manufacturer:
                     sku = "OWW {}".format(row['SKU'])
-                elif "Grey Watkins" in brand:
+                elif "Grey Watkins" in manufacturer:
                     sku = "GWA {}".format(row['SKU'])
 
                 manufacturer = f"{manufacturer} {type}"
