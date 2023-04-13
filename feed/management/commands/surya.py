@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from feed.models import Surya
 
 import os
 import environ
@@ -35,6 +36,9 @@ class Command(BaseCommand):
 
         if "tag" in options['functions']:
             processor.tag()
+
+        if "image" in options['functions']:
+            processor.image()
 
         if "sample" in options['functions']:
             processor.sample()
@@ -219,22 +223,23 @@ class Processor:
         self.databaseManager.writeFeed(products)
 
     def sync(self):
-        self.databaseManager.statusSync()
+        self.databaseManager.statusSync(fullSync=False)
 
     def add(self):
-        self.databaseManager.createProducts()
+        self.databaseManager.createProducts(formatPrice=True)
 
     def update(self):
-        self.databaseManager.updateProducts()
+        products = Surya.objects.all()
+        self.databaseManager.updateProducts(products=products, formatPrice=True)
 
     def tag(self):
-        self.databaseManager.updateTags(False)
+        self.databaseManager.updateTags(category=False)
 
     def image(self):
-        self.databaseManager.downloadImages()
+        self.databaseManager.downloadImages(missingOnly=False)
 
     def sample(self):
-        self.databaseManager.customTags("statusS", "NoSample")
+        self.databaseManager.customTags(key="statusS", tag="NoSample")
 
     def shipping(self):
-        self.databaseManager.customTags("whiteShip", "White Glove")
+        self.databaseManager.customTags(key="whiteShip", tag="White Glove")

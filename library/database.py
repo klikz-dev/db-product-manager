@@ -485,7 +485,10 @@ class DatabaseManager:
 
         products = self.Feed.objects.all()
         for product in products:
-            if missingOnly and (product.productId == None or product.productId in hasImage):
+            if not product.productId:
+                continue
+
+            if missingOnly and product.productId in hasImage:
                 continue
 
             self.downloadImage(product.productId,
