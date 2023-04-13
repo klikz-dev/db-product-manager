@@ -452,7 +452,11 @@ class Command(BaseCommand):
             if "Sample" != uom:
                 csr.execute(
                     "SELECT Quantity FROM ProductInventory WHERE SKU = '{}'".format(sku))
-                stock = csr.fetchone()[0]
+                stockData = csr.fetchone()
+                if stockData:
+                    stock = stockData[0]
+                else:
+                    stock = 0
 
                 if stock < qty:
                     stockStatus = False
