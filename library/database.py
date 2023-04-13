@@ -66,7 +66,7 @@ class DatabaseManager:
                     repeatV=product.get('repeatV', 0),
                     repeat=product.get('repeat', ""),
                     content=product.get('content', ""),
-                    match=product.get('content', ""),
+                    match=product.get('match', ""),
                     material=product.get('material', ""),
                     finish=product.get('finish', ""),
                     care=product.get('care', ""),
@@ -510,12 +510,15 @@ class DatabaseManager:
 
         for product in products:
             sku = product.sku
+            type = product.type
 
             colors = product.colors
             tags = ", ".join((product.type, product.pattern, product.tags))
             collection = product.collection
+            size = product.size
+            width = product.width
 
-            if tags != None and tags != "":
+            if tags:
                 if category:
                     self.csr.execute("CALL AddToEditCategory ({}, {})".format(
                         common.sq(sku), common.sq(tags)))
@@ -529,14 +532,38 @@ class DatabaseManager:
                     common.sq(sku), common.sq(str(tags).strip())))
                 self.con.commit()
 
-            if colors != None and colors != "":
+            if colors:
                 self.csr.execute("CALL AddToEditColor ({}, {})".format(
                     common.sq(sku), common.sq(colors)))
                 self.con.commit()
 
-            if collection != None and collection != "":
+            if collection:
                 self.csr.execute("CALL AddToEditCollection ({}, {})".format(
                     common.sq(sku), common.sq(collection)))
+                self.con.commit()
+
+            if size and type == "Pillow":
+                self.csr.execute("CALL AddToEditSize ({}, {})".format(
+                    common.sq(sku), common.sq(size)))
+                self.con.commit()
+
+            if width > 0 and type == "Trim":
+
+                if width < 1:
+                    tag = 'Up to 1"'
+                elif width < 2:
+                    tag = '1" to 2"'
+                elif width < 3:
+                    tag = '2" to 3"'
+                elif width < 4:
+                    tag = '3" to 4"'
+                elif width < 5:
+                    tag = '4" to 5"'
+                else:
+                    tag = '5" and More'
+
+                self.csr.execute("CALL AddToEditSize ({}, {})".format(
+                    common.sq(sku), common.sq(tag)))
                 self.con.commit()
 
             debug.debug(self.brand, 0,
