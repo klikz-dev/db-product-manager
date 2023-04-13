@@ -10,11 +10,13 @@ import urllib
 import zipfile
 import requests
 import xlrd
+import time
 from bs4 import BeautifulSoup
 
 from library import database, debug
 
-FTP_INFO = "ftp://decbest:mArker999@file.kravet.com/decbest.zip"
+KRAVET_FTP_INFO = "ftp://decbest:mArker999@file.kravet.com/decbest.zip"
+KRAVET_DECOR_FTP_INFO = "ftp://decbest:mArker999@file.kravet.com/curated_onhand_info.zip"
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
@@ -50,6 +52,21 @@ class Command(BaseCommand):
         if "sample" in options['functions']:
             processor.sample()
 
+        if "inventory" in options['functions']:
+            processor.inventory()
+
+        if "shipping" in options['functions']:
+            processor.shipping()
+
+        if "main" in options['functions']:
+            while True:
+                processor.feed()
+                processor.sync()
+                processor.inventory()
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
+
 
 class Processor:
     def __init__(self):
@@ -64,16 +81,24 @@ class Processor:
 
     def downloadFeed(self):
         [os.remove(f"{FILEDIR}/{file}") for file in [
-            'kravet-master.csv', 'kravet-master.zip'] if os.path.exists(f"{FILEDIR}/{file}")]
+            'kravet-master.csv', 'kravet-master.zip', 'kravet-decor-inventory.csv', 'kravet-decor-inventory.zip'] if os.path.exists(f"{FILEDIR}/{file}")]
 
         try:
             urllib.request.urlretrieve(
-                FTP_INFO, f"{FILEDIR}/kravet-master.zip")
+                KRAVET_FTP_INFO, f"{FILEDIR}/kravet-master.zip")
             z = zipfile.ZipFile(f"{FILEDIR}/kravet-master.zip", "r")
             z.extractall(FILEDIR)
             z.close()
             os.rename(f"{FILEDIR}/item_info.csv",
                       f"{FILEDIR}/kravet-master.csv")
+            
+            urllib.request.urlretrieve(
+                KRAVET_DECOR_FTP_INFO, f"{FILEDIR}/kravet-decor-inventory.zip")
+            z = zipfile.ZipFile(f"{FILEDIR}/kravet-decor-inventory.zip", "r")
+            z.extractall(FILEDIR)
+            z.close()
+            os.rename(f"{FILEDIR}/curated_onhand_info.csv",
+                      f"{FILEDIR}/kravet-decor-inventory.csv")
 
             debug.debug(BRAND, 0, "Download Completed")
             return True
@@ -103,6 +128,20 @@ class Processor:
         for i in range(1, sh.nrows):
             prices[str(sh.cell_value(i, 0))] = round(
                 float(sh.cell_value(i, 1)), 2)
+
+        # Pillow Stock
+        inventories = {}
+
+        f = open(f"{FILEDIR}/kravet-decor-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            if row[0] == "Item":
+                continue
+            try:
+                inventories[str(row[0]).strip()] = (int(float(row[1])), int(float(row[2])), str(row[3]).strip())
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
 
         # Get Product Feed
         products = []
@@ -297,7 +336,7 @@ class Processor:
                 # Stock
                 stockP = int(float(row[46]))
                 stockS = int(float(row[50]))
-                stockNote = str(row[47]).strip()
+                stockNote = f"{str(row[47]).strip()} days"
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -422,7 +461,15 @@ class Processor:
                     statusP = False
 
                 # Stock
+                stockP = 0
                 stockNote = str(sh.cell_value(i, 17))
+                whiteShip = False
+
+                if mpn in inventories:
+                    (stockP, leadtime, shipping) = inventories[mpn]
+                    stockNote = f"{leadtime} days"
+                    if "White" in shipping:
+                        whiteShip = True
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -459,7 +506,9 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
 
+                'stockP': stockP,
                 'stockNote': stockNote,
+                'whiteShip': whiteShip,
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
@@ -495,3 +544,20 @@ class Processor:
 
     def sample(self):
         self.databaseManager.customTags(key="statusS", tag="NoSample")
+
+    def shipping(self):
+        self.databaseManager.customTags(key="whiteShip", tag="White Glove")
+
+    def inventory(self):
+        stocks = []
+
+        products = Kravet.objects.all()
+        for product in products:
+            stock = {
+                'sku': product.sku,
+                'quantity': product.stockP,
+                'note': product.stockNote or ""
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
