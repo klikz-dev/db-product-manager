@@ -129,7 +129,7 @@ class Command(BaseCommand):
                     print(e)
                     debug("PJ EDI", 2, "Adding Item {} to Cart has been failed. PO: {}".format(
                         mpn, orderNumber))
-                    return
+                    continue
 
             try:
                 # Update Billing
@@ -244,7 +244,7 @@ class Command(BaseCommand):
                 print(e)
                 debug("PJ EDI", 2,
                       "Processing PO {} has been failed.".format(orderNumber))
-                return
+                continue
 
             csr.execute(
                 "SELECT Status FROM Orders WHERE OrderNumber = {}".format(orderNumber))
@@ -259,9 +259,9 @@ class Command(BaseCommand):
 
             lastPO = orderNumber
 
-        csr.execute(
-            "UPDATE PORecord SET PhillipJeffriesSample = {}".format(lastPO))
-        con.commit()
+            csr.execute(
+                "UPDATE PORecord SET PhillipJeffriesSample = {}".format(lastPO))
+            con.commit()
 
     def reference(self):
         con = pymysql.connect(host=db_host, user=db_username,
