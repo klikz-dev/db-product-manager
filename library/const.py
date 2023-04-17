@@ -1,8 +1,8 @@
 markup = {
     "Phillips": {
         "useMAP": True,
-        "consumer": 1.5,
-        "trade": 1,
+        "consumer": 2,
+        "trade": 1.5,
     },
     "York": {
         "useMAP": True,
@@ -12,7 +12,7 @@ markup = {
     "Stark Studio": {
         "useMAP": True,
         "consumer": 2.22,
-        "trade": 1.25,
+        "trade": 1.5,
     },
     "Phillip Jeffries": {
         "useMAP": False,
@@ -21,8 +21,8 @@ markup = {
     },
     "Surya": {
         "useMAP": True,
-        "consumer": 1.5,
-        "trade": 1.3,
+        "consumer": 2,
+        "trade": 1.5,
     },
     "Kravet": {
         "useMAP": True,

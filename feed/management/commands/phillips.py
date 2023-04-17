@@ -37,6 +37,9 @@ class Command(BaseCommand):
         if "update" in options['functions']:
             processor.update()
 
+        if "price" in options['functions']:
+            processor.price()
+
         if "tag" in options['functions']:
             processor.tag()
 
