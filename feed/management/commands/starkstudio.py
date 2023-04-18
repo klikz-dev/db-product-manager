@@ -26,41 +26,50 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         processor = Processor()
+
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
-            processor.update()
+            products = StarkStudio.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=False)
 
         if "price" in options['functions']:
-            processor.price()
+            processor.databaseManager.updatePrices(formatPrice=False)
 
         if "image" in options['functions']:
             processor.image()
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
-            processor.sample()
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "shipping" in options['functions']:
-            processor.shipping()
+            processor.databaseManager.customTags(
+                key="whiteShip", tag="White Glove")
 
         if "inventory" in options['functions']:
             processor.inventory()
 
         if "main" in options['functions']:
             while True:
-                processor.feed()
-                processor.sync()
+                products = processor.fetchFeed()
+                processor.databaseManager.writeFeed(products=products)
+
+                processor.databaseManager.statusSync(fullSync=False)
+
                 processor.inventory()
+
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
                 time.sleep(86400)
@@ -310,31 +319,6 @@ class Processor:
                         print("Product: {}".format(fname))
                         copyfile(imageDir + fname, FILEDIR +
                                  "/../../../images/product/{}.jpg".format(product.productId))
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync()
-
-    def add(self):
-        self.databaseManager.createProducts()
-
-    def price(self):
-        self.databaseManager.updatePrices(False)
-
-    def update(self):
-        self.databaseManager.updateProducts()
-
-    def tag(self):
-        self.databaseManager.updateTags(False)
-
-    def sample(self):
-        self.databaseManager.customTags("statusS", "NoSample")
-
-    def shipping(self):
-        self.databaseManager.customTags("whiteShip", "White Glove")
 
     def downloadInvFile(self):
         debug.debug(BRAND, 0, "Download New CSV from {} FTP".format(BRAND))
