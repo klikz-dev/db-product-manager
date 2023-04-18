@@ -752,7 +752,9 @@ class Command(BaseCommand):
                 continue
 
             try:
-                newPrice = common.formatprice(map, 1)
+                newPrice = common.formatprice(newCost, markup_price)
+                if product.map > 0:
+                    newPrice = common.formatprice(map, 1)
                 newPriceTrade = common.formatprice(newCost, markup_trade)
             except:
                 debug("JaipurLiving", 1, "Price Error: SKU: {}".format(product.sku))
