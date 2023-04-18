@@ -22,29 +22,37 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         processor = Processor()
+
         if "feed" in options['functions']:
-            processor.feed()
+            products = self.fetchFeed()
+            processor.databaseManager.writeFeed(products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            processor.update()
+            products = Surya.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=True)
+
+        if "price" in options['functions']:
+            processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=False)
 
         if "image" in options['functions']:
-            processor.image()
+            processor.databaseManager.downloadImages(missingOnly=False)
 
         if "sample" in options['functions']:
-            processor.sample()
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "shipping" in options['functions']:
-            processor.shipping()
+            processor.databaseManager.customTags(
+                key="whiteShip", tag="White Glove")
 
 
 class Processor:
@@ -217,29 +225,3 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=True)
-
-    def update(self):
-        products = Surya.objects.all()
-        self.databaseManager.updateProducts(products=products, formatPrice=True)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=False)
-
-    def image(self):
-        self.databaseManager.downloadImages(missingOnly=False)
-
-    def sample(self):
-        self.databaseManager.customTags(key="statusS", tag="NoSample")
-
-    def shipping(self):
-        self.databaseManager.customTags(key="whiteShip", tag="White Glove")
