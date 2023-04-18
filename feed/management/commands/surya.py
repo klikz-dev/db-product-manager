@@ -24,7 +24,7 @@ class Command(BaseCommand):
         processor = Processor()
 
         if "feed" in options['functions']:
-            products = self.fetchFeed()
+            products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
 
         if "sync" in options['functions']:
