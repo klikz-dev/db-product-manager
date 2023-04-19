@@ -67,7 +67,7 @@ class Command(BaseCommand):
         Seabrook.objects.all().delete()
 
         wb = xlrd.open_workbook(
-            FILEDIR + "/files/seabrook-master.xlsx")
+            FILEDIR + "/files/seabrook-master-1-27-23.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(2, sh.nrows):
