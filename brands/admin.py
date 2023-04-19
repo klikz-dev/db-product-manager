@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JamieYoung, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, Kravet, KravetDecor, Mindthegap, Pindler, PhillipJeffries, Pklifestyles, PremierPrints, Scalamandre, Schumacher, Seabrook, Stout, TresTintas, York, Zoffany
+from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, KravetDecor, Mindthegap, Pindler, PremierPrints, Seabrook, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
