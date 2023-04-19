@@ -37,7 +37,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = Schumacher.objects.all()
+            products = Schumacher.objects.filter(productId='6867475464238')
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -77,9 +77,6 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
-        if not self.datasheet():
-            return
-
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
         # Get Product Feed
@@ -108,11 +105,11 @@ class Processor:
                 if type == "Wallcovering":
                     type = "Wallpaper"
                 if type == "Furniture & Accessories":
-                    type = "Pillow"
+                    type = "Throw Pillows"
                 if type == "Rugs & Carpets":
                     type = "Rug"
                 if "Throw" in pattern:
-                    type = "Throw"
+                    type = "Throws"
 
                 pattern = pattern.replace(type, "").strip()
 
