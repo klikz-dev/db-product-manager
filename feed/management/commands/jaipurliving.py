@@ -108,6 +108,7 @@ class Processor:
                 upc = common.formatInt(sh.cell_value(i, 6))
 
                 title = common.formatText(sh.cell_value(i, 9)).title()
+                title = title.replace(BRAND, "").strip()
 
                 # Categorization
                 manufacturer = BRAND
