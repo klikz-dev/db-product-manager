@@ -6,10 +6,9 @@ import environ
 import pymysql
 import csv
 import codecs
-import paramiko
 import time
 
-from library import database, debug
+from library import database, debug, common
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
@@ -26,6 +25,8 @@ class Command(BaseCommand):
         processor = Processor()
 
         if "feed" in options['functions']:
+            processor.databaseManager.downloadFileFromSFTP(
+                src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
@@ -51,7 +52,10 @@ class Command(BaseCommand):
 
         if "inventory" in options['functions']:
             while True:
+                processor.databaseManager.downloadFileFromSFTP(
+                    src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
                 processor.inventory()
+
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
                 time.sleep(86400)
@@ -71,53 +75,6 @@ class Processor:
 
     def __del__(self):
         self.con.close()
-
-    def datasheet(self):
-        debug.debug(
-            BRAND, 0, "Download New Master CSV file from Schumacher FTP")
-
-        host = "34.203.121.151"
-        port = 22
-        username = "schumacher"
-        password = "Sch123Decbest!"
-
-        try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug.debug("Schumacher", 2,
-                        "Connection to Schumacher FTP Server Failed")
-            return False
-
-        sftp.get("../daily_feed/Assortment-DecoratorsBest.csv",
-                 f"{FILEDIR}/schumacher-master.csv")
-
-        sftp.close()
-
-        debug.debug(BRAND, 0, "Schumacher FTP Master File Download Completed")
-        return True
-
-    def formatText(self, text):
-        return str(text).replace('', '').replace('¥', '').replace('…', '').replace('„', '').strip()
-
-    def formatFloat(self, value):
-        if str(value).strip() != '':
-            try:
-                return round(float(str(value).replace('"', "").strip()), 2)
-            except:
-                return 0
-        else:
-            return 0
-
-    def formatInt(self, value):
-        if str(value).strip() != '':
-            try:
-                return int(float(str(value).replace('"', "").strip()))
-            except:
-                return 0
-        else:
-            return 0
 
     def fetchFeed(self):
         if not self.datasheet():
@@ -140,8 +97,8 @@ class Processor:
                 mpn = str(row[3]).strip().replace("'", "")
                 sku = f"SCH {mpn}"
 
-                pattern = self.formatText(row[4]).title()
-                color = self.formatText(row[5]).title()
+                pattern = common.formatText(row[4]).title()
+                color = common.formatText(row[5]).title()
 
                 type = str(row[0]).strip().title()
 
@@ -168,22 +125,22 @@ class Processor:
                     collection = "BORÃSTAPETER"
 
                 # Main Information
-                description = self.formatText(row[17])
+                description = common.formatText(row[17])
 
-                width = self.formatFloat(row[11])
-                length = self.formatFloat(row[21])
+                width = common.formatFloat(row[11])
+                length = common.formatFloat(row[21])
 
                 size = ""
                 if (type == "Pillow" or type == "Rug" or type == "Throw") and width != "" and length != "":
                     size = f'{width}" x {length}"'
 
-                repeatV = self.formatFloat(row[15])
-                repeatH = self.formatFloat(row[16])
+                repeatV = common.formatFloat(row[15])
+                repeatH = common.formatFloat(row[16])
 
                 # Additional Information
                 match = str(row[14]).strip()
 
-                yards = self.formatFloat(row[8])
+                yards = common.formatFloat(row[8])
 
                 content = ", ".join(
                     (str(row[12]).strip(), str(row[13].strip())))
@@ -201,7 +158,7 @@ class Processor:
                 else:
                     debug.debug(BRAND, 1, f"UOM Error. mpn: {mpn}. uom: {uom}")
 
-                minimum = self.formatInt(row[10])
+                minimum = common.formatInt(row[10])
 
                 if type == "Wallpaper" and minimum > 1:
                     increment = ",".join([str(ii * minimum)
@@ -210,7 +167,7 @@ class Processor:
                     increment = ""
 
                 # Pricing
-                cost = self.formatFloat(row[7])
+                cost = common.formatFloat(row[7])
 
                 # Tagging
                 tags = ", ".join((collection, row[6], description))
@@ -287,9 +244,6 @@ class Processor:
         return products
 
     def inventory(self):
-        if not self.datasheet():
-            return
-
         stocks = []
 
         f = open(f"{FILEDIR}/schumacher-master.csv", "rb")

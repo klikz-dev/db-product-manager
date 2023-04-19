@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, JaipurLiving, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, KravetDecor, Mindthegap, Pindler, PremierPrints, Seabrook, Stout, TresTintas, York, Zoffany
+from .models import CoutureLamps, Covington, DanaGibson, ElaineSmith, MadcapCottage, Materialworks, Maxwell, Brewster, JFFabrics, Kasmir, KravetDecor, Mindthegap, Pindler, PremierPrints, Seabrook, Stout, TresTintas, York, Zoffany
 
 
 class BrewsterAdmin(admin.ModelAdmin):
@@ -121,31 +121,6 @@ class ElaineSmithAdmin(admin.ModelAdmin):
 
     list_filter = ['ptype', 'status', 'uom',
                    'manufacturer', 'collection', 'size']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
-class JaipurLivingAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['name', 'pattern', 'color']}),
-        ('Collection', {'fields': [
-         'brand', 'ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'length', 'height', 'features', 'material', 'care', 'country', 'usage', 'weight', 'upc']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomsets']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
-
-    list_filter = ['ptype', 'status', 'uom',
-                   'manufacturer', 'collection']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -485,7 +460,6 @@ admin.site.register(CoutureLamps, CoutureLampsAdmin)
 admin.site.register(Covington, CovingtonAdmin)
 admin.site.register(DanaGibson, DanaGibsonAdmin)
 admin.site.register(ElaineSmith, ElaineSmithAdmin)
-admin.site.register(JaipurLiving, JaipurLivingAdmin)
 admin.site.register(JFFabrics, JFFabricsAdmin)
 admin.site.register(Kasmir, KasmirAdmin)
 admin.site.register(KravetDecor, KravetDecorAdmin)

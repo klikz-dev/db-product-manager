@@ -1,6 +1,8 @@
 import environ
 import requests
 import json
+import paramiko
+import urllib
 
 from library import debug, common, const, shopify
 from mysql.models import Type
@@ -488,6 +490,38 @@ class DatabaseManager:
 
             self.downloadImage(product.productId,
                                product.thumbnail, product.roomsets)
+
+    def downloadFileFromSFTP(self, src, dst):
+        try:
+            transport = paramiko.Transport(
+                (const.sftp[self.brand]["host"], const.sftp[self.brand]["port"]))
+            transport.connect(
+                username=const.sftp[self.brand]["user"], password=const.sftp[self.brand]["pass"])
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except Exception as e:
+            debug.debug(self.brand, 1,
+                        f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
+            return False
+
+        sftp.get(src, dst)
+        sftp.close()
+
+        debug.debug(self.brand, 0,
+                    f"{dst} downloaded from {self.brand} SFTP")
+        return True
+
+    def downloadFileFromFTP(self, src, dst):
+        try:
+            urllib.request.urlretrieve(
+                f"ftp://{const.ftp[self.brand]['user']}:{const.ftp[self.brand]['pass']}@{const.ftp[self.brand]['host']}/{src}", dst)
+        except Exception as e:
+            debug.debug(self.brand, 1,
+                        f"Connection to {self.brand} FTP Server Failed. Error: {str(e)}")
+            return False
+
+        debug.debug(self.brand, 0,
+                    f"{dst} downloaded from {self.brand} FTP")
+        return True
 
     def updateStock(self, stocks, stockType=1):
         for stock in stocks:

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, Schumacher, StarkStudio, Surya, York
+from .models import JaipurLiving, JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, Schumacher, StarkStudio, Surya, York
 
 
 class FeedAdmin(admin.ModelAdmin):
@@ -25,9 +25,14 @@ class FeedAdmin(admin.ModelAdmin):
                     'manufacturer', 'collection', 'cost', 'map', 'statusP', 'statusS')
 
     list_filter = ['brand', 'type', 'manufacturer',
-                   'uom', 'statusP', 'statusS', 'whiteShip', 'quickShip']
+                   'uom', 'statusP', 'statusS', 'whiteShip', 'quickShip', 'collection']
 
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
+    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color', 'collection']
+
+
+@admin.register(JaipurLiving)
+class JaipurLivingAdmin(FeedAdmin):
+    pass
 
 
 @admin.register(JamieYoung)

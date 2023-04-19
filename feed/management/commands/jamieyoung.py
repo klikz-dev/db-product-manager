@@ -68,7 +68,8 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=JamieYoung)
 
     def __del__(self):
         self.con.close()

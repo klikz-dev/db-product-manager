@@ -49,3 +49,29 @@ markup = {
         "trade": 1.3,
     },
 }
+
+
+sftp = {
+    "Jaipur Living": {
+        "host": "18.206.49.64",
+        "port": 22,
+        "user": "jaipur",
+        "pass": "JaipurDecor",
+    },
+    "Schumacher": {
+        "host": "34.203.121.151",
+        "port": 22,
+        "user": "schumacher",
+        "pass": "Sch123Decbest!",
+    },
+}
+
+
+ftp = {
+    "Jaipur Living": {
+        "host": "fingerprinti.com",
+        "port": 21,
+        "user": "jrinventory",
+        "pass": "JRInv2775",
+    },
+}

@@ -107,6 +107,12 @@ class Feed(models.Model):
         abstract = True
 
 
+class JaipurLiving(Feed):
+    class Meta:
+        verbose_name = "Jaipur Living"
+        verbose_name_plural = "Jaipur Living"
+
+
 class JamieYoung(Feed):
     class Meta:
         verbose_name = "Jamie Young"
