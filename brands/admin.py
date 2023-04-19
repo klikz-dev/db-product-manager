@@ -125,31 +125,6 @@ class ElaineSmithAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
-class JamieYoungAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': [
-         'brand', 'ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'height', 'depth', 'features', 'material', 'disclaimer', 'care', 'specs', 'country', 'usage', 'weight', 'upc']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'boDate', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomsets']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'boDate')
-
-    list_filter = ['ptype', 'status', 'uom',
-                   'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
 class JaipurLivingAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['mpn', 'sku']}),
@@ -217,31 +192,6 @@ class KasmirAdmin(admin.ModelAdmin):
                     'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
-class KravetAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'height', 'rollLength', 'content', 'hr', 'vr', 'feature']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': [
-         'status', 'statusText', 'stock', 'stockNote']}),
-        ('Image', {'fields': ['thumbnail', 'roomset']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'size', 'width', 'productId', 'status', 'statusText', 'stock', 'sampleStock')
-
-    list_filter = ['ptype', 'status', 'statusText', 'sample',
-                   'uom', 'manufacturer', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -388,52 +338,6 @@ class PindlerAdmin(admin.ModelAdmin):
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
 
-class PhillipJeffriesAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'height', 'rollLength', 'content', 'hr', 'vr', 'feature']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomset']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'minimum', 'productId', 'status', 'stock')
-
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
-class PklifestylesAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'content', 'width', 'sqft', 'rollLength', 'vr', 'hr', 'material', 'match', 'instruction', 'feature', 'usage']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomset']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
-
-    list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
 class PremierPrintsAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['mpn', 'sku']}),
@@ -453,55 +357,6 @@ class PremierPrintsAdmin(admin.ModelAdmin):
                     'cost', 'msrp', 'map', 'uom', 'productId', 'status', 'stock')
 
     list_filter = ['ptype', 'status', 'uom', 'manufacturer', 'collection']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
-class ScalamandreAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'height', 'pieceSize', 'rollLength', 'content', 'hr', 'vr', 'feature']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': [
-         'status', 'sampleStatus', 'stock', 'stockText']}),
-        ('Image', {'fields': ['thumbnail', 'roomset']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'pieceSize', 'width', 'productId', 'status', 'stock')
-
-    list_filter = ['ptype', 'status', 'sampleStatus', 'uom',
-                   'manufacturer', 'collection', 'pieceSize']
-
-    search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
-
-
-class SchumacherAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['mpn', 'sku']}),
-        ('Identities', {'fields': ['pattern', 'color']}),
-        ('Collection', {'fields': ['ptype', 'manufacturer', 'collection']}),
-        ('Description', {'fields': [
-         'description', 'width', 'rollLength', 'height', 'content', 'hr', 'vr', 'feature', 'match']}),
-        ('Cut by', {'fields': ['uom', 'minimum', 'increment']}),
-        ('Tagging', {'fields': ['style', 'colors', 'category']}),
-        ('Pricing', {'fields': ['cost', 'msrp', 'map']}),
-        ('Availability', {'fields': ['status', 'stock']}),
-        ('Image', {'fields': ['thumbnail', 'roomset']}),
-        ('Shipify Product', {'fields': ['productId']}),
-    ]
-
-    list_display = ('mpn', 'sku', 'collection', 'pattern', 'color',
-                    'cost', 'msrp', 'map', 'uom', 'size', 'width', 'productId', 'status', 'stock')
-
-    list_filter = ['ptype', 'status', 'uom',
-                   'manufacturer', 'minimum', 'collection', 'size']
 
     search_fields = ['mpn', 'sku', 'productId', 'pattern', 'color']
 
@@ -630,22 +485,16 @@ admin.site.register(CoutureLamps, CoutureLampsAdmin)
 admin.site.register(Covington, CovingtonAdmin)
 admin.site.register(DanaGibson, DanaGibsonAdmin)
 admin.site.register(ElaineSmith, ElaineSmithAdmin)
-admin.site.register(JamieYoung, JamieYoungAdmin)
 admin.site.register(JaipurLiving, JaipurLivingAdmin)
 admin.site.register(JFFabrics, JFFabricsAdmin)
 admin.site.register(Kasmir, KasmirAdmin)
-admin.site.register(Kravet, KravetAdmin)
 admin.site.register(KravetDecor, KravetDecorAdmin)
 admin.site.register(Materialworks, MaterialworksAdmin)
 admin.site.register(MadcapCottage, MadcapCottageAdmin)
 admin.site.register(Maxwell, MaxwellAdmin)
 admin.site.register(Mindthegap, MindthegapAdmin)
-admin.site.register(PhillipJeffries, PhillipJeffriesAdmin)
 admin.site.register(Pindler, PindlerAdmin)
-admin.site.register(Pklifestyles, PklifestylesAdmin)
 admin.site.register(PremierPrints, PremierPrintsAdmin)
-admin.site.register(Scalamandre, ScalamandreAdmin)
-admin.site.register(Schumacher, SchumacherAdmin)
 admin.site.register(Seabrook, SeabrookAdmin)
 admin.site.register(Stout, StoutAdmin)
 admin.site.register(TresTintas, TresTintasAdmin)
