@@ -739,7 +739,7 @@ class Command(BaseCommand):
             category = product.category
             style = product.style
             colors = product.color
-            subtypes = "{}, {}".format(product.ptype, product.pattern)
+            subtypes = "{}, {}".format(product.ptype)
             collection = product.collection
 
             if category != None and category != "":
@@ -941,7 +941,7 @@ class Command(BaseCommand):
                 else:
                     debug("Schumacher", 1, "Metafield Create API error. {}".format(
                         response.text))
-                    
+
     def discoSamples(self):
         con = pymysql.connect(host=db_host, port=db_port, user=db_username,
                               passwd=db_password, db=db_name, connect_timeout=5)
@@ -974,7 +974,6 @@ class Command(BaseCommand):
                 con.commit()
 
                 debug('Scalamandre', 0, "Deleted No Sample Tag. SKU: {}".format(sku))
-
 
         csr.close()
         con.close()

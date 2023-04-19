@@ -31,37 +31,42 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         processor = Processor()
+
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            processor.update()
+            products = Kravet.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=True)
 
         if "price" in options['functions']:
-            processor.price()
+            processor.databaseManager.updatePrices(formatPrice=True)
 
         if "sample" in options['functions']:
-            processor.sample()
-
-        if "inventory" in options['functions']:
-            processor.inventory()
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "shipping" in options['functions']:
-            processor.shipping()
+            processor.databaseManager.customTags(
+                key="whiteShip", tag="White Glove")
 
-        if "main" in options['functions']:
+        if "inventory" in options['functions']:
             while True:
-                processor.feed()
-                processor.sync()
+                products = processor.fetchFeed()
+                processor.databaseManager.writeFeed(products)
+
+                processor.databaseManager.statusSync(fullSync=False)
+
                 processor.inventory()
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
@@ -91,7 +96,7 @@ class Processor:
             z.close()
             os.rename(f"{FILEDIR}/item_info.csv",
                       f"{FILEDIR}/kravet-master.csv")
-            
+
             urllib.request.urlretrieve(
                 KRAVET_DECOR_FTP_INFO, f"{FILEDIR}/kravet-decor-inventory.zip")
             z = zipfile.ZipFile(f"{FILEDIR}/kravet-decor-inventory.zip", "r")
@@ -138,7 +143,8 @@ class Processor:
             if row[0] == "Item":
                 continue
             try:
-                inventories[str(row[0]).strip()] = (int(float(row[1])), int(float(row[2])), str(row[3]).strip())
+                inventories[str(row[0]).strip()] = (
+                    int(float(row[1])), int(float(row[2])), str(row[3]).strip())
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
                 continue
@@ -517,36 +523,6 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=True)
-
-    def update(self):
-        products = Kravet.objects.all()
-        self.databaseManager.updateProducts(
-            products=products, formatPrice=True)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=True)
-
-    def price(self):
-        self.databaseManager.updatePrices(formatPrice=True)
-
-    def image(self):
-        self.databaseManager.downloadImages(missingOnly=True)
-
-    def sample(self):
-        self.databaseManager.customTags(key="statusS", tag="NoSample")
-
-    def shipping(self):
-        self.databaseManager.customTags(key="whiteShip", tag="White Glove")
 
     def inventory(self):
         stocks = []

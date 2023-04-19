@@ -163,6 +163,8 @@ class Processor:
                 tags = str(sh.cell_value(i, 11)).strip()
                 if str(sh.cell_value(i, 23)).strip() == "Yes":
                     tags = "{}, Outdoor".format(tags)
+                tags = f"{tags}, {type}, {collection}, {pattern}"
+
                 colors = str(sh.cell_value(i, 9)).strip()
 
                 statusP = True

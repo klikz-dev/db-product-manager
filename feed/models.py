@@ -137,6 +137,12 @@ class Scalamandre(Feed):
         verbose_name_plural = "Scalamandre"
 
 
+class Schumacher(Feed):
+    class Meta:
+        verbose_name = "Schumacher"
+        verbose_name_plural = "Schumacher"
+
+
 class StarkStudio(Feed):
     class Meta:
         verbose_name = "Stark Studio"

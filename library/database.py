@@ -1,32 +1,27 @@
+import environ
+import requests
+import json
+
 from library import debug, common, const, shopify
-from feed.models import JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, StarkStudio, Surya, York
 from mysql.models import Type
+from shopify.models import Product
+
+env = environ.Env()
+SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
+    env('shopify_api_version'))
+SHOPIFY_PRODUCT_API_HEADER = {
+    'X-Shopify-Access-Token': env('shopify_product_token'),
+    'Content-Type': 'application/json'
+}
 
 
 class DatabaseManager:
-    def __init__(self, con, brand):
+    def __init__(self, con, brand, Feed):
         self.con = con
         self.csr = self.con.cursor()
-        self.brand = brand
 
-        if brand == "Jamie Young":
-            self.Feed = JamieYoung
-        elif brand == "Kravet":
-            self.Feed = Kravet
-        elif brand == "Phillip Jeffries":
-            self.Feed = PhillipJeffries
-        elif brand == "Phillips":
-            self.Feed = Phillips
-        elif brand == "Scalamandre":
-            self.Feed = Scalamandre
-        elif brand == "Stark Studio":
-            self.Feed = StarkStudio
-        elif brand == "Surya":
-            self.Feed = Surya
-        elif brand == "York":
-            self.Feed = York
-        else:
-            raise ValueError(f"Unknown Brand {brand}")
+        self.brand = brand
+        self.Feed = Feed
 
     def __del__(self):
         self.csr.close()
@@ -771,3 +766,68 @@ class DatabaseManager:
                 self.con.commit()
         except Exception as e:
             debug.debug(self.brand, str(e))
+
+    def linkPillowSample(self):
+        pillows = self.Feed.objects.filter(ptype="Pillow")
+
+        for pillow in pillows:
+            try:
+                fabric = self.Feed.objects.get(
+                    pattern=pillow.pattern, color=pillow.color, ptype="Fabric")
+                product = Product.objects.get(productId=fabric.productId)
+                handle = product.handle
+            except self.Feed.DoesNotExist:
+                debug.debug(
+                    self.brand, 1, f"Matching Fabric not found for pillow Pattern: {pillow.pattern} and Color: {pillow.color}")
+                continue
+
+            productId = pillow.productId
+
+            response = requests.get(
+                f"{SHOPIFY_API_URL}/products/{productId}/metafields.json", headers=SHOPIFY_PRODUCT_API_HEADER)
+            data = json.loads(response.text)
+
+            isFabricLinked = False
+            for metafield in data['metafields']:
+                if metafield['key'] == "fabric_id":
+                    payload = json.dumps({
+                        "metafield": {
+                            "namespace": "product",
+                            "key": "fabric_id",
+                            "type": "single_line_text_field",
+                            "value": handle
+                        }
+                    })
+
+                    response = requests.put(
+                        f"{SHOPIFY_API_URL}/products/{productId}/metafields/{metafield['id']}.json", headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
+
+                    if response.status_code == 200:
+                        debug.debug(
+                            self.brand, 0, f"Fabric link has been updated successfully. Pillow: {productId}, Fabric: {fabric.productId}")
+                    else:
+                        debug.debug(
+                            self.brand, 1, f"Metafield Update API error. {response.text}")
+
+                    isFabricLinked = True
+                    break
+
+            if not isFabricLinked:
+                payload = json.dumps({
+                    "metafield": {
+                        "namespace": "product",
+                        "key": "fabric_id",
+                        "type": "single_line_text_field",
+                        "value": handle
+                    }
+                })
+
+                response = requests.post(
+                    f"{SHOPIFY_API_URL}/products/{productId}/metafields.json", headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
+
+                if response.status_code == 201:
+                    debug.debug(
+                        self.brand, 0, f"Fabric has been linked successfully. Pillow: {productId}, Fabric: {fabric.productId}")
+                else:
+                    debug.debug(
+                        self.brand, 1, f"Metafield Create API error. {response.text}")

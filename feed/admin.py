@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, StarkStudio, Surya, York
+from .models import JamieYoung, Kravet, PhillipJeffries, Phillips, Scalamandre, Schumacher, StarkStudio, Surya, York
 
 
 class FeedAdmin(admin.ModelAdmin):
@@ -52,6 +52,11 @@ class PhillipsAdmin(FeedAdmin):
 
 @admin.register(Scalamandre)
 class ScalamandreAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(Schumacher)
+class SchumacherAdmin(FeedAdmin):
     pass
 
 
