@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 import os
 import environ
@@ -10,6 +11,8 @@ import environ
 from library import debug
 
 from shopify.models import Variant
+from mysql.models import ProductSubtype
+from feed.models import Schumacher
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -33,6 +36,9 @@ class Command(BaseCommand):
 
         if "samplePrice" in options['functions']:
             processor.updateSamplePrices()
+
+        if "deleteSubtypeTags" in options['functions']:
+            processor.deleteSubtypeTags()
 
 
 class Processor:
@@ -72,3 +78,34 @@ class Processor:
             except Exception as e:
                 debug.debug("Custom", 1, str(e))
                 continue
+
+    def deleteSubtypeTags(self):
+        csr = self.con.cursor()
+
+        subtypeId = 65
+        products = Schumacher.objects.filter(
+            Q(type="Wallpaper") | Q(type="Fabric"))
+
+        for product in products:
+            sku = product.sku
+            productId = product.productId
+
+            if not sku or not productId:
+                continue
+
+            try:
+                productSubtype = ProductSubtype.objects.get(
+                    sku=sku, subtypeId=subtypeId)
+                productSubtype.delete()
+
+                csr.execute(
+                    f"CALL AddToPendingUpdateTagBodyHTML ({productId})")
+                self.con.commit()
+
+                debug.debug(
+                    "Custom", 0, f"Deleted Subtype {subtypeId} for SKU: {sku}, ProductId: {productId}")
+
+            except ProductSubtype.DoesNotExist:
+                continue
+
+        csr.close()
