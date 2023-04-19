@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from feed.models import JaipurLiving
 
 import os
@@ -39,7 +40,8 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = JaipurLiving.objects.all()
+            products = JaipurLiving.objects.filter(
+                Q(type="Throws") | Q(type="Rug Pad"))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -47,7 +49,7 @@ class Command(BaseCommand):
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.databaseManager.updateTags(category=True)
+            processor.databaseManager.updateTags(category=False)
 
         if "image" in options['functions']:
             processor.databaseManager.downloadImages(missingOnly=True)
@@ -115,8 +117,8 @@ class Processor:
                     type = "Accents"
                 if type == "Décor":
                     type = "Decor"
-                if type == "Rug Pad":
-                    type = "Rug"
+                if "Throw" in title:
+                    type = "Throws"
 
                 collection = common.formatText(sh.cell_value(i, 12))
 

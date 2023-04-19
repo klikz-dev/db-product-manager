@@ -1,4 +1,9 @@
 markup = {
+    "Jaipur Living": {
+        "useMAP": False,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Jamie Young": {
         "useMAP": True,
         "consumer": 2,

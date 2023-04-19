@@ -272,7 +272,8 @@ class DatabaseManager:
             else:
                 priceTrade = product.cost * tradeMarkup
         except Exception as e:
-            debug.debug(self.brand, 1, str(e))
+            debug.debug(self.brand, 1,
+                        f"Price Error. Check if markups are defined properly. {str(e)}")
             return False
 
         if price < 19.99:
@@ -359,12 +360,12 @@ class DatabaseManager:
 
     def updateProducts(self, products, formatPrice=True):
         for product in products:
-            if product.statusP == False or product.productId == None:
+            if product.productId == None:
                 return False
 
             try:
                 createdInDatabase = self.createProduct(
-                    self.brand, product, formatPrice)
+                    product, formatPrice)
                 if not createdInDatabase:
                     continue
             except Exception as e:
