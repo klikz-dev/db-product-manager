@@ -118,6 +118,8 @@ class Processor:
                     type = "Accents"
                 if type == "Décor":
                     type = "Decor"
+                if type == "Pillow":
+                    type = "Throw Pillows"
                 if "Throw" in title:
                     type = "Throws"
 
