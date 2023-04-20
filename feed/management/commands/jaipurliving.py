@@ -170,6 +170,8 @@ class Processor:
 
                 # Image
                 thumbnail = sh.cell_value(i, 89)
+                if thumbnail == "http://cdn1-media.s3.us-east-1.amazonaws.com/product_links/Product_Images/":
+                    thumbnail = f"{thumbnail}{str(sh.cell_value(i, 8)).strip()}.jpg"
 
                 roomsets = []
                 for id in range(90, 104):
