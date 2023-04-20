@@ -12,8 +12,7 @@ from library import database, debug
 
 API_BASE_URL = "http://yorkapi.yorkwall.com:10090/pcsiapi"
 
-FILEDIR = "{}/files/".format(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
+FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
 BRAND = "York"
 
@@ -30,31 +29,36 @@ class Command(BaseCommand):
             processor.test()
 
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            processor.update()
+            products = York.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=True)
 
         if "price" in options['functions']:
-            processor.price()
+            processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=True)
 
-        if "image" in options['functions']:
-            processor.image()
+        if "sample" in options['functions']:
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
-        if "white" in options['functions']:
-            processor.white()
+        if "shipping" in options['functions']:
+            processor.databaseManager.customTags(
+                key="whiteShip", tag="White Glove")
 
-        if "quick" in options['functions']:
-            processor.quick()
+        if "shipping" in options['functions']:
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship")
 
 
 class Processor:
@@ -63,22 +67,22 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=York)
 
     def __del__(self):
         self.con.close()
 
     def test(self):
         try:
+            # Test Collection
             reqProduct = requests.get(
                 "{}/collections.php".format(API_BASE_URL))
             resProduct = json.loads(reqProduct.text)
-            # product = resProduct['results'][0]
+            print(resProduct)
         except Exception as e:
             debug.debug(BRAND, 1, str(e))
             return
-
-        print(resProduct)
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
@@ -287,7 +291,7 @@ class Processor:
         return products
 
     def image(self):
-        fnames = os.listdir(FILEDIR + "images/york/")
+        fnames = os.listdir(f"{FILEDIR}/images/york/")
         for fname in fnames:
             try:
                 if "_" in fname:
@@ -305,8 +309,8 @@ class Processor:
                         idx = 3
 
                     if productId != None and productId != "":
-                        copyfile(FILEDIR + "images/york/" + fname, FILEDIR +
-                                 "/../../../images/roomset/{}_{}.jpg".format(productId, idx))
+                        copyfile(f"{FILEDIR}/images/york/{fname}",
+                                 f"{FILEDIR}/../../../images/roomset/{productId}_{idx}.jpg")
                 else:
                     mpn = fname.split(".")[0]
 
@@ -318,35 +322,9 @@ class Processor:
                     productId = product.productId
 
                     if productId != None and productId != "":
-                        copyfile(FILEDIR + "images/york/" + fname, FILEDIR +
-                                 "/../../../images/product/{}.jpg".format(productId))
+                        copyfile(f"{FILEDIR}/images/york/{fname}",
+                                 f"{FILEDIR}/../../../images/product/{productId}.jpg")
 
-                os.remove(FILEDIR + "images/york/" + fname)
+                os.remove(f"{FILEDIR}images/york/{fname}")
             except:
                 continue
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=True)
-
-    def update(self):
-        products = York.objects.all()
-        self.databaseManager.updateProducts(products, formatPrice=True)
-
-    def price(self):
-        self.databaseManager.updatePrices(formatPrice=True)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=True)
-
-    def white(self):
-        self.databaseManager.customTags("whiteShip", "White Glove")
-
-    def quick(self):
-        self.databaseManager.customTags("quickShip", "Quick Ship")
