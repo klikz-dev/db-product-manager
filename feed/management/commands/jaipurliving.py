@@ -243,7 +243,7 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        f = open(f"{FILEDIR}/jaipur-living-inventory.csv", "rt")
+        f = open(f"{FILEDIR}/jaipur-living-inventory.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
         for row in cr:
             mpn = common.formatText(row[1])
