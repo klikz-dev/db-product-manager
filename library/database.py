@@ -403,8 +403,8 @@ class DatabaseManager:
 
         total = len(variants)
         for index, variant in enumerate(variants):
-            productId = int(variant[1])
-            name = str(variant[2])
+            productId = variant[1]
+            name = variant[2]
             oldCost = float(variant[3])
             oldPrice = float(variant[4])
             isDefault = bool(variant[5])
@@ -418,9 +418,9 @@ class DatabaseManager:
                 continue
 
             if isDefault:
-                isTrade = False
+                type = "Consumer"
             elif "Trade - " in name:
-                isTrade = True
+                type = "Trade"
             else:
                 debug.debug(self.feed, 1, f"Unknown variant {name}")
                 continue
@@ -459,7 +459,7 @@ class DatabaseManager:
                 price = 19.99
                 priceTrade = 16.99
 
-            if newCost != oldCost or (isTrade and priceTrade != oldPrice) or (not isTrade and price != oldPrice):
+            if newCost != oldCost or (type == "Consumer" and price != oldPrice) or (type == "Trade" and priceTrade != oldPrice):
                 self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
                     productId, newCost, price, priceTrade))
                 self.con.commit()
@@ -470,11 +470,11 @@ class DatabaseManager:
                 updatedProducts.append(productId)
 
                 debug.debug(
-                    self.brand, 0, f"{index}/{total}: Updated price for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}")
+                    self.brand, 0, f"{index}/{total}: Updated prices for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
 
             else:
                 debug.debug(
-                    self.brand, 0, f"{index}/{total}: Price is already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}")
+                    self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
 
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
