@@ -408,78 +408,83 @@ class DatabaseManager:
 
         total = len(variants)
         for index, variant in enumerate(variants):
-            productId = variant[1]
-            name = variant[2]
-            oldCost = float(variant[3])
-            oldPrice = float(variant[4])
-            isDefault = bool(variant[5])
-
-            if productId in updatedProducts:
-                continue
-
             try:
-                product = self.Feed.objects.get(productId=productId)
-            except self.Feed.DoesNotExist:
-                continue
+                productId = variant[1]
+                name = variant[2]
+                oldCost = float(variant[3])
+                oldPrice = float(variant[4])
+                isDefault = bool(variant[5])
 
-            if isDefault:
-                type = "Consumer"
-            elif "Trade - " in name:
-                type = "Trade"
-            else:
-                debug.debug(self.feed, 1, f"Unknown variant {name}")
-                continue
+                if productId in updatedProducts:
+                    continue
 
-            try:
-                newCost = product.cost
+                try:
+                    product = self.Feed.objects.get(productId=productId)
+                except self.Feed.DoesNotExist:
+                    continue
 
-                useMAP = const.markup[self.brand]["useMAP"]
-                if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
-                    consumerMarkup = const.markup[self.brand]["consumer_pillow"]
-                    tradeMarkup = const.markup[self.brand]["trade_pillow"]
+                if isDefault:
+                    type = "Consumer"
+                elif "Trade - " in name:
+                    type = "Trade"
                 else:
-                    consumerMarkup = const.markup[self.brand]["consumer"]
-                    tradeMarkup = const.markup[self.brand]["trade"]
+                    debug.debug(self.feed, 1, f"Unknown variant {name}")
+                    continue
 
-                if useMAP and product.map > 0:
-                    if formatPrice:
-                        price = common.formatprice(product.map, 1)
+                try:
+                    newCost = product.cost
+
+                    useMAP = const.markup[self.brand]["useMAP"]
+                    if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
+                        consumerMarkup = const.markup[self.brand]["consumer_pillow"]
+                        tradeMarkup = const.markup[self.brand]["trade_pillow"]
                     else:
-                        price = product.map
-                else:
-                    if formatPrice:
-                        price = common.formatprice(newCost, consumerMarkup)
-                    else:
-                        price = newCost * consumerMarkup
+                        consumerMarkup = const.markup[self.brand]["consumer"]
+                        tradeMarkup = const.markup[self.brand]["trade"]
 
-                if formatPrice:
-                    priceTrade = common.formatprice(newCost, tradeMarkup)
+                    if useMAP and product.map > 0:
+                        if formatPrice:
+                            price = common.formatprice(product.map, 1)
+                        else:
+                            price = product.map
+                    else:
+                        if formatPrice:
+                            price = common.formatprice(newCost, consumerMarkup)
+                        else:
+                            price = newCost * consumerMarkup
+
+                    if formatPrice:
+                        priceTrade = common.formatprice(newCost, tradeMarkup)
+                    else:
+                        priceTrade = newCost * tradeMarkup
+                except Exception as e:
+                    debug.debug(self.brand, 1, str(e))
+                    return False
+
+                if price < 19.99:
+                    price = 19.99
+                    priceTrade = 16.99
+
+                if newCost != oldCost or (type == "Consumer" and price != oldPrice) or (type == "Trade" and priceTrade != oldPrice):
+                    self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                        productId, newCost, price, priceTrade))
+                    self.con.commit()
+                    self.csr.execute(
+                        "CALL AddToPendingUpdatePrice ({})".format(productId))
+                    self.con.commit()
+
+                    updatedProducts.append(productId)
+
+                    debug.debug(
+                        self.brand, 0, f"{index}/{total}: Updated prices for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+
                 else:
-                    priceTrade = newCost * tradeMarkup
+                    debug.debug(
+                        self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+
             except Exception as e:
-                debug.debug(self.brand, 1, str(e))
-                return False
-
-            if price < 19.99:
-                price = 19.99
-                priceTrade = 16.99
-
-            if newCost != oldCost or (type == "Consumer" and price != oldPrice) or (type == "Trade" and priceTrade != oldPrice):
-                self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
-                    productId, newCost, price, priceTrade))
-                self.con.commit()
-                self.csr.execute(
-                    "CALL AddToPendingUpdatePrice ({})".format(productId))
-                self.con.commit()
-
-                updatedProducts.append(productId)
-
-                debug.debug(
-                    self.brand, 0, f"{index}/{total}: Updated prices for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
-
-            else:
-                debug.debug(
-                    self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+                debug.debug(self.feed, 1, str(e))
+                continue
 
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
