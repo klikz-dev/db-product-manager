@@ -6,7 +6,7 @@ import urllib
 
 from library import debug, common, const, shopify
 from mysql.models import Type
-from shopify.models import Product
+from shopify.models import Product, Variant
 
 env = environ.Env()
 SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
@@ -331,7 +331,8 @@ class DatabaseManager:
     def createProducts(self, formatPrice=True):
         products = self.Feed.objects.all()
 
-        for product in products:
+        total = len(products)
+        for index, product in enumerate(products):
             if product.statusP == False or product.productId != None:
                 continue
 
@@ -352,14 +353,15 @@ class DatabaseManager:
                 self.downloadImage(product.productId,
                                    product.thumbnail, product.roomsets)
 
-                debug.debug(self.brand, 0, "Created New product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
+                debug.debug(
+                    self.brand, 0, f"{index}/{total}: Created New product ProductID: {product.productId}, SKU: {product.sku}")
 
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
 
     def updateProducts(self, products, formatPrice=True):
-        for product in products:
+        total = len(products)
+        for index, product in enumerate(products):
             if product.productId == None:
                 return False
 
@@ -374,87 +376,105 @@ class DatabaseManager:
 
             try:
                 self.csr.execute(
-                    "CALL AddToPendingUpdateProduct ({})".format(product.productId))
+                    f"CALL AddToPendingUpdateProduct ({product.productId})")
                 self.con.commit()
 
-                debug.debug(self.brand, 0, "Updated the product ProductID: {}, SKU: {}".format(
-                    product.productId, product.sku))
+                debug.debug(
+                    self.brand, 0, f"{index}/{total}: Updated the product ProductID: {product.productId}, SKU: {product.sku}")
 
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
 
     def updatePrices(self, formatPrice=True):
-        products = self.Feed.objects.all()
+        updatedProducts = []
 
-        for product in products:
-            cost = product.cost
-            productId = product.productId
+        self.csr.execute(f"""
+            SELECT PV.VariantId, PV.ProductId, PV.Name, PV.Cost, PV.Price, PV.IsDefault
+            FROM ProductVariant PV
+            LEFT JOIN Product P ON P.ProductId = PV.ProductId
+            LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
+            LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+            WHERE M.BRAND = "{self.brand}"
+                AND PV.Name NOT LIKE '%SAMPLE - %' 
+                AND PV.Cost IS NOT NULL
+                AND PV.ProductId IS NOT NULL
+        """)
+        variants = self.csr.fetchall()
 
-            if productId != "" and productId != None:
-                try:
-                    useMAP = const.markup[self.brand]["useMAP"]
-                    if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
-                        consumerMarkup = const.markup[self.brand]["consumer_pillow"]
-                        tradeMarkup = const.markup[self.brand]["trade_pillow"]
-                    else:
-                        consumerMarkup = const.markup[self.brand]["consumer"]
-                        tradeMarkup = const.markup[self.brand]["trade"]
+        total = len(variants)
+        for index, variant in enumerate(variants):
+            productId = int(variant[1])
+            name = str(variant[2])
+            oldCost = float(variant[3])
+            oldPrice = float(variant[4])
+            isDefault = bool(variant[5])
 
-                    if useMAP and product.map > 0:
-                        if formatPrice:
-                            price = common.formatprice(product.map, 1)
-                        else:
-                            price = product.map
-                    else:
-                        if formatPrice:
-                            price = common.formatprice(
-                                product.cost, consumerMarkup)
-                        else:
-                            price = product.cost * consumerMarkup
+            if productId in updatedProducts:
+                continue
 
+            updatedProducts.append(productId)
+
+            try:
+                product = self.Feed.objects.get(productId=productId)
+            except self.Feed.DoesNotExist:
+                continue
+
+            if isDefault:
+                isTrade = False
+            elif "Trade - " in name:
+                isTrade = True
+            else:
+                debug.debug(self.feed, 1, f"Unknown variant {name}")
+                continue
+
+            try:
+                newCost = product.cost
+
+                useMAP = const.markup[self.brand]["useMAP"]
+                if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
+                    consumerMarkup = const.markup[self.brand]["consumer_pillow"]
+                    tradeMarkup = const.markup[self.brand]["trade_pillow"]
+                else:
+                    consumerMarkup = const.markup[self.brand]["consumer"]
+                    tradeMarkup = const.markup[self.brand]["trade"]
+
+                if useMAP and product.map > 0:
                     if formatPrice:
-                        priceTrade = common.formatprice(
-                            product.cost, tradeMarkup)
+                        price = common.formatprice(product.map, 1)
                     else:
-                        priceTrade = product.cost * tradeMarkup
-                except Exception as e:
-                    debug.debug(self.brand, 1, str(e))
-                    return False
-
-                if price < 19.99:
-                    price = 19.99
-                    priceTrade = 16.99
-
-                try:
-                    self.csr.execute("SELECT PV1.Cost, PV1.Price, PV2.Price AS TradePrice FROM ProductVariant PV1, ProductVariant PV2 WHERE PV1.ProductID = {} AND PV2.ProductID = {} AND PV1.IsDefault = 1 AND PV2.Name LIKE 'Trade - %' AND PV1.Cost IS NOT NULL AND PV2.Cost IS NOT NULL".format(productId, productId))
-                    tmp = self.csr.fetchone()
-                    if tmp == None:
-                        debug.debug(
-                            "DatabaseManager", 1, "Variant not found: ProductId: {}".format(productId))
-                        continue
-
-                    oCost = float(tmp[0])
-                    oPrice = float(tmp[1])
-                    oTrade = float(tmp[2])
-
-                    if cost != oCost or price != oPrice or priceTrade != oTrade:
-                        self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
-                            productId, cost, price, priceTrade))
-                        self.con.commit()
-                        self.csr.execute(
-                            "CALL AddToPendingUpdatePrice ({})".format(productId))
-                        self.con.commit()
-
-                        debug.debug(self.brand, 0, "Updated price for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
-                            productId, cost, price, priceTrade))
+                        price = product.map
+                else:
+                    if formatPrice:
+                        price = common.formatprice(newCost, consumerMarkup)
                     else:
-                        debug.debug(self.brand, 0, "Price is already updated. ProductId: {}, Price: {}, Trade Price: {}".format(
-                            productId, price, priceTrade))
+                        price = newCost * consumerMarkup
 
-                except:
-                    debug.debug(self.brand, 1, "Updating price error for ProductID: {}. COST: {}, Price: {}, Trade Price: {}".format(
-                        productId, cost, price, priceTrade))
-                    continue
+                if formatPrice:
+                    priceTrade = common.formatprice(newCost, tradeMarkup)
+                else:
+                    priceTrade = newCost * tradeMarkup
+            except Exception as e:
+                debug.debug(self.brand, 1, str(e))
+                return False
+
+            if price < 19.99:
+                price = 19.99
+                priceTrade = 16.99
+
+            if newCost != oldCost or (isTrade and priceTrade != oldPrice) or (not isTrade and price != oldPrice):
+                self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
+                    productId, newCost, price, priceTrade))
+                self.con.commit()
+                self.csr.execute(
+                    "CALL AddToPendingUpdatePrice ({})".format(productId))
+                self.con.commit()
+
+                debug.debug(
+                    self.brand, 0, f"{index}/{total}: Updated price for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}")
+
+            else:
+                debug.debug(
+                    self.brand, 0, f"{index}/{total}: Price is already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}")
 
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
