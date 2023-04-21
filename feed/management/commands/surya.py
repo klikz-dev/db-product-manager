@@ -5,6 +5,9 @@ import os
 import environ
 import pymysql
 import xlrd
+import csv
+import codecs
+import time
 
 from library import database, debug
 
@@ -54,6 +57,16 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteShip", tag="White Glove")
 
+        if "inventory" in options['functions']:
+            if True:
+                # processor.databaseManager.downloadFileFromSFTP(
+                #     src="/daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/surya-master.csv")
+                processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
+
 
 class Processor:
     def __init__(self):
@@ -81,7 +94,7 @@ class Processor:
                 mpn = str(sh.cell_value(i, 1)).strip()
                 debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
 
-                sku = "SR {}".format(mpn)
+                sku = f"SR {mpn}"
                 try:
                     upc = int(sh.cell_value(i, 5))
                 except:
@@ -228,3 +241,27 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def inventory(self):
+        stocks = []
+
+        f = open(f"{FILEDIR}/surya-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+
+        for row in cr:
+            if row[0] == "Itemcode":
+                continue
+
+            mpn = str(row[0]).strip()
+            sku = f"SR {mpn}"
+            stockP = int(float(row[12]))
+            stockNote = str(row[19]).strip()
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': stockNote,
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
