@@ -173,6 +173,11 @@ class DatabaseManager:
         if ptype in manufacturer:
             manufacturer = str(manufacturer).replace(ptype, "").strip()
 
+        if str(ptype).endswith("es"):
+            ptype = ptype[:-2]
+        elif str(ptype).endswith("s"):
+            ptype = ptype[:-1]
+
         if product.title != "":
             name = " | ".join((manufacturer, product.title))
             title = " ".join((manufacturer, product.title))
@@ -284,16 +289,16 @@ class DatabaseManager:
         try:
             productType = Type.objects.get(name=product.type)
             if productType.parentTypeId == 0:
-                ptype = productType.name
+                rootProductType = productType.name
             else:
                 parentType = Type.objects.get(
                     typeId=productType.parentTypeId)
                 if parentType.parentTypeId == 0:
-                    ptype = parentType.name
+                    rootProductType = parentType.name
                 else:
                     rootType = Type.objects.get(
                         typeId=parentType.parentTypeId)
-                    ptype = rootType.name
+                    rootProductType = rootType.name
         except Type.DoesNotExist:
             debug.debug(self.brand, 1,
                         "Unknown product type: {}".format(product.type))
@@ -307,7 +312,7 @@ class DatabaseManager:
             common.sq(bodyHTML),
             common.sq(title),
             common.sq(description),
-            common.sq(ptype),
+            common.sq(rootProductType),
             common.sq(vname),
             hassample,
             product.cost,

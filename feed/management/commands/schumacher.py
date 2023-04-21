@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from feed.models import Schumacher
 
 import os
@@ -37,7 +38,8 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = Schumacher.objects.filter(productId='6867475464238')
+            products = Schumacher.objects.filter(
+                Q(type='Pillow') | Q(type='Throws'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -105,7 +107,7 @@ class Processor:
                 if type == "Wallcovering":
                     type = "Wallpaper"
                 if type == "Furniture & Accessories":
-                    type = "Throw Pillows"
+                    type = "Pillow"
                 if type == "Rugs & Carpets":
                     type = "Rug"
                 if "Throw" in pattern:
