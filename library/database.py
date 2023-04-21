@@ -304,6 +304,11 @@ class DatabaseManager:
                         "Unknown product type: {}".format(product.type))
             return False
 
+        if rootProductType in ["Fabric", "Wallpaper", "Pillow"]:
+            priceSample = 7
+        elif rootProductType == "Rug":
+            priceSample = 15
+
         self.csr.execute("CALL CreateProduct ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format(
             common.sq(product.sku),
             common.sq(name),
