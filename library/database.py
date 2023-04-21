@@ -412,8 +412,6 @@ class DatabaseManager:
             if productId in updatedProducts:
                 continue
 
-            updatedProducts.append(productId)
-
             try:
                 product = self.Feed.objects.get(productId=productId)
             except self.Feed.DoesNotExist:
@@ -468,6 +466,8 @@ class DatabaseManager:
                 self.csr.execute(
                     "CALL AddToPendingUpdatePrice ({})".format(productId))
                 self.con.commit()
+
+                updatedProducts.append(productId)
 
                 debug.debug(
                     self.brand, 0, f"{index}/{total}: Updated price for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}")
