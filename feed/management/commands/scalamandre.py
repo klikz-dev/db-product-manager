@@ -1,18 +1,16 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from feed.models import Scalamandre
-from shopify.models import Product
 
 import os
 import environ
 import pymysql
 import requests
-import paramiko
-import csv
 import time
 import json
 import environ
 
-from library import database, debug, common
+from library import database, debug
 
 API_ADDRESS = 'http://scala-api.scalamandre.com/api'
 API_USERNAME = 'Decoratorsbest'
@@ -40,32 +38,40 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         processor = Processor()
+
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            processor.update()
+            products = Scalamandre.objects.filter(
+                Q(type='Pillow') | Q(type='Throws'))
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=True)
 
-        if "image" in options['functions']:
-            processor.image()
+        if "price" in options['functions']:
+            processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=True)
+
+        if "image" in options['functions']:
+            processor.databaseManager.downloadImages(missingOnly=True)
 
         if "sample" in options['functions']:
-            processor.sample()
-
-        if "pillow" in options['functions']:
-            processor.pillow()
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "inventory" in options['functions']:
             processor.inventory()
+
+        if "pillow" in options['functions']:
+            processor.databaseManager.linkPillowSample()
 
         if "main" in options['functions']:
             while True:
@@ -83,7 +89,8 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=Scalamandre)
 
         r = requests.post("{}/Auth/authenticate".format(API_ADDRESS), headers={'Content-Type': 'application/json'},
                           data=json.dumps({"Username": API_USERNAME, "Password": API_PASSWORD}))
@@ -297,30 +304,6 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def image(self):
-        self.databaseManager.downloadImages(missingOnly=True)
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products=products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=True)
-
-    def update(self):
-        products = Scalamandre.objects.all()
-        self.databaseManager.updateProducts(
-            products=products, formatPrice=True)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=True)
-
-    def sample(self):
-        self.databaseManager.customTags(key="statusS", tag="NoSample")
-
     def inventory(self):
         stocks = []
 
@@ -334,68 +317,3 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
-
-    def pillow(self):
-        pillows = Scalamandre.objects.filter(ptype="Pillow")
-
-        for pillow in pillows:
-            try:
-                fabric = Scalamandre.objects.get(
-                    pattern=pillow.pattern, color=pillow.color, ptype="Fabric")
-                product = Product.objects.get(productId=fabric.productId)
-                handle = product.handle
-            except Scalamandre.DoesNotExist:
-                debug.debug(
-                    BRAND, 1, f"Matching Fabric not found for pillow Pattern: {pillow.pattern} and Color: {pillow.color}")
-                continue
-
-            productId = pillow.productId
-
-            response = requests.get(
-                f"{SHOPIFY_API_URL}/products/{productId}/metafields.json", headers=SHOPIFY_PRODUCT_API_HEADER)
-            data = json.loads(response.text)
-
-            isFabricLinked = False
-            for metafield in data['metafields']:
-                if metafield['key'] == "fabric_id":
-                    payload = json.dumps({
-                        "metafield": {
-                            "namespace": "product",
-                            "key": "fabric_id",
-                            "type": "single_line_text_field",
-                            "value": handle
-                        }
-                    })
-
-                    response = requests.put(
-                        f"{SHOPIFY_API_URL}/products/{productId}/metafields/{metafield['id']}.json", headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
-
-                    if response.status_code == 200:
-                        debug.debug(
-                            BRAND, 0, f"Fabric link has been updated successfully. Pillow: {productId}, Fabric: {fabric.productId}")
-                    else:
-                        debug.debug(
-                            BRAND, 1, f"Metafield Update API error. {response.text}")
-
-                    isFabricLinked = True
-                    break
-
-            if not isFabricLinked:
-                payload = json.dumps({
-                    "metafield": {
-                        "namespace": "product",
-                        "key": "fabric_id",
-                        "type": "single_line_text_field",
-                        "value": handle
-                    }
-                })
-
-                response = requests.post(
-                    f"{SHOPIFY_API_URL}/products/{productId}/metafields.json", headers=SHOPIFY_PRODUCT_API_HEADER, data=payload)
-
-                if response.status_code == 201:
-                    debug.debug(
-                        BRAND, 0, f"Fabric has been linked successfully. Pillow: {productId}, Fabric: {fabric.productId}")
-                else:
-                    debug.debug(
-                        BRAND, 1, f"Metafield Create API error. {response.text}")

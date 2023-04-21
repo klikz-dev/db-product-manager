@@ -107,6 +107,36 @@ class Feed(models.Model):
         abstract = True
 
 
+class Brewster(Feed):
+    class Meta:
+        verbose_name = "Brewster"
+        verbose_name_plural = "Brewster"
+
+
+class CoutureLamps(Feed):
+    class Meta:
+        verbose_name = "Couture Lamps"
+        verbose_name_plural = "Couture Lamps"
+
+
+class Covington(Feed):
+    class Meta:
+        verbose_name = "Covington"
+        verbose_name_plural = "Covington"
+
+
+class DanaGibson(Feed):
+    class Meta:
+        verbose_name = "Dana Gibson"
+        verbose_name_plural = "Dana Gibson"
+
+
+class ElaineSmith(Feed):
+    class Meta:
+        verbose_name = "Elaine Smith"
+        verbose_name_plural = "Elaine Smith"
+
+
 class JaipurLiving(Feed):
     class Meta:
         verbose_name = "Jaipur Living"
@@ -119,10 +149,52 @@ class JamieYoung(Feed):
         verbose_name_plural = "Jamie Young"
 
 
+class JFFabrics(Feed):
+    class Meta:
+        verbose_name = "JF Fabrics"
+        verbose_name_plural = "JF Fabrics"
+
+
+class Kasmir(Feed):
+    class Meta:
+        verbose_name = "Kasmir"
+        verbose_name_plural = "Kasmir"
+
+
 class Kravet(Feed):
     class Meta:
         verbose_name = "Kravet"
         verbose_name_plural = "Kravet"
+
+
+class KravetDecor(Feed):
+    class Meta:
+        verbose_name = "Kravet Decor"
+        verbose_name_plural = "Kravet Decor"
+
+
+class MadcapCottage(Feed):
+    class Meta:
+        verbose_name = "Madcap Cottage"
+        verbose_name_plural = "Madcap Cottage"
+
+
+class Materialworks(Feed):
+    class Meta:
+        verbose_name = "Materialworks"
+        verbose_name_plural = "Materialworks"
+
+
+class Maxwell(Feed):
+    class Meta:
+        verbose_name = "Maxwell"
+        verbose_name_plural = "Maxwell"
+
+
+class MindTheGap(Feed):
+    class Meta:
+        verbose_name = "MindTheGap"
+        verbose_name_plural = "MindTheGap"
 
 
 class PhillipJeffries(Feed):
@@ -137,6 +209,18 @@ class Phillips(Feed):
         verbose_name_plural = "Phillips"
 
 
+class Pindler(Feed):
+    class Meta:
+        verbose_name = "Pindler"
+        verbose_name_plural = "Pindler"
+
+
+class PremierPrints(Feed):
+    class Meta:
+        verbose_name = "Premier Prints"
+        verbose_name_plural = "Premier Prints"
+
+
 class Scalamandre(Feed):
     class Meta:
         verbose_name = "Scalamandre"
@@ -149,10 +233,22 @@ class Schumacher(Feed):
         verbose_name_plural = "Schumacher"
 
 
+class Seabrook(Feed):
+    class Meta:
+        verbose_name = "Seabrook"
+        verbose_name_plural = "Seabrook"
+
+
 class StarkStudio(Feed):
     class Meta:
         verbose_name = "Stark Studio"
         verbose_name_plural = "Stark Studio"
+
+
+class Stout(Feed):
+    class Meta:
+        verbose_name = "Stout"
+        verbose_name_plural = "Stout"
 
 
 class Surya(Feed):
@@ -161,7 +257,19 @@ class Surya(Feed):
         verbose_name_plural = "Surya"
 
 
+class TresTintas(Feed):
+    class Meta:
+        verbose_name = "Tres Tintas"
+        verbose_name_plural = "Tres Tintas"
+
+
 class York(Feed):
     class Meta:
         verbose_name = "York"
         verbose_name_plural = "York"
+
+
+class Zoffany(Feed):
+    class Meta:
+        verbose_name = "Zoffany"
+        verbose_name_plural = "Zoffany"

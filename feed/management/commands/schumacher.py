@@ -52,6 +52,9 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "pillow" in options['functions']:
+            processor.databaseManager.linkPillowSample()
+
         if "inventory" in options['functions']:
             while True:
                 processor.databaseManager.downloadFileFromSFTP(
@@ -61,9 +64,6 @@ class Command(BaseCommand):
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
                 time.sleep(86400)
-
-        if "pillow" in options['functions']:
-            processor.databaseManager.linkPillowSample()
 
 
 class Processor:
