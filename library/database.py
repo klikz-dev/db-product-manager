@@ -373,7 +373,7 @@ class DatabaseManager:
         total = len(products)
         for index, product in enumerate(products):
             if product.productId == None:
-                return False
+                continue
 
             try:
                 createdInDatabase = self.createProduct(
