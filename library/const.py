@@ -16,6 +16,11 @@ markup = {
         "consumer_pillow": 1.75,
         "trade_pillow": 1.3,
     },
+    "Kravet Decor": {
+        "useMAP": False,
+        "consumer": 1.75,
+        "trade": 1.5,
+    },
     "Phillips": {
         "useMAP": True,
         "consumer": 2,
@@ -84,5 +89,17 @@ ftp = {
         "port": 21,
         "user": "jrinventory",
         "pass": "JRInv2775",
+    },
+    "Kravet": {
+        "host": "file.kravet.com",
+        "port": 21,
+        "user": "decbest",
+        "pass": "mArker999",
+    },
+    "Kravet Decor": {
+        "host": "file.kravet.com",
+        "port": 21,
+        "user": "decbest",
+        "pass": "mArker999",
     },
 }

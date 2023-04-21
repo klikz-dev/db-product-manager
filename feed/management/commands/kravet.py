@@ -15,8 +15,6 @@ from bs4 import BeautifulSoup
 
 from library import database, debug
 
-KRAVET_FTP_INFO = "ftp://decbest:mArker999@file.kravet.com/decbest.zip"
-KRAVET_DECOR_FTP_INFO = "ftp://decbest:mArker999@file.kravet.com/curated_onhand_info.zip"
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
@@ -33,6 +31,8 @@ class Command(BaseCommand):
         processor = Processor()
 
         if "feed" in options['functions']:
+            processor.downloadFeed()
+
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
 
@@ -62,6 +62,8 @@ class Command(BaseCommand):
 
         if "inventory" in options['functions']:
             while True:
+                processor.downloadFeed()
+
                 products = processor.fetchFeed()
                 processor.databaseManager.writeFeed(products)
 
@@ -85,20 +87,17 @@ class Processor:
         self.con.close()
 
     def downloadFeed(self):
-        [os.remove(f"{FILEDIR}/{file}") for file in [
-            'kravet-master.csv', 'kravet-master.zip', 'kravet-decor-inventory.csv', 'kravet-decor-inventory.zip'] if os.path.exists(f"{FILEDIR}/{file}")]
-
         try:
-            urllib.request.urlretrieve(
-                KRAVET_FTP_INFO, f"{FILEDIR}/kravet-master.zip")
+            self.databaseManager.downloadFileFromFTP(
+                src="decbest.zip", dst=f"{FILEDIR}/kravet-master.zip")
             z = zipfile.ZipFile(f"{FILEDIR}/kravet-master.zip", "r")
             z.extractall(FILEDIR)
             z.close()
             os.rename(f"{FILEDIR}/item_info.csv",
                       f"{FILEDIR}/kravet-master.csv")
 
-            urllib.request.urlretrieve(
-                KRAVET_DECOR_FTP_INFO, f"{FILEDIR}/kravet-decor-inventory.zip")
+            self.databaseManager.downloadFileFromFTP(
+                src="curated_onhand_info.zip", dst=f"{FILEDIR}/kravet-decor-inventory.zip")
             z = zipfile.ZipFile(f"{FILEDIR}/kravet-decor-inventory.zip", "r")
             z.extractall(FILEDIR)
             z.close()
@@ -113,9 +112,6 @@ class Processor:
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
-
-        if not self.downloadFeed():
-            return
 
         # Images
         images = {}
