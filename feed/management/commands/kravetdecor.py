@@ -31,6 +31,9 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor.databaseManager.statusSync(fullSync=False)
 
@@ -98,6 +101,9 @@ class Processor:
 
                 # Categorization
                 type = common.formatText(row[6]).title()
+                if type == "Benches & Ottomans":
+                    type = "Ottomans"
+
                 manufacturer = BRAND
                 collection = common.formatText(row[3])
 
@@ -154,7 +160,7 @@ class Processor:
                 uom = "Per Item"
 
                 # Tagging
-                tags = f"{usage}, {pattern}, {collection}, {description}"
+                tags = f"{row[6]}, {usage}, {pattern}, {collection}, {description}"
                 colors = row[7]
 
                 # Image

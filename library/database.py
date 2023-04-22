@@ -5,8 +5,8 @@ import paramiko
 import urllib
 
 from library import debug, common, const, shopify
-from mysql.models import Type
-from shopify.models import Product, Variant
+from mysql.models import Type, Manufacturer
+from shopify.models import Product
 
 env = environ.Env()
 SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
@@ -98,6 +98,66 @@ class DatabaseManager:
 
         debug.debug(
             self.brand, 0, f"Finished writing {self.brand} feeds to our database. Total: {total}, Success: {success}, Failed: {failed}")
+
+    def validateFeed(self):
+        # Validate Required fields
+        invalidProducts = []
+        products = self.Feed.objects.all()
+        for product in products:
+            if not (product.pattern and product.color and product.type and product.cost > 0 and product.uom):
+                invalidProducts.append(product.mpn)
+
+        if len(invalidProducts) == 0:
+            debug.debug(self.brand, 0, "Product fields are ok!")
+        else:
+            debug.debug(
+                self.brand, 1, f"The following products missing mandatory fields: {', '.join(invalidProducts)}")
+
+        # Validate Types
+        types = self.Feed.objects.values_list('type', flat=True).distinct()
+        unknownTypes = []
+        for t in types:
+            try:
+                Type.objects.get(name=t)
+            except Type.DoesNotExist:
+                unknownTypes.append(t)
+
+        if len(unknownTypes) == 0:
+            debug.debug(self.brand, 0, "Types are ok!")
+        else:
+            debug.debug(self.brand, 1,
+                        f"Unknown Types: {', '.join(unknownTypes)}")
+
+        # Validate Manufacturers
+        manufacturers = self.Feed.objects.values_list(
+            'manufacturer', flat=True).distinct()
+        unknownManufacturers = []
+        for m in manufacturers:
+            try:
+                manufacturer = Manufacturer.objects.get(name=m)
+                if not (manufacturer.name and manufacturer.brand):
+                    unknownManufacturers(m)
+            except Type.DoesNotExist:
+                unknownManufacturers.append(m)
+
+        if len(unknownManufacturers) == 0:
+            debug.debug(self.brand, 0, "Manufacturers are ok!")
+        else:
+            debug.debug(
+                self.brand, 1, f"Unknown Manufacturers: {', '.join(unknownManufacturers)}")
+
+        # Validate UOMs
+        uoms = self.Feed.objects.values_list('uom', flat=True).distinct()
+        unknownUOMs = []
+        for u in uoms:
+            if u not in ['Per Roll', 'Per Yard', 'Per Item']:
+                unknownUOMs(u)
+
+        if len(unknownUOMs) == 0:
+            debug.debug(self.brand, 0, "UOMs are ok!")
+        else:
+            debug.debug(
+                self.brand, 1, f"Unknown UOMs: {', '.join(unknownUOMs)}")
 
     def statusSync(self, fullSync=False):
         debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
