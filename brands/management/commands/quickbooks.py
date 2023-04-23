@@ -38,7 +38,7 @@ class Command(BaseCommand):
             while True:
                 self.feed()
                 self.upload()
-                time.sleep(36400)
+                time.sleep(86400)
 
     def feed(self):
         con = pymysql.connect(host=db_host, user=db_username,
