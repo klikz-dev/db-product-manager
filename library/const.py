@@ -31,6 +31,11 @@ markup = {
         "consumer": 1.5,
         "trade": 1.3,
     },
+    "Port 68": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Scalamandre": {
         "useMAP": False,
         "consumer": 1.5,

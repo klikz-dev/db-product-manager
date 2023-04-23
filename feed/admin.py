@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import Brewster, CoutureLamps, Covington, DanaGibson, ElaineSmith, JaipurLiving, JamieYoung, JFFabrics
 from .models import Kasmir, Kravet, KravetDecor, MadcapCottage, Materialworks, Maxwell, MindTheGap, PhillipJeffries
-from .models import Phillips, Pindler, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, Surya
+from .models import Phillips, Pindler, Port68, PremierPrints, Scalamandre, Schumacher, Seabrook, StarkStudio, Stout, Surya
 from .models import TresTintas, York, Zoffany
 
 
@@ -121,6 +121,11 @@ class PhillipsAdmin(FeedAdmin):
 
 @admin.register(Pindler)
 class PindlerAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(Port68)
+class Port68Admin(FeedAdmin):
     pass
 
 

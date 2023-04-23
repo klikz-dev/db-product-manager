@@ -151,7 +151,7 @@ class DatabaseManager:
         unknownUOMs = []
         for u in uoms:
             if u not in ['Per Roll', 'Per Yard', 'Per Item']:
-                unknownUOMs(u)
+                unknownUOMs.append(u)
 
         if len(unknownUOMs) == 0:
             debug.debug(self.brand, 0, "UOMs are ok!")
