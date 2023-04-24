@@ -46,6 +46,8 @@ PO_RECORDS = [
     'PhillipJeffriesSample',
     'PindlerOrder',
     'PindlerSample',
+    'Port68Order',
+    'Port68Sample',
     'PremierPrintsOrder',
     'PremierPrintsSample',
     'RalphLaurenOrder',
