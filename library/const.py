@@ -1,4 +1,29 @@
 markup = {
+    "Brewster": {
+        "useMAP": True,
+        "consumer": 1.4,
+        "trade": 1.3,
+    },
+    "Couture Lamps": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
+    "Covington": {
+        "useMAP": False,
+        "consumer": 2,
+        "trade": 1.5,
+    },
+    "Dana Gibson": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
+    "Elaine Smith": {
+        "useMAP": True,
+        "consumer": 1.8,
+        "trade": 1.5,
+    },
     "Jaipur Living": {
         "useMAP": False,
         "consumer": 2,
@@ -8,6 +33,16 @@ markup = {
         "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
+    },
+    "JF Fabrics": {
+        "useMAP": True,
+        "consumer": 1.75,
+        "trade": 1.5,
+    },
+    "Kasmir": {
+        "useMAP": False,
+        "consumer": 1.5,
+        "trade": 1,
     },
     "Kravet": {
         "useMAP": True,
@@ -21,6 +56,26 @@ markup = {
         "consumer": 1.75,
         "trade": 1.5,
     },
+    "Madcap Cottage": {
+        "useMAP": True,
+        "consumer": 2.3,
+        "trade": 1,
+    },
+    "Materialworks": {
+        "useMAP": True,
+        "consumer": 1.5,
+        "trade": 1.5,
+    },
+    "Maxwell": {
+        "useMAP": False,
+        "consumer": 1.4,
+        "trade": 1,
+    },
+    "MindTheGap": {
+        "useMAP": False,
+        "consumer": 2.44,
+        "trade": 1.5,
+    },
     "Phillips": {
         "useMAP": True,
         "consumer": 2,
@@ -31,10 +86,20 @@ markup = {
         "consumer": 1.5,
         "trade": 1.3,
     },
+    "Pindler": {
+        "useMAP": False,
+        "consumer": 1.5,
+        "trade": 1,
+    },
     "Port 68": {
         "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
+    },
+    "Premier Prints": {
+        "useMAP": False,
+        "consumer": 3,
+        "trade": 2,
     },
     "Scalamandre": {
         "useMAP": False,
@@ -48,10 +113,25 @@ markup = {
         "consumer": 1.5,
         "trade": 1.25,
     },
+    "Seabrook": {
+        "useMAP": False,
+        "consumer": 1.5,
+        "trade": 1,
+    },
     "Stark Studio": {
         "useMAP": True,
         "consumer": 2.22,
         "trade": 1.5,
+    },
+    "Stout": {
+        "useMAP": True,
+        "consumer": 1.5,
+        "trade": 1,
+    },
+    "Tres Tintas": {
+        "useMAP": True,
+        "consumer": 2.99,
+        "trade": 1.4,
     },
     "Surya": {
         "useMAP": True,
@@ -63,6 +143,11 @@ markup = {
         "consumer": 1.5,
         "trade": 1.3,
     },
+    "Zoffany": {
+        "useMAP": False,
+        "consumer": 2,
+        "trade": 1.3,
+    },
 }
 
 
@@ -72,6 +157,12 @@ sftp = {
         "port": 22,
         "user": "jaipur",
         "pass": "JaipurDecor",
+    },
+    "JF Fabrics": {
+        "host": "jfprod.sftp.wpengine.com",
+        "port": 2222,
+        "user": "jfprod-DecoratorsBest",
+        "pass": "DecoratorsBest26!)",
     },
     "Schumacher": {
         "host": "34.203.121.151",
