@@ -11,7 +11,7 @@ import environ
 from library import debug
 
 from shopify.models import Variant
-from mysql.models import ProductSubtype
+from mysql.models import ProductSubtype, Type
 from feed.models import Schumacher
 
 FILEDIR = "{}/files/".format(os.path.dirname(
@@ -39,6 +39,9 @@ class Command(BaseCommand):
 
         if "deleteSubtypeTags" in options['functions']:
             processor.deleteSubtypeTags()
+
+        if "getTypeList" in options['functions']:
+            processor.getTypeList()
 
 
 class Processor:
@@ -109,3 +112,10 @@ class Processor:
                 continue
 
         csr.close()
+
+    def getTypeList(self):
+        types = Type.objects.filter(Q(parentTypeId=6) | Q(parentTypeId=7) | Q(
+            parentTypeId=8) | Q(parentTypeId=40) | Q(parentTypeId=41))
+        for type in types:
+            print(type.name)
+        print(len(types))
