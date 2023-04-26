@@ -65,7 +65,8 @@ class Command(BaseCommand):
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "sample" in options['functions']:
-            processor.databaseManager.customTags(key="statusS", tag="NoSample")
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
 
         if "inventory" in options['functions']:
             processor.inventory()
@@ -75,8 +76,10 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                processor.feed()
-                processor.sync()
+                products = processor.fetchFeed()
+                processor.databaseManager.writeFeed(products=products)
+                processor.databaseManager.statusSync(fullSync=False)
+
                 processor.inventory()
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
@@ -117,8 +120,7 @@ class Processor:
             return
 
         for row in rows:
-            # try:
-            if True:
+            try:
                 # Primary Keys
                 mpn = row['ITEMID']
                 sku = "SCALA {}".format(row['SKU'])
@@ -256,9 +258,12 @@ class Processor:
                 if row['SAMPLE_STATUS'] == 1:
                     statusS = True
 
-            # except Exception as e:
-            #     debug.debug(BRAND, 1, str(e))
-            #     continue
+                # Disable all samples
+                statusS = False
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
 
             product = {
                 'mpn': mpn,
