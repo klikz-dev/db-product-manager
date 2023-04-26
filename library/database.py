@@ -588,7 +588,7 @@ class DatabaseManager:
             self.downloadImage(product.productId,
                                product.thumbnail, product.roomsets)
 
-    def downloadFileFromSFTP(self, src, dst):
+    def downloadFileFromSFTP(self, src, dst, fileSrc=True):
         try:
             transport = paramiko.Transport(
                 (const.sftp[self.brand]["host"], const.sftp[self.brand]["port"]))
@@ -600,7 +600,14 @@ class DatabaseManager:
                         f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
             return False
 
-        sftp.get(src, dst)
+        if fileSrc:
+            sftp.get(src, dst)
+        else:
+            files = sftp.listdir(src)
+            for file in files:
+                sftp.get(f"{src}/{file}", dst)
+                sftp.remove(file)
+
         sftp.close()
 
         debug.debug(self.brand, 0,

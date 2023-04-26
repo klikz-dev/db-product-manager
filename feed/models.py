@@ -113,10 +113,10 @@ class Brewster(Feed):
         verbose_name_plural = "Brewster"
 
 
-class CoutureLamps(Feed):
+class Couture(Feed):
     class Meta:
-        verbose_name = "Couture Lamps"
-        verbose_name_plural = "Couture Lamps"
+        verbose_name = "Couture"
+        verbose_name_plural = "Couture"
 
 
 class Covington(Feed):

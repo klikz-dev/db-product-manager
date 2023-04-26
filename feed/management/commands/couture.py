@@ -1,18 +1,19 @@
 from django.core.management.base import BaseCommand
-from feed.models import DanaGibson
+from feed.models import Couture
 
 import os
 import environ
 import pymysql
 import xlrd
 from shutil import copyfile
+import datetime
 
 from library import database, debug, common
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
-BRAND = "Dana Gibson"
+BRAND = "Couture"
 
 
 class Command(BaseCommand):
@@ -38,7 +39,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = DanaGibson.objects.all()
+            products = Couture.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -55,6 +56,12 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor.image()
 
+        if "inventory" in options['functions']:
+            while True:
+                processor.databaseManager.downloadFileFromSFTP(
+                    src="/couture", dst=f"{FILEDIR}/couture-inventory.xlsm", fileSrc=False)
+                processor.inventory()
+
 
 class Processor:
     def __init__(self):
@@ -63,7 +70,7 @@ class Processor:
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
         self.databaseManager = database.DatabaseManager(
-            con=self.con, brand=BRAND, Feed=DanaGibson)
+            con=self.con, brand=BRAND, Feed=Couture)
 
     def __del__(self):
         self.con.close()
@@ -74,81 +81,80 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/dana-gibson-master.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/couture-master.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(2, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 1))
-                sku = f"DG {mpn}"
+                mpn = common.formatText(sh.cell_value(i, 0))
+                sku = f"CL {mpn}"
 
-                title = common.formatText(sh.cell_value(i, 4)).title()
-                if "Lumbar" in title:
-                    title = f"{title} Pillow"
+                pattern = common.formatText(
+                    sh.cell_value(i, 2)).split("-")[0].strip()
+                pattern = pattern.replace("Lamp", "").replace(
+                    "Table", "").replace("  ", "").strip()
 
-                color = common.formatText(sh.cell_value(i, 3)).title()
+                color = common.formatText(sh.cell_value(i, 7))
 
                 # Categorization
                 brand = BRAND
-                type = common.formatText(sh.cell_value(i, 2)).title()
+                collection = common.formatText(sh.cell_value(i, 3)).title()
                 manufacturer = BRAND
-                collection = common.formatText(sh.cell_value(i, 2))
 
-                # Reconfigure
-                pattern = title.replace(color, "").replace(
-                    type, "").replace("Lamp", "").replace("  ", " ").strip()
-
-                if type == "Bowl":
-                    type = "Bowls"
-
-                if not pattern or not color or not type:
+                if collection == "":
                     continue
-                #############
+                if collection == "Accent Lamp":
+                    type = "Accent Lamps"
+                if collection == "Accent Table":
+                    type = "Accent Tables"
+                if collection == "Decorative Accessories":
+                    type = "Decorative Accents"
+                if collection == "Table Lamp":
+                    type = "Table Lamps"
+                else:
+                    type = collection
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 17))
-                width = common.formatFloat(sh.cell_value(i, 12))
-                length = common.formatFloat(sh.cell_value(i, 10))
-                height = common.formatFloat(sh.cell_value(i, 14))
+                description = common.formatText(sh.cell_value(i, 4))
+                width = common.formatFloat(sh.cell_value(i, 13))
+                length = common.formatFloat(sh.cell_value(i, 16))
+                height = common.formatFloat(sh.cell_value(i, 15))
 
                 # Additional Information
+                material = common.formatText(sh.cell_value(i, 6))
+                care = common.formatText(sh.cell_value(i, 5))
+                country = common.formatText(sh.cell_value(i, 1))
+                weight = common.formatFloat(sh.cell_value(i, 12))
+                upc = sh.cell_value(i, 38)
+
+                features = [common.formatText(sh.cell_value(i, 8))]
+
                 specs = []
-                for j in [21, 22, 26, 27, 28, 29]:
+                for j in [17, 19, 20, 24, 25, 26]:
                     if sh.cell_value(i, 21):
                         specs.append((common.formatText(sh.cell_value(
                             1, j)).title(), common.formatText(sh.cell_value(i, j))))
 
-                material = common.formatText(sh.cell_value(i, 19))
-                finish = common.formatText(sh.cell_value(i, 20))
-                country = common.formatText(sh.cell_value(i, 32))
-                weight = common.formatFloat(sh.cell_value(i, 9))
-                upc = sh.cell_value(i, 0)
-
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 5))
-                map = common.formatFloat(sh.cell_value(i, 6))
-
-                # Measurement
+                cost = common.formatFloat(sh.cell_value(i, 9))
+                map = common.formatFloat(sh.cell_value(i, 10))
                 uom = "Per Item"
 
+                # Measurement
+
                 # Tagging
-                tags = f"{sh.cell_value(i, 18)}, {pattern}, {type}"
+                tags = description
                 colors = color
 
                 # Image
-                thumbnail = sh.cell_value(i, 46)
-                roomsets = []
-                for id in range(52, 54):
-                    if sh.cell_value(i, id):
-                        roomsets.append(sh.cell_value(i, id))
 
                 # Status
                 statusP = True
                 statusS = False
 
                 # Stock
-                stockNote = f"{int(int(sh.cell_value(i, 34)) / 24)} days"
+                stockNote = common.formatText(sh.cell_value(i, 37))
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -159,7 +165,6 @@ class Processor:
                 'sku': sku,
                 'pattern': pattern,
                 'color': color,
-                'title': title,
 
                 'brand': brand,
                 'type': type,
@@ -172,11 +177,12 @@ class Processor:
                 'height': height,
 
                 'material': material,
-                'finish': finish,
-                'country': country,
-                'specs': specs,
+                'care': care,
                 'weight': weight,
                 'upc': upc,
+                'country': country,
+                'features': features,
+                'specs': specs,
 
                 'cost': cost,
                 'map': map,
@@ -184,9 +190,6 @@ class Processor:
 
                 'tags': tags,
                 'colors': colors,
-
-                'thumbnail': thumbnail,
-                'roomsets': roomsets,
 
                 'statusP': statusP,
                 'statusS': statusS,
@@ -199,14 +202,35 @@ class Processor:
         return products
 
     def image(self):
-        products = DanaGibson.objects.all()
+        products = Couture.objects.all()
 
         for product in products:
-            for fname in os.listdir(f"{FILEDIR}/images/danagibson/"):
-                if product.mpn.replace("-", "").lower() in fname.lower():
-                    if "_bak" in fname:
-                        copyfile(f"{FILEDIR}/images/danagibson/{fname}",
-                                 f"{FILEDIR}/../../../images/roomset/{product.productId}_2.jpg")
-                    else:
-                        copyfile(f"{FILEDIR}/images/danagibson/{fname}",
-                                 f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+            for fname in os.listdir(f"{FILEDIR}/images/couture/"):
+                if ".jpg" in fname.lower() and product.mpn in fname:
+                    copyfile(f"{FILEDIR}/images/couture/{fname}",
+                             f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+
+    def inventory(self):
+        stocks = []
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/couture-inventory.xlsm")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 0))
+            sku = f"CL {mpn}"
+            stockP = int(sh.cell_value(i, 1))
+
+            stockNote = sh.cell_value(i, 2)
+            if stockNote:
+                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
+                date_obj = datetime(*date_tuple)
+                stockNote = date_obj.date()
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)

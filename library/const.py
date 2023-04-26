@@ -152,6 +152,12 @@ markup = {
 
 
 sftp = {
+    "Couture": {
+        "host": "18.206.49.64",
+        "port": 22,
+        "user": "couture",
+        "pass": "Couture123!",
+    },
     "Jaipur Living": {
         "host": "18.206.49.64",
         "port": 22,
