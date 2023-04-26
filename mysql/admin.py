@@ -15,6 +15,7 @@ PO_RECORDS = [
     'SchumacherEDI',
     'ScalamandreEDI',
     'PhillipsEDI',
+    'SuryaEDI',
 
     'CovingtonOrder',
     'CovingtonSample',
@@ -58,6 +59,8 @@ PO_RECORDS = [
     'StarkStudioSample',
     'StoutOrder',
     'StoutSample',
+    'SuryaOrder',
+    'SuryaSample',
     'TresTintasOrder',
     'TresTintasSample',
     'ZoffanyOrder',

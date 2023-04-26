@@ -5,8 +5,6 @@ import os
 import environ
 import pymysql
 import xlrd
-from shutil import copyfile
-import datetime
 
 from library import database, debug, common
 

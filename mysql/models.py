@@ -195,6 +195,8 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     PhillipsEDI = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    SuryaEDI = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
 
     CovingtonOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -279,6 +281,10 @@ class PORecord(models.Model):
     StoutOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     StoutSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    SuryaOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    SuryaSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     TresTintasOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
