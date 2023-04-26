@@ -300,7 +300,8 @@ class DatabaseManager:
 
         if len(product.specs) > 0:
             for spec in product.specs:
-                bodyHTML += "{}: {}<br/>".format(spec['key'], spec['value'])
+                specKey, specVal = spec
+                bodyHTML += "{}: {}<br/>".format(specKey, specVal)
         if len(product.features) > 0:
             for feature in product.features:
                 bodyHTML += "{}<br/>".format(feature)
@@ -694,12 +695,12 @@ class DatabaseManager:
             debug.debug(self.brand, 0,
                         "Added Tags for Brand: {}, SKU: {}".format(self.brand, sku))
 
-    def customTags(self, key, tag):
+    def customTags(self, key, tag, logic=True):
         products = self.Feed.objects.all()
 
         for product in products:
             if product.productId:
-                if product[key]:
+                if getattr(product, key) == logic:
                     self.csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(product.sku), common.sq(tag)))
                     self.con.commit()
