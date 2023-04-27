@@ -182,6 +182,12 @@ sftp = {
         "user": "surya",
         "pass": "Surya123!",
     },
+    "Zoffany": {
+        "host": "34.203.121.151",
+        "port": 22,
+        "user": "zoffany",
+        "pass": "Zof!Dec123",
+    },
 }
 
 

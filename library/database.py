@@ -83,6 +83,8 @@ class DatabaseManager:
                     statusS=product.get('statusS', False),
                     whiteShip=product.get('whiteShip', False),
                     quickShip=product.get('quickShip', False),
+                    bestSeller=product.get('bestSeller', False),
+                    outlet=product.get('outlet', False),
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),
                     stockNote=product.get('stockNote', 0),
@@ -150,7 +152,7 @@ class DatabaseManager:
         uoms = self.Feed.objects.values_list('uom', flat=True).distinct()
         unknownUOMs = []
         for u in uoms:
-            if u not in ['Per Roll', 'Per Yard', 'Per Item']:
+            if u not in ['Per Roll', 'Per Yard', 'Per Item', 'Per Panel']:
                 unknownUOMs.append(u)
 
         if len(unknownUOMs) == 0:
@@ -653,6 +655,9 @@ class DatabaseManager:
 
             if tags:
                 if category:
+                    if type == "Fabric" and "outdoor" in tags.lower():
+                        tags = f"{tags}, Performance Fabric"
+
                     self.csr.execute("CALL AddToEditCategory ({}, {})".format(
                         common.sq(sku), common.sq(tags)))
                     self.con.commit()

@@ -1,20 +1,20 @@
 from django.core.management.base import BaseCommand
-from feed.models import Couture
+from feed.models import Zoffany
 
 import os
 import environ
 import pymysql
 import xlrd
-from shutil import copyfile
-import datetime
 import time
+import csv
+import codecs
 
 from library import database, debug, common
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
-BRAND = "Couture"
+BRAND = "Zoffany"
 
 
 class Command(BaseCommand):
@@ -40,7 +40,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = Couture.objects.all()
+            products = Zoffany.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -55,12 +55,12 @@ class Command(BaseCommand):
                 key="statusS", tag="NoSample", logic=False)
 
         if "image" in options['functions']:
-            processor.image()
+            processor.databaseManager.downloadImages(missingOnly=True)
 
         if "inventory" in options['functions']:
             while True:
                 processor.databaseManager.downloadFileFromSFTP(
-                    src="/couture", dst=f"{FILEDIR}/couture-inventory.xlsm", fileSrc=False)
+                    src="/", dst=f"{FILEDIR}/zoffany-inventory.xlsm", fileSrc=False)
                 processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -75,7 +75,7 @@ class Processor:
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
         self.databaseManager = database.DatabaseManager(
-            con=self.con, brand=BRAND, Feed=Couture)
+            con=self.con, brand=BRAND, Feed=Zoffany)
 
     def __del__(self):
         self.con.close()
@@ -83,83 +83,88 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
+        # Best Sellers
+        bestSellingMPNs = []
+
+        # wb = xlrd.open_workbook(FILEDIR + "/files/zoffany-bestsellers.xlsx")
+        # sh = wb.sheet_by_index(0)
+
+        # for i in range(3, sh.nrows):
+        #     bestSellingMPNs.append(common.formatText(sh.cell_value(i, 1)))
+
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/couture-master.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/zoffany-master.xlsx")
         sh = wb.sheet_by_index(0)
 
-        for i in range(2, sh.nrows):
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 0))
-                sku = f"CL {mpn}"
+                mpn = common.formatText(sh.cell_value(i, 2))
+                sku = f"ZOF {mpn}"
 
-                pattern = common.formatText(
-                    sh.cell_value(i, 2)).split("-")[0].strip()
-                pattern = pattern.replace("Lamp", "").replace(
-                    "Table", "").replace("  ", "").strip()
-
-                color = common.formatText(sh.cell_value(i, 7))
+                pattern = common.formatText(sh.cell_value(i, 8))
+                color = common.formatText(sh.cell_value(i, 9))
 
                 # Categorization
                 brand = BRAND
-                collection = common.formatText(sh.cell_value(i, 3)).title()
-                manufacturer = BRAND
 
-                if collection == "":
-                    continue
-                if collection == "Accent Lamp":
-                    type = "Accent Lamps"
-                if collection == "Accent Table":
-                    type = "Accent Tables"
-                if collection == "Decorative Accessories":
-                    type = "Decorative Accents"
-                if collection == "Table Lamp":
-                    type = "Table Lamps"
-                else:
-                    type = collection
+                type = str(sh.cell_value(i, 12))
+                if type == "WP":
+                    type = "Wallpaper"
+                elif type == "FB":
+                    type = "Fabric"
+
+                manufacturer = f"{common.formatText(sh.cell_value(i, 21)).title()} {type}"
+                collection = common.formatText(sh.cell_value(i, 7))
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 4))
-                width = common.formatFloat(sh.cell_value(i, 13))
-                length = common.formatFloat(sh.cell_value(i, 16))
-                height = common.formatFloat(sh.cell_value(i, 15))
+                description = common.formatText(sh.cell_value(i, 25))
+                usage = common.formatText(sh.cell_value(i, 13))
+                width = common.formatFloat(sh.cell_value(i, 18))
+                repeatH = common.formatFloat(sh.cell_value(i, 20))
+                repeatV = common.formatFloat(sh.cell_value(i, 19))
 
                 # Additional Information
-                material = common.formatText(sh.cell_value(i, 6))
-                care = common.formatText(sh.cell_value(i, 5))
-                country = common.formatText(sh.cell_value(i, 1))
-                weight = common.formatFloat(sh.cell_value(i, 12))
-                upc = sh.cell_value(i, 38)
-
-                features = [common.formatText(sh.cell_value(i, 8))]
-
-                specs = []
-                for j in [17, 19, 20, 24, 25, 26]:
-                    if sh.cell_value(i, 21):
-                        specs.append((common.formatText(sh.cell_value(
-                            1, j)).title(), common.formatText(sh.cell_value(i, j))))
+                match = common.formatText(sh.cell_value(i, 14))
+                yards = common.formatFloat(sh.cell_value(i, 17))
+                features = [
+                    f"Reversible: {common.formatText(sh.cell_value(i, 15))}"]
 
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 9))
-                map = common.formatFloat(sh.cell_value(i, 10))
-                uom = "Per Item"
+                cost = common.formatFloat(sh.cell_value(i, 4))
+                map = common.formatFloat(sh.cell_value(i, 5))
+                msrp = common.formatFloat(sh.cell_value(i, 6))
 
                 # Measurement
+                uom = common.formatText(sh.cell_value(i, 11))
+                if uom.lower() == "yard" or uom.lower() == "y":
+                    uom = "Per Yard"
+                elif uom.lower() == "roll" or uom.lower() == "r":
+                    uom = "Per Roll"
+                elif uom.lower() == "panel":
+                    uom = "Per Panel"
+
+                minimum = 2
 
                 # Tagging
-                tags = description
+                tags = f"{sh.cell_value(i, 10)}, {collection}, {usage}, {description}"
                 colors = color
 
                 # Image
+                thumbnail = sh.cell_value(i, 24)
 
                 # Status
                 statusP = True
                 statusS = False
 
+                if mpn in bestSellingMPNs:
+                    bestSeller = True
+                else:
+                    bestSeller = False
+
                 # Stock
-                stockNote = common.formatText(sh.cell_value(i, 37))
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -177,59 +182,50 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
+                'usage': usage,
                 'width': width,
-                'length': length,
-                'height': height,
+                'repeatH': repeatH,
+                'repeatV': repeatV,
 
-                'material': material,
-                'care': care,
-                'weight': weight,
-                'upc': upc,
-                'country': country,
+                'match': match,
+                'yards': yards,
                 'features': features,
-                'specs': specs,
 
                 'cost': cost,
                 'map': map,
+                'msrp': msrp,
+
                 'uom': uom,
+                'minimum': minimum,
 
                 'tags': tags,
                 'colors': colors,
 
+                'thumbnail': thumbnail,
+
                 'statusP': statusP,
                 'statusS': statusS,
-
-                'stockNote': stockNote,
+                'bestSeller': bestSeller
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def image(self):
-        products = Couture.objects.all()
-
-        for product in products:
-            for fname in os.listdir(f"{FILEDIR}/images/couture/"):
-                if ".jpg" in fname.lower() and product.mpn in fname:
-                    copyfile(f"{FILEDIR}/images/couture/{fname}",
-                             f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
-
     def inventory(self):
         stocks = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/couture-inventory.xlsm")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            mpn = common.formatText(sh.cell_value(i, 0))
-            sku = f"CL {mpn}"
-            stockP = int(sh.cell_value(i, 1))
+        f = open(FILEDIR + "/files/zoffany-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
 
-            stockNote = sh.cell_value(i, 2)
-            if stockNote:
-                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
-                date_obj = datetime(*date_tuple)
-                stockNote = date_obj.date()
+        for row in cr:
+            if row[0] == "Supplier ID":
+                continue
+
+            mpn = common.formatText(row[1])
+            sku = f"ZOF {mpn}"
+            stockP = common.formatInt(row[2])
+            stockNote = common.formatText(row[5])
 
             stock = {
                 'sku': sku,
