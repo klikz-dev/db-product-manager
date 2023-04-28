@@ -80,6 +80,9 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = common.formatText(sh.cell_value(i, 3))
+                if "JP3" in mpn:
+                    continue
+
                 sku = f"SB {mpn}"
 
                 pattern = common.formatText(sh.cell_value(i, 5))
