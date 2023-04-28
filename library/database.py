@@ -605,9 +605,13 @@ class DatabaseManager:
         if fileSrc:
             sftp.get(src, dst)
         else:
-            files = sftp.listdir(src)
+            sftp.chdir(src)
+            files = sftp.listdir()
             for file in files:
-                sftp.get(f"{src}/{file}", dst)
+                if "EDI" in file:
+                    continue
+
+                sftp.get(file, dst)
                 sftp.remove(file)
 
         sftp.close()

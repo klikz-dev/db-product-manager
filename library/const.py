@@ -170,6 +170,12 @@ sftp = {
         "user": "jfprod-DecoratorsBest",
         "pass": "DecoratorsBest26!)",
     },
+    "Materialworks": {
+        "host": "18.206.49.64",
+        "port": 22,
+        "user": "materialworks",
+        "pass": "MWDecor1!",
+    },
     "Schumacher": {
         "host": "34.203.121.151",
         "port": 22,
