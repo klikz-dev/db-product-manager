@@ -272,9 +272,7 @@ class DatabaseManager:
         if float(product.length) > 0:
             bodyHTML += "Length: {} in<br/>".format(product.length)
         if float(product.height) > 0:
-            bodyHTML += "Height: {} in<br/>".format(product.height)
-        if product.size != "":
-            bodyHTML += "Size: {}<br/>".format(product.size)
+            bodyHTML += "Depth: {} in<br/>".format(product.height)
         if product.size != "":
             bodyHTML += "Size: {}<br/>".format(product.size)
         if product.dimension != "":
