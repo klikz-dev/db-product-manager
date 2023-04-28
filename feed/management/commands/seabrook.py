@@ -80,9 +80,6 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = common.formatText(sh.cell_value(i, 3))
-                if "JP3" in mpn:
-                    continue
-
                 sku = f"SB {mpn}"
 
                 pattern = common.formatText(sh.cell_value(i, 5))
@@ -155,7 +152,7 @@ class Processor:
                 roomsets = [sh.cell_value(i, 46)]
 
                 # Status
-                if collection == 'Lillian August Grasscloth Binder' or collection == 'Indigo' or collection == 'New Hampton':
+                if "JP3" in mpn or collection == 'Lillian August Grasscloth Binder' or collection == 'Indigo' or collection == 'New Hampton':
                     statusP = False
                 else:
                     statusP = True
