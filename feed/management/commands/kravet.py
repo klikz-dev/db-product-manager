@@ -54,7 +54,8 @@ class Command(BaseCommand):
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "sample" in options['functions']:
-            processor.databaseManager.customTags(key="statusS", tag="NoSample")
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
@@ -65,11 +66,12 @@ class Command(BaseCommand):
                 processor.downloadFeed()
 
                 products = processor.fetchFeed()
-                processor.databaseManager.writeFeed(products)
+                processor.databaseManager.writeFeed(products=products)
 
                 processor.databaseManager.statusSync(fullSync=False)
 
                 processor.inventory()
+
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
                 time.sleep(86400)
@@ -81,7 +83,8 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=Kravet)
 
     def __del__(self):
         self.con.close()
