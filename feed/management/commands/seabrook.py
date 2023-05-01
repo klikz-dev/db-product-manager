@@ -152,12 +152,12 @@ class Processor:
                 roomsets = [sh.cell_value(i, 46)]
 
                 # Status
-                if "JP3" in mpn or collection == 'Lillian August Grasscloth Binder' or collection == 'Indigo' or collection == 'New Hampton':
+                if collection == 'Lillian August Grasscloth Binder' or collection == 'Indigo' or collection == 'New Hampton':
                     statusP = False
                 else:
                     statusP = True
 
-                if common.formatText(sh.cell_value(i, 17)) == "Y":
+                if common.formatText(sh.cell_value(i, 17)) == "Y" and "JP3" not in mpn:
                     statusS = True
                 else:
                     statusS = False
