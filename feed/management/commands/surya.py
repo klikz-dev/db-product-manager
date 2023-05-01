@@ -9,7 +9,7 @@ import csv
 import codecs
 import time
 
-from library import database, debug
+from library import database, debug, common
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -60,8 +60,8 @@ class Command(BaseCommand):
 
         if "inventory" in options['functions']:
             if True:
-                # processor.databaseManager.downloadFileFromSFTP(
-                #     src="/daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/surya-master.csv")
+                processor.databaseManager.downloadFileFromSFTP(
+                    src="/surya/inventory_dbest.csv", dst=f"{FILEDIR}/surya-inventory.csv")
                 processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -250,13 +250,12 @@ class Processor:
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
 
         for row in cr:
-            if row[0] == "Itemcode":
+            if row[0] == "Sku":
                 continue
 
-            mpn = str(row[0]).strip()
-            sku = f"SR {mpn}"
-            stockP = int(float(row[12]))
-            stockNote = str(row[19]).strip()
+            sku = f"SR {common.formatText(row[0])}"
+            stockP = common.formatInt(row[1])
+            stockNote = common.formatText(row[2])
 
             stock = {
                 'sku': sku,
