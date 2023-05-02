@@ -43,7 +43,7 @@ class ProductData:
         self.con = con
         self.csr = self.con.cursor()
 
-        self.csr.execute("""SELECT P.ProductID, P.ManufacturerPartNumber, P.BodyHTML, P.Title, P.Description, P.Published, PV.Price, T.Name AS ProductType, P.Pattern, P.Color, P.Collection, M.Name AS Manufacturer, P.IsOutlet, P.CreatedAt, M.Brand AS Brand
+        self.csr.execute("""SELECT P.ProductID, P.ManufacturerPartNumber, P.BodyHTML, P.Title, P.Description, P.Published, PV.Price, T.Name AS ProductType, P.Pattern, P.Color, P.Collection, M.Name AS Manufacturer, P.IsOutlet, P.CreatedAt, M.Brand AS Brand, PV.Cost
                     FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID LEFT JOIN Type T ON P.ProductTypeID = T.TypeID LEFT JOIN ProductVariant PV ON P.SKU = PV.SKU
                     WHERE PV.IsDefault = 1 AND P.SKU = {}""".format(sq(sku)))
         product = self.csr.fetchone()
@@ -64,6 +64,7 @@ class ProductData:
             self.isOutlet = product[12]
             self.createdAt = product[13]
             self.brand = product[14]
+            self.cost = product[15]
         else:
             raise ValueError(f"SKU {sku} not found")
 
@@ -381,6 +382,11 @@ def NewProductBySku(sku, con):
     manu = pd.manufacturer
     published = pd.published
 
+    # Product Cost
+    cost = pd.cost
+    if "Sample - " in title:
+        cost = 0
+
     # Product Variants
     titles = []
     variants = pd.ProductVariants()
@@ -441,6 +447,19 @@ def NewProductBySku(sku, con):
             csr.execute("UPDATE ProductVariant SET ProductID = {}, VariantID = {} WHERE SKU = {} AND Name = {}".format(
                 productID, variantID, sq(sku), sq(vTitle)))
             con.commit()
+
+            try:
+                inventoryItemId = pv["inventory_item_id"]
+                s.put("{}/inventory_items/{}.json".format(SHOPIFY_API_URL, inventoryItemId),
+                      headers=SHOPIFY_PRODUCT_API_HEADER,
+                      json={
+                    "inventory_item": {
+                        "id": inventoryItemId,
+                        "cost": cost
+                    }
+                })
+            except Exception as e:
+                print(e)
 
         csr.close()
         s.close()

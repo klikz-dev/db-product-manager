@@ -114,7 +114,7 @@ markup = {
         "trade": 1.25,
     },
     "Seabrook": {
-        "useMAP": False,
+        "useMAP": True,
         "consumer": 1.5,
         "trade": 1,
     },

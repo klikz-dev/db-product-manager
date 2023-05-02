@@ -45,7 +45,7 @@ class Command(BaseCommand):
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.databaseManager.updateTags(category=False)
+            processor.databaseManager.updateTags(category=True)
 
         if "sample" in options['functions']:
             processor.databaseManager.customTags(

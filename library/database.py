@@ -255,6 +255,21 @@ class DatabaseManager:
         gtin = product.upc
         weight = product.weight
 
+        # Set minimum to height
+        def swap(a, b):
+            return b, a
+
+        width = product.width
+        length = product.length
+        height = product.height
+
+        if width < height:
+            width, height = swap(width, height)
+
+        if length < height:
+            length, height = swap(length, height)
+        #######################
+
         bodyHTML = ""
         if product.description != "":
             bodyHTML += "{}<br/>".format(product.description)
@@ -267,12 +282,12 @@ class DatabaseManager:
             bodyHTML += "Collection: {}<br/><br/>".format(
                 product.collection)
 
-        if float(product.width) > 0:
-            bodyHTML += "Width: {} in<br/>".format(product.width)
-        if float(product.length) > 0:
-            bodyHTML += "Length: {} in<br/>".format(product.length)
-        if float(product.height) > 0:
-            bodyHTML += "Depth: {} in<br/>".format(product.height)
+        if float(width) > 0:
+            bodyHTML += "Width: {} in<br/>".format(width)
+        if float(length) > 0:
+            bodyHTML += "Height: {} in<br/>".format(length)
+        if float(height) > 0:
+            bodyHTML += "Depth: {} in<br/>".format(height)
         if product.size != "":
             bodyHTML += "Size: {}<br/>".format(product.size)
         if product.dimension != "":
@@ -410,6 +425,7 @@ class DatabaseManager:
             try:
                 createdInDatabase = self.createProduct(
                     product, formatPrice)
+                print(createdInDatabase)
                 if not createdInDatabase:
                     continue
             except Exception as e:

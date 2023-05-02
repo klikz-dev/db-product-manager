@@ -47,7 +47,7 @@ class Command(BaseCommand):
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.databaseManager.updateTags(category=False)
+            processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
             processor.databaseManager.downloadImages(missingOnly=True)
@@ -156,7 +156,7 @@ class Processor:
 
                 # Status
                 statusP = True
-                statusS = False
+                statusS = True
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
