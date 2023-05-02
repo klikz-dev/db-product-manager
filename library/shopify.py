@@ -448,19 +448,6 @@ def NewProductBySku(sku, con):
                 productID, variantID, sq(sku), sq(vTitle)))
             con.commit()
 
-            try:
-                inventoryItemId = pv["inventory_item_id"]
-                s.put("{}/inventory_items/{}.json".format(SHOPIFY_API_URL, inventoryItemId),
-                      headers=SHOPIFY_PRODUCT_API_HEADER,
-                      json={
-                    "inventory_item": {
-                        "id": inventoryItemId,
-                        "cost": cost
-                    }
-                })
-            except Exception as e:
-                print(e)
-
         csr.close()
         s.close()
 

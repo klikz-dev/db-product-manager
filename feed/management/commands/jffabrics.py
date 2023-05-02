@@ -39,7 +39,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = JFFabrics.objects.all()
+            products = JFFabrics.objects.filter(Q(productId='6880928137262'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 

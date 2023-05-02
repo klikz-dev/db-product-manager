@@ -232,7 +232,9 @@ class DatabaseManager:
         ptype = product.type
         manufacturer = product.manufacturer
 
-        if ptype in manufacturer:
+        if "JF Fabrics" in manufacturer:
+            manufacturer = product.brand
+        elif ptype in manufacturer:
             manufacturer = str(manufacturer).replace(ptype, "").strip()
 
         if str(ptype).endswith("es"):
@@ -425,7 +427,6 @@ class DatabaseManager:
             try:
                 createdInDatabase = self.createProduct(
                     product, formatPrice)
-                print(createdInDatabase)
                 if not createdInDatabase:
                     continue
             except Exception as e:
