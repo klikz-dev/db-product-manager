@@ -273,6 +273,7 @@ class ProductData:
 
             variant = {
                 "title": vName,
+                "cost": cost,
                 "price": price,
                 "sku": self.sku,
                 "option1": vName,
@@ -334,6 +335,7 @@ class ProductData:
 
         variant = {
             "title": vName,
+            "cost": cost,
             "price": price,
             "sku": self.sku,
             "option1": vName,
@@ -632,14 +634,15 @@ def UpdatePriceToShopify(productID, con):
     s = requests.Session()
     csr = con.cursor()
     csr.execute(
-        "SELECT VariantID, Price FROM ProductVariant WHERE ProductID = {} AND Name NOT LIKE '%Sample - %'".format(productID))
+        "SELECT VariantID, Cost, Price FROM ProductVariant WHERE ProductID = {} AND Name NOT LIKE '%Sample - %'".format(productID))
     for row in csr.fetchall():
         variantID = row[0]
-        price = float(row[1])
+        cost = float(row[1])
+        price = float(row[2])
 
         s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
               headers=SHOPIFY_PRODUCT_API_HEADER,
-              json={"variant": {'id': variantID, 'price': price}})
+              json={"variant": {'id': variantID, 'cost': cost, 'price': price}})
 
         csr.execute(
             "DELETE FROM PendingUpdatePrice WHERE ProductID = {}".format(productID))

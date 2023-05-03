@@ -34,15 +34,15 @@ class Command(BaseCommand):
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.databaseManager.createProducts(formatPrice=True)
+            processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
             products = Surya.objects.all()
             processor.databaseManager.updateProducts(
-                products=products, formatPrice=True)
+                products=products, formatPrice=False)
 
         if "price" in options['functions']:
-            processor.databaseManager.updatePrices(formatPrice=True)
+            processor.databaseManager.updatePrices(formatPrice=False)
 
         if "tag" in options['functions']:
             processor.databaseManager.updateTags(category=False)
