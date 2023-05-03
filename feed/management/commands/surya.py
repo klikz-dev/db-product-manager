@@ -11,6 +11,10 @@ import time
 
 from library import database, debug, common
 
+formatText = common.formatText
+formatInt = common.formatInt
+formatFloat = common.formatFloat
+
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
@@ -29,6 +33,9 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
+
+        if "validate" in options['functions']:
+            processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
             processor.databaseManager.statusSync(fullSync=False)
@@ -92,21 +99,17 @@ class Processor:
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = str(sh.cell_value(i, 1)).strip()
+                mpn = formatText(sh.cell_value(i, 1))
                 debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
 
                 sku = f"SR {mpn}"
-                try:
-                    upc = int(sh.cell_value(i, 5))
-                except:
-                    upc = ""
-                pattern = str(sh.cell_value(i, 4)).strip()
-                color = str(sh.cell_value(i, 2)).strip()
+                pattern = formatText(sh.cell_value(i, 4))
+                color = formatText(sh.cell_value(i, 2))
 
                 # Categorization
                 brand = BRAND
 
-                typeText = str(sh.cell_value(i, 0)).strip().title()
+                typeText = formatText(sh.cell_value(i, 0)).title()
                 if typeText == "Bedding":
                     type = "Furniture"
                 elif typeText == "Accent And Lounge Chairs":
@@ -121,80 +124,64 @@ class Processor:
                     type = typeText
 
                 manufacturer = BRAND
-                collection = str(sh.cell_value(i, 4))
+                collection = formatText(sh.cell_value(i, 4))
 
                 # Main Information
-                description = str(sh.cell_value(i, 3)).strip()
-                try:
-                    width = round(float(sh.cell_value(i, 16)), 2)
-                except:
-                    width = 0
-                try:
-                    length = round(float(sh.cell_value(i, 15)), 2)
-                except:
-                    length = 0
-                try:
-                    height = round(float(sh.cell_value(i, 17)), 2)
-                except:
-                    height = 0
-                size = str(sh.cell_value(i, 13)).strip()
+                description = formatText(sh.cell_value(i, 3))
+                usage = typeText
+                width = formatFloat(sh.cell_value(i, 16))
+                length = formatFloat(sh.cell_value(i, 17))
+                height = formatFloat(sh.cell_value(i, 15))
+
+                if "D" in sh.cell_value(i, 13):
+                    size = ""
+                    dimension = formatText(sh.cell_value(i, 13))
+                else:
+                    size = formatText(sh.cell_value(i, 13))
+                    dimension = ""
 
                 # Additional Information
-                material = str(sh.cell_value(i, 10)).strip()
-                try:
-                    weight = float(sh.cell_value(i, 18))
-                except:
-                    weight = 5
+                material = formatText(sh.cell_value(i, 10))
+                weight = formatFloat(sh.cell_value(i, 18)) or 5
                 specs = [
-                    {
-                        "key": "Construction",
-                        "value": str(sh.cell_value(i, 21)).strip()
-                    }
-                ]
+                    ("Construction", formatText(sh.cell_value(i, 21)))]
+                upc = formatInt(sh.cell_value(i, 5))
 
                 # Measurement
                 uom = "Per Item"
 
                 # Pricing
-                try:
-                    cost = round(float(sh.cell_value(i, 6)), 2)
-                except:
+                cost = formatFloat(sh.cell_value(i, 6))
+                map = formatFloat(sh.cell_value(i, 7))
+                msrp = formatFloat(sh.cell_value(i, 8))
+
+                if cost == 0:
                     debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
                     continue
 
-                try:
-                    map = round(float(sh.cell_value(i, 7)), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt MAP error {}".format(mpn))
-                    map = 0
-
-                try:
-                    msrp = round(float(sh.cell_value(i, 8)), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt MSRP error {}".format(mpn))
-                    msrp = 0
-
                 # Tagging
-                tags = str(sh.cell_value(i, 11)).strip()
-                if str(sh.cell_value(i, 23)).strip() == "Yes":
+                tags = f"{formatText(sh.cell_value(i, 11))}, {formatText(sh.cell_value(i, 12))}"
+                if formatText(sh.cell_value(i, 23)) == "Yes":
                     tags = "{}, Outdoor".format(tags)
                 tags = f"{tags}, {type}, {collection}, {pattern}"
 
-                colors = str(sh.cell_value(i, 9)).strip()
+                colors = formatText(sh.cell_value(i, 9))
 
+                # Status
                 statusP = True
                 statusS = False
+
                 whiteShip = False
                 if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
                     whiteShip = True
 
                 # Image
-                thumbnail = str(sh.cell_value(i, 25)).strip()
+                thumbnail = sh.cell_value(i, 25)
+
                 roomsets = []
                 for id in range(26, 31):
-                    roomset = str(sh.cell_value(i, id)).strip()
-                    if roomset != "":
-                        roomsets.append(roomset)
+                    if sh.cell_value(i, id) != "":
+                        roomsets.append(sh.cell_value(i, id))
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -213,11 +200,13 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
+                'usage': usage,
                 'width': width,
                 'length': length,
                 'height': height,
                 'weight': weight,
                 'size': size,
+                'dimension': dimension,
 
                 'material': material,
                 'specs': specs,
@@ -253,9 +242,9 @@ class Processor:
             if row[0] == "Sku":
                 continue
 
-            sku = f"SR {common.formatText(row[0])}"
-            stockP = common.formatInt(row[1])
-            stockNote = common.formatText(row[2])
+            sku = f"SR {formatText(row[0])}"
+            stockP = formatInt(row[1])
+            stockNote = formatText(row[2])
 
             stock = {
                 'sku': sku,
