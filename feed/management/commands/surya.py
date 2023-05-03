@@ -55,7 +55,7 @@ class Command(BaseCommand):
             processor.databaseManager.updateTags(category=False)
 
         if "image" in options['functions']:
-            processor.databaseManager.downloadImages(missingOnly=False)
+            processor.databaseManager.downloadImages(missingOnly=True)
 
         if "sample" in options['functions']:
             processor.databaseManager.customTags(

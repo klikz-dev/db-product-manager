@@ -44,7 +44,7 @@ class DatabaseManager:
                     sku=product.get('sku'),
                     pattern=product.get('pattern'),
                     color=product.get('color'),
-                    title=product.get('title', ""),
+                    name=product.get('name', ""),
 
                     brand=product.get('brand'),
                     type=product.get('type'),
@@ -285,9 +285,9 @@ class DatabaseManager:
         elif str(ptype).endswith("s"):
             ptype = ptype[:-1]
 
-        if product.title != "":
-            name = " | ".join((manufacturer, product.title))
-            title = " ".join((manufacturer, product.title))
+        if product.name != "":
+            name = " | ".join((manufacturer, product.name))
+            title = " ".join((manufacturer, product.name))
         else:
             name = " | ".join(
                 (manufacturer, product.pattern, product.color, ptype))
