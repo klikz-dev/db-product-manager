@@ -109,8 +109,8 @@ class Processor:
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 17))
                 width = common.formatFloat(sh.cell_value(i, 12))
-                length = common.formatFloat(sh.cell_value(i, 10))
-                height = common.formatFloat(sh.cell_value(i, 14))
+                height = common.formatFloat(sh.cell_value(i, 10))
+                depth = common.formatFloat(sh.cell_value(i, 14))
 
                 # Additional Information
                 specs = []
@@ -168,8 +168,8 @@ class Processor:
 
                 'description': description,
                 'width': width,
-                'length': length,
                 'height': height,
+                'depth': depth,
 
                 'material': material,
                 'finish': finish,

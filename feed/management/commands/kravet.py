@@ -13,7 +13,7 @@ import xlrd
 import time
 from bs4 import BeautifulSoup
 
-from library import database, debug
+from library import database, debug, common
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
-                key="whiteShip", tag="White Glove")
+                key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
@@ -413,15 +413,8 @@ class Processor:
                 description = str(sh.cell_value(i, 2))
                 usage = "Accessory"
 
-                try:
-                    width = round(float(sh.cell_value(i, 9)), 2)
-                except:
-                    width = 0
-
-                try:
-                    height = round(float(sh.cell_value(i, 11)), 2)
-                except:
-                    height = 0
+                width = common.formatFloat(sh.cell_value(i, 9))
+                height = common.formatFloat(sh.cell_value(i, 11))
 
                 if width != 0 and height != 0:
                     size = f'{int(width)}" x {int(height)}"'
@@ -468,13 +461,13 @@ class Processor:
                 # Stock
                 stockP = 0
                 stockNote = str(sh.cell_value(i, 17))
-                whiteShip = False
+                whiteGlove = False
 
                 if mpn in inventories:
                     (stockP, leadtime, shipping) = inventories[mpn]
                     stockNote = f"{leadtime} days"
                     if "White" in shipping:
-                        whiteShip = True
+                        whiteGlove = True
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -513,7 +506,7 @@ class Processor:
 
                 'stockP': stockP,
                 'stockNote': stockNote,
-                'whiteShip': whiteShip,
+                'whiteGlove': whiteGlove,
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,

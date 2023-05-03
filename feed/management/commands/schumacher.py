@@ -127,7 +127,7 @@ class Processor:
                 description = common.formatText(row[17])
 
                 width = common.formatFloat(row[11])
-                length = common.formatFloat(row[21])
+                height = common.formatFloat(row[21])
 
                 size = ""
                 if (type == "Pillow" or type == "Rug" or type == "Throw") and width != "" and length != "":
@@ -184,9 +184,9 @@ class Processor:
                     statusS = True
 
                 if width > 107 or length > 107:
-                    whiteShip = True
+                    whiteGlove = True
                 else:
-                    whiteShip = False
+                    whiteGlove = False
 
                 # Stock
                 stockP = int(float(row[19]))
@@ -210,7 +210,7 @@ class Processor:
 
                 'description': description,
                 'width': width,
-                'length': length,
+                'height': height,
                 'repeatV': repeatV,
                 'repeatH': repeatH,
                 'size': size,
@@ -233,7 +233,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
-                'whiteShip': whiteShip,
+                'whiteGlove': whiteGlove,
 
                 'stockP': stockP,
             }

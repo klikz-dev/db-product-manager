@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
-                key="whiteShip", tag="White Glove")
+                key="whiteGlove", tag="White Glove")
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(

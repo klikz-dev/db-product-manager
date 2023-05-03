@@ -42,26 +42,28 @@ class DatabaseManager:
                 feed = self.Feed.objects.create(
                     mpn=product.get('mpn'),
                     sku=product.get('sku'),
-                    upc=product.get('upc', ""),
                     pattern=product.get('pattern'),
                     color=product.get('color'),
                     title=product.get('title', ""),
+
                     brand=product.get('brand'),
                     type=product.get('type'),
                     manufacturer=product.get('manufacturer'),
                     collection=product.get('collection', ""),
+
                     description=product.get('description', ""),
                     usage=product.get('usage', ""),
                     disclaimer=product.get('disclaimer', ""),
                     width=product.get('width', 0),
-                    length=product.get('length', 0),
                     height=product.get('height', 0),
+                    depth=product.get('depth', 0),
                     size=product.get('size', ""),
                     dimension=product.get('dimension', ""),
-                    yards=product.get('yards', 0),
                     repeatH=product.get('repeatH', 0),
                     repeatV=product.get('repeatV', 0),
                     repeat=product.get('repeat', ""),
+
+                    yards=product.get('yards', 0),
                     content=product.get('content', ""),
                     match=product.get('match', ""),
                     material=product.get('material', ""),
@@ -71,23 +73,31 @@ class DatabaseManager:
                     features=product.get('features', []),
                     weight=product.get('weight', 5),
                     country=product.get('country', ""),
-                    uom=product.get('uom'),
-                    minimum=product.get('minimum', 1),
-                    increment=product.get('increment', ""),
-                    tags=product.get('tags', ""),
-                    colors=product.get('colors', ""),
+                    upc=product.get('upc', ""),
+                    custom=product.get('custom', {}),
+
                     cost=product.get('cost'),
                     msrp=product.get('msrp', 0),
                     map=product.get('map', 0),
+
+                    uom=product.get('uom'),
+                    minimum=product.get('minimum', 1),
+                    increment=product.get('increment', ""),
+
+                    tags=product.get('tags', ""),
+                    colors=product.get('colors', ""),
+
                     statusP=product.get('statusP', False),
                     statusS=product.get('statusS', False),
-                    whiteShip=product.get('whiteShip', False),
+                    whiteGlove=product.get('whiteGlove', False),
                     quickShip=product.get('quickShip', False),
                     bestSeller=product.get('bestSeller', False),
                     outlet=product.get('outlet', False),
+
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),
                     stockNote=product.get('stockNote', 0),
+
                     thumbnail=product.get('thumbnail', ""),
                     roomsets=product.get('roomsets', [])
                 )
@@ -227,6 +237,39 @@ class DatabaseManager:
         debug.debug(
             self.brand, 0, f"Finished status sync for {self.brand}. total: {total}, published: {pb}, unpublished: {upb}")
 
+    def formatPrice(self, product, formatPrice):
+        try:
+            useMAP = const.markup[self.brand]["useMAP"]
+            consumerMarkup = const.markup[self.brand]["consumer"]
+            tradeMarkup = const.markup[self.brand]["trade"]
+
+            if useMAP and product.map > 0:
+                if formatPrice:
+                    price = common.formatprice(product.map, 1)
+                else:
+                    price = product.map
+            else:
+                if formatPrice:
+                    price = common.formatprice(product.cost, consumerMarkup)
+                else:
+                    price = product.cost * consumerMarkup
+
+            if formatPrice:
+                priceTrade = common.formatprice(product.cost, tradeMarkup)
+            else:
+                priceTrade = product.cost * tradeMarkup
+        except Exception as e:
+            debug.debug(self.brand, 1,
+                        f"Price Error. Check if markups are defined properly. {str(e)}")
+            return (0, 0, 0)
+
+        if price < 19.99:
+            price = 19.99
+            priceTrade = 16.99
+        priceSample = 5
+
+        return (price, priceTrade, priceSample)
+
     def createProduct(self, product, formatPrice):
 
         ptype = product.type
@@ -255,44 +298,29 @@ class DatabaseManager:
         vname = title
         hassample = 1
         gtin = product.upc
-        weight = product.weight
-
-        # Set minimum to height
-        def swap(a, b):
-            return b, a
-
-        width = product.width
-        length = product.length
-        height = product.height
-
-        if width < height:
-            width, height = swap(width, height)
-
-        if length < height:
-            length, height = swap(length, height)
-        #######################
+        weight = product.weight or 5
 
         bodyHTML = ""
-        if product.description != "":
+        if product.description:
             bodyHTML += "{}<br/>".format(product.description)
         if product.disclaimer != "":
             bodyHTML += "<small><i>Disclaimer: {}</i></small><br/><br/>".format(
                 product.disclaimer)
         else:
             bodyHTML += "<br/>"
-        if product.collection != "":
+        if product.collection:
             bodyHTML += "Collection: {}<br/><br/>".format(
                 product.collection)
 
-        if float(width) > 0:
-            bodyHTML += "Width: {} in<br/>".format(width)
-        if float(length) > 0:
-            bodyHTML += "Height: {} in<br/>".format(length)
-        if float(height) > 0:
-            bodyHTML += "Depth: {} in<br/>".format(height)
-        if product.size != "":
+        if float(product.width) > 0:
+            bodyHTML += "Width: {} in<br/>".format(product.width)
+        if float(product.height) > 0:
+            bodyHTML += "Height: {} in<br/>".format(product.height)
+        if float(product.depth) > 0:
+            bodyHTML += "Depth: {} in<br/>".format(product.depth)
+        if product.size:
             bodyHTML += "Size: {}<br/>".format(product.size)
-        if product.dimension != "":
+        if product.dimension:
             bodyHTML += "Dimension: {}<br/>".format(product.dimension)
         if float(product.yards) > 0:
             bodyHTML += "Roll Length: {} yds<br/>".format(product.yards)
@@ -301,18 +329,18 @@ class DatabaseManager:
             bodyHTML += "Horizontal Repeat: {} in<br/>".format(product.repeatH)
         if float(product.repeatV) > 0:
             bodyHTML += "Vertical Repeat: {} in<br/>".format(product.repeatV)
-        if product.repeat != "":
+        if product.repeat:
             bodyHTML += "Repeat: {}<br/>".format(product.repeat)
 
-        if product.content != "":
+        if product.content:
             bodyHTML += "Content: {}<br/>".format(product.content)
-        if product.match != "":
+        if product.match:
             bodyHTML += "Content: {}<br/>".format(product.match)
-        if product.material != "":
+        if product.material:
             bodyHTML += "Material: {}<br/>".format(product.material)
-        if product.finish != "":
+        if product.finish:
             bodyHTML += "Finish: {}<br/>".format(product.finish)
-        if product.care != "":
+        if product.care:
             bodyHTML += "Care Instructions: {}<br/>".format(product.care)
 
         if len(product.specs) > 0:
@@ -324,45 +352,20 @@ class DatabaseManager:
                 bodyHTML += "{}<br/>".format(feature)
         bodyHTML += "<br/>"
 
-        if product.country != "":
+        if product.country:
             bodyHTML += "Country of Origin: {}<br/>".format(
                 product.country)
-        if product.usage != "":
+        if product.usage:
             bodyHTML += "Usage: {}<br/>".format(product.usage)
         else:
             bodyHTML += "Usage: {}<br/><br/>".format(ptype)
 
         bodyHTML += "{} {}".format(manufacturer, ptype)
 
-        try:
-            useMAP = const.markup[self.brand]["useMAP"]
-            consumerMarkup = const.markup[self.brand]["consumer"]
-            tradeMarkup = const.markup[self.brand]["trade"]
-
-            if useMAP and product.map > 0:
-                if formatPrice:
-                    price = common.formatprice(product.map, 1)
-                else:
-                    price = product.map
-            else:
-                if formatPrice:
-                    price = common.formatprice(product.cost, consumerMarkup)
-                else:
-                    price = product.cost * consumerMarkup
-
-            if formatPrice:
-                priceTrade = common.formatprice(product.cost, tradeMarkup)
-            else:
-                priceTrade = product.cost * tradeMarkup
-        except Exception as e:
-            debug.debug(self.brand, 1,
-                        f"Price Error. Check if markups are defined properly. {str(e)}")
+        price, priceTrade, priceSample = self.formatPrice(
+            product, formatPrice=formatPrice)
+        if price == 0:
             return False
-
-        if price < 19.99:
-            price = 19.99
-            priceTrade = 16.99
-        priceSample = 5
 
         try:
             productType = Type.objects.get(name=product.type)
@@ -514,43 +517,14 @@ class DatabaseManager:
                     debug.debug(self.feed, 1, f"Unknown variant {name}")
                     continue
 
-                try:
-                    newCost = product.cost
-
-                    useMAP = const.markup[self.brand]["useMAP"]
-                    if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
-                        consumerMarkup = const.markup[self.brand]["consumer_pillow"]
-                        tradeMarkup = const.markup[self.brand]["trade_pillow"]
-                    else:
-                        consumerMarkup = const.markup[self.brand]["consumer"]
-                        tradeMarkup = const.markup[self.brand]["trade"]
-
-                    if useMAP and product.map > 0:
-                        if formatPrice:
-                            price = common.formatprice(product.map, 1)
-                        else:
-                            price = product.map
-                    else:
-                        if formatPrice:
-                            price = common.formatprice(newCost, consumerMarkup)
-                        else:
-                            price = newCost * consumerMarkup
-
-                    if formatPrice:
-                        priceTrade = common.formatprice(newCost, tradeMarkup)
-                    else:
-                        priceTrade = newCost * tradeMarkup
-                except Exception as e:
-                    debug.debug(self.brand, 1, str(e))
+                price, priceTrade = self.formatPrice(
+                    product, formatPrice=formatPrice)
+                if price == 0:
                     return False
 
-                if price < 19.99:
-                    price = 19.99
-                    priceTrade = 16.99
-
-                if newCost != oldCost or (type == "Consumer" and price != oldPrice) or (type == "Trade" and priceTrade != oldPrice):
+                if product.cost != oldCost or (type == "Consumer" and price != oldPrice) or (type == "Trade" and priceTrade != oldPrice):
                     self.csr.execute("CALL UpdatePriceAndTrade ({}, {}, {}, {})".format(
-                        productId, newCost, price, priceTrade))
+                        productId, product.cost, price, priceTrade))
                     self.con.commit()
                     self.csr.execute(
                         "CALL AddToPendingUpdatePrice ({})".format(productId))
@@ -559,11 +533,11 @@ class DatabaseManager:
                     updatedProducts.append(productId)
 
                     debug.debug(
-                        self.brand, 0, f"{index}/{total}: Updated prices for ProductID: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+                        self.brand, 0, f"{index}/{total}: Updated prices for ProductID: {productId}. COST: {product.cost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
 
                 else:
                     debug.debug(
-                        self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {newCost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+                        self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {product.cost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
 
             except Exception as e:
                 debug.debug(self.feed, 1, str(e))

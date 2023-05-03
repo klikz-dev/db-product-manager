@@ -110,7 +110,7 @@ class Processor:
                     repeat = ""
 
                 width = common.formatFloat(sh.cell_value(i, 29))
-                length = common.formatFloat(sh.cell_value(i, 30))
+                height = common.formatFloat(sh.cell_value(i, 30))
                 size = f"{common.formatText(sh.cell_value(i, 32))} sqft"
 
                 # Additional Information
@@ -182,7 +182,7 @@ class Processor:
                 'description': description,
                 'usage': usage,
                 'width': width,
-                'length': length,
+                'height': height,
                 'size': size,
                 'repeat': repeat,
 

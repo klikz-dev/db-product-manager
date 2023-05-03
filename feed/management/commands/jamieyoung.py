@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
-                key="whiteShip", tag="White Glove")
+                key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
@@ -119,18 +119,9 @@ class Processor:
                 # Main Information
                 description = str(sh.cell_value(i, 14)).strip()
                 disclaimer = str(sh.cell_value(i, 22)).strip()
-                try:
-                    width = round(float(sh.cell_value(i, 11)), 2)
-                except:
-                    width = 0
-                try:
-                    length = round(float(sh.cell_value(i, 10)), 2)
-                except:
-                    length = 0
-                try:
-                    height = round(float(sh.cell_value(i, 12)), 2)
-                except:
-                    height = 0
+                width = common.formatFloat(sh.cell_value(i, 11))
+                height = common.formatFloat(sh.cell_value(i, 10))
+                depth = common.formatFloat(sh.cell_value(i, 12))
 
                 # Additional Information
                 material = str(sh.cell_value(i, 20)).strip()
@@ -224,8 +215,8 @@ class Processor:
                 'description': description,
                 'disclaimer': disclaimer,
                 'width': width,
-                'length': length,
                 'height': height,
+                'depth': depth,
                 'weight': weight,
 
                 'material': material,

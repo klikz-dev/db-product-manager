@@ -4,12 +4,11 @@ from django.db import models
 class Feed(models.Model):
     mpn = models.CharField(max_length=200, primary_key=True)
     sku = models.CharField(max_length=200, default=None, null=True, blank=True)
-    upc = models.CharField(max_length=200, default=None, null=True, blank=True)
     pattern = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     color = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-    title = models.CharField(
+    name = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     productId = models.CharField(
         max_length=200, default=None, null=True, blank=True)
@@ -30,21 +29,19 @@ class Feed(models.Model):
     disclaimer = models.CharField(
         max_length=2000, default=None, null=True, blank=True)
 
-    width = models.FloatField(default=0, null=True, blank=True)  # inch
-    length = models.FloatField(default=0, null=True, blank=True)  # inch
-    height = models.FloatField(default=0, null=True, blank=True)  # inch
+    width = models.FloatField(default=0, null=True, blank=True)
+    height = models.FloatField(default=0, null=True, blank=True)
+    depth = models.FloatField(default=0, null=True, blank=True)
     size = models.CharField(
-        max_length=200, default=None, null=True, blank=True)  # explains width x length
+        max_length=200, default=None, null=True, blank=True)
     dimension = models.CharField(
-        max_length=200, default=None, null=True, blank=True)  # explains width x length x height
-    yards = models.FloatField(default=0, null=True,
-                              blank=True)  # yards per roll
-
+        max_length=200, default=None, null=True, blank=True)
     repeatH = models.FloatField(default=0, null=True, blank=True)
     repeatV = models.FloatField(default=0, null=True, blank=True)
     repeat = models.CharField(
-        max_length=200, default=None, null=True, blank=True)  # explains repeatH x repeatV
+        max_length=200, default=None, null=True, blank=True)
 
+    yards = models.FloatField(default=0, null=True, blank=True)
     content = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     match = models.CharField(
@@ -55,15 +52,18 @@ class Feed(models.Model):
         max_length=200, default=None, null=True, blank=True)
     care = models.CharField(
         max_length=200, default=None, null=True, blank=True)
-
-    # array of {"key": "text"} object
     specs = models.JSONField(default=None, null=True, blank=True)
     features = models.JSONField(
-        default=None, null=True, blank=True)  # array of texts
+        default=None, null=True, blank=True)
     weight = models.FloatField(default=0, null=True, blank=True)
-
     country = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    upc = models.CharField(max_length=200, default=None, null=True, blank=True)
+    custom = models.JSONField(default=None, null=True, blank=True)
+
+    cost = models.FloatField(default=0)
+    msrp = models.FloatField(default=0)
+    map = models.FloatField(default=0)
 
     uom = models.CharField(max_length=200, default=None, null=True, blank=True)
     minimum = models.IntegerField(default=1)
@@ -75,15 +75,10 @@ class Feed(models.Model):
     colors = models.CharField(
         max_length=1000, default=None, null=True, blank=True)
 
-    cost = models.FloatField(default=0)
-    msrp = models.FloatField(default=0)
-    map = models.FloatField(default=0)
-
     statusP = models.BooleanField(default=False)
     statusS = models.BooleanField(default=False)
-
     quickShip = models.BooleanField(default=False)
-    whiteShip = models.BooleanField(default=False)
+    whiteGlove = models.BooleanField(default=False)
     bestSeller = models.BooleanField(default=False)
     outlet = models.BooleanField(default=False)
 

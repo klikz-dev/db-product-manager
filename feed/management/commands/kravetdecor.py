@@ -130,18 +130,18 @@ class Processor:
                 usage = common.formatText(row[5])
 
                 width = common.formatFloat(row[11])
-                length = common.formatFloat(row[10])
-                height = common.formatFloat(row[12])
+                height = common.formatFloat(row[10])
+                depth = common.formatFloat(row[12])
 
                 # Set minimum to height
                 def swap(a, b):
                     return b, a
 
-                if width < height:
-                    width, height = swap(width, height)
+                if width < depth:
+                    width, depth = swap(width, depth)
 
-                if length < height:
-                    length, height = swap(length, height)
+                if height < depth:
+                    height, depth = swap(height, depth)
                 #######################
 
                 # Additional Information
@@ -184,9 +184,9 @@ class Processor:
                 statusS = False
 
                 if "White Glove" in row[17]:
-                    whiteShip = True
+                    whiteGlove = True
                 else:
-                    whiteShip = False
+                    whiteGlove = False
 
                 # Stock
                 stockNote = common.formatText(row[18])
@@ -210,8 +210,8 @@ class Processor:
                 'description': description,
                 'usage': usage,
                 'width': width,
-                'length': length,
                 'height': height,
+                'depth': depth,
 
                 'material': material,
                 'care': care,
@@ -231,7 +231,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
-                'whiteShip': whiteShip,
+                'whiteGlove': whiteGlove,
 
                 'stockNote': stockNote,
             }

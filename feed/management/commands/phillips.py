@@ -165,8 +165,8 @@ class Processor:
                         # Main Information
                         description = row['description']['story']
                         width = row['description']['sizew']
-                        length = row['description']['sizel']
-                        height = row['description']['sizeh']
+                        height = row['description']['sizel']
+                        depth = row['description']['sizeh']
                         weight = row['description']['weight']
 
                         # Additional Information
@@ -229,8 +229,8 @@ class Processor:
 
                         'description': description,
                         'width': width,
-                        'length': length,
                         'height': height,
+                        'depth': depth,
                         'weight': weight,
 
                         'material': material,

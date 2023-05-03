@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
-                key="whiteShip", tag="White Glove")
+                key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
@@ -186,7 +186,7 @@ class Processor:
                     description = common.formatText(sh.cell_value(i, 11))
 
                     width = common.formatFloat(sh.cell_value(i, 8))
-                    length = common.formatFloat(sh.cell_value(i, 9))
+                    height = common.formatFloat(sh.cell_value(i, 9))
 
                     # Additional Information
                     material = common.formatText(sh.cell_value(i, 19))
@@ -216,9 +216,9 @@ class Processor:
                     statusS = False
 
                     if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
-                        whiteShip = True
+                        whiteGlove = True
                     else:
-                        whiteShip = False
+                        whiteGlove = False
 
                     # Custom Stock and Price data
                     if mpn_origin in prices:
@@ -249,7 +249,7 @@ class Processor:
 
                     'description': description,
                     'width': width,
-                    'length': length,
+                    'height': height,
                     'weight': weight,
 
                     'material': material,
@@ -268,7 +268,7 @@ class Processor:
 
                     'stockP': stockP,
                     'stockNote': stockNote,
-                    'whiteShip': whiteShip
+                    'whiteGlove': whiteGlove
                 }
                 products.append(product)
 
