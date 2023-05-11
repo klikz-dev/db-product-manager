@@ -30,6 +30,7 @@ class Feed(models.Model):
         max_length=2000, default=None, null=True, blank=True)
 
     width = models.FloatField(default=0, null=True, blank=True)
+    length = models.FloatField(default=0, null=True, blank=True)
     height = models.FloatField(default=0, null=True, blank=True)
     depth = models.FloatField(default=0, null=True, blank=True)
     size = models.CharField(

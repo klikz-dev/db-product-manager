@@ -52,6 +52,7 @@ class FeedAdmin(admin.ModelAdmin):
             'usage',
             'disclaimer',
             'width',
+            'length',
             'height',
             'depth',
             'size',

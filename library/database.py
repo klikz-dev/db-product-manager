@@ -55,6 +55,7 @@ class DatabaseManager:
                     usage=product.get('usage', ""),
                     disclaimer=product.get('disclaimer', ""),
                     width=product.get('width', 0),
+                    length=product.get('length', 0),
                     height=product.get('height', 0),
                     depth=product.get('depth', 0),
                     size=product.get('size', ""),
@@ -314,6 +315,8 @@ class DatabaseManager:
 
         if float(product.width) > 0:
             bodyHTML += "Width: {} in<br/>".format(product.width)
+        if float(product.length) > 0:
+            bodyHTML += "Length: {} in<br/>".format(product.length)
         if float(product.height) > 0:
             bodyHTML += "Height: {} in<br/>".format(product.height)
         if float(product.depth) > 0:
@@ -675,7 +678,7 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
-            if size and type == "Pillow":
+            if size and (type == "Pillow" or type == "Rug"):
                 self.csr.execute("CALL AddToEditSize ({}, {})".format(
                     common.sq(sku), common.sq(size)))
                 self.con.commit()

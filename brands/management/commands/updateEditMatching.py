@@ -231,6 +231,18 @@ sizeDict = {
     '3" to 4"': '3" to 4"',
     '4" to 5"': '4" to 5"',
     '5" and more': '5" and More',
+
+    "10' x 14'": "10' x 14'",
+    "9' x 12'": "9' x 12'",
+    "8' x 10'": "8' x 10'",
+    "6' x 9'": "6' x 9'",
+    "5' x 7'": "5' x 7'",
+    "4' x 6'": "4' x 6'",
+    "3' x 5'": "3' x 5'",
+    "2' x 3'": "2' x 3'",
+    'rectangle': 'Rectangle',
+    'round': 'Round',
+    'square': 'Square',
 }
 
 
@@ -445,7 +457,8 @@ class Command(BaseCommand):
                         common.sq(sku), common.sq(sizeDict[key])))
                     con.commit()
 
-                    print("Size tag: {} for product: {}".format(sizeDict[key], sku))
+                    print("Size tag: {} for product: {}".format(
+                        sizeDict[key], sku))
 
                     isLumbar = False
 
@@ -484,7 +497,7 @@ class Command(BaseCommand):
 
             csr.execute("CALL AddToProductCollection ({}, {})".format(
                         common.sq(sku), common.sq(collection)))
-            
+
             print("Collection tag: {} for product: {}".format(collection, sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
