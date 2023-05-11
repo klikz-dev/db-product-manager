@@ -186,7 +186,11 @@ class Processor:
                     description = common.formatText(sh.cell_value(i, 11))
 
                     width = common.formatFloat(sh.cell_value(i, 8))
-                    height = common.formatFloat(sh.cell_value(i, 9))
+                    length = common.formatFloat(sh.cell_value(i, 9))
+                    if width > 0 and length > 0:
+                        size = f"{common.formatInt(width / 12)}' x {common.formatInt(length / 12)}'"
+                    else:
+                        size = ""
 
                     # Additional Information
                     material = common.formatText(sh.cell_value(i, 19))
@@ -249,11 +253,12 @@ class Processor:
 
                     'description': description,
                     'width': width,
-                    'height': height,
-                    'weight': weight,
+                    'length': length,
+                    'size': size,
 
                     'material': material,
                     'country': country,
+                    'weight': weight,
 
                     'uom': uom,
 

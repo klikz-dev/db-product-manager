@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 from feed.models import Port68
 
 import os
 import environ
 import pymysql
 import xlrd
+import time
+import datetime
 
 from library import database, debug, common
 
@@ -57,6 +58,16 @@ class Command(BaseCommand):
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
+
+        if "inventory" in options['functions']:
+            while True:
+                processor.databaseManager.downloadFileFromSFTP(
+                    src="/port68", dst=f"{FILEDIR}/port-68-inventory.xlsx", fileSrc=False)
+                processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -210,3 +221,29 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def inventory(self):
+        stocks = []
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/port-68-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 0))
+            sku = f"P68 {mpn}"
+
+            stockP = common.formatInt(sh.cell_value(i, 2))
+
+            stockNote = sh.cell_value(i, 3)
+            if stockNote:
+                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
+                date_obj = datetime.datetime(*date_tuple)
+                stockNote = date_obj.date()
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)

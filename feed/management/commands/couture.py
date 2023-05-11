@@ -228,7 +228,7 @@ class Processor:
             stockNote = sh.cell_value(i, 2)
             if stockNote:
                 date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
-                date_obj = datetime(*date_tuple)
+                date_obj = datetime.datetime(*date_tuple)
                 stockNote = date_obj.date()
 
             stock = {

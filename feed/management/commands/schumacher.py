@@ -127,11 +127,14 @@ class Processor:
                 description = common.formatText(row[17])
 
                 width = common.formatFloat(row[11])
-                height = common.formatFloat(row[21])
+                length = common.formatFloat(row[21])
 
                 size = ""
-                if (type == "Pillow" or type == "Rug" or type == "Throw") and width != "" and length != "":
-                    size = f'{width}" x {length}"'
+                if width != "" and length != "":
+                    if type == "Pillow" or type == "Throw":
+                        size = f'{width}" x {length}"'
+                    elif type == "Rug":
+                        size = f"{common.formatInt(width / 12)}' x {common.formatInt(length / 12)}'"
 
                 repeatV = common.formatFloat(row[15])
                 repeatH = common.formatFloat(row[16])
@@ -210,7 +213,7 @@ class Processor:
 
                 'description': description,
                 'width': width,
-                'height': height,
+                'length': length,
                 'repeatV': repeatV,
                 'repeatH': repeatH,
                 'size': size,

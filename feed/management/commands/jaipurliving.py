@@ -128,8 +128,9 @@ class Processor:
                 # Main Information
                 description = sh.cell_value(i, 25)
                 width = common.formatFloat(sh.cell_value(i, 21))
-                height = common.formatFloat(sh.cell_value(i, 22))
-                depth = common.formatFloat(sh.cell_value(i, 24))
+                length = common.formatFloat(sh.cell_value(i, 22))
+                height = common.formatFloat(sh.cell_value(i, 24))
+                size = common.formatText(sh.cell_value(i, 18))
 
                 # Additional Information
                 features = []
@@ -164,7 +165,7 @@ class Processor:
                 msrp = common.formatFloat(sh.cell_value(i, 17))
 
                 # Tagging
-                tags = ", ".join((sh.cell_value(i, 50), sh.cell_value(
+                tags = ", ".join((sh.cell_value(i, 19), sh.cell_value(i, 50), sh.cell_value(
                     i, 51), pattern, description, type))
                 colors = color
 
@@ -183,7 +184,7 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or height > 107 or depth > 107 or weight > 149:
+                if width > 107 or length > 107 or height > 107 or weight > 149:
                     whiteGlove = True
                 else:
                     whiteGlove = False
@@ -209,8 +210,9 @@ class Processor:
 
                 'description': description,
                 'width': width,
+                'length': length,
                 'height': height,
-                'depth': depth,
+                'size': size,
 
                 'features': features,
                 'material': material,
