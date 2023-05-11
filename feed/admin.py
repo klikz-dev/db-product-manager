@@ -119,7 +119,8 @@ class FeedAdmin(admin.ModelAdmin):
         'cost',
         'map',
         'statusP',
-        'statusS'
+        'statusS',
+        'size'
     )
 
     list_filter = [
@@ -131,7 +132,8 @@ class FeedAdmin(admin.ModelAdmin):
         'statusS',
         'whiteGlove',
         'quickShip',
-        'collection'
+        'collection',
+        'size'
     ]
 
     search_fields = [
