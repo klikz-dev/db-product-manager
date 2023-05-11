@@ -594,7 +594,9 @@ class DatabaseManager:
         if fileSrc:
             sftp.get(src, dst)
         else:
-            sftp.chdir(src)
+            if src != "":
+                sftp.chdir(src)
+
             files = sftp.listdir()
             for file in files:
                 if "EDI" in file:

@@ -58,7 +58,7 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 processor.databaseManager.downloadFileFromSFTP(
-                    src="/", dst=f"{FILEDIR}/brewster-inventory.xlsm", fileSrc=False)
+                    src="", dst=f"{FILEDIR}/brewster-inventory.csv", fileSrc=False)
                 processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
