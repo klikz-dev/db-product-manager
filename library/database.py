@@ -650,6 +650,7 @@ class DatabaseManager:
             collection = product.collection
             size = product.size
             width = product.width
+            length = product.length
 
             if tags:
                 if category:
@@ -678,7 +679,8 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
-            if size and (type == "Pillow" or type == "Rug"):
+            if type == "Pillow" or type == "Rug":
+                size = f"{common.formatInt(width / 12)}' x {common.formatInt(length / 12)}', {size}, {tags}"
                 self.csr.execute("CALL AddToEditSize ({}, {})".format(
                     common.sq(sku), common.sq(size)))
                 self.con.commit()

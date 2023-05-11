@@ -130,8 +130,8 @@ class Processor:
                 description = formatText(sh.cell_value(i, 3))
                 usage = typeText
                 width = formatFloat(sh.cell_value(i, 16))
+                length = formatFloat(sh.cell_value(i, 15))
                 height = formatFloat(sh.cell_value(i, 17))
-                depth = formatFloat(sh.cell_value(i, 15))
 
                 if "D" in sh.cell_value(i, 13):
                     size = ""
@@ -202,8 +202,8 @@ class Processor:
                 'description': description,
                 'usage': usage,
                 'width': width,
+                'length': length,
                 'height': height,
-                'depth': depth,
                 'weight': weight,
                 'size': size,
                 'dimension': dimension,
