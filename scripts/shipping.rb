@@ -17,6 +17,9 @@ end
 
 has_white_glove_tag = Input.cart.line_items.all? { |line_item| line_item.variant.product.tags.include?("White Glove") }
 
+# 5/9/23 Disable white glove shipping - from bk
+has_white_glove_tag = false
+
 if has_white_glove_tag
   Input.shipping_rates.delete_if { |shipping_rate| shipping_rate.name != 'White Glove Shipping'}
 else

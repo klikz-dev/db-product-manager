@@ -152,6 +152,18 @@ markup = {
 
 
 sftp = {
+    "Brewster Images": {
+        "host": "ftpimages.brewsterhomefashions.com",
+        "port": 22,
+        "user": "dealers",
+        "pass": "Brewster#1",
+    },
+    "Brewster": {
+        "host": "34.203.121.151",
+        "port": 22,
+        "user": "brewster",
+        "pass": "Dec123Brewster!",
+    },
     "Couture": {
         "host": "18.206.49.64",
         "port": 22,
