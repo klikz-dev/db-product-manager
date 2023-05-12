@@ -28,8 +28,8 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             total, skiped = processor.feed()
-            if skiped > total * 0.2:
-                self.upload()
+            if skiped < total * 0.2:
+                processor.upload()
             else:
                 debug.debug(
                     PROCESS, 2, f"Ignore uploading the feed because too many items {skiped}/{total} have been skiped")
