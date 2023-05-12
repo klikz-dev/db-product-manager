@@ -163,9 +163,9 @@ class Processor:
 
                     if "-" in sh.cell_value(i, 0):
                         pattern = common.formatText(
-                            sh.cell_value(i, 0)).split("-")[0]
+                            str(sh.cell_value(i, 0)).split("-")[0])
                         color = common.formatText(
-                            sh.cell_value(i, 0)).split("-")[1]
+                            str(sh.cell_value(i, 0)).split("-")[1])
                     else:
                         pattern = common.formatText(sh.cell_value(i, 0))
                         color = common.formatText(sh.cell_value(i, 1))
@@ -281,39 +281,39 @@ class Processor:
         return products
 
     def image(self):
-        imageDir = FILEDIR + "images/stark/"
+        imageDir = f"{FILEDIR}/images/stark"
 
         products = StarkStudio.objects.all()
         for product in products:
-            productStr = "{} {}".format(product.pattern, product.color).replace(
+            productStr = f"{product.pattern.strip()} {product.color.strip()}".replace(
                 ",", "").replace("/", " ").lower()
 
             for fname in os.listdir(imageDir):
-                if productStr in fname.lower() or product.pattern in fname.lower():
+                if productStr in fname.lower():
                     if "_CL" in fname:
                         print("Roomset 2: {}".format(fname))
-                        copyfile(imageDir + fname, FILEDIR +
-                                 "/../../../images/roomset/{}_2.jpg".format(product.productId))
+                        copyfile(
+                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_2.jpg")
 
                     elif "_ALT1" in fname:
                         print("Roomset 3: {}".format(fname))
-                        copyfile(imageDir + fname, FILEDIR +
-                                 "/../../../images/roomset/{}_3.jpg".format(product.productId))
+                        copyfile(
+                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_3.jpg")
 
                     elif "_ALT2" in fname:
                         print("Roomset 4: {}".format(fname))
-                        copyfile(imageDir + fname, FILEDIR +
-                                 "/../../../images/roomset/{}_4.jpg".format(product.productId))
+                        copyfile(
+                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_4.jpg")
 
                     elif "_RM" in fname:
                         print("Roomset 5: {}".format(fname))
-                        copyfile(imageDir + fname, FILEDIR +
-                                 "/../../../images/roomset/{}_5.jpg".format(product.productId))
+                        copyfile(
+                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_5.jpg")
 
                     else:
                         print("Product: {}".format(fname))
-                        copyfile(imageDir + fname, FILEDIR +
-                                 "/../../../images/product/{}.jpg".format(product.productId))
+                        copyfile(
+                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
     def inventory(self):
         stocks = []
