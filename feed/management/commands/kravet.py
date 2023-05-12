@@ -12,6 +12,7 @@ import requests
 import xlrd
 import time
 from bs4 import BeautifulSoup
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -52,6 +53,12 @@ class Command(BaseCommand):
 
         if "price" in options['functions']:
             processor.databaseManager.updatePrices(formatPrice=True)
+
+        if "image" in options['functions']:
+            processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "image-manual" in options['functions']:
+            processor.image()
 
         if "sample" in options['functions']:
             processor.databaseManager.customTags(
@@ -529,3 +536,26 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def image(self):
+        fnames = os.listdir(f"{FILEDIR}/images/kravet/")
+        for fname in fnames:
+            mpn = f"{fname.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
+            )
+
+            print(mpn)
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            print(product.sku)
+
+            productId = product.productId
+
+            if productId:
+                debug.debug(
+                    BRAND, 0, f"Copying {FILEDIR}/images/kravet/{fname} to {productId}.jpg")
+                copyfile(f"{FILEDIR}/images/kravet/{fname}",
+                         f"{FILEDIR}/../../../images/product/{productId}.jpg")

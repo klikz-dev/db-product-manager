@@ -9,6 +9,7 @@ import csv
 import codecs
 import zipfile
 import time
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -57,6 +58,9 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "image-manual" in options['functions']:
+            processor.image()
 
         if "inventory" in options['functions']:
             while True:
@@ -279,3 +283,42 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def image(self):
+        fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
+        for fname in fnames:
+            if "_1" in fname or "_0" in fname:
+                index = 0
+                mpn = fname.replace("_1", "").replace("_0", "")
+            elif "_2" in fname:
+                index = 2
+                mpn = fname.replace("_2", "")
+            else:
+                index = 0
+                mpn = fname
+
+            mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
+            )
+
+            print(mpn)
+
+            try:
+                product = KravetDecor.objects.get(mpn=mpn)
+            except KravetDecor.DoesNotExist:
+                continue
+
+            print(product.sku)
+
+            productId = product.productId
+
+            if productId:
+                if index == 0:
+                    debug.debug(
+                        BRAND, 0, f"Copying {FILEDIR}/images/kravetdecor/{fname} to {productId}.jpg")
+                    copyfile(f"{FILEDIR}/images/kravetdecor/{fname}",
+                             f"{FILEDIR}/../../../images/product/{productId}.jpg")
+                else:
+                    debug.debug(
+                        BRAND, 0, f"Copying {FILEDIR}/images/kravetdecor/{fname} to {productId}_{index}.jpg")
+                    copyfile(f"{FILEDIR}/images/kravetdecor/{fname}",
+                             f"{FILEDIR}/../../../images/roomset/{productId}_{index}.jpg")
