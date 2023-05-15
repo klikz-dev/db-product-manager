@@ -234,31 +234,28 @@ class Processor:
 
             item = ET.SubElement(channel, "item")
 
-            item.extend([
-                ET.Element("g:id", text=f"{sku}"),
-                ET.Element("g:item_group_id", text=f"{productID}"),
-                ET.Element("g:title", text=f"{title}"),
-                ET.Element("g:description", text=f"{desc}"),
-                ET.Element("g:google_product_category", text=f"{category}"),
-                ET.Element(
-                    "g:link", text=f"https://www.decoratorsbest.com/products/{handle}"),
-                ET.Element("g:image_link", text=f"{imageURL}"),
-                ET.Element("g:availability", text="in stock"),
-                ET.Element("g:gtin", text=f"{gtin}"),
-                ET.Element("g:price", text=f"{price}"),
-                ET.Element("g:brand", text=f"{brand}"),
-                ET.Element("g:mpn", text=f"{mpn}"),
-                ET.Element("g:product_type", text=f"{productType}"),
-                ET.Element("g:condition", text="new"),
-                ET.Element("g:color", text=f"{color}"),
-                ET.Element("g:pattern", text=f"{style}"),
-                ET.Element("g:shipping_weight", text=f"{weight}"),
-                ET.Element("g:material", text=f"{material}"),
-                ET.Element("g:custom_label_0", text=f"{ptype}"),
-                ET.Element("g:custom_label_1", text=f"{brand}"),
-                ET.Element("g:custom_label_2", text=f"{priceRange}"),
-                ET.Element("g:custom_label_3", text=f"{margin}"),
-            ])
+            ET.SubElement(item, "g:id").text=f"{sku}"
+            ET.SubElement(item, "g:item_group_id").text=f"{productID}"
+            ET.SubElement(item, "g:title").text=f"{title}"
+            ET.SubElement(item, "g:description").text=f"{desc}"
+            ET.SubElement(item, "g:google_product_category").text=f"{category}"
+            ET.SubElement(item, "g:link").text=f"https://www.decoratorsbest.com/products/{handle}"
+            ET.SubElement(item, "g:image_link").text=f"{imageURL}"
+            ET.SubElement(item, "g:availability").text="in stock"
+            ET.SubElement(item, "g:gtin").text=f"{gtin}"
+            ET.SubElement(item, "g:price").text=f"{price}"
+            ET.SubElement(item, "g:brand").text=f"{brand}"
+            ET.SubElement(item, "g:mpn").text=f"{mpn}"
+            ET.SubElement(item, "g:product_type").text=f"{productType}"
+            ET.SubElement(item, "g:condition").text="new"
+            ET.SubElement(item, "g:color").text=f"{color}"
+            ET.SubElement(item, "g:pattern").text=f"{style}"
+            ET.SubElement(item, "g:shipping_weight").text=f"{weight}"
+            ET.SubElement(item, "g:material").text=f"{material}"
+            ET.SubElement(item, "g:custom_label_0").text=f"{ptype}"
+            ET.SubElement(item, "g:custom_label_1").text=f"{brand}"
+            ET.SubElement(item, "g:custom_label_2").text=f"{priceRange}"
+            ET.SubElement(item, "g:custom_label_3").text=f"{margin}"
 
             debug.debug(
                 PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
