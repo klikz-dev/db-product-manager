@@ -4,9 +4,9 @@ import os
 import environ
 import pymysql
 import datetime
-import html
 import re
 import boto3
+import xml.etree.ElementTree as ET
 
 from library import debug, inventory
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             total, skiped = processor.feed()
-            if skiped < total * 0.2:
+            if skiped < total * 0.3:
                 processor.upload()
             else:
                 debug.debug(
@@ -55,7 +55,7 @@ class Processor:
             cleaned = [character for character in s if character.isalnum()
                        or character in allowedCharaters]
 
-            return html.escape("".join(cleaned))
+            return "".join(cleaned)
         else:
             return ""
 
@@ -111,153 +111,160 @@ class Processor:
         total = len(products)
         skiped = 0
 
-        with open(FEEDDIR, 'w') as f:
-            f.write('<?xml version="1.0"?>')
-            f.write('<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">')
-            f.write('<channel>')
-            f.write('<title>DecoratorsBest</title>')
-            f.write('<link>https://www.decoratorsbest.com</link>')
-            f.write('<description>DecoratorsBest</description>')
+        root = ET.Element("rss")
+        root.set("xmlns:g", "http://base.google.com/ns/1.0")
 
-            for index, row in enumerate(products):
-                sku = self.fmt(str(row[0]))
-                pName = self.fmt(str(row[1]).title())
-                handle = str(row[2])
-                imageURL = str(row[3])
-                brand = self.fmt(str(row[4]))
-                price = round(float(row[5]), 2)
-                ptype = self.fmt(str(row[6]))
-                style = self.fmt(str(row[7]))
-                color = self.fmt(str(row[8]))
-                weight = round(float(row[9]), 2)
-                gtin = self.fmt(str(row[10]))
-                mpn = self.fmt(str(row[11]))
-                bodyHTML = str(row[12])
-                cost = round(float(row[13]), 2)
-                sprice = round(float(row[14]), 2)
-                productID = str(row[15])
-                pattern = self.fmt(str(row[16]))
-                minQty = int(row[17])
+        channel = ET.SubElement(root, "channel")
 
-                stock = inventory.inventory(sku)
+        title = ET.SubElement(channel, "title")
+        title.text = "DecoratorsBest"
 
-                # Exceptions
-                if stock["quantity"] < int(minQty):
-                    debug.debug(
-                        PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Out of stock")
-                    skiped += 1
-                    continue
+        link = ET.SubElement(channel, "link")
+        link.text = "https://www.decoratorsbest.com/"
 
-                if (brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper") and "Peel & Stick" in pName:
-                    debug.debug(
-                        PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Brewster Peel & Stick")
-                    skiped += 1
-                    continue
+        description = ET.SubElement(channel, "description")
+        description.text = "DecoratorsBest"
 
-                if bool(re.search(r'\bget\b', f"{pName}, {bodyHTML}", re.IGNORECASE)):
-                    debug.debug(
-                        PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. 'Get' word in the description")
-                    skiped += 1
-                    continue
-                ################
+        for index, row in enumerate(products):
+            sku = self.fmt(str(row[0]))
+            pName = self.fmt(str(row[1]).title())
+            handle = str(row[2])
+            imageURL = str(row[3])
+            brand = self.fmt(str(row[4]))
+            price = round(float(row[5]), 2)
+            ptype = self.fmt(str(row[6]))
+            style = self.fmt(str(row[7]))
+            color = self.fmt(str(row[8]))
+            weight = round(float(row[9]), 2)
+            gtin = self.fmt(str(row[10]))
+            mpn = self.fmt(str(row[11]))
+            bodyHTML = str(row[12])
+            cost = round(float(row[13]), 2)
+            sprice = round(float(row[14]), 2)
+            productID = str(row[15])
+            pattern = self.fmt(str(row[16]))
+            minQty = int(row[17])
 
-                # Refine Information
-                title = f"{pName} - {sku}"
+            stock = inventory.inventory(sku)
 
-                desc = self.fmt(bodyHTML.replace(
-                    "<br />", "").replace("<br/>", " ").replace("<br>", " "))
-                if desc == "":
-                    desc = title
-
-                brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
-                    "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
-
-                if price > 300:
-                    priceRange = "300+"
-                elif price > 250:
-                    priceRange = "250-300"
-                elif price > 200:
-                    priceRange = "200-250"
-                elif price > 150:
-                    priceRange = "150-200"
-                elif price > 100:
-                    priceRange = "100-150"
-                elif price > 50:
-                    priceRange = "50-100"
-                elif price > 25:
-                    priceRange = "25-50"
-                elif price > 10:
-                    priceRange = "10-25"
-                else:
-                    priceRange = "0-10"
-
-                margin = int((sprice - cost) / cost * 100)
-
-                if ptype == "Fabric":
-                    category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Textiles > Fabric"
-                    productType = "Home & Garden > Bed and Living Room > Home Fabric"
-                elif ptype == "Wallpaper":
-                    category = "Home & Garden > Decor > Wallpaper"
-                    productType = "Home & Garden > Bed and Living Room > Home Wallpaper"
-                elif ptype == "Pillow":
-                    category = "Home & Garden > Decor > Throw Pillows"
-                    productType = "Home & Garden > Bed and Living Room > Home Pillow"
-                elif ptype == "Trim":
-                    category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Embellishments & Trims"
-                    productType = "Home & Garden > Bed and Living Room > Home Trim"
-                elif ptype == "Furniture":
-                    category = "Furniture"
-                    productType = "Home & Garden > Bed and Living Room > Home Furniture"
-                else:
-                    category = "Home & Garden > Decor"
-                    productType = "Home & Garden > Decor"
-                category = self.fmt(category)
-                productType = self.fmt(productType)
-
-                material = ""
-                lines = bodyHTML.replace(
-                    "<br />", "<br/>").replace("<br/>", "<br>").split("<br>")
-                for line in lines:
-                    if "Material:" in line:
-                        material = self.fmt(
-                            line.replace("Material:", "").strip())
-
-                if style == "":
-                    style = pattern
-                ##################
-
-                f.write("<item>")
-                f.write(f"<g:id>{sku}</g:id>")
-                f.write(f"<g:item_group_id>{productID}</g:item_group_id>")
-                f.write(f"<g:title>{title}</g:title>")
-                f.write(f"<g:description>{desc}</g:description>")
-                f.write(
-                    f"<g:google_product_category>{category}</g:google_product_category>")
-                f.write(
-                    f"<g:link>https://www.decoratorsbest.com/products/{handle}</g:link>")
-                f.write(f"<g:image_link>{imageURL}</g:image_link>")
-                f.write(f"<g:availability>in stock</g:availability>")
-                f.write(f"<g:gtin>{gtin}</g:gtin>")
-                f.write(f"<g:price>{price} USD</g:price>")
-                f.write(f"<g:brand>{brand}</g:brand>")
-                f.write(f"<g:mpn>{mpn}</g:mpn>")
-                f.write(f"<g:product_type>{productType}</g:product_type>")
-                f.write(f"<g:condition>new</g:condition>")
-                f.write(f"<g:color>{color}</g:color>")
-                f.write(f"<g:pattern>{style}</g:pattern>")
-                f.write(f"<g:shipping_weight>{weight} lb</g:shipping_weight>")
-                f.write(f"<g:material>{material}</g:material>")
-                f.write(f"<g:custom_label_0>{ptype}</g:custom_label_0>")
-                f.write(f"<g:custom_label_1>{brand}</g:custom_label_1>")
-                f.write(f"<g:custom_label_2>{priceRange}</g:custom_label_2>")
-                f.write(f"<g:custom_label_3>{margin}%</g:custom_label_3>")
-
+            # Exceptions
+            if stock["quantity"] < int(minQty):
                 debug.debug(
-                    PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
+                    PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Out of stock")
+                skiped += 1
+                continue
 
-            f.write('</channel>')
-            f.write('</rss>')
-            f.close()
+            if (brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper") and "Peel & Stick" in pName:
+                debug.debug(
+                    PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Brewster Peel & Stick")
+                skiped += 1
+                continue
+
+            if bool(re.search(r'\bget\b', f"{pName}, {bodyHTML}", re.IGNORECASE)):
+                debug.debug(
+                    PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. 'Get' word in the description")
+                skiped += 1
+                continue
+            ################
+
+            # Refine Information
+            title = f"{pName} - {sku}"
+
+            desc = self.fmt(bodyHTML.replace(
+                "<br />", "").replace("<br/>", " ").replace("<br>", " "))
+            if desc == "":
+                desc = title
+
+            brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
+                "Premier Prints", "DB By DecoratorsBest").replace("Materialworks", "DB By DecoratorsBest")
+
+            if price > 300:
+                priceRange = "300+"
+            elif price > 250:
+                priceRange = "250-300"
+            elif price > 200:
+                priceRange = "200-250"
+            elif price > 150:
+                priceRange = "150-200"
+            elif price > 100:
+                priceRange = "100-150"
+            elif price > 50:
+                priceRange = "50-100"
+            elif price > 25:
+                priceRange = "25-50"
+            elif price > 10:
+                priceRange = "10-25"
+            else:
+                priceRange = "0-10"
+
+            margin = int((sprice - cost) / cost * 100)
+
+            if ptype == "Fabric":
+                category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Textiles > Fabric"
+                productType = "Home & Garden > Bed and Living Room > Home Fabric"
+            elif ptype == "Wallpaper":
+                category = "Home & Garden > Decor > Wallpaper"
+                productType = "Home & Garden > Bed and Living Room > Home Wallpaper"
+            elif ptype == "Pillow":
+                category = "Home & Garden > Decor > Throw Pillows"
+                productType = "Home & Garden > Bed and Living Room > Home Pillow"
+            elif ptype == "Trim":
+                category = "Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Embellishments & Trims"
+                productType = "Home & Garden > Bed and Living Room > Home Trim"
+            elif ptype == "Furniture":
+                category = "Furniture"
+                productType = "Home & Garden > Bed and Living Room > Home Furniture"
+            else:
+                category = "Home & Garden > Decor"
+                productType = "Home & Garden > Decor"
+            category = self.fmt(category)
+            productType = self.fmt(productType)
+
+            material = ""
+            lines = bodyHTML.replace(
+                "<br />", "<br/>").replace("<br/>", "<br>").split("<br>")
+            for line in lines:
+                if "Material:" in line:
+                    material = self.fmt(
+                        line.replace("Material:", "").strip())
+
+            if style == "":
+                style = pattern
+            ##################
+
+            item = ET.SubElement(channel, "item")
+
+            item.extend([
+                ET.Element("g:id", text=f"{sku}"),
+                ET.Element("g:item_group_id", text=f"{productID}"),
+                ET.Element("g:title", text=f"{title}"),
+                ET.Element("g:description", text=f"{desc}"),
+                ET.Element("g:google_product_category", text=f"{category}"),
+                ET.Element(
+                    "g:link", text=f"https://www.decoratorsbest.com/products/{handle}"),
+                ET.Element("g:image_link", text=f"{imageURL}"),
+                ET.Element("g:availability", text="in stock"),
+                ET.Element("g:gtin", text=f"{gtin}"),
+                ET.Element("g:price", text=f"{price}"),
+                ET.Element("g:brand", text=f"{brand}"),
+                ET.Element("g:mpn", text=f"{mpn}"),
+                ET.Element("g:product_type", text=f"{productType}"),
+                ET.Element("g:condition", text="new"),
+                ET.Element("g:color", text=f"{color}"),
+                ET.Element("g:pattern", text=f"{style}"),
+                ET.Element("g:shipping_weight", text=f"{weight}"),
+                ET.Element("g:material", text=f"{material}"),
+                ET.Element("g:custom_label_0", text=f"{ptype}"),
+                ET.Element("g:custom_label_1", text=f"{brand}"),
+                ET.Element("g:custom_label_2", text=f"{priceRange}"),
+                ET.Element("g:custom_label_3", text=f"{margin}"),
+            ])
+
+            debug.debug(
+                PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
+
+        tree = ET.ElementTree(root)
+        tree.write(FEEDDIR, encoding="UTF-8", xml_declaration=True)
 
         return (total, skiped)
 
