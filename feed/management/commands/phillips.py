@@ -26,25 +26,28 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         processor = Processor()
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
-            processor.update()
+            products = Phillips.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=False)
 
         if "price" in options['functions']:
-            processor.price()
+            processor.databaseManager.updatePrices(formatPrice=False)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
-            processor.sample()
+            processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "order" in options['functions']:
             processor.order()
@@ -71,7 +74,8 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=Phillips)
 
     def __del__(self):
         self.con.close()
@@ -279,30 +283,6 @@ class Processor:
                     idx = idx + 1
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=False)
-
-    def update(self):
-        products = Phillips.objects.all()
-        self.databaseManager.updateProducts(
-            products=products, formatPrice=False)
-
-    def price(self):
-        self.databaseManager.updatePrices(formatPrice=False)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=False)
-
-    def sample(self):
-        self.databaseManager.customTags(key="statusS", tag="NoSample")
 
     def inventory(self, mpn):
         try:
