@@ -136,7 +136,7 @@ class Processor:
             style = self.fmt(str(row[7]))
             color = self.fmt(str(row[8]))
             weight = round(float(row[9]), 2)
-            gtin = self.fmt(str(row[10]))
+            gtin = row[10]
             mpn = self.fmt(str(row[11]))
             bodyHTML = str(row[12])
             cost = round(float(row[13]), 2)
@@ -145,9 +145,8 @@ class Processor:
             pattern = self.fmt(str(row[16]))
             minQty = int(row[17])
 
-            stock = inventory.inventory(sku)
-
             # Exceptions
+            stock = inventory.inventory(sku)
             if stock["quantity"] < int(minQty):
                 debug.debug(
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Out of stock")
@@ -172,7 +171,7 @@ class Processor:
 
             desc = self.fmt(bodyHTML.replace(
                 "<br />", "").replace("<br/>", " ").replace("<br>", " "))
-            if desc == "":
+            if not desc:
                 desc = title
 
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace(
@@ -234,28 +233,30 @@ class Processor:
 
             item = ET.SubElement(channel, "item")
 
-            ET.SubElement(item, "g:id").text=f"{sku}"
-            ET.SubElement(item, "g:item_group_id").text=f"{productID}"
-            ET.SubElement(item, "g:title").text=f"{title}"
-            ET.SubElement(item, "g:description").text=f"{desc}"
-            ET.SubElement(item, "g:google_product_category").text=f"{category}"
-            ET.SubElement(item, "g:link").text=f"https://www.decoratorsbest.com/products/{handle}"
-            ET.SubElement(item, "g:image_link").text=f"{imageURL}"
-            ET.SubElement(item, "g:availability").text="in stock"
-            ET.SubElement(item, "g:gtin").text=f"{gtin}"
-            ET.SubElement(item, "g:price").text=f"{price}"
-            ET.SubElement(item, "g:brand").text=f"{brand}"
-            ET.SubElement(item, "g:mpn").text=f"{mpn}"
-            ET.SubElement(item, "g:product_type").text=f"{productType}"
-            ET.SubElement(item, "g:condition").text="new"
-            ET.SubElement(item, "g:color").text=f"{color}"
-            ET.SubElement(item, "g:pattern").text=f"{style}"
-            ET.SubElement(item, "g:shipping_weight").text=f"{weight}"
-            ET.SubElement(item, "g:material").text=f"{material}"
-            ET.SubElement(item, "g:custom_label_0").text=f"{ptype}"
-            ET.SubElement(item, "g:custom_label_1").text=f"{brand}"
-            ET.SubElement(item, "g:custom_label_2").text=f"{priceRange}"
-            ET.SubElement(item, "g:custom_label_3").text=f"{margin}"
+            ET.SubElement(item, "g:id").text = f"{sku}"
+            ET.SubElement(item, "g:item_group_id").text = f"{productID}"
+            ET.SubElement(item, "g:title").text = f"{title}"
+            ET.SubElement(item, "g:description").text = f"{desc}"
+            ET.SubElement(
+                item, "g:google_product_category").text = f"{category}"
+            ET.SubElement(
+                item, "g:link").text = f"https://www.decoratorsbest.com/products/{handle}"
+            ET.SubElement(item, "g:image_link").text = f"{imageURL}"
+            ET.SubElement(item, "g:availability").text = "in stock"
+            ET.SubElement(item, "g:gtin").text = f"{gtin}"
+            ET.SubElement(item, "g:price").text = f"{price}"
+            ET.SubElement(item, "g:brand").text = f"{brand}"
+            ET.SubElement(item, "g:mpn").text = f"{mpn}"
+            ET.SubElement(item, "g:product_type").text = f"{productType}"
+            ET.SubElement(item, "g:condition").text = "new"
+            ET.SubElement(item, "g:color").text = f"{color}"
+            ET.SubElement(item, "g:pattern").text = f"{style}"
+            ET.SubElement(item, "g:shipping_weight").text = f"{weight}"
+            ET.SubElement(item, "g:material").text = f"{material}"
+            ET.SubElement(item, "g:custom_label_0").text = f"{ptype}"
+            ET.SubElement(item, "g:custom_label_1").text = f"{brand}"
+            ET.SubElement(item, "g:custom_label_2").text = f"{priceRange}"
+            ET.SubElement(item, "g:custom_label_3").text = f"{margin}"
 
             debug.debug(
                 PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
