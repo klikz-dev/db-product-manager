@@ -10,7 +10,7 @@ import environ
 
 from library import debug
 
-from shopify.models import Variant
+from shopify.models import Variant, Product
 from mysql.models import ProductSubtype, Type
 from feed.models import Schumacher
 
@@ -42,6 +42,9 @@ class Command(BaseCommand):
 
         if "getTypeList" in options['functions']:
             processor.getTypeList()
+
+        if "refreshPrices" in options['functions']:
+            processor.refreshPrices()
 
 
 class Processor:
@@ -119,3 +122,35 @@ class Processor:
         for type in types:
             print(type.name)
         print(len(types))
+
+    def refreshPrices(self):
+        csr = self.con.cursor()
+
+        brandsRefreshed = ["Surya", "Kravet", "Brewster",
+                           "Phillip Jeffries", "Scalamandre", "Pindler"]
+        brandsToRefresh = ["Kravet", "Brewster",
+                           "Phillip Jeffries", "Scalamandre", "Pindler"]
+
+        for brand in brandsToRefresh:
+            if brand in brandsRefreshed:
+                continue
+
+            csr.execute(f"""
+                SELECT P.ProductId
+                FROM Product P
+                LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
+                LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+                WHERE M.BRAND = "{brand}" AND P.ProductId IS NOT NULL
+            """)
+            products = csr.fetchall()
+
+            for product in products:
+                productId = product[0]
+                csr.execute(
+                    "CALL AddToPendingUpdatePrice ({})".format(productId))
+                self.con.commit()
+
+                debug.debug(
+                    "Custom", 0, f"Updated {brand} prices. Product {productId}")
+
+        csr.close()
