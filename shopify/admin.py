@@ -211,10 +211,11 @@ class ProductAdmin(admin.ModelAdmin):
             'title',
             'bodyHTML',
         ]}),
-        # ("Category", {'fields': [
-        #     'manufacturer',
-        #     'type'
-        # ]}),
+        ("Information", {'fields': [
+            'name',
+            'description',
+            'handle'
+        ]}),
         ("Status", {'fields': [
             'isOutlet',
             'published',
