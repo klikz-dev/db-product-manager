@@ -497,8 +497,7 @@ class DatabaseManager:
 
         total = len(variants)
         for index, variant in enumerate(variants):
-            # try:
-            if True:
+            try:
                 productId = variant[1]
                 name = variant[2]
                 oldCost = float(variant[3])
@@ -543,9 +542,9 @@ class DatabaseManager:
                     debug.debug(
                         self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {product.cost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
 
-            # except Exception as e:
-            #     debug.debug(self.brand, 1, str(e))
-            #     continue
+            except Exception as e:
+                debug.debug(self.brand, 1, str(e))
+                continue
 
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
