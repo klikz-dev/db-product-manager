@@ -463,11 +463,14 @@ class Command(BaseCommand):
                     isLumbar = False
 
             if isLumbar:
-                csr.execute("CALL AddToProductTag ({}, {})".format(
-                    common.sq(sku), common.sq('Lumbar')))
-                con.commit()
-
-                print("Size tag: {} for product: {}".format("Lumbar", sku))
+                csr.execute(
+                    f"SELECT productTypeId FROM Product WHERE SKU = '{sku}'")
+                product = csr.fetchone()
+                if product and product[0] == 5:  # Lumbar is Only for Pillows
+                    csr.execute("CALL AddToProductTag ({}, {})".format(
+                        common.sq(sku), common.sq('Lumbar')))
+                    con.commit()
+                    print("Size tag: {} for product: {}".format("Lumbar", sku))
 
         csr.execute("""INSERT INTO PendingUpdateTagBodyHTML (ProductID) SELECT ProductID FROM Product WHERE ProductID IS NOT NULL
                                                             AND ProductID NOT IN (SELECT ProductID FROM PendingUpdateTagBodyHTML)

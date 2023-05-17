@@ -46,6 +46,9 @@ class Command(BaseCommand):
         if "refreshPrices" in options['functions']:
             processor.refreshPrices()
 
+        if "removeTags" in options['functions']:
+            processor.removeTags()
+
 
 class Processor:
     def __init__(self):
@@ -181,5 +184,32 @@ class Processor:
 
                 debug.debug(
                     "Custom", 0, f"Updated {brand} prices. Product {productId}")
+
+        csr.close()
+
+    def removeTags(self):
+        csr = self.con.cursor()
+
+        csr.execute("""
+            SELECT DISTINCT P.ProductId, P.SKU, P.Title
+            FROM Product P
+            LEFT JOIN ProductTag PT ON P.SKU = PT.SKU
+            WHERE PT.TagId = 272 AND P.ProductTypeId != 5
+        """)
+        rows = csr.fetchall()
+
+        for row in rows:
+            productId = row[0]
+            sku = row[1]
+            title = row[2]
+
+            csr.execute(
+                f"DELETE FROM ProductTag WHERE SKU = '{sku}' AND TagId = 272")
+            self.con.commit()
+
+            csr.execute(f"CALL AddToPendingUpdateTagBodyHTML ({productId})")
+            self.con.commit()
+
+            debug.debug("Custom", 0, f"Removed Rumbar tag from {title}")
 
         csr.close()
