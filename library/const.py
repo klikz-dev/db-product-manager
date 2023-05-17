@@ -152,6 +152,12 @@ markup = {
 
 
 sftp = {
+    "Ann Gish": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "anngish",
+        "pass": "AnnGish123!",
+    },
     "Brewster Images": {
         "host": "ftpimages.brewsterhomefashions.com",
         "port": 22,
@@ -165,13 +171,13 @@ sftp = {
         "pass": "Dec123Brewster!",
     },
     "Couture": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "couture",
         "pass": "Couture123!",
     },
     "Jaipur Living": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "jaipur",
         "pass": "JaipurDecor",
@@ -183,19 +189,19 @@ sftp = {
         "pass": "DecoratorsBest26!)",
     },
     "Materialworks": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "materialworks",
         "pass": "MWDecor1!",
     },
     "Poppy": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "poppy",
         "pass": "Poppy123!",
     },
     "Port 68": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "port68",
         "pass": "Port68Decor",
@@ -207,13 +213,13 @@ sftp = {
         "pass": "Sch123Decbest!",
     },
     "Stark Studio": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "stark",
         "pass": "Stark123!",
     },
     "Surya": {
-        "host": "18.206.49.64",
+        "host": "decoratorsbestam.com",
         "port": 22,
         "user": "surya",
         "pass": "Surya123!",
