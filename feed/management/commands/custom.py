@@ -128,8 +128,37 @@ class Processor:
 
         brandsRefreshed = ["Surya", "Kravet", "Brewster",
                            "Phillip Jeffries", "Scalamandre", "Pindler"]
-        brandsToRefresh = ["Kravet", "Brewster",
-                           "Phillip Jeffries", "Scalamandre", "Pindler"]
+        brandsToRefresh = [
+            "Brewster",
+            "Couture",
+            "Covington",
+            "DanaGibson",
+            "ElaineSmith",
+            "JaipurLiving",
+            "JamieYoung",
+            "JFFabrics",
+            "Kasmir",
+            "Kravet",
+            "KravetDecor",
+            "MadcapCottage",
+            "Materialworks",
+            "Maxwell",
+            "MindTheGap",
+            "Phillips",
+            "PhillipJeffries",
+            "Pindler",
+            "Port68",
+            "PremierPrints",
+            "Scalamandre",
+            "Schumacher",
+            "Seabrook",
+            "StarkStudio",
+            "Stout",
+            "Surya",
+            "TresTintas",
+            "York",
+            "Zoffany",
+        ]
 
         for brand in brandsToRefresh:
             if brand in brandsRefreshed:
