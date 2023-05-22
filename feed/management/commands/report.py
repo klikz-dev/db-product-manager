@@ -106,10 +106,10 @@ class Processor:
                 'availability',
                 'sku',
                 'name',
-                'swatch_width',
-                'swatch_length',
                 'width',
                 'length',
+                'horizontal_repeat',
+                'vertical_repeat',
                 'image',
                 'layout',
                 'type',
@@ -128,10 +128,10 @@ class Processor:
                 'availability': 'Aavailability',
                 'sku': 'SKU',
                 'name': 'Name',
-                'swatch_width': 'Swatch Width',
-                'swatch_length': 'Swatch Length',
                 'width': 'Width',
                 'length': 'Length',
+                'horizontal_repeat': 'Horizontal Repeat',
+                'vertical_repeat': 'Vertical Repeat',
                 'image': 'Image File Path',
                 'layout': 'Tile / Plank Layout',
                 'type': 'Product Subtype',
@@ -171,6 +171,8 @@ class Processor:
                 # Collection, Width, Length, and Layout
                 width = ""
                 length = ""
+                hr = ""
+                vr = ""
                 layout = ""
                 body = product.bodyHTML.replace(
                     "<br/>", "<br>").replace("<br />", "<br>").split("<br>")
@@ -181,6 +183,10 @@ class Processor:
                         length = line.replace("Length:", "").strip()
                     if "Height:" in line:
                         length = line.replace("Height:", "").strip()
+                    if "Horizontal Repeat:" in line:
+                        hr = line.replace("Horizontal Repeat:", "").strip()
+                    if "Vertical Repeat:" in line:
+                        vr = line.replace("Vertical Repeat:", "").strip()
                     if "Repeat:" in line or "Horizontal Repeat:" in line or "Vertical Repeat:" in line:
                         layout = "Repeat"
                     if "Match:" in line:
@@ -261,10 +267,10 @@ class Processor:
                     'availability': 'Yes',
                     'sku': sku,
                     'name': name,
-                    'swatch_width': '',
-                    'swatch_length': '',
                     'width': width,
                     'length': length,
+                    'horizontal_repeat': hr,
+                    'vertical_repeat': vr,
                     'image': image,
                     'layout': layout,
                     'type': type,
