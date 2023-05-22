@@ -35,8 +35,6 @@ class Processor:
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
         self.csr = self.con.cursor()
 
-        self.databaseManager = database.DatabaseManager(self.con)
-
     def __del__(self):
         self.csr.close()
         self.con.close()
@@ -148,7 +146,7 @@ class Processor:
                 'v4': 'Order Sample (Trade)'
             })
 
-            total = len(skus)
+            total = len(products)
             for index, product in enumerate(products):
                 if product.sku not in skus:
                     continue
