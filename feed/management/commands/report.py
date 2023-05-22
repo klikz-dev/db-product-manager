@@ -41,7 +41,7 @@ class Processor:
 
     def roomvo(self):
         ### Get High Res Image SKUs ###
-        skus = []
+        wallpaperSkus = []
 
         # Kravet Decor
         fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
@@ -61,7 +61,7 @@ class Processor:
 
             try:
                 product = KravetDecor.objects.get(mpn=mpn)
-                skus.append(product.sku)
+                wallpaperSkus.append(product.sku)
             except KravetDecor.DoesNotExist:
                 continue
 
@@ -73,7 +73,7 @@ class Processor:
 
             try:
                 product = Kravet.objects.get(mpn=mpn)
-                skus.append(product.sku)
+                wallpaperSkus.append(product.sku)
             except Kravet.DoesNotExist:
                 continue
 
@@ -86,13 +86,13 @@ class Processor:
 
                     try:
                         product = York.objects.get(mpn=mpn)
-                        skus.append(product.sku)
+                        wallpaperSkus.append(product.sku)
                     except York.DoesNotExist:
                         continue
             except:
                 continue
 
-        print(skus)
+        print(wallpaperSkus)
         ###############################
 
         products = Product.objects.filter(Q(published=True) & Q(deleted=False))
@@ -147,8 +147,18 @@ class Processor:
             })
 
             total = len(products)
+            wallpaperAdded = 0
+            rugAdded = 0
+            wallArtAdded = 0
+
             for index, product in enumerate(products):
-                if product.sku not in skus:
+                if product.productTypeId == 2 and product.sku not in wallpaperSkus:
+                    continue
+
+                if (product.productTypeId == 2 and wallpaperAdded > 99) or (product.productTypeId == 4 and rugAdded > 49) or (product.productTypeId == 41 and wallArtAdded > 49):
+                    continue
+
+                if "Rug Pad" in product.title:
                     continue
 
                 productId = product.productId
@@ -284,3 +294,12 @@ class Processor:
                     'v3': v3,
                     'v4': v4
                 })
+
+                if product.productTypeId == 2:
+                    wallpaperAdded = wallpaperAdded + 1
+
+                if product.productTypeId == 4:
+                    rugAdded = rugAdded + 1
+
+                if product.productTypeId == 41:
+                    wallArtAdded = wallArtAdded + 1
