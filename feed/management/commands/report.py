@@ -10,6 +10,8 @@ from library import database, debug
 from shopify.models import Product, ProductImage
 from mysql.models import ProductTag, Tag, ProductSubtype, Type
 
+from feed.models import KravetDecor, Kravet, York
+
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
@@ -40,6 +42,61 @@ class Processor:
         self.con.close()
 
     def roomvo(self):
+        ### Get High Res Image SKUs ###
+        skus = []
+
+        # Kravet Decor
+        fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
+        for fname in fnames:
+            if "_1" in fname or "_0" in fname:
+                index = 0
+                mpn = fname.replace("_1", "").replace("_0", "")
+            elif "_2" in fname:
+                index = 2
+                mpn = fname.replace("_2", "")
+            else:
+                index = 0
+                mpn = fname
+
+            mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
+            )
+
+            try:
+                product = KravetDecor.objects.get(mpn=mpn)
+                skus.append(product.sku)
+            except KravetDecor.DoesNotExist:
+                continue
+
+        # Kravet
+        fnames = os.listdir(f"{FILEDIR}/images/kravet/")
+        for fname in fnames:
+            mpn = f"{fname.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
+            )
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+                skus.append(product.sku)
+            except Kravet.DoesNotExist:
+                continue
+
+        # York
+        fnames = os.listdir(f"{FILEDIR}/images/york/")
+        for fname in fnames:
+            try:
+                if "_" not in fname:
+                    mpn = fname.split(".")[0]
+
+                    try:
+                        product = York.objects.get(mpn=mpn)
+                        skus.append(product.sku)
+                    except York.DoesNotExist:
+                        continue
+            except:
+                continue
+
+        print(skus)
+        ###############################
+
         products = Product.objects.filter(Q(published=True) & Q(deleted=False))
         products = products.exclude(Q(productId=None) | Q(productId="") | Q(
             manufacturerPartNumber=None) | Q(manufacturerPartNumber=""))
@@ -91,8 +148,11 @@ class Processor:
                 'v4': 'Order Sample (Trade)'
             })
 
-            total = len(products)
+            total = len(skus)
             for index, product in enumerate(products):
+                if product.sku not in skus:
+                    continue
+
                 productId = product.productId
 
                 # SKU, Name, and Handle
