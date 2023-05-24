@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from feed.models import Surya
+from django.db.models import Q
 
 import os
 import environ
@@ -44,7 +45,8 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
-            products = Surya.objects.all()
+            products = Surya.objects.filter(
+                Q(type='Wall Hangings') | Q(type='Wall Art'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 
@@ -130,8 +132,8 @@ class Processor:
                 description = formatText(sh.cell_value(i, 3))
                 usage = typeText
                 width = formatFloat(sh.cell_value(i, 16))
-                length = formatFloat(sh.cell_value(i, 15))
                 height = formatFloat(sh.cell_value(i, 17))
+                depth = formatFloat(sh.cell_value(i, 15))
 
                 if "D" in sh.cell_value(i, 13):
                     size = ""
@@ -202,8 +204,8 @@ class Processor:
                 'description': description,
                 'usage': usage,
                 'width': width,
-                'length': length,
                 'height': height,
+                'depth': depth,
                 'weight': weight,
                 'size': size,
                 'dimension': dimension,

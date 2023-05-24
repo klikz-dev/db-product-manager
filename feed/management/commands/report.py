@@ -44,26 +44,26 @@ class Processor:
         wallpaperSkus = []
 
         # Kravet Decor
-        fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
-        for fname in fnames:
-            if "_1" in fname or "_0" in fname:
-                index = 0
-                mpn = fname.replace("_1", "").replace("_0", "")
-            elif "_2" in fname:
-                index = 2
-                mpn = fname.replace("_2", "")
-            else:
-                index = 0
-                mpn = fname
+        # fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
+        # for fname in fnames:
+        #     if "_1" in fname or "_0" in fname:
+        #         index = 0
+        #         mpn = fname.replace("_1", "").replace("_0", "")
+        #     elif "_2" in fname:
+        #         index = 2
+        #         mpn = fname.replace("_2", "")
+        #     else:
+        #         index = 0
+        #         mpn = fname
 
-            mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
-            )
+        #     mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
+        #     )
 
-            try:
-                product = KravetDecor.objects.get(mpn=mpn)
-                wallpaperSkus.append(product.sku)
-            except KravetDecor.DoesNotExist:
-                continue
+        #     try:
+        #         product = KravetDecor.objects.get(mpn=mpn)
+        #         wallpaperSkus.append(product.sku)
+        #     except KravetDecor.DoesNotExist:
+        #         continue
 
         # Kravet
         fnames = os.listdir(f"{FILEDIR}/images/kravet/")
@@ -91,8 +91,6 @@ class Processor:
                         continue
             except:
                 continue
-
-        print(wallpaperSkus)
         ###############################
 
         products = Product.objects.filter(Q(published=True) & Q(deleted=False))
@@ -108,6 +106,7 @@ class Processor:
                 'name',
                 'width',
                 'length',
+                'height',
                 'horizontal_repeat',
                 'vertical_repeat',
                 'image',
@@ -130,6 +129,7 @@ class Processor:
                 'name': 'Name',
                 'width': 'Width',
                 'length': 'Length',
+                'height': 'Thickness',
                 'horizontal_repeat': 'Horizontal Repeat',
                 'vertical_repeat': 'Vertical Repeat',
                 'image': 'Image File Path',
@@ -181,6 +181,8 @@ class Processor:
                 # Collection, Width, Length, and Layout
                 width = ""
                 length = ""
+                height = ""
+                depth = ""
                 hr = ""
                 vr = ""
                 layout = ""
@@ -192,7 +194,9 @@ class Processor:
                     if "Length:" in line and "Roll Length:" not in line:
                         length = line.replace("Length:", "").strip()
                     if "Height:" in line:
-                        length = line.replace("Height:", "").strip()
+                        height = line.replace("Height:", "").strip()
+                    if "Depth:" in line:
+                        depth = line.replace("Depth:", "").strip()
                     if "Horizontal Repeat:" in line:
                         hr = line.replace("Horizontal Repeat:", "").strip()
                     if "Vertical Repeat:" in line:
@@ -202,6 +206,26 @@ class Processor:
                     if "Match:" in line:
                         match = line.replace("Match:", "").strip()
                         layout = ", ".join((layout, match))
+
+                x = width
+                y = ""
+                z = ""
+
+                if product.productTypeId == 41:
+                    if depth:
+                        z = depth
+                        y = height or length
+                    else:
+                        z = height
+                        y = length
+
+                    if not (y and z):
+                        continue
+                else:
+                    y = height or length
+
+                    if not y:
+                        continue
 
                 # Image
                 images = ProductImage.objects.filter(
@@ -277,8 +301,9 @@ class Processor:
                     'availability': 'Yes',
                     'sku': sku,
                     'name': name,
-                    'width': width,
-                    'length': length,
+                    'width': x,
+                    'length': y,
+                    'height': z,
                     'horizontal_repeat': hr,
                     'vertical_repeat': vr,
                     'image': image,
