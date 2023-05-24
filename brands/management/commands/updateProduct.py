@@ -45,12 +45,17 @@ class Command(BaseCommand):
             productID = product[0]
 
             try:
-                shopify.UpdateProductToShopify(productID, con)
+                handle = shopify.UpdateProductToShopify(productID, con)
+
+                csr.execute(
+                    "UPDATE Product SET Handle = %s WHERE ProductID = %s", (handle, productID))
+                con.commit()
+
                 debug("Shopify", 0,
                       "Updated Pending Product : {}".format(productID))
             except Exception as e:
                 print(e)
-                debug("Shopify", 2,
+                debug("Shopify", 1,
                       "Failed Updating Pending Product : {}".format(productID))
                 continue
 

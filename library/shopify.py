@@ -180,7 +180,7 @@ class ProductData:
 
         _spt = curtags.split(',')
         for k in range(0, len(_spt)):
-            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0:
+            if _spt[k].strip().find('p_color:') == 0 or _spt[k].strip().find('Designer:') == 0 or _spt[k].strip().find('Block:Change') == 0:
                 tags.append(_spt[k].strip())
         # Hiplee ends
 
@@ -542,73 +542,73 @@ def UpdateProductToShopify(productID, con):
     csr = con.cursor()
     csr.execute(
         "SELECT SKU FROM Product WHERE ProductID = {}".format(productID))
-    try:
-        upd = csr.fetchone()
-        sku = upd[0]
 
-        pd = ProductData(con, sku)
+    upd = csr.fetchone()
+    sku = upd[0]
 
-        titles = []
-        csr.execute(
-            "SELECT VariantID FROM ProductVariant WHERE SKU = {}".format(sq(sku)))
-        for v in csr.fetchall():
-            variantID = v[0]
-            rvm = s.get("{}/products/{}/variants/{}/metafields.json".format(
-                SHOPIFY_API_URL, productID, variantID), headers=SHOPIFY_PRODUCT_API_HEADER)
-            jvm = json.loads(rvm.text)
-            if 'metafields' in jvm:
-                for vm in jvm['metafields']:
-                    s.delete(
-                        "{}/metafields/{}.json".format(SHOPIFY_API_URL, vm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
-            variant = pd.ProductVariant(variantID)
-            titles.append(variant['title'])
-            variant.update({"id": variantID})
-            s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
-                  headers=SHOPIFY_PRODUCT_API_HEADER,
-                  json={"variant": variant})
+    pd = ProductData(con, sku)
 
-        rpm = s.get("{}/products/{}/metafields.json".format(SHOPIFY_API_URL,
-                    productID), headers=SHOPIFY_PRODUCT_API_HEADER)
-        jpm = json.loads(rpm.text)
-        for pm in jpm['metafields']:
-            s.delete(
-                "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
+    titles = []
+    csr.execute(
+        "SELECT VariantID FROM ProductVariant WHERE SKU = {}".format(sq(sku)))
+    for v in csr.fetchall():
+        variantID = v[0]
+        rvm = s.get("{}/products/{}/variants/{}/metafields.json".format(
+            SHOPIFY_API_URL, productID, variantID), headers=SHOPIFY_PRODUCT_API_HEADER)
+        jvm = json.loads(rvm.text)
+        if 'metafields' in jvm:
+            for vm in jvm['metafields']:
+                s.delete(
+                    "{}/metafields/{}.json".format(SHOPIFY_API_URL, vm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
+        variant = pd.ProductVariant(variantID)
+        titles.append(variant['title'])
+        variant.update({"id": variantID})
+        s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
+              headers=SHOPIFY_PRODUCT_API_HEADER,
+              json={"variant": variant})
 
-        body = pd.body
-        title = pd.title
-        ptype = pd.ptype
-        pattern = pd.pattern
-        color = pd.color
-        manu = pd.manufacturer
-        published = pd.published
-        tags = pd.ProductTag()
-        pMeta = pd.ProductMetafield()
+    rpm = s.get("{}/products/{}/metafields.json".format(SHOPIFY_API_URL,
+                productID), headers=SHOPIFY_PRODUCT_API_HEADER)
+    jpm = json.loads(rpm.text)
+    for pm in jpm['metafields']:
+        s.delete(
+            "{}/metafields/{}.json".format(SHOPIFY_API_URL, pm['id']), headers=SHOPIFY_PRODUCT_API_HEADER)
 
-        # Generate a new handle
-        handle = common.fmt(title).lower().replace(" ", "-")
+    body = pd.body
+    title = pd.title
+    ptype = pd.ptype
+    pattern = pd.pattern
+    color = pd.color
+    manu = pd.manufacturer
+    published = pd.published
+    tags = pd.ProductTag()
+    pMeta = pd.ProductMetafield()
 
-        p = {
-            "body_html": body,
-            "options": [
-                {"name": "Title", "position": 1, "values": titles},
-                {"name": "Pattern", "position": 2, "values": [pattern]},
-                {"name": "Color", "position": 3, "values": [color]},
-            ],
-            "product_type": ptype,
-            "tags": ",".join(tags),
-            "title": title,
-            "handle": handle,
-            "vendor": manu,
-            "metafields": pMeta
-        }
+    # Generate a new handle
+    handle = common.fmt(title).lower().replace(" ", "-")
 
-        if published == 0:
-            p.update({'published': False})
+    p = {
+        "body_html": body,
+        "options": [
+            {"name": "Title", "position": 1, "values": titles},
+            {"name": "Pattern", "position": 2, "values": [pattern]},
+            {"name": "Color", "position": 3, "values": [color]},
+        ],
+        "product_type": ptype,
+        "tags": ",".join(tags),
+        "title": title,
+        "handle": handle,
+        "vendor": manu,
+        "metafields": pMeta
+    }
 
+    if published == 0:
+        p.update({'published': False})
+
+    if "Block:Change" not in tags:
         r = s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
                   headers=SHOPIFY_PRODUCT_API_HEADER,
                   json={"product": p})
-
         j = json.loads(r.text)
 
         errors = j.get("errors")
@@ -619,15 +619,14 @@ def UpdateProductToShopify(productID, con):
             csr.close()
             s.close()
 
-        csr.execute(
-            "DELETE FROM PendingUpdateProduct WHERE ProductID = {}".format(productID))
-        con.commit()
-
-    except Exception as e:
-        print(e)
+    csr.execute(
+        "DELETE FROM PendingUpdateProduct WHERE ProductID = {}".format(productID))
+    con.commit()
 
     csr.close()
     s.close()
+
+    return handle
 
 
 def UpdatePriceToShopify(productID, con):
