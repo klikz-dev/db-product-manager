@@ -45,8 +45,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
-            products = Surya.objects.filter(
-                Q(type='Wall Hangings') | Q(type='Wall Art'))
+            products = Surya.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 
@@ -135,6 +134,10 @@ class Processor:
                 height = formatFloat(sh.cell_value(i, 17))
                 depth = formatFloat(sh.cell_value(i, 15))
 
+                if height == 0 and depth != 0:
+                    height = depth
+                    depth = 0
+
                 if "D" in sh.cell_value(i, 13):
                     size = ""
                     dimension = formatText(sh.cell_value(i, 13))
@@ -146,7 +149,9 @@ class Processor:
                 material = formatText(sh.cell_value(i, 10))
                 weight = formatFloat(sh.cell_value(i, 18)) or 5
                 specs = [
-                    ("Construction", formatText(sh.cell_value(i, 21)))]
+                    ("Color", formatText(sh.cell_value(i, 9))),
+                    ("Construction", formatText(sh.cell_value(i, 21))),
+                ]
                 upc = formatInt(sh.cell_value(i, 5))
 
                 # Measurement

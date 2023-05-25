@@ -190,7 +190,7 @@ class Processor:
                 y = ""
                 z = ""
 
-                if product.productTypeId == 41:
+                if product.productTypeId == 4 or product.productTypeId == 41:
                     if depth:
                         z = depth
                         y = height or length
@@ -203,7 +203,7 @@ class Processor:
                 else:
                     y = height or length
 
-                    if not y and product.productTypeId == 4:
+                    if not (hr and vr):
                         continue
 
                 # Image
