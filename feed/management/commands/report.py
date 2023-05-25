@@ -125,7 +125,6 @@ class Processor:
                 'v4': 'Order Sample (Trade)'
             })
 
-            total = len(products)
             wallpaperAdded = 0
             rugAdded = 0
             wallArtAdded = 0
@@ -137,7 +136,7 @@ class Processor:
                 if (product.productTypeId == 2 and wallpaperAdded > 99) or (product.productTypeId == 4 and rugAdded > 49) or (product.productTypeId == 41 and wallArtAdded > 49):
                     continue
 
-                if "Rug Pad" in product.title:
+                if "Rug Pad" in product.title or (product.productTypeId == 4 and "SR" not in product.sku):
                     continue
 
                 productId = product.productId
@@ -198,13 +197,10 @@ class Processor:
                         z = height
                         y = length
 
-                    if not (y and z):
+                    if product.productTypeId == 41 and not z:
                         continue
                 else:
                     y = height or length
-
-                    if not (hr and vr):
-                        continue
 
                 # Image
                 images = ProductImage.objects.filter(
