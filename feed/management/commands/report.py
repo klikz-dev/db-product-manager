@@ -43,28 +43,6 @@ class Processor:
         ### Get High Res Image SKUs ###
         wallpaperSkus = []
 
-        # Kravet Decor
-        # fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
-        # for fname in fnames:
-        #     if "_1" in fname or "_0" in fname:
-        #         index = 0
-        #         mpn = fname.replace("_1", "").replace("_0", "")
-        #     elif "_2" in fname:
-        #         index = 2
-        #         mpn = fname.replace("_2", "")
-        #     else:
-        #         index = 0
-        #         mpn = fname
-
-        #     mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
-        #     )
-
-        #     try:
-        #         product = KravetDecor.objects.get(mpn=mpn)
-        #         wallpaperSkus.append(product.sku)
-        #     except KravetDecor.DoesNotExist:
-        #         continue
-
         # Kravet
         fnames = os.listdir(f"{FILEDIR}/images/kravet/")
         for fname in fnames:
@@ -91,6 +69,7 @@ class Processor:
                         continue
             except:
                 continue
+
         ###############################
 
         products = Product.objects.filter(Q(published=True) & Q(deleted=False))
@@ -151,7 +130,7 @@ class Processor:
             rugAdded = 0
             wallArtAdded = 0
 
-            for index, product in enumerate(products):
+            for product in products:
                 if product.productTypeId == 2 and product.sku not in wallpaperSkus:
                     continue
 
@@ -224,7 +203,7 @@ class Processor:
                 else:
                     y = height or length
 
-                    if not y:
+                    if not y and product.productTypeId == 4:
                         continue
 
                 # Image
@@ -295,7 +274,7 @@ class Processor:
                 subtypes = ", ".join(subtypes)
 
                 debug.debug(
-                    "Report", 0, "{}/{} -- SKU: {}, Name: {}".format(index, total, sku, name))
+                    "Report", 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {name}")
 
                 roomvoWriter.writerow({
                     'availability': 'Yes',
