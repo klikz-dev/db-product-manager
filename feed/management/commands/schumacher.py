@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             products = Schumacher.objects.filter(
-                Q(type='Pillow') | Q(type='Throws'))
+                Q(pattern='Birds & Butterflies'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
