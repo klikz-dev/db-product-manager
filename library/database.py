@@ -549,7 +549,7 @@ class DatabaseManager:
     def downloadImage(self, productId, thumbnail, roomsets):
         if thumbnail and thumbnail.strip() != "":
             try:
-                common.picdownload2(str(thumbnail).replace(
+                common.picdownload2(str(thumbnail).strip().replace(
                     " ", "%20"), "{}.jpg".format(productId))
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
@@ -558,7 +558,7 @@ class DatabaseManager:
             idx = 2
             for roomset in roomsets:
                 try:
-                    common.roomdownload(str(roomset).replace(
+                    common.roomdownload(str(roomset).strip().replace(
                         " ", "%20"), "{}_{}.jpg".format(productId, idx))
                     idx = idx + 1
                 except Exception as e:
