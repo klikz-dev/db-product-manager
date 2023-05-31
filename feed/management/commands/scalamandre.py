@@ -43,6 +43,9 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor.databaseManager.statusSync(fullSync=False)
 
