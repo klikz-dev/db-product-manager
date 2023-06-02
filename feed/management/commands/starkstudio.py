@@ -123,12 +123,12 @@ class Processor:
                 stockP = common.formatInt(row[1])
                 stockNote = common.formatText(row[4])
 
-                if common.formatInt(row[5]) == 1:
-                    statusP = False
-                else:
+                if common.formatInt(row[5]) == 0:
                     statusP = True
+                else:
+                    statusP = False
 
-                if common.formatInt(row[7]) == 1:
+                if common.formatInt(row[7]) == 0:
                     statusS = True
                 else:
                     statusS = False
@@ -216,7 +216,7 @@ class Processor:
                     colors = common.formatText(sh.cell_value(i, 1))
 
                     # Status
-                    statusP = True
+                    statusP = False
                     statusS = False
 
                     if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
