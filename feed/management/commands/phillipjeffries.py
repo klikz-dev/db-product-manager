@@ -107,18 +107,10 @@ class Processor:
 
                 # Additional Information
                 specs = [
-                    {
-                        "key": "Width",
-                        "value": str(data["specs"]["width"])
-                    },
-                    {
-                        "key": "Horizontal Repeat",
-                        "value": str(data["specs"]["horizontal_repeat"])
-                    },
-                    {
-                        "key": "Vertical Repeat",
-                        "value": str(data["specs"]["vertical_repeat"])
-                    },
+                    ("Width", str(data["specs"]["width"])),
+                    ("Horizontal Repeat", str(
+                        data["specs"]["horizontal_repeat"])),
+                    ("Vertical Repeat", str(data["specs"]["vertical_repeat"])),
                 ]
                 features = [data["specs"]["maintenance"]]
 

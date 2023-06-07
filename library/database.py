@@ -8,6 +8,11 @@ from library import debug, common, const, shopify
 from mysql.models import Type, Manufacturer
 from shopify.models import Product
 
+opener = urllib.request.build_opener()
+opener.addheaders = [
+    ('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+urllib.request.install_opener(opener)
+
 env = environ.Env()
 SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
     env('shopify_api_version'))
@@ -581,6 +586,15 @@ class DatabaseManager:
 
             self.downloadImage(product.productId,
                                product.thumbnail, product.roomsets)
+
+    def downloadFileFromLink(self, src, dst):
+        try:
+            urllib.request.urlretrieve(src, dst)
+            debug.debug(self.brand, 1,
+                        f"Downloaded Successfully. {dst} From {src}")
+        except Exception as e:
+            debug.debug(self.brand, 1,
+                        f"Download Error {dst} From {src}. Error: {str(e)}")
 
     def downloadFileFromSFTP(self, src, dst, fileSrc=True):
         try:

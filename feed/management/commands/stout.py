@@ -5,8 +5,7 @@ from feed.models import Stout
 import os
 import environ
 import pymysql
-import csv
-import codecs
+import xlrd
 import requests
 import json
 
@@ -31,6 +30,8 @@ class Command(BaseCommand):
         processor = Processor()
 
         if "feed" in options['functions']:
+            processor.databaseManager.downloadFileFromLink(
+                "https://www.stouttextiles.com/downloads/Online_Retail_Items.xlsx", f"{FILEDIR}/stout-master.xlsx")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
@@ -77,16 +78,13 @@ class Processor:
         # Get Product Feed
         products = []
 
-        f = open(f"{FILEDIR}/stout-master.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        wb = xlrd.open_workbook(f"{FILEDIR}/stout-master.xlsx")
+        sh = wb.sheet_by_index(0)
 
-        for row in cr:
-            if row[0] == "ITEM-NUMBER":
-                continue
-
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(row[0])
+                mpn = common.formatText(sh.cell_value(i, 0))
 
                 try:
                     debug.debug(BRAND, 0, f"Fetching data for {mpn}")
@@ -101,13 +99,13 @@ class Processor:
 
                 sku = f"STOUT {mpn}"
 
-                pattern = common.formatText(row[1].split(" ")[0])
-                color = common.formatText(row[8])
+                pattern = common.formatText(sh.cell_value(i, 1).split(" ")[0])
+                color = common.formatText(sh.cell_value(i, 8))
 
                 # Categorization
-                usage = common.formatText(row[14]).title()
-                construction = common.formatText(row[10])
-                style = common.formatText(row[11])
+                usage = common.formatText(sh.cell_value(i, 14)).title()
+                construction = common.formatText(sh.cell_value(i, 10))
+                style = common.formatText(sh.cell_value(i, 11))
 
                 if "Trimming" in usage or "Trimming" in construction or "Trimming" in style:
                     type = "Trim"
@@ -120,24 +118,24 @@ class Processor:
                     continue
 
                 manufacturer = f"{BRAND} {type}"
-                collection = common.formatText(row[19])
+                collection = common.formatText(sh.cell_value(i, 19))
 
                 # Main Information
-                width = common.formatFloat(row[4])
+                width = common.formatFloat(sh.cell_value(i, 4))
 
-                repeatV = common.formatFloat(row[5])
-                repeatH = common.formatFloat(row[6])
+                repeatV = common.formatFloat(sh.cell_value(i, 5))
+                repeatH = common.formatFloat(sh.cell_value(i, 6))
 
                 # Additional Information
-                content = str(row[7]).replace(
+                content = str(sh.cell_value(i, 7)).replace(
                     " ", ", ").replace("%", "% ").strip()
 
-                finish = common.formatFloat(row[13])
-                country = common.formatFloat(row[15])
+                finish = common.formatFloat(sh.cell_value(i, 13))
+                country = common.formatFloat(sh.cell_value(i, 15))
 
                 specs = []
-                if row[12]:
-                    specs.append(str(row[12]))
+                if sh.cell_value(i, 12):
+                    specs.append(str(sh.cell_value(i, 12)))
 
                 features = []
                 if construction:
@@ -146,11 +144,11 @@ class Processor:
                 # Pricing
                 cost = common.formatFloat(data.get("price", "0"))
                 if cost == 0:
-                    cost = common.formatFloat(row[2])
+                    cost = common.formatFloat(sh.cell_value(i, 2))
 
                 map = common.formatFloat(data.get("map", "0"))
 
-                msrp = common.formatFloat(row[3])
+                msrp = common.formatFloat(sh.cell_value(i, 3))
 
                 # Measurement
                 uom = str(data.get("uom", "")).upper()

@@ -12,8 +12,7 @@ from shutil import copyfile
 
 from library import database, debug, common
 
-FILEDIR = "{}/files/".format(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
+FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
 BRAND = "Stark Studio"
 
@@ -100,7 +99,7 @@ class Processor:
 
         # Price Update Manual
         prices = {}
-        wb = xlrd.open_workbook(FILEDIR + 'stark-studio-price.xlsx')
+        wb = xlrd.open_workbook(f"{FILEDIR}/stark-studio-price.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(2, sh.nrows):
             # Primary Keys
@@ -154,7 +153,7 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(FILEDIR + 'stark-studio-master.xlsx')
+        wb = xlrd.open_workbook(f"{FILEDIR}/stark-studio-master.xlsx")
         for index in [0, 1, 2]:
             sh = wb.sheet_by_index(index)
             for i in range(2, sh.nrows):
@@ -162,6 +161,10 @@ class Processor:
                     # Primary Keys
                     mpn_origin = common.formatText(sh.cell_value(i, 3))
                     mpn = common.formatText(sh.cell_value(i, 4))
+
+                    if not mpn_origin:
+                        mpn_origin = mpn
+
                     sku = "SS {}".format(mpn)
                     try:
                         upc = int(sh.cell_value(i, 2))
@@ -226,6 +229,9 @@ class Processor:
                     statusP = False
                     statusS = False
 
+                    # Store ItemID in thumbnail field
+                    thumbnail = mpn_origin
+
                     if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
                         whiteGlove = True
                     else:
@@ -280,7 +286,9 @@ class Processor:
 
                     'stockP': stockP,
                     'stockNote': stockNote,
-                    'whiteGlove': whiteGlove
+                    'whiteGlove': whiteGlove,
+
+                    'thumbnail': thumbnail
                 }
                 products.append(product)
 
@@ -288,39 +296,55 @@ class Processor:
         return products
 
     def image(self):
+        images = []
         imageDir = f"{FILEDIR}/images/stark"
+
+        files = os.listdir(imageDir)
+        for file in files:
+            newFile = file.split(" ")[0]
+            newFile = newFile.replace("A53_", "A53").replace(
+                "B17_", "B17").replace("D18_", "D18").replace("WW1_", "WW1")
+
+            imageIndex = 1
+            if "_" in newFile:
+                mpn = newFile.split("_")[0]
+                imageType = newFile.split("_")[1]
+
+                if imageType == "CL":
+                    imageIndex = 2
+                elif imageType == "ALT1":
+                    imageIndex = 3
+                elif imageType == "ALT2":
+                    imageIndex = 4
+                elif imageType == "RM":
+                    imageIndex = 5
+                elif imageType == "RUNNER":
+                    imageIndex = 6
+                else:
+                    imageIndex = 7
+
+            else:
+                mpn = newFile
+
+            image = (mpn, imageIndex, file)
+            images.append(image)
 
         products = StarkStudio.objects.all()
         for product in products:
-            productStr = f"{product.pattern.strip()} {product.color.strip()}".replace(
-                ",", "").replace("/", " ").lower()
+            for image in images:
+                mpn, imageIndex, file = image
 
-            for fname in os.listdir(imageDir):
-                if productStr in fname.lower():
-                    if "_CL" in fname:
-                        print("Roomset 2: {}".format(fname))
+                if len(mpn) > 8 and mpn in product.thumbnail:
+                    if imageIndex == 1:
+                        debug.debug(
+                            BRAND, 0, f"Copying {file} to {product.productId}.jpg")
                         copyfile(
-                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_2.jpg")
-
-                    elif "_ALT1" in fname:
-                        print("Roomset 3: {}".format(fname))
-                        copyfile(
-                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_3.jpg")
-
-                    elif "_ALT2" in fname:
-                        print("Roomset 4: {}".format(fname))
-                        copyfile(
-                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_4.jpg")
-
-                    elif "_RM" in fname:
-                        print("Roomset 5: {}".format(fname))
-                        copyfile(
-                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/roomset/{product.productId}_5.jpg")
-
+                            f"{imageDir}/{file}", f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
                     else:
-                        print("Product: {}".format(fname))
+                        debug.debug(
+                            BRAND, 0, f"Copying {file} to {product.productId}_{imageIndex}.jpg")
                         copyfile(
-                            f"{imageDir}/{fname}", f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+                            f"{imageDir}/{file}", f"{FILEDIR}/../../../images/roomset/{product.productId}_{imageIndex}.jpg")
 
     def inventory(self):
         stocks = []
