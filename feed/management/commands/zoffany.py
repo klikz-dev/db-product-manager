@@ -59,13 +59,20 @@ class Command(BaseCommand):
 
         if "inventory" in options['functions']:
             while True:
-                processor.databaseManager.downloadFileFromSFTP(
-                    src="/", dst=f"{FILEDIR}/zoffany-inventory.xlsm", fileSrc=False)
-                processor.inventory()
+                try:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="", dst=f"{FILEDIR}/zoffany-inventory.csv", fileSrc=False)
+                    processor.inventory()
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:
@@ -215,14 +222,13 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        f = open(FILEDIR + "/files/zoffany-inventory.csv", "rb")
+        f = open(f"{FILEDIR}/zoffany-inventory.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
-
         for row in cr:
             if row[0] == "Supplier ID":
                 continue
 
-            mpn = common.formatText(row[1])
+            mpn = common.formatText(row[1]).replace("/UC", "")
             sku = f"ZOF {mpn}"
             stockP = common.formatInt(row[2])
             stockNote = common.formatText(row[5])

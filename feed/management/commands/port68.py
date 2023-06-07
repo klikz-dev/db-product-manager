@@ -61,13 +61,20 @@ class Command(BaseCommand):
 
         if "inventory" in options['functions']:
             while True:
-                processor.databaseManager.downloadFileFromSFTP(
-                    src="/port68", dst=f"{FILEDIR}/port-68-inventory.xlsx", fileSrc=False)
-                processor.inventory()
+                try:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="/port68", dst=f"{FILEDIR}/port-68-inventory.xlsx", fileSrc=False)
+                    processor.inventory()
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:

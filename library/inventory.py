@@ -1,12 +1,9 @@
 import requests
 import requests
 import json
-import xml.etree.ElementTree as ET
-from urllib.parse import quote
 
 from mysql.models import ProductInventory, ProductManufacturer
 from shopify.models import Product
-from feed.management.commands.phillips import Processor as PhillipsProcessor
 
 
 def inventory(sku):
@@ -19,33 +16,6 @@ def inventory(sku):
     except Exception as e:
         noStock["error"] = str(e)
         return noStock
-
-    # if manufacturer.brand == "Kravet" and manufacturer.name != "Kravet Pillow":
-    #     try:
-    #         response = requests.request(
-    #             "GET",
-    #             "https://www.e-designtrade.com/api/stock_onhand.asp?user=DBEST767&password=b1028H47kkr&pattern={}&color={}".format(
-    #                 quote(product.pattern), quote(product.color)),
-    #             headers={
-    #                 'Authorization': 'Token d71bcdc1b60d358e01182da499fd16664a27877a',
-    #                 'Cookie': 'ASPSESSIONIDAURDSCBS=MECPGHNBKCFFKBBBKKAEJOGO'
-    #             }
-    #         )
-    #         data = ET.fromstring(response.content)
-    #         onhand_qty = data.find('ONHAND_QTY').text
-    #         lead_time = data.find('LEAD_TIME').text
-
-    #         return {
-    #             "brand": manufacturer.brand,
-    #             "sku": sku,
-    #             "quantity": int(float(onhand_qty)),
-    #             "type": 1,
-    #             "note": "{} days".format(lead_time)
-    #         }
-    #     except Exception as e:
-    #         noStock["error"] = str(e)
-    #         noStock["data"] = str(response.content)
-    #         return noStock
 
     if manufacturer.brand == "Maxwell":
         try:
@@ -186,15 +156,63 @@ def inventory(sku):
 
     elif manufacturer.brand == "Phillips":
         try:
-            processor = PhillipsProcessor()
-            response = processor.inventory(product.manufacturerPartNumber)
+            API_BASE_URL = "https://step-up-production.ue.r.appspot.com/v1"
+            API_KEY = "57d18c3398da46c9b19d8a5d86498765"
+            API_USERNAME = "orders@decoratorsbest.com"
+            API_PASSWORD = "m8q97J%7$MfC"
+
+            response = requests.request(
+                "POST",
+                "{}{}".format(API_BASE_URL, "/auth"),
+                headers={
+                    'Content-type': 'application/json',
+                    'x-api-key': API_KEY
+                },
+                data=json.dumps({
+                    "email": API_USERNAME,
+                    "password": API_PASSWORD
+                })
+            )
+            data = json.loads(response.text)
+
+            TOKEN = data['data']['token']
+
+            try:
+                response = requests.request(
+                    "GET",
+                    "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/inventory".format(
+                        product.manufacturerPartNumber),
+                    headers={
+                        'x-api-key': API_KEY,
+                        'Authorization': "Bearer {}".format(TOKEN)
+                    }
+                )
+                data = json.loads(response.text)
+                stock = data['data']['qtyavailable']
+            except Exception as e:
+                stock = 0
+
+            try:
+                response = requests.request(
+                    "GET",
+                    "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/leadtime".format(
+                        product.manufacturerPartNumber),
+                    headers={
+                        'x-api-key': API_KEY,
+                        'Authorization': "Bearer {}".format(TOKEN)
+                    }
+                )
+                data = json.loads(response.text)
+                leadtime = data['data']['leadtime'][0]['message']
+            except Exception as e:
+                leadtime = ""
 
             return {
                 "brand": manufacturer.brand,
                 "sku": sku,
-                "quantity": response['stock'],
+                "quantity": stock,
                 "type": 1,
-                "note": response['leadtime']
+                "note": leadtime
             }
         except Exception as e:
             noStock["error"] = str(e)

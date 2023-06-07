@@ -6,6 +6,7 @@ import environ
 import pymysql
 import requests
 import json
+import time
 from shutil import copyfile
 
 from library import database, debug
@@ -55,13 +56,31 @@ class Command(BaseCommand):
         if "sample" in options['functions']:
             processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
-        if "shipping" in options['functions']:
+        if "whiteglove" in options['functions']:
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "shipping" in options['functions']:
+        if "quickship" in options['functions']:
             processor.databaseManager.customTags(
                 key="quickShip", tag="Quick Ship")
+
+        if "main" in options['functions']:
+            while True:
+                try:
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+
+                    processor.databaseManager.statusSync(fullSync=False)
+
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:

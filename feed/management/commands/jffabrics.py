@@ -53,14 +53,26 @@ class Command(BaseCommand):
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "inventory" in options['functions']:
-            while True:
-                processor.databaseManager.downloadFileFromSFTP(
-                    src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx")
-                processor.inventory()
+            processor.databaseManager.downloadFileFromSFTP(
+                src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx")
+            processor.inventory()
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+        if "main" in options['functions']:
+            while True:
+                try:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx")
+                    processor.inventory()
+
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:

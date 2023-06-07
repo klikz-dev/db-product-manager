@@ -5,14 +5,13 @@ import os
 import environ
 import pymysql
 import xlrd
-import paramiko
 import csv
+import codecs
 import time
 
 from library import database, debug, common
 
-FILEDIR = "{}/files/".format(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
+FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
 BRAND = "Jamie Young"
 
@@ -44,19 +43,25 @@ class Command(BaseCommand):
         if "price" in options['functions']:
             processor.databaseManager.updatePrices(formatPrice=False)
 
+        if "image" in options['functions']:
+            processor.databaseManager.downloadImages(missingOnly=True)
+
         if "tag" in options['functions']:
             processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
             processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
-        if "shipping" in options['functions']:
+        if "whiteglove" in options['functions']:
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
+                processor.databaseManager.downloadFileFromSFTP(
+                    src="jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False)
                 processor.inventory()
+
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
                 time.sleep(86400)
@@ -79,7 +84,7 @@ class Processor:
 
         # Discontinued
         discontinued_mpns = []
-        wb = xlrd.open_workbook(FILEDIR + 'jamieyoung-discontinued.xlsx')
+        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-discontinued.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             discontinued_mpns.append(str(sh.cell_value(i, 0)).strip())
@@ -87,7 +92,7 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(FILEDIR + 'jamieyoung-master.xlsx')
+        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(2, sh.nrows):
             try:
@@ -97,7 +102,7 @@ class Processor:
                     debug.debug(BRAND, 1, f"Item discontinued: {mpn}")
                     continue
 
-                sku = "JY {}".format(mpn)
+                sku = f"JY {mpn}"
                 try:
                     upc = int(sh.cell_value(i, 8))
                 except:
@@ -245,66 +250,11 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def image(self, productId, thumbnail, roomsets):
-        if thumbnail and thumbnail.strip() != "":
-            try:
-                common.picdownload2(thumbnail, "{}.jpg".format(productId))
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-
-        if len(roomsets) > 0:
-            idx = 2
-            for roomset in roomsets:
-                try:
-                    common.roomdownload(
-                        roomset, "{}_{}.jpg".format(productId, idx))
-                    idx = idx + 1
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-
-    def downloadInvFile(self):
-        debug.debug(BRAND, 0, "Download New CSV from {} FTP".format(BRAND))
-
-        host = "18.206.49.64"
-        port = 22
-        username = "jamieyoung"
-        password = "JY123!"
-
-        try:
-            transport = paramiko.Transport((host, port))
-            transport.connect(username=username, password=password)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except:
-            debug.debug(
-                BRAND, 2, "Connection to {} FTP Server Failed".format(BRAND))
-            return False
-
-        try:
-            sftp.chdir(path='/jamieyoung')
-            files = sftp.listdir()
-        except:
-            debug.debug(BRAND, 1, "No New Inventory File")
-            return False
-
-        for file in files:
-            if "EDI" in file:
-                continue
-            sftp.get(file, FILEDIR + 'jamieyoung-inventory.csv')
-            sftp.remove(file)
-
-        sftp.close()
-
-        debug.debug(BRAND, 0, "FTP Inventory Download Completed".format(BRAND))
-        return True
-
     def inventory(self):
         stocks = []
 
-        if not self.downloadInvFile():
-            return
-
-        f = open(FILEDIR + 'jamieyoung-inventory.csv', "rt")
-        cr = csv.reader(f)
+        f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
         for row in cr:
             try:
                 mpn = row[1]
@@ -324,4 +274,4 @@ class Processor:
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(stocks, 1)
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)

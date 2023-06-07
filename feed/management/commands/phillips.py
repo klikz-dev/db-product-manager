@@ -5,6 +5,7 @@ import environ
 import requests
 import json
 import pymysql
+import time
 
 from library import database, debug, common
 
@@ -51,6 +52,23 @@ class Command(BaseCommand):
 
         if "order" in options['functions']:
             processor.order()
+
+        if "main" in options['functions']:
+            while True:
+                try:
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
+
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:
@@ -283,44 +301,6 @@ class Processor:
                     idx = idx + 1
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
-
-    def inventory(self, mpn):
-        try:
-            response = requests.request(
-                "GET",
-                "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/inventory".format(
-                    mpn),
-                headers={
-                    'x-api-key': API_KEY,
-                    'Authorization': "Bearer {}".format(self.token)
-                }
-            )
-            data = json.loads(response.text)
-            stock = data['data']['qtyavailable']
-        except Exception as e:
-            debug.debug(BRAND, 1, str(e))
-            stock = 0
-
-        try:
-            response = requests.request(
-                "GET",
-                "https://step-up-production.ue.r.appspot.com/v1/ecomm/items/{}/leadtime".format(
-                    mpn),
-                headers={
-                    'x-api-key': API_KEY,
-                    'Authorization': "Bearer {}".format(self.token)
-                }
-            )
-            data = json.loads(response.text)
-            leadtime = data['data']['leadtime'][0]['message']
-        except Exception as e:
-            debug.debug(BRAND, 1, str(e))
-            leadtime = ""
-
-        return {
-            'stock': stock,
-            'leadtime': leadtime
-        }
 
     def order(self):
         orders = self.databaseManager.getOrders()

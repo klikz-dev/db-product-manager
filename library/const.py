@@ -176,6 +176,12 @@ sftp = {
         "user": "couture",
         "pass": "Couture123!",
     },
+    "Jamie Young": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "jamieyoung",
+        "pass": "JY123!",
+    },
     "Jaipur Living": {
         "host": "decoratorsbestam.com",
         "port": 22,

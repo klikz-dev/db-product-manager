@@ -61,15 +61,29 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
-                processor.databaseManager.downloadFileFromFTP(
-                    src="Jaipur inventory feed.csv", dst=f"{FILEDIR}/jaipur-living-inventory.csv")
-                processor.inventory()
+                try:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx")
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+                    processor.databaseManager.statusSync(fullSync=False)
+
+                    processor.databaseManager.downloadFileFromFTP(
+                        src="Jaipur inventory feed.csv", dst=f"{FILEDIR}/jaipur-living-inventory.csv")
+                    processor.inventory()
+
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
+                    print("Failed process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(3600)
 
 
 class Processor:

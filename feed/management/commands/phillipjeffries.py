@@ -12,8 +12,7 @@ from library import database, debug
 
 API_BASE_URL = "https://www.phillipjeffries.com/api/products/skews"
 
-FILEDIR = "{}/files/".format(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
+FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
 BRAND = "Phillip Jeffries"
 
@@ -28,22 +27,28 @@ class Command(BaseCommand):
         processor = Processor()
 
         if "feed" in options['functions']:
-            processor.feed()
+            products = processor.fetchFeed()
+            processor.databaseManager.writeFeed(products)
 
         if "sync" in options['functions']:
-            processor.sync()
+            processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
-            processor.add()
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            processor.update()
+            products = PhillipJeffries.objects.all()
+            processor.databaseManager.updateProducts(
+                products=products, formatPrice=True)
 
         if "price" in options['functions']:
-            processor.price()
+            processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
-            processor.tag()
+            processor.databaseManager.updateTags(category=True)
+
+        if "cutfee" in options['functions']:
+            processor.databaseManager.customTags(key="cutFee", tag="Cut Fee")
 
 
 class Processor:
@@ -52,7 +57,8 @@ class Processor:
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
-        self.databaseManager = database.DatabaseManager(self.con, BRAND)
+        self.databaseManager = database.DatabaseManager(
+            con=self.con, brand=BRAND, Feed=PhillipJeffries)
 
     def __del__(self):
         self.con.close()
@@ -63,7 +69,7 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(FILEDIR + "pj-master-2023.04.05.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/pj-master-2023.04.05.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             try:
@@ -191,27 +197,3 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
-
-    def feed(self):
-        products = self.fetchFeed()
-        self.databaseManager.writeFeed(products)
-
-    def sync(self):
-        self.databaseManager.statusSync(fullSync=False)
-
-    def add(self):
-        self.databaseManager.createProducts(formatPrice=True)
-
-    def update(self):
-        products = PhillipJeffries.objects.all()
-        self.databaseManager.updateProducts(
-            products=products, formatPrice=True)
-
-    def price(self):
-        self.databaseManager.updatePrices(formatPrice=True)
-
-    def tag(self):
-        self.databaseManager.updateTags(category=True)
-
-    def cutFee(self):
-        self.databaseManager.customTags(key="cutFee", tag="Cut Fee")

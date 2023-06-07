@@ -28,9 +28,9 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                processor.ups()
-                processor.schumacher()
                 processor.kravet()
+                processor.schumacher()
+                processor.ups()
 
                 print(
                     f"Finished process. Waiting for next run. Tracking:{options['functions']}")
@@ -162,11 +162,10 @@ class Processor:
                          f"{FILEDIR}/EDI/Schumacher/ASN/{file}")
                 sftp.remove(f"../EDI/EDI_to_DB/{file}")
 
-        sftp.close()
-
         for file in files:
             if "ASN" not in file:
                 continue
+
             f = open(f"{FILEDIR}/EDI/Schumacher/ASN/{file}", "rb")
             cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
             for row in cr:
@@ -180,6 +179,8 @@ class Processor:
                     self.uploadTracking("Schumacher", PONumber, tracking)
                 except Exception as e:
                     debug.debug("Tracking", 1, str(e))
+
+        sftp.close()
 
     def kravet(self):
         ftp = FTP(const.ftp['Kravet']['host'])
@@ -200,8 +201,6 @@ class Processor:
                 print(e)
                 continue
 
-        ftp.close()
-
         for file in files:
             if "ShipExt" not in file:
                 continue
@@ -219,6 +218,8 @@ class Processor:
                     self.uploadTracking("Kravet", PONumber, tracking)
                 except Exception as e:
                     debug.debug("Tracking", 1, str(e))
+
+        ftp.close()
 
     def uploadTracking(self, brand, orderNumber, trackingNumber):
         debug.debug(
