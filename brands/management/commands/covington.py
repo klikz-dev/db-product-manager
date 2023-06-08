@@ -217,50 +217,57 @@ class Command(BaseCommand):
             mpn = row[1]
             published = row[2]
 
-            try:
-                product = Covington.objects.get(mpn=mpn)
-                product.productId = productID
-                product.save()
+            csr.execute(
+                "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+            con.commit()
+            csr.execute(
+                "CALL AddToPendingUpdatePublish ({})".format(productID))
+            con.commit()
 
-                if published == 1 and product.status == False:
-                    csr.execute(
-                        "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
-                    con.commit()
-                    csr.execute(
-                        "CALL AddToPendingUpdatePublish ({})".format(productID))
-                    con.commit()
+        #     try:
+        #         product = Covington.objects.get(mpn=mpn)
+        #         product.productId = productID
+        #         product.save()
 
-                    upb = upb + 1
-                    debug(
-                        "Covington", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+        #         if published == 1 and product.status == False:
+        #             csr.execute(
+        #                 "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+        #             con.commit()
+        #             csr.execute(
+        #                 "CALL AddToPendingUpdatePublish ({})".format(productID))
+        #             con.commit()
 
-                if published == 0 and product.status == True and product.cost != None:
-                    csr.execute(
-                        "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
-                    con.commit()
-                    csr.execute(
-                        "CALL AddToPendingUpdatePublish ({})".format(productID))
-                    con.commit()
+        #             upb = upb + 1
+        #             debug(
+        #                 "Covington", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
 
-                    pb = pb + 1
-                    debug(
-                        "Covington", 0, "Enabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+        #         if published == 0 and product.status == True and product.cost != None:
+        #             csr.execute(
+        #                 "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
+        #             con.commit()
+        #             csr.execute(
+        #                 "CALL AddToPendingUpdatePublish ({})".format(productID))
+        #             con.commit()
 
-            except Covington.DoesNotExist:
-                if published == 1:
-                    csr.execute(
-                        "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
-                    con.commit()
-                    csr.execute(
-                        "CALL AddToPendingUpdatePublish ({})".format(productID))
-                    con.commit()
+        #             pb = pb + 1
+        #             debug(
+        #                 "Covington", 0, "Enabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
 
-                    upb = upb + 1
-                    debug(
-                        "Covington", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+        #     except Covington.DoesNotExist:
+        #         if published == 1:
+        #             csr.execute(
+        #                 "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+        #             con.commit()
+        #             csr.execute(
+        #                 "CALL AddToPendingUpdatePublish ({})".format(productID))
+        #             con.commit()
 
-        debug("Covington", 0, "Total {} Products. Published {} Products, Unpublished {} Products.".format(
-            total, pb, upb))
+        #             upb = upb + 1
+        #             debug(
+        #                 "Covington", 0, "Disabled product -- ProductID: {}, mpn: {}".format(productID, mpn))
+
+        # debug("Covington", 0, "Total {} Products. Published {} Products, Unpublished {} Products.".format(
+        #     total, pb, upb))
 
         csr.close()
         con.close()
