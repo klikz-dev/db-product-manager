@@ -334,6 +334,8 @@ class Processor:
             for image in images:
                 mpn, imageIndex, file = image
 
+                print(mpn)
+
                 if len(mpn) > 8 and mpn in product.thumbnail:
                     if imageIndex == 1:
                         debug.debug(

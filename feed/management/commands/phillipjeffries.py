@@ -47,6 +47,9 @@ class Command(BaseCommand):
         if "tag" in options['functions']:
             processor.databaseManager.updateTags(category=True)
 
+        if "image" in options['functions']:
+            processor.databaseManager.downloadImages(missingOnly=True)
+
         if "cutfee" in options['functions']:
             processor.databaseManager.customTags(key="cutFee", tag="Cut Fee")
 
