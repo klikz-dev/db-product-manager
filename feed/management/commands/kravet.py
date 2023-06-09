@@ -6,13 +6,11 @@ import environ
 import pymysql
 import csv
 import codecs
-import urllib
 import zipfile
 import requests
 import xlrd
 import time
 from bs4 import BeautifulSoup
-from shutil import copyfile
 
 from library import database, debug, common
 
@@ -55,9 +53,6 @@ class Command(BaseCommand):
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "image" in options['functions']:
-            processor.databaseManager.downloadImages(missingOnly=True)
-
-        if "image-manual" in options['functions']:
             processor.image()
 
         if "sample" in options['functions']:
@@ -68,19 +63,10 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "inventory" in options['functions']:
-            processor.inventory()
-
         if "main" in options['functions']:
             while True:
                 try:
                     processor.downloadFeed()
-
-                    products = processor.fetchFeed()
-                    processor.databaseManager.writeFeed(products=products)
-
-                    processor.databaseManager.statusSync(fullSync=False)
-
                     processor.inventory()
 
                     print("Finished process. Waiting for next run. {}:{}".format(
@@ -349,6 +335,18 @@ class Processor:
                 if str(row[22]).strip() != 'Y':
                     statusP = False
 
+                # 6/9/23 Block collections.
+                blockCollections = [
+                    "CANDICE OLSON AFTER EIGHT",
+                    "CANDICE OLSON MODERN NATURE 2ND EDITION",
+                    "RONALD REDDING TRAVELER",
+                    "RONALD REDDING ARTS & CRAFTS",
+                    "MISSONI HOME WALLCOVERINGS 04",
+                    "DAMASK RESOURCE LIBRARY"
+                ]
+                if collection in blockCollections:
+                    statusP = False
+
                 if row[43].strip() != "YES":
                     statusS = False
 
@@ -536,36 +534,69 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        products = Kravet.objects.all()
-        for product in products:
+        f = open(f"{FILEDIR}/kravet-master.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            try:
+                mpn = row[0].strip()
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            stockP = int(float(row[46]))
+            stockNote = f"{str(row[47]).strip()} days"
+
             stock = {
                 'sku': product.sku,
-                'quantity': product.stockP,
-                'note': product.stockNote or ""
+                'quantity': stockP,
+                'note': stockNote
+            }
+            stocks.append(stock)
+
+        f = open(f"{FILEDIR}/kravet-decor-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            try:
+                mpn = str(row[0]).strip()
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            stockP = int(float(row[1]))
+            leadtime = int(float(row[2]))
+            stockNote = f"{leadtime} days"
+
+            stock = {
+                'sku': product.sku,
+                'quantity': stockP,
+                'note': f"{leadtime} days"
             }
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
 
     def image(self):
-        fnames = os.listdir(f"{FILEDIR}/images/kravet/")
-        for fname in fnames:
-            mpn = f"{fname.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
-            )
+        csr = self.con.cursor()
 
-            print(mpn)
+        hasImage = []
 
-            try:
-                product = Kravet.objects.get(mpn=mpn)
-            except Kravet.DoesNotExist:
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        products = Kravet.objects.all()
+        for product in products:
+            if not product.productId or not product.thumbnail:
                 continue
 
-            print(product.sku)
+            if product.productId in hasImage:
+                continue
 
-            productId = product.productId
+            if "http" in product.thumbnail:
+                self.databaseManager.downloadImage(product.productId,
+                                                   product.thumbnail, product.roomsets)
+            else:
+                self.databaseManager.downloadFileFromFTP(
+                    src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
-            if productId:
-                debug.debug(
-                    BRAND, 0, f"Copying {FILEDIR}/images/kravet/{fname} to {productId}.jpg")
-                copyfile(f"{FILEDIR}/images/kravet/{fname}",
-                         f"{FILEDIR}/../../../images/product/{productId}.jpg")
+        csr.close()

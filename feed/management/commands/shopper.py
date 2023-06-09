@@ -15,7 +15,7 @@ from library import debug, inventory
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
-FEEDDIR = f"{FILEDIR}/feed/DecoratorsBestGS.xml"
+FEEDDIR = f"{FILEDIR}/feed/DecoratorsBestSA.xml"
 
 PROCESS = "SA Feed"
 
