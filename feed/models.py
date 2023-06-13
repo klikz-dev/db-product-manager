@@ -78,6 +78,7 @@ class Feed(models.Model):
 
     statusP = models.BooleanField(default=False)
     statusS = models.BooleanField(default=False)
+    european = models.BooleanField(default=False)
     quickShip = models.BooleanField(default=False)
     whiteGlove = models.BooleanField(default=False)
     bestSeller = models.BooleanField(default=False)

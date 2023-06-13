@@ -92,6 +92,7 @@ class FeedAdmin(admin.ModelAdmin):
         ('Status', {'fields': [
             'statusP',
             'statusS',
+            'european',
             'quickShip',
             'whiteGlove',
             'bestSeller',

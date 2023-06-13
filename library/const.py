@@ -50,6 +50,8 @@ markup = {
         "trade": 1,
         "consumer_pillow": 1.75,
         "trade_pillow": 1.3,
+        "consumer_european": 1.5,
+        "trade_european": 1.35,
     },
     "Kravet Decor": {
         "useMAP": False,

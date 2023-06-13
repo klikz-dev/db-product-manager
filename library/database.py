@@ -246,8 +246,17 @@ class DatabaseManager:
     def formatPrice(self, product, formatPrice):
         try:
             useMAP = const.markup[self.brand]["useMAP"]
+
             consumerMarkup = const.markup[self.brand]["consumer"]
             tradeMarkup = const.markup[self.brand]["trade"]
+
+            if product.type == "Pillow":
+                consumerMarkup = const.markup[self.brand]["consumer_pillow"]
+                tradeMarkup = const.markup[self.brand]["trade_pillow"]
+
+            if product.european:
+                consumerMarkup = const.markup[self.brand]["consumer_european"]
+                tradeMarkup = const.markup[self.brand]["trade_european"]
 
             if useMAP and product.map > 0:
                 if formatPrice:

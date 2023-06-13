@@ -165,6 +165,19 @@ class Processor:
                 if len(keys) != 3 or keys[2] != "0":
                     continue
 
+                manufacturer = row[3]
+                collection = row[16]
+                european = False
+                if "LIZZO" in collection:
+                    manufacturer = "LIZZO"
+                    european = True
+                elif "ANDREW MARTIN" in collection:
+                    manufacturer = "ANDREW MARTIN"
+                    european = True
+                elif "BLITHFIELD" in collection or "JAGTAR" in collection or "JOSEPHINE MUNSEY" in collection or "MISSONI HOME" in collection or "PAOLO MOSCHINO" in collection:
+                    manufacturer = "ANDREW MARTIN"
+                    european = True
+
                 manufacturer_mapping = {
                     "LEE JOFA": ("Lee Jofa", "LJ"),
                     "LEE JOFA MODERN": ("Lee Jofa", "LJ"),
@@ -189,10 +202,11 @@ class Processor:
                     "BRUNSCHWIG & FILS": ("Brunschwig & Fils", "BF"),
                     "GASTON Y DANIELA": ("Gaston Y Daniela", "GD"),
                     "WINFIELD THYBONY": ("Winfield Thybony", "WF"),
-                    "CLARKE AND CLARKE": ("Clarke & Clarke", "CC")
+                    "CLARKE AND CLARKE": ("Clarke & Clarke", "CC"),
+                    "LIZZO": ("Lizzo", "LI"),
+                    "ANDREW MARTIN": ("Andrew Martin", "AM"),
                 }
 
-                manufacturer = row[3]
                 if manufacturer in manufacturer_mapping:
                     manufacturer, code_prefix = manufacturer_mapping[manufacturer]
                     sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
@@ -244,8 +258,6 @@ class Processor:
                     debug.debug(BRAND, 1, f"Unknown product type {row[17]}")
 
                 manufacturer = f"{manufacturer} {type}"
-
-                collection = row[16]
 
                 # Main Information
                 usage = row[17]
@@ -324,6 +336,8 @@ class Processor:
 
                 # Image
                 thumbnail = str(row[24] or row[25]).strip()
+                if manufacturer == "Winfield Thybony" and picLoc:
+                    thumbnail = picLoc
                 if mpn in images:
                     thumbnail = images[mpn]
 
@@ -392,6 +406,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'european': european,
                 'outlet': outlet,
 
                 'stockP': stockP,
