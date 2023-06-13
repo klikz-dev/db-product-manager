@@ -352,11 +352,18 @@ class Processor:
                 # 6/9/23 Block collections.
                 blockCollections = [
                     "CANDICE OLSON AFTER EIGHT",
+                    "CANDICE OLSON COLLECTION",
                     "CANDICE OLSON MODERN NATURE 2ND EDITION",
-                    "RONALD REDDING TRAVELER",
+                    "RONALD REDDING",
                     "RONALD REDDING ARTS & CRAFTS",
+                    "RONALD REDDING TRAVELER",
+                    "DAMASK RESOURCE LIBRARY",
+                    "MISSONI HOME",
+                    "MISSONI HOME 2020",
+                    "MISSONI HOME 2021",
+                    "MISSONI HOME 2022 INDOOR/OUTDOOR",
+                    "MISSONI HOME WALLCOVERINGS 03",
                     "MISSONI HOME WALLCOVERINGS 04",
-                    "DAMASK RESOURCE LIBRARY"
                 ]
                 if collection in blockCollections:
                     statusP = False
