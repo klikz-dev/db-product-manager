@@ -77,7 +77,7 @@ class Processor:
         wb = xlrd.open_workbook(f"{FILEDIR}/dana-gibson-master.xlsx")
         sh = wb.sheet_by_index(0)
 
-        for i in range(2, sh.nrows):
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
                 mpn = common.formatText(sh.cell_value(i, 1))

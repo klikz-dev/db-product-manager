@@ -130,8 +130,8 @@ class Processor:
                 content = str(sh.cell_value(i, 7)).replace(
                     " ", ", ").replace("%", "% ").strip()
 
-                finish = common.formatFloat(sh.cell_value(i, 13))
-                country = common.formatFloat(sh.cell_value(i, 15))
+                finish = common.formatText(sh.cell_value(i, 13))
+                country = common.formatText(sh.cell_value(i, 15))
 
                 features = []
                 if construction:
