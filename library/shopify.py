@@ -616,8 +616,8 @@ def UpdateProductToShopify(productID, con):
             debug("Shopify", 1, "Adding SKU: {} Error: {}".format(
                 sku, errors))
 
-            csr.close()
-            s.close()
+        else:
+            handle = j['product']['handle']
 
     csr.execute(
         "DELETE FROM PendingUpdateProduct WHERE ProductID = {}".format(productID))

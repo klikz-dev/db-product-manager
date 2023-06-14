@@ -8,7 +8,7 @@ import requests
 import environ
 
 
-from library import debug
+from library import debug, shopify
 
 from shopify.models import Variant, Product
 from mysql.models import ProductSubtype, Type
@@ -48,6 +48,9 @@ class Command(BaseCommand):
 
         if "removeTags" in options['functions']:
             processor.removeTags()
+
+        if "deleteProducts" in options['functions']:
+            processor.deleteProducts()
 
 
 class Processor:
@@ -211,5 +214,102 @@ class Processor:
             self.con.commit()
 
             debug.debug("Custom", 0, f"Removed Rumbar tag from {title}")
+
+        csr.close()
+
+    def deleteProducts(self):
+        csr = self.con.cursor()
+
+        productIDs = [
+            ''
+        ]
+
+        for productID in productIDs:
+            csr.execute("""SELECT P.ProductID, P.SKU 
+                FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+                WHERE P.ProductID = '{}'""".format(productID))
+
+            try:
+                row = csr.fetchone()
+                productID = row[0]
+                sku = row[1]
+            except Exception as e:
+                print(e)
+                continue
+
+            try:
+                row = csr.fetchone()
+                productID = row[0]
+                sku = row[1]
+                shopify.DeleteProductByProductID(productID)
+            except Exception as e:
+                print(e)
+
+            try:
+                csr.execute(
+                    "DELETE from Product where productID={}".format(productID))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductImage where productID='{}';".format(productID))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductInventory where SKU='{}';".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductManufacturer where SKU='{}';".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductSubcategory where SKU='{}';".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductSubtype where SKU='{}';".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductTag where SKU='{}';".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            try:
+                csr.execute(
+                    "DELETE from ProductVariant where SKU='{}'".format(sku))
+                self.con.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+            debug.debug(
+                "Custom", 0, f"Deleted --- ProductID: {productID}, sku: {sku}")
 
         csr.close()

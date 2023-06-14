@@ -101,6 +101,12 @@ class Processor:
 
                 if type == "Bowl":
                     type = "Bowls"
+                elif type == "Wastebasket":
+                    type = "Wastebaskets"
+                elif type == "Pendant":
+                    type = "Pendants"
+                elif type == "Tray":
+                    type = "Trays"
 
                 if not pattern or not color or not type:
                     continue

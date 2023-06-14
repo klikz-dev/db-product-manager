@@ -45,7 +45,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
-            products = Surya.objects.all()
+            products = Surya.objects.filter(sku="SR AML2323-710102")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 

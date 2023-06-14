@@ -250,11 +250,11 @@ class DatabaseManager:
             consumerMarkup = const.markup[self.brand]["consumer"]
             tradeMarkup = const.markup[self.brand]["trade"]
 
-            if product.type == "Pillow":
+            if product.type == "Pillow" and "consumer_pillow" in const.markup[self.brand]:
                 consumerMarkup = const.markup[self.brand]["consumer_pillow"]
                 tradeMarkup = const.markup[self.brand]["trade_pillow"]
 
-            if product.european:
+            if product.european and "consumer_european" in const.markup[self.brand]:
                 consumerMarkup = const.markup[self.brand]["consumer_european"]
                 tradeMarkup = const.markup[self.brand]["trade_european"]
 
