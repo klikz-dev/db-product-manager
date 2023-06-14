@@ -6,6 +6,7 @@ import environ
 import pymysql
 import requests
 import environ
+import json
 
 
 from library import debug, shopify
@@ -51,6 +52,9 @@ class Command(BaseCommand):
 
         if "deleteProducts" in options['functions']:
             processor.deleteProducts()
+
+        if "syncHandle" in options['functions']:
+            processor.syncHandle()
 
 
 class Processor:
@@ -311,5 +315,43 @@ class Processor:
 
             debug.debug(
                 "Custom", 0, f"Deleted --- ProductID: {productID}, sku: {sku}")
+
+        csr.close()
+
+    def syncHandle(self):
+        csr = self.con.cursor()
+
+        brand = "Surya"
+        csr.execute(f"""
+            SELECT P.ProductId, P.Handle
+            FROM Product P
+            LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
+            LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+            WHERE M.BRAND = '{brand}' AND P.ProductId IS NOT NULL
+        """)
+        products = csr.fetchall()
+
+        for product in products:
+            productId = product[0]
+            productHandle = product[1]
+
+            res = requests.get(
+                f"{SHOPIFY_API_URL}/products/{productId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
+            data = json.loads(res.text)
+
+            if data.get("errors"):
+                debug.debug(
+                    "Custom", 1, f"Getting product {productId} Error: {data.get('errors')}")
+                continue
+
+            handle = data['product']['handle']
+
+            if handle != productHandle:
+                csr.execute(
+                    "UPDATE Product SET Handle = %s WHERE ProductID = %s", (handle, productId))
+                self.con.commit()
+
+                debug.debug(
+                    "Custom", 0, f"Update product {productId} handle to {handle}.")
 
         csr.close()
