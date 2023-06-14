@@ -133,13 +133,11 @@ class Processor:
                 finish = common.formatFloat(sh.cell_value(i, 13))
                 country = common.formatFloat(sh.cell_value(i, 15))
 
-                specs = []
-                if sh.cell_value(i, 12):
-                    specs.append(str(sh.cell_value(i, 12)))
-
                 features = []
                 if construction:
                     features.append(f"Construction: {construction}")
+                if sh.cell_value(i, 12):
+                    features.append(str(sh.cell_value(i, 12)))
 
                 # Pricing
                 cost = common.formatFloat(data.get("price", "0"))
@@ -202,7 +200,6 @@ class Processor:
                 'content': content,
                 'finish': finish,
                 'country': country,
-                'specs': specs,
                 'features': features,
 
                 'cost': cost,
