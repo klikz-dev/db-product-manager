@@ -95,10 +95,11 @@ class DatabaseManager:
 
                     statusP=product.get('statusP', False),
                     statusS=product.get('statusS', False),
+                    european=product.get('european', False),
+                    outlet=product.get('outlet', False),
                     whiteGlove=product.get('whiteGlove', False),
                     quickShip=product.get('quickShip', False),
                     bestSeller=product.get('bestSeller', False),
-                    outlet=product.get('outlet', False),
 
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),

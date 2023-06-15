@@ -63,7 +63,7 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "main" in options['functions']:
+        if "inventory" in options['functions']:
             while True:
                 try:
                     processor.downloadFeed()
@@ -175,7 +175,6 @@ class Processor:
                     manufacturer = "ANDREW MARTIN"
                     european = True
                 elif "BLITHFIELD" in collection or "JAGTAR" in collection or "JOSEPHINE MUNSEY" in collection or "MISSONI HOME" in collection or "PAOLO MOSCHINO" in collection:
-                    manufacturer = "ANDREW MARTIN"
                     european = True
 
                 manufacturer_mapping = {
