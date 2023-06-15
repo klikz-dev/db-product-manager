@@ -61,16 +61,9 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "main" in options['functions']:
+        if "inventory" in options['functions']:
             while True:
                 try:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx")
-                    products = processor.fetchFeed()
-                    processor.databaseManager.writeFeed(products=products)
-
-                    processor.databaseManager.statusSync(fullSync=False)
-
                     processor.databaseManager.downloadFileFromFTP(
                         src="Jaipur inventory feed.csv", dst=f"{FILEDIR}/jaipur-living-inventory.csv")
                     processor.inventory()
@@ -121,8 +114,8 @@ class Processor:
 
                 upc = common.formatInt(sh.cell_value(i, 6))
 
-                title = common.formatText(sh.cell_value(i, 9)).title()
-                title = title.replace(BRAND, "").strip()
+                name = common.formatText(sh.cell_value(i, 9)).title()
+                name = name.replace(BRAND, "").strip()
 
                 # Categorization
                 manufacturer = BRAND
@@ -134,7 +127,7 @@ class Processor:
                     type = "Decor"
                 if type == "Pillow":
                     type = "Throw Pillows"
-                if "Throw" in title:
+                if "Throw" in name:
                     type = "Throws"
 
                 collection = common.formatText(sh.cell_value(i, 12))
@@ -180,7 +173,7 @@ class Processor:
 
                 # Tagging
                 tags = ", ".join((sh.cell_value(i, 19), sh.cell_value(i, 50), sh.cell_value(
-                    i, 51), pattern, description, type))
+                    i, 51), pattern, name, description, type))
                 colors = color
 
                 # Image
@@ -215,7 +208,7 @@ class Processor:
                 'pattern': pattern,
                 'color': color,
                 'upc': upc,
-                'title': title,
+                'name': name,
 
                 'brand': BRAND,
                 'type': type,
