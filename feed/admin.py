@@ -27,6 +27,7 @@ from .models import StarkStudio
 from .models import Stout
 from .models import Surya
 from .models import TresTintas
+from .models import HubbardtonForge
 from .models import York
 from .models import Zoffany
 
@@ -280,6 +281,11 @@ class SuryaAdmin(FeedAdmin):
 
 @admin.register(TresTintas)
 class TresTintasAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(HubbardtonForge)
+class HubbardtonForgeAdmin(FeedAdmin):
     pass
 
 

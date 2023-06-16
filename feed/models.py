@@ -266,6 +266,12 @@ class TresTintas(Feed):
         verbose_name_plural = "Tres Tintas"
 
 
+class HubbardtonForge(Feed):
+    class Meta:
+        verbose_name = "Hubbardton Forge"
+        verbose_name_plural = "Hubbardton Forge"
+
+
 class York(Feed):
     class Meta:
         verbose_name = "York"

@@ -145,6 +145,11 @@ markup = {
         "consumer": 1.5,
         "trade": 1.3,
     },
+    "Hubbardton Forge": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Zoffany": {
         "useMAP": False,
         "consumer": 2,
@@ -237,6 +242,12 @@ sftp = {
         "port": 22,
         "user": "surya",
         "pass": "Surya123!",
+    },
+    "Hubbardton Forge": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "vtforge",
+        "pass": "Vtforge123!",
     },
     "Zoffany": {
         "host": "34.203.121.151",
