@@ -135,13 +135,12 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
-        # Discontinued
+        # Price & Discontinued
         discontinuedMPNs = []
         prices = {}
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/brewster-discontinued.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/brewster-price.xlsx")
         sh = wb.sheet_by_index(0)
-
         for i in range(1, sh.nrows):
             mpn = common.formatText(sh.cell_value(i, 0))
 
@@ -158,12 +157,19 @@ class Processor:
                 'msrp': msrp
             }
 
+        wb = xlrd.open_workbook(f"{FILEDIR}/brewster-od.xls")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 2))
+
+            if mpn not in discontinuedMPNs:
+                discontinuedMPNs.append(mpn)
+
         # Best Sellers
         bestsellingMPNs = []
 
         wb = xlrd.open_workbook(f"{FILEDIR}/brewster-bestsellers.xlsx")
         sh = wb.sheet_by_index(0)
-
         for i in range(1, sh.nrows):
             mpn = common.formatText(sh.cell_value(i, 0))
             bestsellingMPNs.append(mpn)
