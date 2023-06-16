@@ -40,7 +40,8 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = York.objects.all()
+            # products = York.objects.all()
+            products = York.objects.filter(pattern="Lingering Garden Mural")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -80,8 +81,14 @@ class Processor:
     def test(self):
         try:
             # Test Collection
+            # reqProduct = requests.get(
+            #     "{}/collections.php".format(API_BASE_URL))
+            # resProduct = json.loads(reqProduct.text)
+            # print(resProduct)
+
+            # Test Product
             reqProduct = requests.get(
-                "{}/collections.php".format(API_BASE_URL))
+                "{}/product.php/{}".format(API_BASE_URL, "MU0314M"))
             resProduct = json.loads(reqProduct.text)
             print(resProduct)
         except Exception as e:

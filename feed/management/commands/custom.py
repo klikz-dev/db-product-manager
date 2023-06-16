@@ -321,7 +321,7 @@ class Processor:
     def syncHandle(self):
         csr = self.con.cursor()
 
-        brand = "Surya"
+        brand = "Kravet"
         csr.execute(f"""
             SELECT P.ProductId, P.Handle
             FROM Product P
