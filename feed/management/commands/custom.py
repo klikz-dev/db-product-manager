@@ -332,26 +332,31 @@ class Processor:
         products = csr.fetchall()
 
         for product in products:
-            productId = product[0]
-            productHandle = product[1]
+            try:
+                productId = product[0]
+                productHandle = product[1]
 
-            res = requests.get(
-                f"{SHOPIFY_API_URL}/products/{productId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
-            data = json.loads(res.text)
+                res = requests.get(
+                    f"{SHOPIFY_API_URL}/products/{productId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
+                data = json.loads(res.text)
 
-            if data.get("errors"):
-                debug.debug(
-                    "Custom", 1, f"Getting product {productId} Error: {data.get('errors')}")
+                if data.get("errors"):
+                    debug.debug(
+                        "Custom", 1, f"Getting product {productId} Error: {data.get('errors')}")
+                    continue
+
+                handle = data['product']['handle']
+
+                if handle != productHandle:
+                    csr.execute(
+                        "UPDATE Product SET Handle = %s WHERE ProductID = %s", (handle, productId))
+                    self.con.commit()
+
+                    debug.debug(
+                        "Custom", 0, f"Update product {productId} handle to {handle}.")
+
+            except Exception as e:
+                debug.debug("Custom", 1, str(e))
                 continue
-
-            handle = data['product']['handle']
-
-            if handle != productHandle:
-                csr.execute(
-                    "UPDATE Product SET Handle = %s WHERE ProductID = %s", (handle, productId))
-                self.con.commit()
-
-                debug.debug(
-                    "Custom", 0, f"Update product {productId} handle to {handle}.")
 
         csr.close()
