@@ -154,6 +154,12 @@ markup = {
 
 
 sftp = {
+    "Decoratorsbest": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "decoratorsbest",
+        "pass": "Decbest123!",
+    },
     "Ann Gish": {
         "host": "decoratorsbestam.com",
         "port": 22,

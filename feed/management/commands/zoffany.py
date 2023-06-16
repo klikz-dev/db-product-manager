@@ -8,6 +8,7 @@ import xlrd
 import time
 import csv
 import codecs
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -56,6 +57,9 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "roomset" in options['functions']:
+            processor.roomset()
 
         if "inventory" in options['functions']:
             while True:
@@ -218,6 +222,25 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def roomset(self):
+        fnames = os.listdir(f"{FILEDIR}/images/zoffany/")
+        for fname in fnames:
+            mpn = fname.split("_")[0]
+
+            try:
+                product = Zoffany.objects.get(mpn=mpn)
+            except Zoffany.DoesNotExist:
+                continue
+
+            productId = product.productId
+            idx = 2
+
+            if productId:
+                copyfile(f"{FILEDIR}/images/zoffany/{fname}",
+                         f"{FILEDIR}/../../../images/roomset/{productId}_{idx}.jpg")
+
+            os.remove(f"{FILEDIR}/images/zoffany/{fname}")
 
     def inventory(self):
         stocks = []

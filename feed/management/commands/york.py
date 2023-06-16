@@ -336,6 +336,6 @@ class Processor:
                         copyfile(f"{FILEDIR}/images/york/{fname}",
                                  f"{FILEDIR}/../../../images/product/{productId}.jpg")
 
-                os.remove(f"{FILEDIR}images/york/{fname}")
+                os.remove(f"{FILEDIR}/images/york/{fname}")
             except:
                 continue
