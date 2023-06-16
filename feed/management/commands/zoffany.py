@@ -226,21 +226,20 @@ class Processor:
     def roomset(self):
         fnames = os.listdir(f"{FILEDIR}/images/zoffany/")
         for fname in fnames:
-            mpn = fname.split("_")[0]
+            if "_" in fname:
+                mpn = fname.split("_")[0]
+                idx = int(fname.split("_")[1].replace(".jpg", "")) + 1
 
-            try:
-                product = Zoffany.objects.get(mpn=mpn)
-            except Zoffany.DoesNotExist:
-                continue
+                try:
+                    product = Zoffany.objects.get(mpn=mpn)
 
-            productId = product.productId
-            idx = 2
+                    if product.productId:
+                        copyfile(f"{FILEDIR}/images/zoffany/{fname}",
+                                 f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg")
 
-            if productId:
-                copyfile(f"{FILEDIR}/images/zoffany/{fname}",
-                         f"{FILEDIR}/../../../images/roomset/{productId}_{idx}.jpg")
-
-            os.remove(f"{FILEDIR}/images/zoffany/{fname}")
+                    os.remove(f"{FILEDIR}/images/zoffany/{fname}")
+                except Zoffany.DoesNotExist:
+                    continue
 
     def inventory(self):
         stocks = []
