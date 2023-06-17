@@ -585,7 +585,7 @@ def UpdateProductToShopify(productID, con):
     pMeta = pd.ProductMetafield()
 
     # Generate a new handle
-    handle = common.fmt(title).lower().replace(" ", "-")
+    handle = common.fmt(title).lower().replace(" ", "-").replace("--", "-")
 
     p = {
         "body_html": body,
