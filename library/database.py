@@ -562,7 +562,7 @@ class DatabaseManager:
                 continue
 
     def downloadImage(self, productId, thumbnail, roomsets):
-        if thumbnail and thumbnail.strip() != "":
+        if thumbnail and thumbnail.strip() != "" and "http" in thumbnail:
             try:
                 common.picdownload2(str(thumbnail).strip().replace(
                     " ", "%20"), "{}.jpg".format(productId))

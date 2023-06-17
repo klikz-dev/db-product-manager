@@ -40,8 +40,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = HubbardtonForge.objects.filter(
-                Q(type='Pillow') | Q(type='Throws'))
+            products = HubbardtonForge.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -52,10 +51,7 @@ class Command(BaseCommand):
             processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
-            processor.databaseManager.downloadImages(missingOnly=False)
-
-        if "pillow" in options['functions']:
-            processor.databaseManager.linkPillowSample()
+            processor.image()
 
 
 class Processor:
@@ -109,8 +105,8 @@ class Processor:
                     type = "Consoles"
                 elif "Accent Table" in name:
                     type = "Accent Tables"
-                # else:
-                #     type = "Accessories"
+                else:
+                    type = "Accessories"
 
                 manufacturer = brand
                 collection = common.formatText(sh.cell_value(i, 7))
@@ -125,9 +121,9 @@ class Processor:
                 # Additional Information
                 weight = common.formatFloat(sh.cell_value(i, 26))
 
-                finish = common.formatFloat(sh.cell_value(i, 9))
-                if common.formatFloat(sh.cell_value(i, 10)):
-                    finish = f"{finish}, {common.formatFloat(sh.cell_value(i, 10))}"
+                finish = common.formatText(sh.cell_value(i, 9))
+                if common.formatText(sh.cell_value(i, 10)):
+                    finish = f"{finish}, {common.formatText(sh.cell_value(i, 10))}"
 
                 features = []
                 for id in range(74, 79):
@@ -144,8 +140,11 @@ class Processor:
                 uom = "Per Item"
 
                 # Tagging
-                tags = f"{sh.cell_value(i, 79)}, {sh.cell_value(i, 80)}, {type}, {name}"
+                tags = f"{sh.cell_value(i, 79)}, {sh.cell_value(i, 80)}, {sh.cell_value(i, 89)}, {type}, {name}"
                 colors = f"{color}, {sh.cell_value(i, 10)}"
+
+                # Image
+                thumbnail = sh.cell_value(i, 90)
 
                 # Status
                 statusP = True
@@ -185,6 +184,8 @@ class Processor:
                 'tags': tags,
                 'colors': colors,
 
+                'thumbnail': thumbnail,
+
                 'statusP': statusP,
                 'statusS': statusS,
             }
@@ -192,3 +193,27 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def image(self):
+        csr = self.con.cursor()
+
+        hasImage = []
+
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        products = HubbardtonForge.objects.all()
+        for product in products:
+            if not product.productId or not product.thumbnail:
+                continue
+
+            if product.productId in hasImage:
+                continue
+
+            self.databaseManager.downloadFileFromSFTP(
+                src=f"/vtforge/rendered_product_images/{product.thumbnail}",
+                dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
+            )
+
+        csr.close()
