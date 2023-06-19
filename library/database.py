@@ -286,15 +286,19 @@ class DatabaseManager:
 
         return (price, priceTrade, priceSample)
 
-    def createProduct(self, product, formatPrice):
+    def createProduct(self, product, formatPrice, private):
 
         ptype = product.type
-        manufacturer = product.manufacturer
 
-        if "JF Fabrics" in manufacturer:
-            manufacturer = product.brand
-        elif ptype in manufacturer:
-            manufacturer = str(manufacturer).replace(ptype, "").strip()
+        if private:
+            manufacturer = "DecoratorsBest"
+        else:
+            manufacturer = product.manufacturer
+
+            if "JF Fabrics" in manufacturer:
+                manufacturer = product.brand
+            elif ptype in manufacturer:
+                manufacturer = str(manufacturer).replace(ptype, "").strip()
 
         if str(ptype).endswith("es"):
             ptype = ptype[:-2]
@@ -437,7 +441,7 @@ class DatabaseManager:
 
         return True
 
-    def createProducts(self, formatPrice=True):
+    def createProducts(self, formatPrice=True, private=False):
         products = self.Feed.objects.all()
 
         total = len(products)
@@ -447,7 +451,7 @@ class DatabaseManager:
 
             try:
                 createdInDatabase = self.createProduct(
-                    product, formatPrice)
+                    product, formatPrice, private=private)
                 if not createdInDatabase:
                     continue
             except Exception as e:
