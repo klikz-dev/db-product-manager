@@ -29,7 +29,8 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             while True:
-                try:
+                # try:
+                if True:
                     total, skiped = processor.feed()
                     if skiped < total * 0.3:
                         processor.upload()
@@ -41,11 +42,11 @@ class Command(BaseCommand):
                         PROCESS, options['functions']))
                     time.sleep(86400)
 
-                except Exception as e:
-                    debug.debug(PROCESS, 1, str(e))
-                    print("Failed process. Waiting for next run. {}:{}".format(
-                        PROCESS, options['functions']))
-                    time.sleep(3600)
+                # except Exception as e:
+                #     debug.debug(PROCESS, 1, str(e))
+                #     print("Failed process. Waiting for next run. {}:{}".format(
+                #         PROCESS, options['functions']))
+                #     time.sleep(3600)
 
 
 class Processor:
