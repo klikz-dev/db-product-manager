@@ -727,14 +727,14 @@ class Command(BaseCommand):
 
         for fname in fnames:
             try:
-                if "_" in fname:
+                if "-" in fname:
                     mpn = fname.split("_")[0]
-                    roomId = int(fname.split("_")[1].split(".")[0]) + 1
+                    roomId = 2
 
                     product = PremierPrints.objects.get(mpn=mpn)
                     productId = product.productId
 
-                    if productId != None and productId != "":
+                    if productId:
                         copyfile(FILEDIR + "/files/images/premierprints/" + fname, FILEDIR +
                                  "/../../images/roomset/{}_{}.jpg".format(productId, roomId))
 

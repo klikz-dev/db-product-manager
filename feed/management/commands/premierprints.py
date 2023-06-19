@@ -7,6 +7,7 @@ import environ
 import pymysql
 import xlrd
 import time
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -52,6 +53,9 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor.image()
+
+        if "roomset" in options['functions']:
+            processor.roomset()
 
         if "inventory" in options['functions']:
             while True:
@@ -111,6 +115,7 @@ class Processor:
                 width = common.formatFloat(sh.cell_value(i, 10))
                 repeatH = common.formatFloat(sh.cell_value(i, 14))
                 repeatV = common.formatFloat(sh.cell_value(i, 13))
+                usage = common.formatText(sh.cell_value(i, 20))
 
                 # Additional Information
 
@@ -166,6 +171,7 @@ class Processor:
                 'description': description,
                 'repeatH': repeatH,
                 'repeatV': repeatV,
+                'usage': usage,
 
                 'cost': cost,
 
@@ -201,8 +207,38 @@ class Processor:
                 continue
 
             self.databaseManager.downloadFileFromSFTP(
-                src=f"/vtforge/rendered_product_images/{product.thumbnail}",
+                src=f"{product.mpn}-L.jpg",
                 dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
             )
 
         csr.close()
+
+    def roomset(self):
+        fnames = os.listdir(f"{FILEDIR}/images/premier-prints/")
+
+        for fname in fnames:
+            try:
+                if "-" in fname:
+                    mpn = fname.split("-")[0]
+                    print(mpn)
+                    roomId = 2
+
+                    product = PremierPrints.objects.get(mpn=mpn)
+                    productId = product.productId
+
+                    if productId:
+                        copyfile(f"{FILEDIR}/images/premier-prints/{fname}",
+                                 f"{FILEDIR}/../../../images/roomset/{productId}_{roomId}.jpg")
+
+                        debug.debug(BRAND, 0, "Roomset Image {}_{}.jpg".format(
+                            productId, roomId))
+
+                        os.remove(f"{FILEDIR}/images/premier-prints/{fname}")
+                    else:
+                        print("No product found with MPN: {}".format(mpn))
+                else:
+                    continue
+
+            except Exception as e:
+                print(e)
+                continue
