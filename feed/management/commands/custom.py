@@ -322,16 +322,16 @@ class Processor:
     def syncHandle(self):
         csr = self.con.cursor()
 
+        brand = "Surya"
+
         csr.execute(f"""
             SELECT P.ProductId, P.Handle
             FROM Product P
             LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
             LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
-            WHERE P.ProductId IS NOT NULL
+            WHERE M.Brand = '{brand}' AND P.ProductId IS NOT NULL
         """)
         products = csr.fetchall()
-
-        csr.close()
 
         total = len(products)
         for index, product in enumerate(products):
@@ -367,3 +367,5 @@ class Processor:
                 debug.debug("Custom", 1, str(e))
                 time.sleep(5)
                 continue
+
+        csr.close()
