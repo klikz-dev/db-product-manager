@@ -25,12 +25,10 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "main" in options['functions']:
             while True:
-                # try:
-                if True:
+                with Processor() as processor:
                     total, skiped = processor.feed()
                     if skiped < total * 0.3:
                         processor.upload()
@@ -42,23 +40,20 @@ class Command(BaseCommand):
                         PROCESS, options['functions']))
                     time.sleep(86400)
 
-                # except Exception as e:
-                #     debug.debug(PROCESS, 1, str(e))
-                #     print("Failed process. Waiting for next run. {}:{}".format(
-                #         PROCESS, options['functions']))
-                #     time.sleep(3600)
-
 
 class Processor:
     def __init__(self):
-        env = environ.Env()
-        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
-            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
-        self.s3 = boto3.client('s3', aws_access_key_id=env(
-            'aws_access_key'), aws_secret_access_key=env('aws_secret_key'))
+        self.env = environ.Env()
         self.bucket = 'decoratorsbestimages'
 
-    def __del__(self):
+    def __enter__(self):
+        self.con = pymysql.connect(host=self.env('MYSQL_HOST'), user=self.env('MYSQL_USER'), passwd=self.env(
+            'MYSQL_PASSWORD'), db=self.env('MYSQL_DATABASE'), connect_timeout=5)
+        self.s3 = boto3.client('s3', aws_access_key_id=self.env(
+            'aws_access_key'), aws_secret_access_key=self.env('aws_secret_key'))
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fmt(self, s):
