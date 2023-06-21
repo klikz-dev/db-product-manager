@@ -194,7 +194,12 @@ class Processor:
                 statusP = True
 
                 if type == "Rug":
-                    statusS = False
+                    if cost == 15:
+                        statusP = False
+                        statusS = True
+                    else:
+                        statusP = True
+                        statusS = False
                 else:
                     statusS = True
 
