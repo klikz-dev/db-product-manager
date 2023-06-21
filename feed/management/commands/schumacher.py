@@ -23,65 +23,71 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "feed" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
                 src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = Schumacher.objects.filter(
                 Q(pattern='Birds & Butterflies'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "pillow" in options['functions']:
+            processor = Processor()
             processor.databaseManager.linkPillowSample()
 
         if "inventory" in options['functions']:
-            processor.databaseManager.downloadFileFromSFTP(
-                src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
-            processor.inventory()
-
-        if "main" in options['functions']:
             while True:
-                processor.databaseManager.downloadFileFromSFTP(
-                    src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
+                with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
 
-                processor.inventory()
+                    processor.inventory()
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
 
 
 class Processor:
     def __init__(self):
         env = environ.Env()
+
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
-
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=Schumacher)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):
