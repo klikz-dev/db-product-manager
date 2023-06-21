@@ -3,6 +3,8 @@ import requests
 import json
 import paramiko
 import urllib
+from shutil import copyfile
+import os
 
 from library import debug, common, const, shopify
 from mysql.models import Type, Manufacturer
@@ -637,6 +639,20 @@ class DatabaseManager:
                 sftp.remove(file)
 
         sftp.close()
+
+        debug.debug(self.brand, 0,
+                    f"{dst} downloaded from {self.brand} SFTP")
+        return True
+
+    def downloadFileFromLocalSFTP(self, src, dst, fileSrc=True):
+        src = f"/var/sftp/{const.sftp[self.brand]['user']}{src}"
+
+        if fileSrc:
+            copyfile(src, dst)
+        else:
+            files = os.listdir(src)
+            for file in files:
+                copyfile(f"{src}/{file}", dst)
 
         debug.debug(self.brand, 0,
                     f"{dst} downloaded from {self.brand} SFTP")

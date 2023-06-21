@@ -221,7 +221,7 @@ class Processor:
                 continue
 
             try:
-                self.databaseManager.downloadFileFromSFTP(
+                self.databaseManager.downloadFileFromLocalSFTP(
                     src=f"/vtforge/rendered_product_images/{product.thumbnail}",
                     dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
                 )
