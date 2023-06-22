@@ -288,7 +288,7 @@ class DatabaseManager:
 
         return (price, priceTrade, priceSample)
 
-    def createProduct(self, product, formatPrice, private):
+    def createProduct(self, product, formatPrice, private=False):
 
         ptype = product.type
 

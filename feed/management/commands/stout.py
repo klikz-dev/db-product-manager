@@ -42,8 +42,7 @@ class Command(BaseCommand):
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
-            products = Stout.objects.filter(
-                Q(type='Pillow') | Q(type='Throws'))
+            products = Stout.objects.filter(pattern="WINDY")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
