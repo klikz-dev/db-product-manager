@@ -59,6 +59,11 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "sample" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
+
 
 class Processor:
     def __init__(self):
