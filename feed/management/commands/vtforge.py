@@ -227,6 +227,13 @@ class Processor:
                 )
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
-                continue
+
+                try:
+                    self.databaseManager.downloadFileFromLocalSFTP(
+                        src=f"/vtforge/standard_product_images/{product.thumbnail}",
+                        dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
+                    )
+                except Exception as e:
+                    debug.debug(BRAND, 1, str(e))
 
         csr.close()
