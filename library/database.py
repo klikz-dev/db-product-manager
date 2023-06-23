@@ -723,7 +723,7 @@ class DatabaseManager:
                     common.sq(sku), common.sq(collection)))
                 self.con.commit()
 
-            if type == "Pillow" or type == "Rug":
+            if type == "Pillow" or type == "Rug" or type == "Rug Pad":
                 size = f"{common.formatInt(width / 12)}' x {common.formatInt(length / 12)}', {size}, {tags}"
                 self.csr.execute("CALL AddToEditSize ({}, {})".format(
                     common.sq(sku), common.sq(size)))

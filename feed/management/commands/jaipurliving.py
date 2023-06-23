@@ -137,7 +137,10 @@ class Processor:
                 width = common.formatFloat(sh.cell_value(i, 21))
                 length = common.formatFloat(sh.cell_value(i, 22))
                 height = common.formatFloat(sh.cell_value(i, 24))
+
                 size = common.formatText(sh.cell_value(i, 18))
+                size = size.replace("X", " x ").replace(
+                    "Folded", "").replace("BOX", "").replace("  ", " ").strip()
 
                 # Additional Information
                 features = []
