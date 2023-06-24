@@ -422,17 +422,6 @@ class ProductTagAdmin(admin.ModelAdmin):
 
 
 class TagAdmin(admin.ModelAdmin):
-    actions = None
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    # def has_add_permission(self, request):
-    #     return False
-
-    # def has_change_permission(self, request, obj=None):
-    #     return False
-
     fields = ['tagId', 'name', 'parentTagId',
               'description', 'published', 'deleted']
 
