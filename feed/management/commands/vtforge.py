@@ -95,9 +95,13 @@ class Processor:
                 mpn = common.formatText(sh.cell_value(i, 1))
                 sku = f"HF {mpn}"
 
-                pattern = common.formatText(sh.cell_value(i, 3))
-                color = common.formatText(sh.cell_value(i, 9))
-                name = common.formatText(sh.cell_value(i, 2))
+                pattern = common.formatInt(sh.cell_value(i, 3))
+
+                color = f"{common.formatText(sh.cell_value(i, 9))}"
+                if sh.cell_value(i, 10):
+                    color = f"{color} {sh.cell_value(i, 10)}"
+
+                name = f"{color} {common.formatText(sh.cell_value(i, 2))}"
 
                 # Categorization
                 brand = BRAND
@@ -155,7 +159,7 @@ class Processor:
 
                 # Tagging
                 tags = f"{sh.cell_value(i, 79)}, {sh.cell_value(i, 80)}, {sh.cell_value(i, 89)}, {type}, {name}"
-                colors = f"{color}, {sh.cell_value(i, 10)}"
+                colors = color
 
                 # Image
                 thumbnail = sh.cell_value(i, 90)
