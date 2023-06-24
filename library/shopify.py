@@ -125,7 +125,6 @@ class ProductData:
         # Add Subtype To Tags
         self.csr.execute("SELECT T.Name, T.ParentTypeID, PT.ParentTypeID FROM ProductSubtype PS JOIN Type T ON PS.SubtypeID = T.TypeID LEFT JOIN Type PT ON T.ParentTypeID = PT.TypeID WHERE PS.SKU = {} AND T.Published = 1 AND PT.Published = 1 ORDER BY T.TypeID DESC".format(sq(self.sku)))
         subtypes = self.csr.fetchall()
-        subtypeStr = ""
         sts = []
         for subtype in subtypes:
             if subtype[1] == None or subtype[1] == 0 or subtype[0] in sts:
@@ -211,17 +210,20 @@ class ProductData:
 
         # Rebuy Rug Pad Tag
         size = ''
+        subtype = ''
         for tag in tags:
             if ":" not in tag:
                 continue
             tagKey = tag.split(":")[0]
             tagVal = tag.split(":")[1]
-            if tagKey[0] == 'Size':
+            if tagKey == 'Size':
                 size = tagVal
+            if tagKey == 'Subtype':
+                subtype = tagVal
 
         if size and self.ptype == "Rug":
             tags.append("Rebuy_Rug_Size_{}".format(size))
-        if size and subtypeStr == "Rug Pad":
+        if size and subtype == "Rug Pad":
             tags.append("Rebuy_Rug_Pad_Size_{}".format(size))
 
         return tags
