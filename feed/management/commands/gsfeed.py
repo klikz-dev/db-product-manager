@@ -145,7 +145,7 @@ class Processor:
             style = self.fmt(str(row[7]))
             color = self.fmt(str(row[8]))
             weight = round(float(row[9]), 2)
-            gtin = row[10]
+            gtin = ''
             mpn = self.fmt(str(row[11]))
             bodyHTML = str(row[12])
             cost = round(float(row[13]), 2)
