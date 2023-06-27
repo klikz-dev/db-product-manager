@@ -100,7 +100,13 @@ class Processor:
 
             # Test Product
             reqProduct = requests.get(
-                "{}/product.php/{}".format(API_BASE_URL, "MU0314M"))
+                "{}/product.php/{}".format(API_BASE_URL, "SW7430"))
+            resProduct = json.loads(reqProduct.text)
+            print(resProduct)
+
+            # Test Inventory
+            reqProduct = requests.get(
+                "{}/stock.php/{}".format(API_BASE_URL, "SW7430"))
             resProduct = json.loads(reqProduct.text)
             print(resProduct)
         except Exception as e:

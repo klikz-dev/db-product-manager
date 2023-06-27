@@ -156,7 +156,7 @@ class Processor:
 
             # Exceptions
             stock = inventory.inventory(sku)
-            if stock["quantity"] < int(minQty):
+            if stock["quantity"] < minQty:
                 debug.debug(
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Out of stock")
                 skiped += 1
