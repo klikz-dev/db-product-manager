@@ -64,6 +64,10 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "inventory" in options['functions']:
+            processor = Processor()
+            processor.inventory()
+
 
 class Processor:
     def __init__(self):
@@ -246,3 +250,18 @@ class Processor:
                     debug.debug(BRAND, 1, str(e))
 
         csr.close()
+
+    def inventory(self):
+        stocks = []
+
+        products = HubbardtonForge.objects.all()
+
+        for product in products:
+            stock = {
+                'sku': product.sku,
+                'quantity': 5,
+                'note': "Made To Order: This product will ship in 3-4 weeks.",
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=3)
