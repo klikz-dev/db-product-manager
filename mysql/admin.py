@@ -25,6 +25,8 @@ PO_RECORDS = [
     'DanaGibsonSample',
     'ElaineSmithOrder',
     'ElaineSmithSample',
+    'HubbardtonForgeOrder',
+    'HubbardtonForgeSample',
     'JaipurLivingOrder',
     'JaipurLivingSample',
     'JamieYoungOrder',
