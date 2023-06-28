@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from feed.models import Kravet
+from django.db.models import Q
 
 import os
 import environ
@@ -44,7 +45,10 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Kravet.objects.all()
+            products = Kravet.objects.filter(
+                Q(manufacturer="Cole & Son Wallpaper") |
+                Q(manufacturer="Winfield Thybony Wallpaper")
+            )
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
