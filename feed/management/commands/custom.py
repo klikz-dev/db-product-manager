@@ -57,14 +57,21 @@ class Command(BaseCommand):
         if "syncHandle" in options['functions']:
             processor.syncHandle()
 
+        if "unpublishBrand" in options['functions']:
+            processor.unpublishBrand()
+
 
 class Processor:
     def __init__(self):
-        env = environ.Env()
-        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
-            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
+        self.env = environ.Env()
 
-    def __del__(self):
+        self.con = pymysql.connect(host=self.env('MYSQL_HOST'), user=self.env('MYSQL_USER'), passwd=self.env(
+            'MYSQL_PASSWORD'), db=self.env('MYSQL_DATABASE'), connect_timeout=5)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def updateSamplePrices(self):
@@ -367,5 +374,36 @@ class Processor:
                 debug.debug("Custom", 1, str(e))
                 time.sleep(5)
                 continue
+
+        csr.close()
+
+    def unpublishBrand(self):
+        brand = "Stark Studio"
+
+        debug.debug(brand, 0, f"Started unpublishing {brand}")
+
+        csr = self.con.cursor()
+        csr.execute(f"""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
+                    FROM Product P
+                    WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
+                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{brand}')""")
+        rows = csr.fetchall()
+
+        for row in rows:
+            productID = row[0]
+            mpn = row[1]
+
+            csr.execute(
+                "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+            self.con.commit()
+            csr.execute(
+                "CALL AddToPendingUpdatePublish ({})".format(productID))
+            self.con.commit()
+
+            debug.debug(
+                brand, 0, f"Disabled product -- Brand: {brand}, ProductID: {productID}, mpn: {mpn}")
+
+        debug.debug(
+            brand, 0, f"Finished unpublishing {brand}. total: {len(rows)}")
 
         csr.close()

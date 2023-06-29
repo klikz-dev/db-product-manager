@@ -228,6 +228,8 @@ class Processor:
                     # Status
                     statusP = False
                     statusS = False
+                    stockP = 0
+                    stockNote = ""
 
                     # Store ItemID in thumbnail field
                     thumbnail = mpn_origin
