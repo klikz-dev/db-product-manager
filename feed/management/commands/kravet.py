@@ -216,10 +216,15 @@ class Processor:
 
                 if manufacturer in manufacturer_mapping:
                     manufacturer, code_prefix = manufacturer_mapping[manufacturer]
+
                     sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
+
+                    if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony":
+                        sku = f"{code_prefix} {keys[0]}"
+
                     if manufacturer == "Winfield Thybony":
                         r = requests.get(
-                            f"http://www.winfieldthybony.com/home/products/details?sku={sku.replace('WF ', '')}")
+                            f"http://www.winfieldthybony.com/home/products/details?sku={keys[0]}")
                         soup = BeautifulSoup(r.content, "lxml")
                         try:
                             collection = soup.find(
@@ -231,6 +236,7 @@ class Processor:
                                 "a", id="ctl00_mainContent_C001_downloadRoomShotImageUrl2")["href"]
                         except:
                             pass
+
                 else:
                     debug.debug(
                         BRAND, 1, f"Brand Error for MPN: {mpn}, Brand: {manufacturer}")

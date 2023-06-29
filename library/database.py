@@ -183,21 +183,23 @@ class DatabaseManager:
     def statusSync(self, fullSync=False):
         debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
 
-        self.csr.execute(f"""SELECT P.ProductID,P.ManufacturerPartNumber,P.Published
+        self.csr.execute(f"""
+                    SELECT P.ProductID, P.SKU, P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
-                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')""")
+                    AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')
+                """)
         rows = self.csr.fetchall()
 
         total, pb, upb = len(rows), 0, 0
 
         for row in rows:
             productID = row[0]
-            mpn = row[1]
+            sku = row[1]
             published = row[2]
 
             try:
-                product = self.Feed.objects.get(mpn=mpn)
+                product = self.Feed.objects.get(sku=sku)
                 product.productId = productID
                 product.save()
 
@@ -211,7 +213,7 @@ class DatabaseManager:
 
                     upb = upb + 1
                     debug.debug(
-                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
+                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
 
                 if published == 0 and product.statusP == True and product.cost != None:
                     self.csr.execute(
@@ -223,7 +225,7 @@ class DatabaseManager:
 
                     pb = pb + 1
                     debug.debug(
-                        self.brand, 0, f"Enabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
+                        self.brand, 0, f"Enabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
 
             except self.Feed.DoesNotExist:
                 if published == 1:
@@ -236,7 +238,7 @@ class DatabaseManager:
 
                     upb = upb + 1
                     debug.debug(
-                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, mpn: {mpn}")
+                        self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
 
             if fullSync:
                 self.csr.execute(
