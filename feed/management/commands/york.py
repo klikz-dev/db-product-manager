@@ -270,9 +270,14 @@ class Processor:
                         row['Theme']), pattern, collection, description)
                     colors = color
 
-                    statusP = True
                     statusS = True
                     quickShip = False
+
+                    if row['SKUStatus'] == "Active":
+                        statusP = True
+                    else:
+                        statusP = False
+
                     if row['QuickShip'] == 'Y':
                         quickShip = True
 

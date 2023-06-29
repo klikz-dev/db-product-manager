@@ -203,13 +203,15 @@ class Processor:
         csr.close()
 
     def removeTags(self):
+        tagId = 282
+
         csr = self.con.cursor()
 
-        csr.execute("""
+        csr.execute(f"""
             SELECT DISTINCT P.ProductId, P.SKU, P.Title
             FROM Product P
             LEFT JOIN ProductTag PT ON P.SKU = PT.SKU
-            WHERE PT.TagId = 272 AND P.ProductTypeId != 5
+            WHERE PT.TagId = {tagId} AND P.ProductTypeId != 5
         """)
         rows = csr.fetchall()
 
@@ -219,13 +221,13 @@ class Processor:
             title = row[2]
 
             csr.execute(
-                f"DELETE FROM ProductTag WHERE SKU = '{sku}' AND TagId = 272")
+                f"DELETE FROM ProductTag WHERE SKU = '{sku}' AND TagId = {tagId}")
             self.con.commit()
 
             csr.execute(f"CALL AddToPendingUpdateTagBodyHTML ({productId})")
             self.con.commit()
 
-            debug.debug("Custom", 0, f"Removed Rumbar tag from {title}")
+            debug.debug("Custom", 0, f"Removed tag {tagId} from {title}")
 
         csr.close()
 

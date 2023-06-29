@@ -180,8 +180,9 @@ class Processor:
                 msrp = common.formatFloat(sh.cell_value(i, 17))
 
                 # Tagging
+                featuresText = ", ".join(features)
                 tags = ", ".join((sh.cell_value(i, 19), sh.cell_value(i, 50), sh.cell_value(
-                    i, 51), pattern, name, description, type))
+                    i, 51), pattern, name, description, type, featuresText))
                 colors = color
 
                 # Image

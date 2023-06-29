@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-import os
+import re
 import time
 import pymysql
 
@@ -452,7 +452,7 @@ class Command(BaseCommand):
             size = row[1].lower()
             isLumbar = True
             for key in sizeDict.keys():
-                if key in size:
+                if self.check_exact_word(key, size):
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(sizeDict[key])))
                     con.commit()
@@ -513,3 +513,7 @@ class Command(BaseCommand):
 
         csr.close()
         con.close()
+
+    def check_exact_word(self, key, text):
+        pattern = r'\b{}\b'.format(re.escape(key))
+        return bool(re.search(pattern, text, flags=re.IGNORECASE))

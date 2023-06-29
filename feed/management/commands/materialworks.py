@@ -59,7 +59,7 @@ class Command(BaseCommand):
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "inventory" in options['functions']:
-            if True:
+            while True:
                 try:
                     processor.databaseManager.downloadFileFromSFTP(
                         src="materialworks", dst=f"{FILEDIR}/materialworks-inventory.csv", fileSrc=False)

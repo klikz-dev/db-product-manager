@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
-            if True:
+            while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
                         src="/surya/inventory_dbest.csv", dst=f"{FILEDIR}/surya-inventory.csv")
