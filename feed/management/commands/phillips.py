@@ -25,50 +25,53 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
+
         if "feed" in options['functions']:
+            processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = Phillips.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=False)
 
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
+            processor = Processor()
             processor.databaseManager.customTags(key="statusS", tag="NoSample")
 
         if "order" in options['functions']:
+            processor = Processor()
             processor.order()
 
         if "main" in options['functions']:
             while True:
-                try:
+                with Processor() as processor:
                     products = processor.fetchFeed()
                     processor.databaseManager.writeFeed(products=products)
                     processor.databaseManager.statusSync(fullSync=False)
+                    processor.databaseManager.updatePrices(formatPrice=False)
 
                     print("Finished process. Waiting for next run. {}:{}".format(
                         BRAND, options['functions']))
-                    time.sleep(86400)
-
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    print("Failed process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(3600)
+                    time.sleep(60 * 60 * 24 * 7)
 
 
 class Processor:
@@ -88,14 +91,17 @@ class Processor:
         data = json.loads(response.text)
         self.token = data['data']['token']
 
-        env = environ.Env()
-        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
-            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
+        self.env = environ.Env()
 
+        self.con = pymysql.connect(host=self.env('MYSQL_HOST'), user=self.env('MYSQL_USER'), passwd=self.env(
+            'MYSQL_PASSWORD'), db=self.env('MYSQL_DATABASE'), connect_timeout=5)
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=Phillips)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):
