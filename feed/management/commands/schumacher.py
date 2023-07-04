@@ -142,11 +142,11 @@ class Processor:
                 length = common.formatFloat(row[21])
 
                 size = ""
-                if width != "" and length != "":
+                if width > 0 and length > 0:
                     if type == "Pillow" or type == "Throw":
                         size = f'{width}" x {length}"'
                     elif type == "Rug":
-                        size = f"{common.formatInt(width / 12)}' x {common.formatInt(length / 12)}'"
+                        size = f"{common.formatFloat(width / 12)}' x {common.formatFloat(length / 12)}'"
 
                 repeatV = common.formatFloat(row[15])
                 repeatH = common.formatFloat(row[16])
