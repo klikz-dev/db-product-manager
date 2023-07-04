@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         if "tag" in options['functions']:
             processor = Processor()
-            processor.databaseManager.updateTags(category=False)
+            processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
             processor = Processor()

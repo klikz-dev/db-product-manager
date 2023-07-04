@@ -270,16 +270,20 @@ class Processor:
                         row['Theme']), pattern, collection, description)
                     colors = color
 
-                    statusS = True
-                    quickShip = False
-
                     if row['SKUStatus'] == "Active":
                         statusP = True
+                        statusS = True
+                    elif row['SKUStatus'] == "Retired":
+                        statusP = False  # To Confirm with York team
+                        statusS = False
                     else:
                         statusP = False
+                        statusS = False
 
                     if row['QuickShip'] == 'Y':
                         quickShip = True
+                    else:
+                        quickShip = False
 
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
