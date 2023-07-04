@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Surya.objects.filter(sku="SR AML2323-710102")
+            products = Surya.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 
