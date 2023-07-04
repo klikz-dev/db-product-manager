@@ -120,6 +120,11 @@ class Processor:
                 pattern = formatText(sh.cell_value(i, 4))
                 color = formatText(sh.cell_value(i, 2))
 
+                if sh.cell_value(i, 3):
+                    name = formatText(sh.cell_value(i, 3))
+                else:
+                    name = ""
+
                 # Categorization
                 brand = BRAND
 
@@ -213,6 +218,7 @@ class Processor:
                 'upc': upc,
                 'pattern': pattern,
                 'color': color,
+                'name': name,
 
                 'brand': brand,
                 'type': type,

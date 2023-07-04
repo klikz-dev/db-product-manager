@@ -42,7 +42,7 @@ class Command(BaseCommand):
         if "update" in options['functions']:
             processor = Processor()
             products = Schumacher.objects.filter(
-                Q(pattern='Birds & Butterflies'))
+                Q(type='Rug'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -211,7 +211,11 @@ class Processor:
                 # Stock
                 stockP = int(float(row[19]))
 
-                pass
+                # Custom Name
+                if type == "Rug" and size:
+                    name = f"{pattern} {color} {size} {type}"
+                else:
+                    name = ""
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -222,6 +226,7 @@ class Processor:
                 'sku': sku,
                 'pattern': pattern,
                 'color': color,
+                'name': name,
 
                 'brand': BRAND,
                 'type': type,
