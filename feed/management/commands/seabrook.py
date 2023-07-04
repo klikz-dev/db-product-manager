@@ -110,7 +110,7 @@ class Processor:
                     repeat = ""
 
                 width = common.formatFloat(sh.cell_value(i, 29))
-                height = common.formatFloat(sh.cell_value(i, 30))
+                length = common.formatFloat(sh.cell_value(i, 30))
                 size = f"{common.formatText(sh.cell_value(i, 32))} sqft"
 
                 # Additional Information
@@ -120,8 +120,8 @@ class Processor:
                 specs = [("Removal", common.formatText(sh.cell_value(i, 39)))]
                 weight = common.formatFloat(sh.cell_value(i, 21))
                 country = common.formatText(sh.cell_value(i, 42))
-                yards = common.formatFloat(sh.cell_value(i, 23))
-                upc = common.formatText(sh.cell_value(i, 16))
+                yards = common.formatFloat(sh.cell_value(i, 22))
+                upc = common.formatInt(sh.cell_value(i, 16))
 
                 # Pricing
                 if 'Bolt' in sh.cell_value(i, 43):
@@ -182,7 +182,7 @@ class Processor:
                 'description': description,
                 'usage': usage,
                 'width': width,
-                'height': height,
+                'length': length,
                 'size': size,
                 'repeat': repeat,
 
