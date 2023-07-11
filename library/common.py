@@ -105,7 +105,10 @@ def backup():
 
 def importOrder(shopifyOrder):
     shopifyCustomer = shopifyOrder['customer']
-    print(shopifyCustomer)
+
+    if shopifyOrder['total_price'] == 0 and "trade" not in shopifyCustomer['tags']:
+        return
+
     try:
         shopifyAddress = shopifyCustomer['default_address']
     except:
