@@ -6,7 +6,6 @@ import pymysql
 import datetime
 import re
 import boto3
-import time
 import xml.etree.ElementTree as ET
 
 from library import debug, inventory
@@ -27,18 +26,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if "main" in options['functions']:
-            while True:
-                with Processor() as processor:
-                    total, skiped = processor.feed()
-                    if skiped < total * 0.3:
-                        processor.upload()
-                    else:
-                        debug.debug(
-                            PROCESS, 2, f"Ignore uploading the feed because too many items {skiped}/{total} have been skiped")
-
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        PROCESS, options['functions']))
-                    time.sleep(86400)
+            with Processor() as processor:
+                total, skiped = processor.feed()
+                if skiped < total * 0.3:
+                    processor.upload()
+                else:
+                    debug.debug(
+                        PROCESS, 2, f"Ignore uploading the feed because too many items {skiped}/{total} have been skiped")
 
 
 class Processor:
