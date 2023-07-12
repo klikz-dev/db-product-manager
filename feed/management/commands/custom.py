@@ -51,6 +51,9 @@ class Command(BaseCommand):
         if "removeTags" in options['functions']:
             processor.removeTags()
 
+        if "removeSubTypes" in options['functions']:
+            processor.removeSubTypes()
+
         if "deleteProducts" in options['functions']:
             processor.deleteProducts()
 
@@ -228,6 +231,38 @@ class Processor:
             self.con.commit()
 
             debug.debug("Custom", 0, f"Removed tag {tagId} from {title}")
+
+        csr.close()
+
+    def removeSubTypes(self):
+        subtypId = 94
+
+        csr = self.con.cursor()
+
+        csr.execute(f"""
+            SELECT DISTINCT P.ProductId, P.SKU, P.Title
+            FROM Product P
+            LEFT JOIN ProductSubtype PT ON P.SKU = PT.SKU
+            LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
+            LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+            WHERE PT.SubtypeId = {subtypId} AND P.ProductTypeId = 4 AND M.Brand = 'Jaipur Living'
+        """)
+        rows = csr.fetchall()
+
+        for row in rows:
+            productId = row[0]
+            sku = row[1]
+            title = row[2]
+
+            csr.execute(
+                f"DELETE FROM ProductSubtype WHERE SKU = '{sku}' AND SubtypeId = {subtypId}")
+            self.con.commit()
+
+            csr.execute(f"CALL AddToPendingUpdateTagBodyHTML ({productId})")
+            self.con.commit()
+
+            debug.debug(
+                "Custom", 0, f"Removed subtype {subtypId} from {title}")
 
         csr.close()
 

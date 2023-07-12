@@ -693,6 +693,7 @@ class DatabaseManager:
 
             colors = product.colors
             tags = ", ".join((product.type, product.pattern, product.tags))
+            subtypes = ", ".join((product.type, product.pattern))
             collection = product.collection
             size = product.size
             width = product.width
@@ -711,8 +712,9 @@ class DatabaseManager:
                     common.sq(sku), common.sq(tags)))
                 self.con.commit()
 
+            if subtypes:
                 self.csr.execute("CALL AddToEditSubtype ({}, {})".format(
-                    common.sq(sku), common.sq(str(tags).strip())))
+                    common.sq(sku), common.sq(str(subtypes).strip())))
                 self.con.commit()
 
             if colors:
