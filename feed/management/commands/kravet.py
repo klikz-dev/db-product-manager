@@ -378,7 +378,7 @@ class Processor:
                     "MISSONI HOME WALLCOVERINGS 03",
                     "MISSONI HOME WALLCOVERINGS 04",
                 ]
-                if collection in blockCollections:
+                if collection in blockCollections and type == "Wallpaper":
                     statusP = False
 
                 if row[43].strip() != "YES":
