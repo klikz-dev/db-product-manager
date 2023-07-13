@@ -385,7 +385,7 @@ class Processor:
                 except York.DoesNotExist:
                     continue
 
-                idx = 11
+                idx = 13
 
                 keyword_mapping = {
                     "Detail2": 3,
