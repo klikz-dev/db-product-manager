@@ -53,7 +53,8 @@ class Command(BaseCommand):
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "sample" in options['functions']:
-            processor.databaseManager.customTags(key="statusS", tag="NoSample")
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
 
         if "shipping" in options['functions']:
             processor.databaseManager.customTags(

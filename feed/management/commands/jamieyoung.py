@@ -50,7 +50,8 @@ class Command(BaseCommand):
             processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
-            processor.databaseManager.customTags(key="statusS", tag="NoSample")
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
 
         if "whiteglove" in options['functions']:
             processor.databaseManager.customTags(

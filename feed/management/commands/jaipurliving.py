@@ -62,7 +62,8 @@ class Command(BaseCommand):
 
         if "sample" in options['functions']:
             processor = Processor()
-            processor.databaseManager.customTags(key="statusS", tag="NoSample")
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
 
         if "shipping" in options['functions']:
             processor = Processor()
