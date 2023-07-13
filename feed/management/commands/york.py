@@ -60,6 +60,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "image-ftp" in options['functions']:
+            processor = Processor()
+            processor.imageFTP()
+
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -367,3 +371,55 @@ class Processor:
                 os.remove(f"{FILEDIR}/images/york/{fname}")
             except:
                 continue
+
+    def imageFTP(self):
+        fnames = self.databaseManager.browseSFTP(src="/york")
+        for fname in fnames:
+            print(fname)
+
+            if "_" in fname:
+                mpn = fname.split("_")[0]
+
+                try:
+                    product = York.objects.get(mpn=mpn)
+                except York.DoesNotExist:
+                    continue
+
+                idx = 11
+
+                keyword_mapping = {
+                    "Detail2": 3,
+                    "Detail3": 4,
+                    "Detail4": 5,
+                    "Detail": 2,
+                    "Room2": 7,
+                    "Room3": 8,
+                    "Room4": 9,
+                    "Room": 6,
+                    "Dims": 10,
+                    "Peel": 11,
+                    "Stick": 12,
+                }
+
+                for keyword, value in keyword_mapping.items():
+                    if keyword in fname:
+                        idx = value
+                        break
+
+                self.databaseManager.downloadFileFromSFTP(
+                    src=f"/york/{fname}",
+                    dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg"
+                )
+
+            else:
+                mpn = fname.split(".")[0]
+
+                try:
+                    product = York.objects.get(mpn=mpn)
+                except York.DoesNotExist:
+                    continue
+
+                self.databaseManager.downloadFileFromSFTP(
+                    src=f"/york/{fname}",
+                    dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
+                )

@@ -255,6 +255,12 @@ sftp = {
         "user": "vtforge",
         "pass": "Vtforge123!",
     },
+    "York": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "york",
+        "pass": "York123!",
+    },
     "Zoffany": {
         "host": "34.203.121.151",
         "port": 22,

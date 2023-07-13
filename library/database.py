@@ -628,6 +628,8 @@ class DatabaseManager:
 
         if fileSrc:
             sftp.get(src, dst)
+            sftp.remove(src)
+
         else:
             if src != "":
                 sftp.chdir(src)
@@ -672,6 +674,27 @@ class DatabaseManager:
         debug.debug(self.brand, 0,
                     f"{dst} downloaded from {self.brand} FTP")
         return True
+
+    def browseSFTP(self, src=""):
+        try:
+            transport = paramiko.Transport(
+                (const.sftp[self.brand]["host"], const.sftp[self.brand]["port"]))
+            transport.connect(
+                username=const.sftp[self.brand]["user"], password=const.sftp[self.brand]["pass"])
+            sftp = paramiko.SFTPClient.from_transport(transport)
+        except Exception as e:
+            debug.debug(self.brand, 1,
+                        f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
+            return False
+
+        if src != "":
+            sftp.chdir(src)
+
+        files = sftp.listdir()
+
+        sftp.close()
+
+        return files
 
     def updateStock(self, stocks, stockType=1):
         for stock in stocks:
