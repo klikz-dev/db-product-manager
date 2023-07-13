@@ -184,7 +184,7 @@ class DatabaseManager:
         debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
 
         self.csr.execute(f"""
-                    SELECT P.ProductID, P.SKU, P.Published
+                    SELECT P.ProductID, P.SKU, P.Published, P.ManufacturerPartNumber
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
                     AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')
@@ -197,9 +197,10 @@ class DatabaseManager:
             productID = row[0]
             sku = row[1]
             published = row[2]
+            mpn = row[3]
 
             try:
-                product = self.Feed.objects.get(sku=sku)
+                product = self.Feed.objects.get(mpn=mpn)
                 product.productId = productID
                 product.save()
 
