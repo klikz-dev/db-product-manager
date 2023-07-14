@@ -9,6 +9,7 @@ import requests
 import time
 import json
 import environ
+from shutil import copyfile
 
 from library import database, debug
 
@@ -73,6 +74,10 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "image-manual" in options['functions']:
+            processor = Processor()
+            processor.imageManual()
 
         if "sample" in options['functions']:
             processor = Processor()
@@ -321,6 +326,23 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def imageManual(self):
+        fnames = os.listdir(f"{FILEDIR}/images/scalamandre/")
+        for fname in fnames:
+            if "_" in fname:
+                mpn = f'{fname.split("_")[0]}{fname.split("_")[1]}'
+
+                try:
+                    product = Scalamandre.objects.get(mpn=mpn)
+
+                    if product.productId:
+                        copyfile(f"{FILEDIR}/images/scalamandre/{fname}",
+                                 f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+
+                    os.remove(f"{FILEDIR}/images/scalamandre/{fname}")
+                except Scalamandre.DoesNotExist:
+                    continue
 
     def inventory(self):
         stocks = []
