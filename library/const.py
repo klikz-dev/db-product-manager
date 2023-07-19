@@ -213,6 +213,12 @@ sftp = {
         "user": "materialworks",
         "pass": "MWDecor1!",
     },
+    "MindTheGap": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "mindthegap",
+        "pass": "DecbestMTG123!",
+    },
     "Poppy": {
         "host": "decoratorsbestam.com",
         "port": 22,
