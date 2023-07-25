@@ -24,6 +24,7 @@ class Command(BaseCommand):
                 with Processor() as processor:
                     processor.compress(path="product")
                     processor.compress(path="roomset")
+                    processor.compress(path="hires")
 
                     total = processor.count(f"{BASEDIR}/compressed")
                     debug.debug(

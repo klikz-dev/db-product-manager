@@ -58,6 +58,15 @@ def roomdownload(link, name):
         debug("Image", 1, "Image Download Failed. {}".format(link))
 
 
+def hiresdownload(link, name):
+    try:
+        urllib.request.urlretrieve(link, DIR + "/images/hires/" + name)
+        debug("Image", 0, "Downloaded hires {}".format(name))
+    except Exception as e:
+        print(e)
+        debug("Image", 1, "Image Download Failed. {}".format(link))
+
+
 def formatprice(x, markUp):
     ret = math.ceil(x * markUp * 4) / 4
     if ret == int(ret):

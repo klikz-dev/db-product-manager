@@ -60,6 +60,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -278,3 +282,12 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        products = JaipurLiving.objects.all()
+        for product in products:
+            if not product.productId:
+                continue
+
+            common.hiresdownload(str(product.thumbnail).strip().replace(
+                " ", "%20"), "{}_20.jpg".format(product.productId))
