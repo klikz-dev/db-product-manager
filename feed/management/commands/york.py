@@ -64,6 +64,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.imageFTP()
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -429,5 +433,30 @@ class Processor:
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
                         dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
+                        delete=False
+                    )
+
+    def hires(self):
+        dnames = [
+            "Artistic Abstracts",
+            "Vintage Florals"
+        ]
+
+        for dname in dnames:
+            fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
+            for fname in fnames:
+                print(fname)
+
+                if "_" not in fname:
+                    mpn = fname.split(".")[0]
+
+                    try:
+                        product = York.objects.get(mpn=mpn)
+                    except York.DoesNotExist:
+                        continue
+
+                    self.databaseManager.downloadFileFromSFTP(
+                        src=f"/york/{dname}/{fname}",
+                        dst=f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg",
                         delete=False
                     )
