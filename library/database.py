@@ -615,7 +615,7 @@ class DatabaseManager:
             debug.debug(self.brand, 1,
                         f"Download Error {dst} From {src}. Error: {str(e)}")
 
-    def downloadFileFromSFTP(self, src, dst, fileSrc=True):
+    def downloadFileFromSFTP(self, src, dst, fileSrc=True, delete=True):
         try:
             transport = paramiko.Transport(
                 (const.sftp[self.brand]["host"], const.sftp[self.brand]["port"]))
@@ -629,7 +629,8 @@ class DatabaseManager:
 
         if fileSrc:
             sftp.get(src, dst)
-            sftp.remove(src)
+            if delete:
+                sftp.remove(src)
 
         else:
             if src != "":
@@ -641,7 +642,8 @@ class DatabaseManager:
                     continue
 
                 sftp.get(file, dst)
-                sftp.remove(file)
+                if delete:
+                    sftp.remove(file)
 
         sftp.close()
 

@@ -414,7 +414,8 @@ class Processor:
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
-                        dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg"
+                        dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg",
+                        delete=False
                     )
 
                 else:
@@ -427,5 +428,6 @@ class Processor:
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
-                        dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
+                        dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
+                        delete=False
                     )
