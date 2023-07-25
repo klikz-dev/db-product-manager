@@ -105,10 +105,18 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
+        # Invalid images
+        unavailable = []
+        wb = xlrd.open_workbook(f'{FILEDIR}/surya-unavailable.xlsx')
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            mpn = formatText(sh.cell_value(i, 0))
+            unavailable.append(mpn)
+
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(FILEDIR + 'surya-master.xlsx')
+        wb = xlrd.open_workbook(f'{FILEDIR}/surya-master.xlsx')
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             try:
@@ -195,6 +203,11 @@ class Processor:
                 # Status
                 statusP = True
                 statusS = False
+
+                if mpn in unavailable:
+                    debug.debug(
+                        BRAND, 1, "Product Image is unavailable for MPN: {}".format(mpn))
+                    statusP = False
 
                 whiteGlove = False
                 if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
