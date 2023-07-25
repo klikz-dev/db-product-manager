@@ -373,53 +373,59 @@ class Processor:
                 continue
 
     def imageFTP(self):
-        fnames = self.databaseManager.browseSFTP(src="/york")
-        for fname in fnames:
-            print(fname)
+        dnames = [
+            "Artistic Abstracts",
+            "Vintage Florals"
+        ]
 
-            if "_" in fname:
-                mpn = fname.split("_")[0]
+        for dname in dnames:
+            fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
+            for fname in fnames:
+                print(fname)
 
-                try:
-                    product = York.objects.get(mpn=mpn)
-                except York.DoesNotExist:
-                    continue
+                if "_" in fname:
+                    mpn = fname.split("_")[0]
 
-                idx = 13
+                    try:
+                        product = York.objects.get(mpn=mpn)
+                    except York.DoesNotExist:
+                        continue
 
-                keyword_mapping = {
-                    "Detail2": 3,
-                    "Detail3": 4,
-                    "Detail4": 5,
-                    "Detail": 2,
-                    "Room2": 7,
-                    "Room3": 8,
-                    "Room4": 9,
-                    "Room": 6,
-                    "Dims": 10,
-                    "Peel": 11,
-                    "Stick": 12,
-                }
+                    idx = 13
 
-                for keyword, value in keyword_mapping.items():
-                    if keyword in fname:
-                        idx = value
-                        break
+                    keyword_mapping = {
+                        "Detail": 2,
+                        "Detail2": 3,
+                        "Detail3": 4,
+                        "Detail4": 5,
+                        "Room": 6,
+                        "Room2": 7,
+                        "Room3": 8,
+                        "Room4": 9,
+                        "Dims": 10,
+                        "Peel": 11,
+                        "Stick": 12,
+                    }
 
-                self.databaseManager.downloadFileFromSFTP(
-                    src=f"/york/{fname}",
-                    dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg"
-                )
+                    for keyword, value in keyword_mapping.items():
+                        if keyword in fname:
+                            idx = value
+                            break
 
-            else:
-                mpn = fname.split(".")[0]
+                    self.databaseManager.downloadFileFromSFTP(
+                        src=f"/york/{dname}/{fname}",
+                        dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{idx}.jpg"
+                    )
 
-                try:
-                    product = York.objects.get(mpn=mpn)
-                except York.DoesNotExist:
-                    continue
+                else:
+                    mpn = fname.split(".")[0]
 
-                self.databaseManager.downloadFileFromSFTP(
-                    src=f"/york/{fname}",
-                    dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
-                )
+                    try:
+                        product = York.objects.get(mpn=mpn)
+                    except York.DoesNotExist:
+                        continue
+
+                    self.databaseManager.downloadFileFromSFTP(
+                        src=f"/york/{dname}/{fname}",
+                        dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg"
+                    )
