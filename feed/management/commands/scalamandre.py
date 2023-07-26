@@ -339,6 +339,8 @@ class Processor:
                     if product.productId:
                         copyfile(f"{FILEDIR}/images/scalamandre/{fname}",
                                  f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+                        debug.debug(
+                            BRAND, 0, f"Copied {fname} to {product.productId}.jpg")
 
                     os.remove(f"{FILEDIR}/images/scalamandre/{fname}")
                 except Scalamandre.DoesNotExist:
