@@ -477,7 +477,7 @@ class DatabaseManager:
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
 
-    def updateProducts(self, products, formatPrice=True):
+    def updateProducts(self, products, formatPrice=True, private=False):
         total = len(products)
         for index, product in enumerate(products):
             if product.productId == None:
@@ -485,7 +485,7 @@ class DatabaseManager:
 
             try:
                 createdInDatabase = self.createProduct(
-                    product, formatPrice)
+                    product, formatPrice, private=private)
                 if not createdInDatabase:
                     continue
             except Exception as e:

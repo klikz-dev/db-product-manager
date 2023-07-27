@@ -38,13 +38,14 @@ class Command(BaseCommand):
 
         if "add" in options['functions']:
             processor = Processor()
-            processor.databaseManager.createProducts(formatPrice=True)
+            processor.databaseManager.createProducts(
+                formatPrice=True, private=True)
 
         if "update" in options['functions']:
             processor = Processor()
             products = Covington.objects.all()
             processor.databaseManager.updateProducts(
-                products=products, formatPrice=True)
+                products=products, formatPrice=True, private=True)
 
         if "price" in options['functions']:
             processor = Processor()
