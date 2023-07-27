@@ -70,6 +70,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.roomset()
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
@@ -268,3 +272,25 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        images = os.listdir(f"{FILEDIR}/images/zoffany-hires")
+
+        for image in images:
+            mpn = image.replace("_HR", "").split(".")[0]
+
+            try:
+                product = Zoffany.objects.get(mpn=mpn)
+                if not product.productId:
+                    continue
+
+            except Zoffany.DoesNotExist:
+                continue
+
+            copyfile(f"{FILEDIR}/images/zoffany-hires/{image}",
+                     f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg")
+
+            debug.debug(
+                BRAND, 0, f"Copied {image} to {product.productId}_20.jpg")
+
+            os.remove(f"{FILEDIR}/images/zoffany-hires/{image}")

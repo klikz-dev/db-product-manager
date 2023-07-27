@@ -8,6 +8,7 @@ import xlrd
 import csv
 import codecs
 import time
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -23,61 +24,76 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "feed" in options['functions']:
+            processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = JamieYoung.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=False)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=False)
 
         if "image" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
+            processor = Processor()
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
         if "whiteglove" in options['functions']:
+            processor = Processor()
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
-                processor.databaseManager.downloadFileFromSFTP(
-                    src="jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False)
-                processor.inventory()
+                with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False)
+                    processor.inventory()
 
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
 
 
 class Processor:
     def __init__(self):
-        env = environ.Env()
-        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
-            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
-
+        self.env = environ.Env()
+        self.con = pymysql.connect(host=self.env('MYSQL_HOST'), user=self.env('MYSQL_USER'), passwd=self.env(
+            'MYSQL_PASSWORD'), db=self.env('MYSQL_DATABASE'), connect_timeout=5)
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=JamieYoung)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):
@@ -276,3 +292,25 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        images = os.listdir(f"{FILEDIR}/images/jamie-young")
+
+        for image in images:
+            mpn = image.split(".")[0]
+
+            try:
+                product = JamieYoung.objects.get(mpn=mpn)
+                if not product.productId:
+                    continue
+
+            except JamieYoung.DoesNotExist:
+                continue
+
+            copyfile(f"{FILEDIR}/images/jamie-young/{image}",
+                     f"{FILEDIR}/../../../images/hires/{product.productId}_20.png")
+
+            debug.debug(
+                BRAND, 0, f"Copied {image} to {product.productId}_20.png")
+
+            os.remove(f"{FILEDIR}/images/jamie-young/{image}")

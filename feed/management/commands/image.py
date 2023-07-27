@@ -54,10 +54,18 @@ class Processor:
                 fname = os.path.basename(fpath)
 
                 with Image.open(infile) as img:
-                    compressed = img.convert("RGB").resize(
-                        self.size(img), Image.LANCZOS)
-                    compressed.save(
-                        f"{BASEDIR}/compressed/{fname}.jpg", "JPEG")
+                    if ext == "jpg":
+                        compressed = img.convert("RGB").resize(
+                            self.size(img), Image.LANCZOS)
+                        compressed.save(
+                            f"{BASEDIR}/compressed/{fname}.jpg", "JPEG")
+                    elif ext == "png":
+                        compressed = img.resize(
+                            self.size(img), Image.LANCZOS)
+                        compressed.save(
+                            f"{BASEDIR}/compressed/{fname}.png", "PNG")
+                    else:
+                        debug.debug(PROCESS, 1, f"Unknow Image Type: {infile}")
 
                 os.remove(infile)
 

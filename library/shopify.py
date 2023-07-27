@@ -3,6 +3,7 @@ import json
 import os
 import requests
 import boto3
+import glob
 import pymysql
 from datetime import timedelta
 from datetime import datetime
@@ -484,18 +485,26 @@ def UploadImageToShopify(src):
                           passwd=db_password, db=db_name, connect_timeout=5)
     csr = con.cursor()
 
-    fl = os.listdir(src)
-    for f in fl:
+    for f in glob.glob(src):
         try:
             if "_" not in f:
-                productID = f.lower().replace(".jpg", "")
+                fpath, ext = os.path.splitext(f)
+                productID = os.path.basename(fpath)
+
+                if ext == "jpg":
+                    contentType = 'image/jpeg'
+                elif ext == "png":
+                    contentType = 'image/png'
+                else:
+                    debug("Shopify", 1, f"Unknow Image Type: {f}")
+                    continue
+
                 csr.execute(
                     "SELECT NULL FROM ProductImage WHERE ProductID = {} AND ImageIndex = 1".format(productID))
-                s3.upload_file("{}/{}".format(src, f), bucket_name, "{}.jpg".format(
-                    productID), ExtraArgs={'ContentType': 'image/jpeg', 'ACL': 'public-read'})
-                os.remove('{}/{}'.format(src, f))
-                imgLink = "https://s3.amazonaws.com/{}/{}.jpg".format(
-                    bucket_name, productID)
+                s3.upload_file(f, bucket_name, f"{productID}.{ext}", ExtraArgs={
+                               'ContentType': contentType, 'ACL': 'public-read'})
+                os.remove(f)
+                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{productID}.{ext}"
 
                 # Alt text
                 try:
@@ -514,24 +523,32 @@ def UploadImageToShopify(src):
                     productID, jpImage['image']['id'], jpImage["image"]["src"]))
                 con.commit()
             else:
-                tmp = f.lower().replace(".jpg", "").split("_")
-                productID = tmp[0]
-                idx = tmp[1]
+                fpath, ext = os.path.splitext(f)
+                fname = os.path.basename(fpath)
+                productID = fname.split("_")[0]
+                idx = fname.split("_")[1]
 
-                csr.execute("SELECT ImageID FROM ProductImage WHERE ProductID = {} AND ImageIndex = {}".format(
-                    productID, idx))
+                if ext == "jpg":
+                    contentType = 'image/jpeg'
+                elif ext == "png":
+                    contentType = 'image/png'
+                else:
+                    debug("Shopify", 1, f"Unknow Image Type: {f}")
+                    continue
+
+                csr.execute(
+                    f"SELECT ImageID FROM ProductImage WHERE ProductID = {productID} AND ImageIndex = {idx}")
                 temp = csr.fetchone()
                 if temp != None:
                     imageId = temp[0]
-                    rImage = s.delete("{}/products/{}/images/{}.json".format(
-                        SHOPIFY_API_URL, productID, imageId), headers=SHOPIFY_PRODUCT_API_HEADER)
+                    rImage = s.delete(
+                        f"{SHOPIFY_API_URL}/products/{productID}/images/{imageId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
                     jImage = json.loads(rImage.text)
 
-                s3.upload_file("{}/{}".format(src, f), bucket_name, f,
-                               ExtraArgs={'ContentType': 'image/jpeg', 'ACL': 'public-read'})
-                os.remove('{}/{}'.format(src, f))
-                imgLink = "https://s3.amazonaws.com/{}/{}".format(
-                    bucket_name, f)
+                s3.upload_file(f, bucket_name, f"{fname}.{ext}", ExtraArgs={
+                               'ContentType': contentType, 'ACL': 'public-read'})
+                os.remove(f)
+                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{fname}.{ext}"
 
                 # Alt text
                 try:
