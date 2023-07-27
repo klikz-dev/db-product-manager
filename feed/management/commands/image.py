@@ -54,12 +54,12 @@ class Processor:
                 fname = os.path.basename(fpath)
 
                 with Image.open(infile) as img:
-                    if ext == "jpg":
+                    if ext == ".jpg":
                         compressed = img.convert("RGB").resize(
                             self.size(img), Image.LANCZOS)
                         compressed.save(
                             f"{BASEDIR}/compressed/{fname}.jpg", "JPEG")
-                    elif ext == "png":
+                    elif ext == ".png":
                         compressed = img.resize(
                             self.size(img), Image.LANCZOS)
                         compressed.save(

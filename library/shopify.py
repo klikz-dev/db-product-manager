@@ -485,15 +485,15 @@ def UploadImageToShopify(src):
                           passwd=db_password, db=db_name, connect_timeout=5)
     csr = con.cursor()
 
-    for f in glob.glob(src):
+    for f in glob.glob(f"{src}/*.*"):
         try:
             if "_" not in f:
                 fpath, ext = os.path.splitext(f)
                 productID = os.path.basename(fpath)
 
-                if ext == "jpg":
+                if ext == ".jpg":
                     contentType = 'image/jpeg'
-                elif ext == "png":
+                elif ext == ".png":
                     contentType = 'image/png'
                 else:
                     debug("Shopify", 1, f"Unknow Image Type: {f}")
@@ -501,10 +501,10 @@ def UploadImageToShopify(src):
 
                 csr.execute(
                     "SELECT NULL FROM ProductImage WHERE ProductID = {} AND ImageIndex = 1".format(productID))
-                s3.upload_file(f, bucket_name, f"{productID}.{ext}", ExtraArgs={
+                s3.upload_file(f, bucket_name, f"{productID}{ext}", ExtraArgs={
                                'ContentType': contentType, 'ACL': 'public-read'})
                 os.remove(f)
-                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{productID}.{ext}"
+                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{productID}{ext}"
 
                 # Alt text
                 try:
@@ -522,15 +522,19 @@ def UploadImageToShopify(src):
                 csr.execute("CALL AddToProductImage ({}, 1, {}, '{}')".format(
                     productID, jpImage['image']['id'], jpImage["image"]["src"]))
                 con.commit()
+
+                debug("Shopify", 0,
+                      f"Uploaded Product Image: {productID}{ext}")
+
             else:
                 fpath, ext = os.path.splitext(f)
                 fname = os.path.basename(fpath)
                 productID = fname.split("_")[0]
                 idx = fname.split("_")[1]
 
-                if ext == "jpg":
+                if ext == ".jpg":
                     contentType = 'image/jpeg'
-                elif ext == "png":
+                elif ext == ".png":
                     contentType = 'image/png'
                 else:
                     debug("Shopify", 1, f"Unknow Image Type: {f}")
@@ -545,10 +549,10 @@ def UploadImageToShopify(src):
                         f"{SHOPIFY_API_URL}/products/{productID}/images/{imageId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
                     jImage = json.loads(rImage.text)
 
-                s3.upload_file(f, bucket_name, f"{fname}.{ext}", ExtraArgs={
+                s3.upload_file(f, bucket_name, f"{fname}{ext}", ExtraArgs={
                                'ContentType': contentType, 'ACL': 'public-read'})
                 os.remove(f)
-                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{fname}.{ext}"
+                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{fname}{ext}"
 
                 # Alt text
                 try:
@@ -565,6 +569,9 @@ def UploadImageToShopify(src):
                 csr.execute("CALL AddToProductImage ({}, {}, {}, '{}')".format(
                     productID, idx, jImage['image']['id'], jImage["image"]["src"]))
                 con.commit()
+
+                debug("Shopify", 0, f"Uploaded Product Image: {fname}{ext}")
+
         except:
             continue
 
