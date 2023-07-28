@@ -6,14 +6,15 @@ import environ
 import pymysql
 import csv
 
-from library import database, debug
-from shopify.models import Product, ProductImage
+from library import debug
+from shopify.models import Product, ProductImage, Customer, Address
 from mysql.models import ProductTag, Tag, ProductSubtype, Type
-
 from feed.models import KravetDecor, Kravet, York
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
+
+PROCESS = "Report"
 
 
 class Command(BaseCommand):
@@ -27,6 +28,10 @@ class Command(BaseCommand):
         if "roomvo" in options['functions']:
             processor = Processor()
             processor.roomvo()
+
+        if "customers" in options['functions']:
+            processor = Processor()
+            processor.customers()
 
 
 class Processor:
@@ -275,7 +280,7 @@ class Processor:
                 subtypes = ", ".join(subtypes)
 
                 debug.debug(
-                    "Report", 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {name}")
+                    PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {name}")
 
                 roomvoWriter.writerow({
                     'availability': 'Yes',
@@ -308,3 +313,62 @@ class Processor:
 
                 if product.productTypeId == 41:
                     wallArtAdded = wallArtAdded + 1
+
+    def customers(self):
+        with open(FILEDIR + 'customers.csv', 'w', newline='') as customersFile:
+            csvWriter = csv.DictWriter(customersFile, fieldnames=[
+                'email',
+                'fname',
+                'lname',
+                'phone',
+                'address1',
+                'address2',
+                'company',
+                'city',
+                'state',
+                'zip',
+                'country',
+                'total',
+            ])
+
+            csvWriter.writerow({
+                'email': 'Email',
+                'fname': 'First Name',
+                'lname': 'Last Name',
+                'phone': 'Phone Number',
+                'address1': 'Address 1',
+                'address2': 'Address 2',
+                'company': 'Company',
+                'city': 'City',
+                'state': 'State',
+                'zip': 'Zip Code',
+                'country': 'Country',
+                'total': 'Total Spent',
+            })
+
+            customers = Customer.objects.all()
+
+            total = len(customers)
+            for index, customer in enumerate(customers):
+                try:
+                    address = Address.objects.get(
+                        addressId=customer.defaultAddressId)
+                except Address.DoesNotExist:
+                    continue
+
+                csvWriter.writerow({
+                    'email': customer.email,
+                    'fname': customer.firstName,
+                    'lname': customer.lastName,
+                    'phone': customer.phone,
+                    'address1': address.address1,
+                    'address2': address.address2,
+                    'company': address.company,
+                    'city': address.city,
+                    'state': address.state,
+                    'zip': address.zip,
+                    'country': address.country,
+                    'total': customer.totalSpent,
+                })
+
+                debug.debug(PROCESS, 0, f"{index+1}/{total}: {customer.email}")
