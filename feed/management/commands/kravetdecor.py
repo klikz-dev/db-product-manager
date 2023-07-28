@@ -26,57 +26,60 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "feed" in options['functions']:
+            processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
         if "validate" in options['functions']:
+            processor = Processor()
             processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = KravetDecor.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=False)
 
         if "sample" in options['functions']:
+            processor = Processor()
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
         if "image" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "image-manual" in options['functions']:
+            processor = Processor()
             processor.image()
 
         if "inventory" in options['functions']:
             while True:
-                try:
+                with Processor() as processor:
                     processor.downloadInventory()
                     processor.inventory()
 
                     print("Finished process. Waiting for next run. {}:{}".format(
                         BRAND, options['functions']))
                     time.sleep(86400)
-
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    print("Failed process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(3600)
 
 
 class Processor:
@@ -88,7 +91,10 @@ class Processor:
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=KravetDecor)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):

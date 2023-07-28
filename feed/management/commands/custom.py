@@ -34,33 +34,41 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "samplePrice" in options['functions']:
+            processor = Processor()
             processor.updateSamplePrices()
 
         if "deleteSubtypeTags" in options['functions']:
+            processor = Processor()
             processor.deleteSubtypeTags()
 
         if "getTypeList" in options['functions']:
+            processor = Processor()
             processor.getTypeList()
 
         if "refreshPrices" in options['functions']:
+            processor = Processor()
             processor.refreshPrices()
 
         if "removeTags" in options['functions']:
+            processor = Processor()
             processor.removeTags()
 
         if "removeSubTypes" in options['functions']:
+            processor = Processor()
             processor.removeSubTypes()
 
         if "deleteProducts" in options['functions']:
+            processor = Processor()
             processor.deleteProducts()
 
         if "syncHandle" in options['functions']:
+            processor = Processor()
             processor.syncHandle()
 
         if "unpublishBrand" in options['functions']:
+            processor = Processor()
             processor.unpublishBrand()
 
 

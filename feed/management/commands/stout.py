@@ -27,48 +27,59 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "feed" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadFileFromLink(
                 "https://www.stouttextiles.com/downloads/Online_Retail_Items.xlsx", f"{FILEDIR}/stout-master.xlsx")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = Stout.objects.filter(pattern="WINDY")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
 
         if "pillow" in options['functions']:
+            processor = Processor()
             processor.databaseManager.linkPillowSample()
 
 
 class Processor:
     def __init__(self):
         env = environ.Env()
+
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=Stout)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):

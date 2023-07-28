@@ -24,33 +24,40 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
 
         if "feed" in options['functions']:
+            processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
 
         if "sync" in options['functions']:
+            processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
 
         if "add" in options['functions']:
+            processor = Processor()
             processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
+            processor = Processor()
             products = PhillipJeffries.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
         if "price" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
         if "tag" in options['functions']:
+            processor = Processor()
             processor.databaseManager.updateTags(category=True)
 
         if "image" in options['functions']:
+            processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
         if "cutfee" in options['functions']:
+            processor = Processor()
             processor.databaseManager.customTags(key="cutFee", tag="Cut Fee")
 
 
@@ -63,7 +70,10 @@ class Processor:
         self.databaseManager = database.DatabaseManager(
             con=self.con, brand=BRAND, Feed=PhillipJeffries)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fetchFeed(self):

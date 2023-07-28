@@ -11,7 +11,7 @@ import requests
 import json
 import time
 
-from library import debug, inventory
+from library import debug
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
@@ -27,23 +27,26 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
+
+        if "main" in options['functions']:
+            processor = Processor()
+            processor.followup()
+            processor.reward()
 
         if "feed" in options['functions']:
             while True:
-                processor.feed()
-                processor.upload()
+                with Processor() as processor:
+                    processor.feed()
+                    processor.upload()
+
                 print("Finished Process. Waiting for Next run")
                 time.sleep(86400 * 3)
-
-        if "main" in options['functions']:
-            processor.followup()
-            processor.reward()
 
 
 class Processor:
     def __init__(self):
         env = environ.Env()
+
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
         self.s3 = boto3.client('s3', aws_access_key_id=env(
@@ -54,7 +57,10 @@ class Processor:
         self.api_header = {
             'X-Shopify-Access-Token': env('shopify_order_token')}
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def fmt(self, s):

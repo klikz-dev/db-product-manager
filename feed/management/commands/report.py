@@ -23,19 +23,24 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
+
         if "roomvo" in options['functions']:
+            processor = Processor()
             processor.roomvo()
 
 
 class Processor:
     def __init__(self):
         env = environ.Env()
+
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
         self.csr = self.con.cursor()
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.csr.close()
         self.con.close()
 
