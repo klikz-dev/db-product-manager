@@ -6,6 +6,9 @@ import os
 import environ
 import pymysql
 import xlrd
+import csv
+import codecs
+import time
 from shutil import copyfile
 
 from library import database, debug, common
@@ -59,6 +62,15 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.inventory()
+
+                    print("Finished process. Waiting for next run. {}:{}".format(
+                        BRAND, options['functions']))
+                    time.sleep(86400)
+
 
 class Processor:
     def __init__(self):
@@ -88,6 +100,9 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = common.formatText(sh.cell_value(i, 0))
+                if "MG-" not in mpn:
+                    continue
+
                 sku = f"DBC {mpn}"
                 pattern = common.formatText(sh.cell_value(i, 4))
                 color = common.formatText(sh.cell_value(i, 5))
@@ -189,3 +204,26 @@ class Processor:
                     f"{FILEDIR}/images/covington-magnolia-home/{fname}")
             except Covington.DoesNotExist:
                 continue
+
+    def inventory(self):
+        stocks = []
+
+        f = open(f"{FILEDIR}/covington-inventory.CSV", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            if row[0] == "STYCOL":
+                continue
+
+            mpn = common.formatText(row[0])
+            sku = f"DBC {mpn}"
+
+            stockP = common.formatInt(row[5])
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': ""
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
