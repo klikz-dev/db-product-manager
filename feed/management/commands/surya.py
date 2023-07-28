@@ -65,6 +65,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires(missingOnly=True)
+
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -293,3 +297,31 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self, missingOnly=False):
+        hasImage = []
+
+        self.csr = self.con.cursor()
+        self.csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{BRAND}'")
+        for row in self.csr.fetchall():
+            hasImage.append(str(row[0]))
+        self.csr.close()
+
+        products = Surya.objects.all()
+        for product in products:
+            if "512x512" not in product.thumbnail:
+                continue
+
+            if not product.productId:
+                continue
+
+            if missingOnly and product.productId in hasImage:
+                continue
+
+            hiresImage = product.thumbnail.replace("512x512", "RAW")
+
+            common.hiresdownload(hiresImage, f"{product.productId}_20.jpg")
+
+            debug.debug(
+                BRAND, 0, f"Copied {hiresImage} to {product.productId}_20.png")
