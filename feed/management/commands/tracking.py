@@ -24,31 +24,35 @@ class Command(BaseCommand):
         parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        processor = Processor()
+
+        if "ups" in options['functions']:
+            processor = Processor()
+            processor.ups()
+
+        if "schumacher" in options['functions']:
+            processor = Processor()
+            processor.schumacher()
+
+        if "kravet" in options['functions']:
+            processor = Processor()
+            processor.kravet()
 
         if "main" in options['functions']:
             while True:
-                processor.kravet()
-                processor.schumacher()
-                processor.ups()
+                with Processor() as processor:
+                    processor.kravet()
+                    processor.schumacher()
+                    processor.ups()
 
                 print(
                     f"Finished process. Waiting for next run. Tracking:{options['functions']}")
                 time.sleep(3600)
 
-        if "ups" in options['functions']:
-            processor.ups()
-
-        if "schumacher" in options['functions']:
-            processor.schumacher()
-
-        if "kravet" in options['functions']:
-            processor.kravet()
-
 
 class Processor:
     def __init__(self):
         env = environ.Env()
+
         self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
@@ -58,7 +62,10 @@ class Processor:
             'Content-Type': 'application/json'
         }
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
     def ups(self):
@@ -132,11 +139,8 @@ class Processor:
             except Exception as e:
                 debug.debug("Tracking", 1, str(e))
 
-            try:
-                self.uploadTracking(
-                    brand=brand, orderNumber=orderNumber, trackingNumber=trackingNumber)
-            except Exception as e:
-                debug.debug("Tracking", 1, str(e))
+            self.uploadTracking(
+                brand=brand, orderNumber=orderNumber, trackingNumber=trackingNumber)
 
         f.close()
         os.remove(file)
@@ -175,10 +179,8 @@ class Processor:
                 PONumber = common.formatText(row[0])
                 tracking = common.formatText(row[4])
 
-                try:
-                    self.uploadTracking("Schumacher", PONumber, tracking)
-                except Exception as e:
-                    debug.debug("Tracking", 1, str(e))
+                self.uploadTracking(
+                    brand="Schumacher", orderNumber=PONumber, trackingNumber=tracking)
 
         sftp.close()
 
@@ -214,10 +216,8 @@ class Processor:
                 PONumber = common.formatText(row[0])
                 tracking = common.formatText(row[7])
 
-                try:
-                    self.uploadTracking("Kravet", PONumber, tracking)
-                except Exception as e:
-                    debug.debug("Tracking", 1, str(e))
+                self.uploadTracking(
+                    brand="Kravet", orderNumber=PONumber, trackingNumber=tracking)
 
         ftp.close()
 
