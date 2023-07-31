@@ -65,8 +65,11 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
+                    try:
+                        processor.databaseManager.downloadFileFromSFTP(
+                            src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
+                    except Exception as e:
+                        print(e)
 
                     processor.inventory()
 

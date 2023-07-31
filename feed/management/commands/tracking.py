@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
                 print(
                     f"Finished process. Waiting for next run. Tracking:{options['functions']}")
-                time.sleep(3600)
+                time.sleep(3600 * 6)
 
 
 class Processor:
