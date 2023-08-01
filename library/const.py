@@ -189,6 +189,18 @@ sftp = {
         "user": "couture",
         "pass": "Couture123!",
     },
+    "Exquisite": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "exquisiterugs",
+        "pass": "ExquisiteRugs123!",
+    },
+    "Hubbardton Forge": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "vtforge",
+        "pass": "Vtforge123!",
+    },
     "Jamie Young": {
         "host": "decoratorsbestam.com",
         "port": 22,
@@ -255,11 +267,11 @@ sftp = {
         "user": "surya",
         "pass": "Surya123!",
     },
-    "Hubbardton Forge": {
+    "Tempaper": {
         "host": "decoratorsbestam.com",
         "port": 22,
-        "user": "vtforge",
-        "pass": "Vtforge123!",
+        "user": "tempaper",
+        "pass": "Tempaper123!",
     },
     "York": {
         "host": "decoratorsbestam.com",

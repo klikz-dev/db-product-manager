@@ -81,7 +81,7 @@ def formatText(text):
 def formatFloat(value):
     if str(value).strip() != '':
         try:
-            return round(float(str(value).lower().replace("n/a", "").replace('"', "").replace("in", "").replace('$', "").replace("s/r", "").replace("bolt", "").replace("yd", "").replace("/", "").strip()), 2)
+            return round(float(str(value).lower().replace("n/a", "").replace('"', "").replace("in", "").replace("kg", "").replace('$', "").replace("s/r", "").replace("bolt", "").replace("yd", "").replace("/", "").strip()), 2)
         except:
             return 0
     else:

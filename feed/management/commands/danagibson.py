@@ -83,6 +83,7 @@ class Processor:
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
         # Get Product Feed
+        blockMPNs = ['110-BlZ']
         products = []
 
         wb = xlrd.open_workbook(f"{FILEDIR}/dana-gibson-master.xlsx")
@@ -163,6 +164,9 @@ class Processor:
                 # Status
                 statusP = True
                 statusS = False
+
+                if mpn in blockMPNs:
+                    statusP = False
 
                 # Stock
                 stockNote = f"{int(int(sh.cell_value(i, 34)) / 24)} days"
