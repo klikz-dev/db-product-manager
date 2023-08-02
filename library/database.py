@@ -570,7 +570,7 @@ class DatabaseManager:
                 debug.debug(self.brand, 1, str(e))
                 continue
 
-    def downloadImage(self, productId, thumbnail, roomsets, hires):
+    def downloadImage(self, productId, thumbnail, roomsets, hires=""):
         if thumbnail and thumbnail.strip() != "" and "http" in thumbnail:
             try:
                 common.picdownload2(str(thumbnail).strip().replace(

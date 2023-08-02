@@ -122,7 +122,7 @@ class Processor:
                 # Additional Information
                 usage = common.formatText(sh.cell_value(i, 21))
                 content = common.formatText(sh.cell_value(i, 13))
-                upc = common.formatText(sh.cell_value(i, 12))
+                upc = common.formatInt(sh.cell_value(i, 12))
 
                 features = []
                 for id in range(16, 19):
@@ -187,7 +187,7 @@ class Processor:
         return products
 
     def image(self):
-        fnames = os.listdir(f"{FILEDIR}/images/covington-magnolia-home/")
+        fnames = os.listdir(f"{FILEDIR}/images/covington/")
         for fname in fnames:
             mpn = fname.split(".")[0]
 
@@ -195,13 +195,13 @@ class Processor:
                 product = Covington.objects.get(mpn=mpn)
 
                 if product.productId:
-                    copyfile(f"{FILEDIR}/images/covington-magnolia-home/{fname}",
+                    copyfile(f"{FILEDIR}/images/covington/{fname}",
                              f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
                     debug.debug(
                         BRAND, 0, f"Copied {fname} to {product.productId}.jpg")
 
                 os.remove(
-                    f"{FILEDIR}/images/covington-magnolia-home/{fname}")
+                    f"{FILEDIR}/images/covington/{fname}")
             except Covington.DoesNotExist:
                 continue
 
