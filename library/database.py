@@ -570,7 +570,7 @@ class DatabaseManager:
                 debug.debug(self.brand, 1, str(e))
                 continue
 
-    def downloadImage(self, productId, thumbnail, roomsets):
+    def downloadImage(self, productId, thumbnail, roomsets, hires):
         if thumbnail and thumbnail.strip() != "" and "http" in thumbnail:
             try:
                 common.picdownload2(str(thumbnail).strip().replace(
@@ -587,6 +587,13 @@ class DatabaseManager:
                     idx = idx + 1
                 except Exception as e:
                     debug.debug(self.brand, 1, str(e))
+
+        if hires and hires.strip() != "" and "http" in hires:
+            try:
+                common.hiresdownload(str(hires).strip().replace(
+                    " ", "%20"), "{}_20.jpg".format(productId))
+            except Exception as e:
+                debug.debug(self.brand, 1, str(e))
 
     def downloadImages(self, missingOnly=True):
         hasImage = []

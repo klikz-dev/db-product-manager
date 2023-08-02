@@ -64,6 +64,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -563,6 +567,115 @@ class Processor:
             }
             products.append(product)
 
+        # Wall Art
+        wb = xlrd.open_workbook(f"{FILEDIR}/kravet-wallart-transparent.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            try:
+                # Primary Keys
+                mpn = str(sh.cell_value(i, 0)).strip()
+                if len(mpn.split(".")) != 3 or mpn.split(".")[2] != "0":
+                    continue
+
+                sku = "K {}".format(mpn)
+
+                pattern = str(sh.cell_value(i, 1)).replace(",", "").strip()
+                color = str(sh.cell_value(i, 7)).replace(";", " ").strip()
+
+                if not color:
+                    continue
+
+                # Categorization
+                brand = BRAND
+                type = "Wall Art"
+                manufacturer = f"{brand} {type}"
+                collection = "Wall Decor"
+
+                # Main Information
+                description = str(sh.cell_value(i, 2))
+                usage = "Wall Art"
+
+                width = common.formatFloat(sh.cell_value(i, 10))
+                length = common.formatFloat(sh.cell_value(i, 12))
+                height = common.formatFloat(sh.cell_value(i, 11))
+
+                # Additional Information
+                content = common.formatText(sh.cell_value(i, 20))
+                country = common.formatText(sh.cell_value(i, 21))
+                care = common.formatText(sh.cell_value(i, 24))
+                weight = common.formatFloat(sh.cell_value(i, 14))
+
+                # Measurement
+                uom = "Per Item"
+
+                # Pricing
+                cost = common.formatFloat(sh.cell_value(i, 15))
+
+                # Tagging
+                tags = description
+                colors = color
+
+                # Image
+                thumbnail = str(sh.cell_value(i, 35))
+
+                # Status
+                statusP = True
+                statusS = False
+
+                # Stock
+                stockP = 0
+                stockNote = str(sh.cell_value(i, 18))
+
+                if "White Glove" in sh.cell_value(i, 17):
+                    whiteGlove = True
+                else:
+                    whiteGlove = False
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            product = {
+                'mpn': mpn,
+                'sku': sku,
+                'pattern': pattern,
+                'color': color,
+
+                'brand': brand,
+                'type': type,
+                'manufacturer': manufacturer,
+                'collection': collection,
+
+                'description': description,
+                'usage': usage,
+
+                'width': width,
+                'length': length,
+                'height': height,
+
+                'content': content,
+                'country': country,
+                'care': care,
+                'weight': weight,
+
+                'uom': uom,
+
+                'tags': tags,
+                'colors': colors,
+
+                'cost': cost,
+
+                'statusP': statusP,
+                'statusS': statusS,
+
+                'stockP': stockP,
+                'stockNote': stockNote,
+                'whiteGlove': whiteGlove,
+
+                'thumbnail': thumbnail,
+            }
+            products.append(product)
+
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
@@ -635,3 +748,12 @@ class Processor:
                     src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
         csr.close()
+
+    def hires(self):
+        products = Kravet.objects.all()
+        for product in products:
+            if not product.productId or not product.thumbnail:
+                continue
+
+            self.databaseManager.downloadImage(
+                productId=product.productId, thumbnail="", roomsets=[], hires=product.thumbnail)
