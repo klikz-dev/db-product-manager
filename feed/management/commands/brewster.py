@@ -69,9 +69,9 @@ class Command(BaseCommand):
                         src="", dst=f"{FILEDIR}/brewster-inventory.csv", fileSrc=False)
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

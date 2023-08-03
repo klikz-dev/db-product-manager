@@ -76,9 +76,9 @@ class Command(BaseCommand):
                         src="/port68", dst=f"{FILEDIR}/port-68-inventory.xlsx", fileSrc=False)
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

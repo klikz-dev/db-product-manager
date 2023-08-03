@@ -72,9 +72,9 @@ class Command(BaseCommand):
                         src="inv_export.new.csv", dst=f"{FILEDIR}/premierprints-inventory.csv")
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

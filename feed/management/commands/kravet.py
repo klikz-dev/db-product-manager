@@ -84,9 +84,9 @@ class Command(BaseCommand):
                     processor.downloadFeed()
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

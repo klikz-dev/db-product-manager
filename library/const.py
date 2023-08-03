@@ -295,6 +295,12 @@ ftp = {
         "user": "jrinventory",
         "pass": "JRInv2775",
     },
+    "Kasmir": {
+        "host": "65.98.183.71",
+        "port": 21,
+        "user": "226022",
+        "pass": "Ashley1!",
+    },
     "Kravet": {
         "host": "file.kravet.com",
         "port": 21,

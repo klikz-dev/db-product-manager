@@ -72,9 +72,9 @@ class Command(BaseCommand):
                         src="/couture", dst=f"{FILEDIR}/couture-inventory.xlsm", fileSrc=False)
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

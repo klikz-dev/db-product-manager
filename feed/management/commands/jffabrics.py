@@ -66,9 +66,9 @@ class Command(BaseCommand):
                         src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx")
                     processor.inventory()
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(86400)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:

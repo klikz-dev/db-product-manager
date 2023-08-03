@@ -70,9 +70,9 @@ class Command(BaseCommand):
                     processor.databaseManager.statusSync(fullSync=False)
                     processor.databaseManager.updatePrices(formatPrice=False)
 
-                    print("Finished process. Waiting for next run. {}:{}".format(
-                        BRAND, options['functions']))
-                    time.sleep(60 * 60 * 24 * 7)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(60 * 60 * 24 * 7)
 
 
 class Processor:
