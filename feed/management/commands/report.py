@@ -1,18 +1,16 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 
 import os
 import environ
 import pymysql
 import csv
+import pandas
 
 from library import debug
-from shopify.models import Product, ProductImage, Customer, Address
+from shopify.models import Variant, Customer, Address
 from mysql.models import ProductTag, Tag, ProductSubtype, Type
-from feed.models import KravetDecor, Kravet, York
 
-FILEDIR = "{}/files/".format(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
+FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
 PROCESS = "Report"
 
@@ -50,269 +48,237 @@ class Processor:
         self.con.close()
 
     def roomvo(self):
-        ### Get High Res Image SKUs ###
-        wallpaperSkus = []
+        col_availability = []
+        col_sku = []
+        col_name = []
+        col_width = []
+        col_length = []
+        col_height = []
+        col_horizontal_repeat = []
+        col_vertical_repeat = []
+        col_image = []
+        col_layout = []
+        col_type = []
+        col_link = []
+        col_category = []
+        col_style = []
+        col_color = []
+        col_subtype = []
+        col_v1 = []
+        col_v2 = []
+        col_v3 = []
+        col_v4 = []
 
-        # Kravet
-        fnames = os.listdir(f"{FILEDIR}/images/kravet/")
-        for fname in fnames:
-            mpn = f"{fname.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
-            )
+        self.csr = self.con.cursor()
+        self.csr.execute(f"""
+            SELECT P.ProductID, P.SKU, P.Handle, P.Title, P.BodyHTML, P.ProductTypeId, M.Brand, PI.imageURL
+            FROM ProductImage PI 
+            JOIN Product P ON PI.ProductID = P.ProductID 
+            JOIN ProductManufacturer PM ON P.SKU = PM.SKU 
+            JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
+            WHERE PI.ImageIndex = 20 AND P.Published = 1
+        """)
+        rows = self.csr.fetchall()
 
-            try:
-                product = Kravet.objects.get(mpn=mpn)
-                wallpaperSkus.append(product.sku)
-            except Kravet.DoesNotExist:
+        wallpaperAdded = 0
+        rugAdded = 0
+        wallArtAdded = 0
+
+        for row in rows:
+            productId = row[0]
+            sku = row[1]
+            handle = row[2]
+            title = row[3]
+            bodyHTML = row[4]
+            productTypeId = row[5]
+            brand = row[6]
+            imageURL = row[7]
+
+            # JL Rug images doesn't look good
+            if brand == "Jaipur Living":
                 continue
 
-        # York
-        fnames = os.listdir(f"{FILEDIR}/images/york/")
-        for fname in fnames:
-            try:
-                if "_" not in fname:
-                    mpn = fname.split(".")[0]
-
-                    try:
-                        product = York.objects.get(mpn=mpn)
-                        wallpaperSkus.append(product.sku)
-                    except York.DoesNotExist:
-                        continue
-            except:
+            # Type
+            if productTypeId == 2:
+                type = "Wallpaper"
+            elif productTypeId == 4:
+                type = "Area Rug"
+            elif productTypeId == 41:
+                type = "Wall Art"
+            else:
                 continue
 
-        ###############################
+            if (type == "Wallpaper" and wallpaperAdded > 99) or (type == "Area Rug" and rugAdded > 99) or (type == "Wall Art" and wallArtAdded > 99):
+                continue
 
-        products = Product.objects.filter(Q(published=True) & Q(deleted=False))
-        products = products.exclude(Q(productId=None) | Q(productId="") | Q(
-            manufacturerPartNumber=None) | Q(manufacturerPartNumber=""))
-        products = products.filter(Q(productTypeId=2) | Q(
-            productTypeId=4) | Q(productTypeId=41))
+            if "Rug Pad" in title:
+                continue
 
-        with open(FILEDIR + 'roomvo.csv', 'w', newline='') as roomvoFile:
-            roomvoWriter = csv.DictWriter(roomvoFile, fieldnames=[
-                'availability',
-                'sku',
-                'name',
-                'width',
-                'length',
-                'height',
-                'horizontal_repeat',
-                'vertical_repeat',
-                'image',
-                'layout',
-                'type',
-                'link',
-                'category',
-                'style',
-                'color',
-                'subtype',
-                'v1',
-                'v2',
-                'v3',
-                'v4'
-            ])
+            # Collection, Width, Length, and Layout
+            width = ""
+            length = ""
+            height = ""
+            depth = ""
+            hr = ""
+            vr = ""
+            layout = ""
+            body = bodyHTML.replace(
+                "<br/>", "<br>").replace("<br />", "<br>").split("<br>")
+            for line in body:
+                if "Width:" in line:
+                    width = line.replace("Width:", "").strip()
+                if "Length:" in line and "Roll Length:" not in line:
+                    length = line.replace("Length:", "").strip()
+                if "Height:" in line:
+                    height = line.replace("Height:", "").strip()
+                if "Depth:" in line:
+                    depth = line.replace("Depth:", "").strip()
+                if "Horizontal Repeat:" in line:
+                    hr = line.replace("Horizontal Repeat:", "").strip()
+                if "Vertical Repeat:" in line:
+                    vr = line.replace("Vertical Repeat:", "").strip()
+                if "Repeat:" in line or "Horizontal Repeat:" in line or "Vertical Repeat:" in line:
+                    layout = "Repeat"
+                if "Match:" in line:
+                    match = line.replace("Match:", "").strip()
+                    layout = ", ".join((layout, match))
 
-            roomvoWriter.writerow({
-                'availability': 'Aavailability',
-                'sku': 'SKU',
-                'name': 'Name',
-                'width': 'Width',
-                'length': 'Length',
-                'height': 'Thickness',
-                'horizontal_repeat': 'Horizontal Repeat',
-                'vertical_repeat': 'Vertical Repeat',
-                'image': 'Image File Path',
-                'layout': 'Tile / Plank Layout',
-                'type': 'Product Subtype',
-                'link': 'Link',
-                'category': 'Category (Filter)',
-                'style': 'Style (Filter)',
-                'color': 'Color (Filter)',
-                'subtype': 'Subtype (Filter)',
-                'v1': 'Add to Cart',
-                'v2': 'Add to Cart (Trade)',
-                'v3': 'Order Sample',
-                'v4': 'Order Sample (Trade)'
-            })
+            x = width
+            y = ""
+            z = ""
 
-            wallpaperAdded = 0
-            rugAdded = 0
-            wallArtAdded = 0
-
-            for product in products:
-                if product.productTypeId == 2 and product.sku not in wallpaperSkus:
-                    continue
-
-                if (product.productTypeId == 2 and wallpaperAdded > 99) or (product.productTypeId == 4 and rugAdded > 49) or (product.productTypeId == 41 and wallArtAdded > 49):
-                    continue
-
-                if "Rug Pad" in product.title or (product.productTypeId == 4 and "SR" not in product.sku):
-                    continue
-
-                productId = product.productId
-
-                # SKU, Name, and Handle
-                sku = product.sku
-                name = product.title
-                handle = product.handle
-
-                # Type
-                if product.productTypeId == 2:
-                    type = "Wallpaper"
-                elif product.productTypeId == 4:
-                    type = "Area Rug"
-                elif product.productTypeId == 41:
-                    type = "Wall Art"
-                else:
-                    continue
-
-                # Collection, Width, Length, and Layout
-                width = ""
-                length = ""
-                height = ""
-                depth = ""
-                hr = ""
-                vr = ""
-                layout = ""
-                body = product.bodyHTML.replace(
-                    "<br/>", "<br>").replace("<br />", "<br>").split("<br>")
-                for line in body:
-                    if "Width:" in line:
-                        width = line.replace("Width:", "").strip()
-                    if "Length:" in line and "Roll Length:" not in line:
-                        length = line.replace("Length:", "").strip()
-                    if "Height:" in line:
-                        height = line.replace("Height:", "").strip()
-                    if "Depth:" in line:
-                        depth = line.replace("Depth:", "").strip()
-                    if "Horizontal Repeat:" in line:
-                        hr = line.replace("Horizontal Repeat:", "").strip()
-                    if "Vertical Repeat:" in line:
-                        vr = line.replace("Vertical Repeat:", "").strip()
-                    if "Repeat:" in line or "Horizontal Repeat:" in line or "Vertical Repeat:" in line:
-                        layout = "Repeat"
-                    if "Match:" in line:
-                        match = line.replace("Match:", "").strip()
-                        layout = ", ".join((layout, match))
-
-                x = width
-                y = ""
-                z = ""
-
-                if product.productTypeId == 4 or product.productTypeId == 41:
-                    if depth:
-                        z = depth
-                        y = height or length
-                    else:
-                        z = height
-                        y = length
-
-                    if product.productTypeId == 41 and not z:
-                        continue
-                else:
+            if type == "Area Rug" or type == "Wall Art":
+                if depth:
+                    z = depth
                     y = height or length
+                else:
+                    z = height
+                    y = length
 
-                # Image
-                images = ProductImage.objects.filter(
-                    Q(productId=productId) & Q(imageIndex=1))
-                if len(images) == 0:
+                if type == "Wall Art" and not z:
                     continue
-                image = images[0].imageURL
-                if image == "":
+            else:
+                y = height or length
+
+            # Variants
+            v1 = ""
+            v2 = ""
+            v3 = ""
+            v4 = ""
+            variants = Variant.objects.filter(productId=productId)
+
+            for variant in variants:
+                if variant.isDefault == True:
+                    v1 = variant.variantId
+                elif "Trade - " in variant.name:
+                    v2 = variant.variantId
+                elif "Free Sample - " in variant.name:
+                    v4 = variant.variantId
+                elif "Sample - " in variant.name:
+                    v3 = variant.variantId
+
+            # Filters
+            categories = []
+            styles = []
+            colors = []
+            subtypes = []
+
+            productTags = ProductTag.objects.filter(sku=sku)
+            for productTag in productTags:
+                try:
+                    tag = Tag.objects.get(tagId=productTag.tagId)
+                except Tag.DoesNotExist:
+                    continue
+                if tag.parentTagId == 0:
                     continue
 
-                # Variants
-                v1 = ""
-                v2 = ""
-                v3 = ""
-                v4 = ""
-                variants = product.variants.all()
+                if tag.description == "Category":
+                    categories.append(tag.name)
 
-                for variant in variants:
-                    if variant.isDefault == True:
-                        v1 = variant.variantId
-                    elif "Trade - " in variant.name:
-                        v2 = variant.variantId
-                    elif "Free Sample - " in variant.name:
-                        v4 = variant.variantId
-                    elif "Sample - " in variant.name:
-                        v3 = variant.variantId
+                if tag.description == "Style":
+                    styles.append(tag.name)
 
-                # Filters
-                categories = []
-                styles = []
-                colors = []
-                subtypes = []
+                if tag.description == "Color":
+                    colors.append(tag.name)
 
-                productTags = ProductTag.objects.filter(sku=sku)
-                for productTag in productTags:
-                    try:
-                        tag = Tag.objects.get(tagId=productTag.tagId)
-                    except Tag.DoesNotExist:
-                        continue
-                    if tag.parentTagId == 0:
-                        continue
+            productSubtypes = ProductSubtype.objects.filter(sku=sku)
+            for productSubtype in productSubtypes:
+                try:
+                    subtype = Type.objects.get(
+                        typeId=productSubtype.subtypeId)
+                except Type.DoesNotExist:
+                    continue
+                if subtype.parentTypeId == 0:
+                    continue
 
-                    if tag.description == "Category":
-                        categories.append(tag.name)
+                subtypes.append(subtype.name)
 
-                    if tag.description == "Style":
-                        styles.append(tag.name)
+            categories = ", ".join(categories)
+            styles = ", ".join(styles)
+            colors = ", ".join(colors)
+            subtypes = ", ".join(subtypes)
 
-                    if tag.description == "Color":
-                        colors.append(tag.name)
+            debug.debug(
+                PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {title}")
 
-                productSubtypes = ProductSubtype.objects.filter(sku=sku)
-                for productSubtype in productSubtypes:
-                    try:
-                        subtype = Type.objects.get(
-                            typeId=productSubtype.subtypeId)
-                    except Type.DoesNotExist:
-                        continue
-                    if subtype.parentTypeId == 0:
-                        continue
+            # Write Row
+            col_availability.append('Yes')
+            col_sku.append(sku)
+            col_name.append(title)
+            col_width.append(x)
+            col_length.append(y)
+            col_height.append(z)
+            col_horizontal_repeat.append(hr)
+            col_vertical_repeat.append(vr)
+            col_image.append(imageURL)
+            col_layout.append(layout)
+            col_type.append(type)
+            col_link.append(
+                'https://www.decoratorsbest.com/products/{}'.format(handle))
+            col_category.append(categories)
+            col_style.append(styles)
+            col_color.append(colors)
+            col_subtype.append(subtypes)
+            col_v1.append(v1)
+            col_v2.append(v2)
+            col_v3.append(v3)
+            col_v4.append(v4)
 
-                    subtypes.append(subtype.name)
+            # Counting
+            if type == "Wallpaper":
+                wallpaperAdded = wallpaperAdded + 1
 
-                categories = ", ".join(categories)
-                styles = ", ".join(styles)
-                colors = ", ".join(colors)
-                subtypes = ", ".join(subtypes)
+            if type == "Area Rug":
+                rugAdded = rugAdded + 1
 
-                debug.debug(
-                    PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {name}")
+            if type == "Wall Art":
+                wallArtAdded = wallArtAdded + 1
 
-                roomvoWriter.writerow({
-                    'availability': 'Yes',
-                    'sku': sku,
-                    'name': name,
-                    'width': x,
-                    'length': y,
-                    'height': z,
-                    'horizontal_repeat': hr,
-                    'vertical_repeat': vr,
-                    'image': image,
-                    'layout': layout,
-                    'type': type,
-                    'link': 'https://www.decoratorsbest.com/products/{}'.format(handle),
-                    'category': categories,
-                    'style': styles,
-                    'color': colors,
-                    'subtype': subtypes,
-                    'v1': v1,
-                    'v2': v2,
-                    'v3': v3,
-                    'v4': v4
-                })
+        data = {
+            'Availability': col_availability,
+            'SKU': col_sku,
+            'Name': col_name,
+            'Width': col_width,
+            'Length': col_length,
+            'Thickness': col_height,
+            'Horizontal Repeat': col_horizontal_repeat,
+            'Vertical Repeat': col_vertical_repeat,
+            'Image File Path': col_image,
+            'Tile / Plank Layout': col_layout,
+            'Product Subtype': col_type,
+            'Link': col_link,
+            'Category (Filter)': col_category,
+            'Style (Filter)': col_style,
+            'Color (Filter)': col_color,
+            'Subtype (Filter)': col_subtype,
+            'Add to Cart': col_v1,
+            'Add to Cart (Trade)': col_v2,
+            'Order Sample': col_v3,
+            'Order Sample (Trade)': col_v4,
+        }
 
-                if product.productTypeId == 2:
-                    wallpaperAdded = wallpaperAdded + 1
-
-                if product.productTypeId == 4:
-                    rugAdded = rugAdded + 1
-
-                if product.productTypeId == 41:
-                    wallArtAdded = wallArtAdded + 1
+        df = pandas.DataFrame(data)
+        df.to_excel(f"{FILEDIR}/roomvo.xlsx", index=False)
 
     def customers(self):
         with open(FILEDIR + 'customers.csv', 'w', newline='') as customersFile:
