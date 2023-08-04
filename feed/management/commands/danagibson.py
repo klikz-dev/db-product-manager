@@ -95,9 +95,9 @@ class Processor:
                 mpn = common.formatText(sh.cell_value(i, 1))
                 sku = f"DG {mpn}"
 
-                title = common.formatText(sh.cell_value(i, 4)).title()
-                if "Lumbar" in title:
-                    title = f"{title} Pillow"
+                name = common.formatText(sh.cell_value(i, 4)).title()
+                if "Lumbar" in name:
+                    name = f"{name} Pillow"
 
                 color = common.formatText(sh.cell_value(i, 3)).title()
 
@@ -108,7 +108,7 @@ class Processor:
                 collection = common.formatText(sh.cell_value(i, 2))
 
                 # Reconfigure
-                pattern = title.replace(color, "").replace(
+                pattern = name.replace(color, "").replace(
                     type, "").replace("Lamp", "").replace("  ", " ").strip()
 
                 if type == "Bowl":
@@ -180,7 +180,7 @@ class Processor:
                 'sku': sku,
                 'pattern': pattern,
                 'color': color,
-                'title': title,
+                'name': name,
 
                 'brand': brand,
                 'type': type,
@@ -208,6 +208,83 @@ class Processor:
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
+
+                'statusP': statusP,
+                'statusS': statusS,
+
+                'stockNote': stockNote,
+            }
+            products.append(product)
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/dana-gibson-lamps-master.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            try:
+                # Primary Keys
+                mpn = common.formatText(sh.cell_value(i, 1))
+                sku = f"DG {mpn}"
+
+                name = common.formatText(sh.cell_value(i, 4)).title()
+                color = common.formatText(sh.cell_value(i, 3)).title()
+
+                pattern = name.replace(color, "").replace(
+                    "Lamp", "").replace("  ", " ").strip()
+
+                # Categorization
+                brand = BRAND
+                type = "Lighting"
+                manufacturer = BRAND
+                collection = "Lighting"
+
+                # Main Information
+                description = common.formatText(sh.cell_value(i, 22))
+                width = common.formatFloat(sh.cell_value(i, 13))
+                height = common.formatFloat(sh.cell_value(i, 12))
+
+                # Pricing
+                cost = common.formatFloat(sh.cell_value(i, 5))
+                map = common.formatFloat(sh.cell_value(i, 6))
+
+                # Measurement
+                uom = "Per Item"
+
+                # Tagging
+                colors = color
+
+                # Status
+                statusP = True
+                statusS = False
+
+                # Stock
+                stockNote = f"{int(int(sh.cell_value(i, 35)) / 24)} days"
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            product = {
+                'mpn': mpn,
+                'sku': sku,
+                'pattern': pattern,
+                'color': color,
+                'name': name,
+
+                'brand': brand,
+                'type': type,
+                'manufacturer': manufacturer,
+                'collection': collection,
+
+                'description': description,
+                'width': width,
+                'height': height,
+
+                'cost': cost,
+                'map': map,
+
+                'uom': uom,
+
+                'colors': colors,
 
                 'statusP': statusP,
                 'statusS': statusS,
