@@ -91,7 +91,7 @@ schumacher = 1.5
 schumacher_trade = 1.25
 
 # Seabrook
-seabrook = 1.5
+seabrook = 1.33
 seabrook_trade = 1
 
 # Stark Studio
