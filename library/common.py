@@ -8,6 +8,7 @@ import shutil
 import datetime
 import pytz
 import requests
+import re
 
 import urllib.request
 
@@ -98,6 +99,11 @@ def fmt(x):
 
 def sq(x):
     return "N'" + x.replace("'", "''") + "'"
+
+
+def check_exact_word(key, text):
+    pattern = r'\b{}\b'.format(re.escape(key))
+    return bool(re.search(pattern, text, flags=re.IGNORECASE))
 
 
 def backup():

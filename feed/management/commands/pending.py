@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 import environ
 import pymysql
 import time
+import re
 
 from library import const, common
 
@@ -221,7 +222,7 @@ class Processor:
             size = row[1].lower()
             isLumbar = True
             for key in const.sizeDict.keys():
-                if self.check_exact_word(key, size):
+                if common.check_exact_word(key, size):
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(const.sizeDict[key])))
                     self.con.commit()
