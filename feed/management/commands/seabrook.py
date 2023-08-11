@@ -143,6 +143,9 @@ class Processor:
                     cost = common.formatFloat(sh.cell_value(i, 12))
                     map = common.formatFloat(sh.cell_value(i, 14))
 
+                if sh.cell_value(i, 53) == "No":
+                    map = 0
+
                 if cost == 0:
                     debug.debug(BRAND, 1, f"Cost Error for MPN: {mpn}")
                     continue
