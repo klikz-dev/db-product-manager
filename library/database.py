@@ -632,25 +632,33 @@ class DatabaseManager:
         except Exception as e:
             debug.debug(self.brand, 1,
                         f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
-            return False
+            return
 
         if fileSrc:
-            sftp.get(src, dst)
-            if delete:
-                sftp.remove(src)
+            try:
+                sftp.get(src, dst)
+                if delete:
+                    sftp.remove(src)
+            except Exception as e:
+                print(e)
+                return True
 
         else:
-            if src != "":
-                sftp.chdir(src)
+            try:
+                if src != "":
+                    sftp.chdir(src)
 
-            files = sftp.listdir()
-            for file in files:
-                if "EDI" in file:
-                    continue
+                files = sftp.listdir()
+                for file in files:
+                    if "EDI" in file:
+                        continue
 
-                sftp.get(file, dst)
-                if delete:
-                    sftp.remove(file)
+                    sftp.get(file, dst)
+                    if delete:
+                        sftp.remove(file)
+            except Exception as e:
+                print(e)
+                return True
 
         sftp.close()
 

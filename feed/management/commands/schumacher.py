@@ -27,7 +27,8 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
-                src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
+                src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv", delete=False)
+            print("hello")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
@@ -54,6 +55,11 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.updateTags(category=True)
 
+        if "sample" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
@@ -65,11 +71,8 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
-                    try:
-                        processor.databaseManager.downloadFileFromSFTP(
-                            src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
-                    except Exception as e:
-                        print(e)
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
 
                     processor.inventory()
 
@@ -203,6 +206,8 @@ class Processor:
                     else:
                         statusP = True
                         statusS = False
+                elif type == "Wallpaper" or type == "Fabric" or type == "Trim":
+                    statusS = False
                 else:
                     statusS = True
 
