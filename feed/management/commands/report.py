@@ -108,8 +108,8 @@ class Processor:
             else:
                 continue
 
-            if (type == "Wallpaper" and wallpaperAdded > 99) or (type == "Area Rug" and rugAdded > 99) or (type == "Wall Art" and wallArtAdded > 99):
-                continue
+            # if (type == "Wallpaper" and wallpaperAdded > 99) or (type == "Area Rug" and rugAdded > 99) or (type == "Wall Art" and wallArtAdded > 99):
+            #     continue
 
             if "Rug Pad" in title:
                 continue
