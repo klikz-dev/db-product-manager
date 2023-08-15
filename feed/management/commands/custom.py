@@ -10,7 +10,7 @@ import json
 import time
 
 
-from library import debug, shopify
+from library import debug, shopify, common
 
 from shopify.models import Variant, Product
 from mysql.models import ProductSubtype, Type
@@ -54,6 +54,10 @@ class Command(BaseCommand):
         if "removeTags" in options['functions']:
             processor = Processor()
             processor.removeTags()
+
+        if "addTags" in options['functions']:
+            processor = Processor()
+            processor.addTags()
 
         if "removeSubTypes" in options['functions']:
             processor = Processor()
@@ -212,6 +216,26 @@ class Processor:
                     "Custom", 0, f"Updated {brand} prices. Product {productId}")
 
         csr.close()
+
+    def addTags(self):
+        tag = "NoSample"
+        con = self.con
+        csr = con.cursor()
+
+        products = Product.objects.filter(Q(productTypeId=5) | Q(productTypeId=23) | Q(productTypeId=24) | Q(
+            productTypeId=90) | Q(productTypeId=91) | Q(productTypeId=92) | Q(productTypeId=95) | Q(productTypeId=96))
+
+        for product in products:
+            if product.productId:
+                csr.execute("CALL AddToProductTag ({}, {})".format(
+                    common.sq(product.sku), common.sq(tag)))
+                con.commit()
+                debug.debug(
+                    "Custom", 0, "{} Tag has been applied to {}".format(tag, product.sku))
+
+                csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
+                    product.productId))
+                con.commit()
 
     def removeTags(self):
         tagId = 282
