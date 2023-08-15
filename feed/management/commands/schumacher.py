@@ -28,7 +28,6 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
                 src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv", delete=False)
-            print("hello")
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
