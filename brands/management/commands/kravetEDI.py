@@ -133,7 +133,8 @@ class Command(BaseCommand):
                 shippingMethod = row[11]
                 shipInstruction = str(row[12]).replace("\n", " ")
                 packInstruction = str(row[13]).replace("\n", " ")
-                phone = str(row[15]).replace("+1", "").replace("-", "").replace(" ","")
+                phone = str(row[15]).replace(
+                    "+1", "").replace("-", "").replace(" ", "")
 
                 instructions = ""
                 if shipInstruction != "" and shipInstruction != None:
@@ -143,6 +144,13 @@ class Command(BaseCommand):
                     instructions += "Pack Instruction: {}".format(
                         packInstruction)
 
+                # Full Address
+                fullAddress = address1
+                if address2:
+                    fullAddress = f"{fullAddress}, {address2}"
+                if suite:
+                    fullAddress = f"{fullAddress}, {suite}"
+
                 # Generate XML Content
                 content = "<G_HDR>"
                 content += "<HDR_CUSTOMER_PO>" + \
@@ -150,19 +158,14 @@ class Command(BaseCommand):
                 content += "<CREATION_DATE>" + \
                     common.fmt(orderDate) + "</CREATION_DATE>"
                 content += "<ACCOUNT_NUMBER>10180317</ACCOUNT_NUMBER>"
-                content += "<CONTACT_NAME>" + \
-                    common.fmt(name) + "</CONTACT_NAME>"
+                content += "<CONTACT_NAME>""</CONTACT_NAME>"
                 content += "<CONT_PHONE_NUMBER>" + \
                     common.fmt(phone) + "</CONT_PHONE_NUMBER>"
 
                 content += "<HDR_SHIP_ADDRESS1>" + \
-                    common.fmt(address1) + "</HDR_SHIP_ADDRESS1>"
-                content += "<HDR_SHIP_ADDRESS2>"
-                if address2 != "" and address2 != None:
-                    content += common.fmt(address2)
-                if suite != "" and suite != None:
-                    content += ", " + common.fmt(suite)
-                content += "</HDR_SHIP_ADDRESS2>"
+                    common.fmt(name) + "</HDR_SHIP_ADDRESS1>"
+                content += "<HDR_SHIP_ADDRESS2>" + \
+                    common.fmt(fullAddress) + "</HDR_SHIP_ADDRESS2>"
 
                 content += "<HDR_SHIP_CITY>" + \
                     common.fmt(city) + "</HDR_SHIP_CITY>"
