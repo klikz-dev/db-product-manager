@@ -81,6 +81,16 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
+        # Discontinued
+        discontinuedMPNs = []
+        wb = xlrd.open_workbook(f"{FILEDIR}/elainesmith-master.xlsx")
+        sh = wb.sheet_by_index(1)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 0))
+
+            if mpn not in discontinuedMPNs:
+                discontinuedMPNs.append(mpn)
+
         # Get Product Feed
         products = []
 
@@ -128,7 +138,11 @@ class Processor:
                         roomsets.append(sh.cell_value(i, id))
 
                 # Status
-                statusP = True
+                if mpn in discontinuedMPNs:
+                    statusP = False
+                else:
+                    statusP = True
+
                 statusS = False
 
                 # Stock
