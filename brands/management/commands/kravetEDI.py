@@ -158,7 +158,8 @@ class Command(BaseCommand):
                 content += "<CREATION_DATE>" + \
                     common.fmt(orderDate) + "</CREATION_DATE>"
                 content += "<ACCOUNT_NUMBER>10180317</ACCOUNT_NUMBER>"
-                content += "<CONTACT_NAME>""</CONTACT_NAME>"
+                content += "<CONTACT_NAME>" + \
+                    common.fmt(name) + "</CONTACT_NAME>"
                 content += "<CONT_PHONE_NUMBER>" + \
                     common.fmt(phone) + "</CONT_PHONE_NUMBER>"
 
