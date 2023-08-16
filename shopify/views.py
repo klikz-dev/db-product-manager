@@ -259,8 +259,25 @@ class ProductViewSet(viewsets.ModelViewSet):
         products = Product.objects.all()
 
         productId = self.request.query_params.get('id')
-        if productId is not None:
+        pattern = self.request.query_params.get('pattern')
+        color = self.request.query_params.get('color')
+        type = self.request.query_params.get('type')
+        vendor = self.request.query_params.get('vendor')
+
+        if productId:
             products = products.filter(productId=productId)
+
+        if pattern:
+            products = products.filter(pattern=pattern)
+
+        if color:
+            products = products.filter(color=color)
+
+        if type:
+            products = products.filter(type=type)
+
+        if vendor:
+            products = products.filter(vendor=vendor)
 
         page = self.paginate_queryset(products)
         if page is not None:
