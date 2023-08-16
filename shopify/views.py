@@ -274,7 +274,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             products = products.filter(color=color)
 
         if type:
-            products = products.filter(type=type)
+            products = products.filter(productTypeId=type)
 
         if vendor:
             products = products.filter(vendor=vendor)
