@@ -98,6 +98,16 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
+        # Sample Status
+        discontinuedSamples = []
+        f = open(f"{FILEDIR}/schumacher-sample-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            mpn = str(row[0]).strip().replace("'", "")
+            stockS = common.formatInt(row[1])
+            if stockS < 1:
+                discontinuedSamples.append(mpn)
+
         # Get Product Feed
         products = []
 
@@ -209,6 +219,9 @@ class Processor:
                     statusS = False
                 else:
                     statusS = True
+
+                if mpn in discontinuedSamples:
+                    statusS = False
 
                 if width > 107 or length > 107:
                     whiteGlove = True
