@@ -222,6 +222,9 @@ class Processor:
                 PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {title}")
 
             # Write Row
+            if not x and not y:
+                continue
+
             col_availability.append('Yes')
             col_sku.append(sku)
             col_name.append(title)
