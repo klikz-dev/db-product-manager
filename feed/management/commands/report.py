@@ -108,8 +108,8 @@ class Processor:
             else:
                 continue
 
-            if (type == "Wallpaper" and wallpaperAdded > 9999) or (type == "Area Rug" and rugAdded > 9999) or (type == "Wall Art" and wallArtAdded > 9999):
-                continue
+            # if (type == "Wallpaper" and wallpaperAdded > 9999) or (type == "Area Rug" and rugAdded > 9999) or (type == "Wall Art" and wallArtAdded > 9999):
+            #     continue
 
             if "Rug Pad" in title:
                 continue
@@ -254,31 +254,55 @@ class Processor:
             if type == "Wall Art":
                 wallArtAdded = wallArtAdded + 1
 
-        data = {
-            'Availability': col_availability,
-            'SKU': col_sku,
-            'Name': col_name,
-            'Width': col_width,
-            'Length': col_length,
-            'Thickness': col_height,
-            'Horizontal Repeat': col_horizontal_repeat,
-            'Vertical Repeat': col_vertical_repeat,
-            'Image File Path': col_image,
-            'Tile / Plank Layout': col_layout,
-            'Product Subtype': col_type,
-            'Link': col_link,
-            'Category (Filter)': col_category,
-            'Style (Filter)': col_style,
-            'Color (Filter)': col_color,
-            'Subtype (Filter)': col_subtype,
-            'Add to Cart': col_v1,
-            'Add to Cart (Trade)': col_v2,
-            'Order Sample': col_v3,
-            'Order Sample (Trade)': col_v4,
+        data1 = {
+            'Availability': col_availability[0:19999],
+            'SKU': col_sku[0:19999],
+            'Name': col_name[0:19999],
+            'Width': col_width[0:19999],
+            'Length': col_length[0:19999],
+            'Thickness': col_height[0:19999],
+            'Horizontal Repeat': col_horizontal_repeat[0:19999],
+            'Vertical Repeat': col_vertical_repeat[0:19999],
+            'Image File Path': col_image[0:19999],
+            'Tile / Plank Layout': col_layout[0:19999],
+            'Product Subtype': col_type[0:19999],
+            'Link': col_link[0:19999],
+            'Category (Filter)': col_category[0:19999],
+            'Style (Filter)': col_style[0:19999],
+            'Color (Filter)': col_color[0:19999],
+            'Subtype (Filter)': col_subtype[0:19999],
+            'Add to Cart': col_v1[0:19999],
+            'Add to Cart (Trade)': col_v2[0:19999],
+            'Order Sample': col_v3[0:19999],
+            'Order Sample (Trade)': col_v4[0:19999],
         }
+        df1 = pandas.DataFrame(data1)
+        df1.to_excel(f"{FILEDIR}/roomvo-1.xlsx", index=False)
 
-        df = pandas.DataFrame(data)
-        df.to_excel(f"{FILEDIR}/roomvo.xlsx", index=False)
+        data2 = {
+            'Availability': col_availability[20000:],
+            'SKU': col_sku[20000:],
+            'Name': col_name[20000:],
+            'Width': col_width[20000:],
+            'Length': col_length[20000:],
+            'Thickness': col_height[20000:],
+            'Horizontal Repeat': col_horizontal_repeat[20000:],
+            'Vertical Repeat': col_vertical_repeat[20000:],
+            'Image File Path': col_image[20000:],
+            'Tile / Plank Layout': col_layout[20000:],
+            'Product Subtype': col_type[20000:],
+            'Link': col_link[20000:],
+            'Category (Filter)': col_category[20000:],
+            'Style (Filter)': col_style[20000:],
+            'Color (Filter)': col_color[20000:],
+            'Subtype (Filter)': col_subtype[20000:],
+            'Add to Cart': col_v1[20000:],
+            'Add to Cart (Trade)': col_v2[20000:],
+            'Order Sample': col_v3[20000:],
+            'Order Sample (Trade)': col_v4[20000:],
+        }
+        df2 = pandas.DataFrame(data2)
+        df2.to_excel(f"{FILEDIR}/roomvo-2.xlsx", index=False)
 
     def customers(self):
         with open(FILEDIR + 'customers.csv', 'w', newline='') as customersFile:
