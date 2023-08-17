@@ -235,13 +235,16 @@ class Processor:
         for i in range(1, sh.nrows):
             mpn = common.formatText(sh.cell_value(i, 0))
             sku = f"CL {mpn}"
-            stockP = int(sh.cell_value(i, 1))
+            stockP = common.formatInt(sh.cell_value(i, 1))
 
             stockNote = sh.cell_value(i, 2)
             if stockNote:
-                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
-                date_obj = datetime.datetime(*date_tuple)
-                stockNote = date_obj.date()
+                try:
+                    date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
+                    date_obj = datetime.datetime(*date_tuple)
+                    stockNote = date_obj.date()
+                except:
+                    pass
 
             stock = {
                 'sku': sku,
