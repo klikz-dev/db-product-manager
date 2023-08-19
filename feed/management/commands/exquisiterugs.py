@@ -5,6 +5,7 @@ import os
 import environ
 import pymysql
 import xlrd
+import time
 
 from library import database, debug, common
 
@@ -60,7 +61,18 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=True)
+            processor.image()
+
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="inventory/Decorators Best Inventory FTP.xlsx", dst=f"{FILEDIR}/exquisiterugs-inventory.xlsx")
+                    processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -203,3 +215,43 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def image(self):
+        products = ExquisiteRugs.objects.all()
+        for product in products:
+            self.databaseManager.downloadFileFromSFTP(
+                src=f"images/{product.thumbnail}",
+                dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
+                fileSrc=True,
+                delete=False
+            )
+
+            for index, roomset in enumerate(product.roomsets):
+                self.databaseManager.downloadFileFromSFTP(
+                    src=f"images/{product.thumbnail}",
+                    dst=f"{FILEDIR}/../../../images/roomset/{roomset}_{index + 2}.jpg",
+                    fileSrc=True,
+                    delete=False
+                )
+
+    def inventory(self):
+        stocks = []
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/exquisiterugs-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 1)).replace("'", "")
+            sku = f"ER {mpn}"
+
+            stockP = common.formatInt(sh.cell_value(i, 2))
+            stockNote = common.formatText(sh.cell_value(i, 3))
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': stockNote,
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
