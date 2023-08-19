@@ -300,6 +300,9 @@ class DatabaseManager:
         else:
             manufacturer = product.manufacturer
 
+            if manufacturer == "Exquisite Rugs":
+                manufacturer = "Exquisite"
+
             if "JF Fabrics" in manufacturer:
                 manufacturer = product.brand
             elif ptype in manufacturer:
@@ -581,12 +584,13 @@ class DatabaseManager:
         if len(roomsets) > 0:
             idx = 2
             for roomset in roomsets:
-                try:
-                    common.roomdownload(str(roomset).strip().replace(
-                        " ", "%20"), "{}_{}.jpg".format(productId, idx))
-                    idx = idx + 1
-                except Exception as e:
-                    debug.debug(self.brand, 1, str(e))
+                if roomset and roomset.strip() != "" and "http" in roomset:
+                    try:
+                        common.roomdownload(str(roomset).strip().replace(
+                            " ", "%20"), "{}_{}.jpg".format(productId, idx))
+                        idx = idx + 1
+                    except Exception as e:
+                        debug.debug(self.brand, 1, str(e))
 
         if hires and hires.strip() != "" and "http" in hires:
             try:

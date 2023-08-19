@@ -302,7 +302,11 @@ class Processor:
         csr = self.con.cursor()
 
         productIDs = [
-            ''
+            '6896321724462',
+            '6896322117678',
+            '6896322150446',
+            '6896322183214',
+            '6896322215982',
         ]
 
         for productID in productIDs:
@@ -310,21 +314,19 @@ class Processor:
                 FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
                 WHERE P.ProductID = '{}'""".format(productID))
 
-            try:
+            # try:
+            if True:
                 row = csr.fetchone()
                 productID = row[0]
                 sku = row[1]
-            except Exception as e:
-                print(e)
-                continue
+            # except Exception as e:
+            #     print(e)
 
-            try:
-                row = csr.fetchone()
-                productID = row[0]
-                sku = row[1]
+            # try:
+            if True:
                 shopify.DeleteProductByProductID(productID)
-            except Exception as e:
-                print(e)
+            # except Exception as e:
+            #     print(e)
 
             try:
                 csr.execute(

@@ -91,10 +91,10 @@ class Processor:
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 2))
+                mpn = common.formatText(sh.cell_value(i, 2)).replace("'", "")
                 sku = f"ER {mpn}"
 
-                pattern = common.formatText(sh.cell_value(i, 3))
+                pattern = common.formatInt(sh.cell_value(i, 3))
                 color = common.formatText(sh.cell_value(i, 4))
 
                 name = common.formatText(sh.cell_value(i, 6))
@@ -120,6 +120,7 @@ class Processor:
                 upc = common.formatInt(sh.cell_value(i, 13))
                 weight = common.formatFloat(sh.cell_value(i, 14))
                 care = common.formatText(sh.cell_value(i, 25))
+                material = common.formatText(sh.cell_value(i, 12))
                 country = common.formatText(sh.cell_value(i, 35))
 
                 # Pricing
@@ -130,7 +131,7 @@ class Processor:
                 uom = "Per Item"
 
                 # Tagging
-                tags = f"{sh.cell_value(i, 11)}, {sh.cell_value(i, 12)}"
+                tags = f"{sh.cell_value(i, 11)}, {material}"
                 colors = color
 
                 # Image
@@ -145,6 +146,11 @@ class Processor:
                 # Status
                 statusP = True
                 statusS = False
+
+                if width > 107 or length > 107 or height > 107 or weight > 149:
+                    whiteGlove = True
+                else:
+                    whiteGlove = False
 
                 # Name
                 name = f"{name} {size} Rug"
@@ -174,6 +180,7 @@ class Processor:
                 'dimension': dimension,
 
                 'care': care,
+                'material': material,
                 'weight': weight,
                 'country': country,
                 'upc': upc,
@@ -190,6 +197,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'whiteGlove': whiteGlove,
             }
             products.append(product)
 
