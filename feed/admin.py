@@ -5,6 +5,7 @@ from .models import Couture
 from .models import Covington
 from .models import DanaGibson
 from .models import ElaineSmith
+from .models import ExquisiteRugs
 from .models import JaipurLiving
 from .models import JamieYoung
 from .models import JFFabrics
@@ -171,6 +172,11 @@ class DanaGibsonAdmin(FeedAdmin):
 
 @admin.register(ElaineSmith)
 class ElaineSmithAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(ExquisiteRugs)
+class ExquisiteRugsAdmin(FeedAdmin):
     pass
 
 

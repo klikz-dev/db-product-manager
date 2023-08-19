@@ -134,6 +134,12 @@ class ElaineSmith(Feed):
         verbose_name_plural = "Elaine Smith"
 
 
+class ExquisiteRugs(Feed):
+    class Meta:
+        verbose_name = "Exquisite Rugs"
+        verbose_name_plural = "Exquisite Rugs"
+
+
 class JaipurLiving(Feed):
     class Meta:
         verbose_name = "Jaipur Living"

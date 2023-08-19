@@ -24,6 +24,11 @@ markup = {
         "consumer": 1.8,
         "trade": 1.5,
     },
+    "Exquisite Rugs": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Jaipur Living": {
         "useMAP": False,
         "consumer": 2,
@@ -189,7 +194,7 @@ sftp = {
         "user": "couture",
         "pass": "Couture123!",
     },
-    "Exquisite": {
+    "Exquisite Rugs": {
         "host": "decoratorsbestam.com",
         "port": 22,
         "user": "exquisiterugs",
