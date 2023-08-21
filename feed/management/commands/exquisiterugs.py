@@ -220,7 +220,7 @@ class Processor:
         products = ExquisiteRugs.objects.all()
         for product in products:
             self.databaseManager.downloadFileFromSFTP(
-                src=f"images/{product.thumbnail}",
+                src=f"/exquisiterugs/images/{product.thumbnail}",
                 dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
                 fileSrc=True,
                 delete=False
@@ -228,8 +228,8 @@ class Processor:
 
             for index, roomset in enumerate(product.roomsets):
                 self.databaseManager.downloadFileFromSFTP(
-                    src=f"images/{product.thumbnail}",
-                    dst=f"{FILEDIR}/../../../images/roomset/{roomset}_{index + 2}.jpg",
+                    src=f"/exquisiterugs/images/{roomset}",
+                    dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{index + 2}.jpg",
                     fileSrc=True,
                     delete=False
                 )
