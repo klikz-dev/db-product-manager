@@ -42,7 +42,7 @@ class Command(BaseCommand):
         if "update" in options['functions']:
             processor = Processor()
             products = Schumacher.objects.filter(
-                Q(type='Rug'))
+                Q(collection='BACKDROP'))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
