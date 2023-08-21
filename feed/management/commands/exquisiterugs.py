@@ -217,8 +217,17 @@ class Processor:
         return products
 
     def image(self):
+        csr = self.con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
         products = ExquisiteRugs.objects.all()
         for product in products:
+            if product.productId in hasImage:
+                continue
+
             self.databaseManager.downloadFileFromSFTP(
                 src=f"/exquisiterugs/images/{product.thumbnail}",
                 dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
@@ -233,6 +242,8 @@ class Processor:
                     fileSrc=True,
                     delete=False
                 )
+
+        csr.close()
 
     def inventory(self):
         stocks = []

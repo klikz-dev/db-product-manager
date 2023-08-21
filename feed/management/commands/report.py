@@ -119,6 +119,7 @@ class Processor:
             length = ""
             height = ""
             depth = ""
+            rollLength = ""
             hr = ""
             vr = ""
             layout = ""
@@ -133,6 +134,8 @@ class Processor:
                     height = line.replace("Height:", "").strip()
                 if "Depth:" in line:
                     depth = line.replace("Depth:", "").strip()
+                if "Roll Length:" in line:
+                    rollLength = line.replace("Roll Length:", "").strip()
                 if "Horizontal Repeat:" in line:
                     hr = line.replace("Horizontal Repeat:", "").strip()
                 if "Vertical Repeat:" in line:
@@ -159,6 +162,9 @@ class Processor:
                     continue
             else:
                 y = height or length
+
+            if not y:
+                y = rollLength
 
             # Variants
             v1 = ""
