@@ -222,6 +222,7 @@ class Processor:
         csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
         for row in csr.fetchall():
             hasImage.append(str(row[0]))
+        csr.close()
 
         products = ExquisiteRugs.objects.all()
         for product in products:
@@ -242,8 +243,6 @@ class Processor:
                     fileSrc=True,
                     delete=False
                 )
-
-        csr.close()
 
     def inventory(self):
         stocks = []

@@ -627,58 +627,69 @@ class DatabaseManager:
                         f"Download Error {dst} From {src}. Error: {str(e)}")
 
     def downloadFileFromSFTP(self, src, dst, fileSrc=True, delete=True):
-        try:
-            transport = paramiko.Transport(
-                (const.sftp[self.brand]["host"], const.sftp[self.brand]["port"]))
-            transport.connect(
-                username=const.sftp[self.brand]["user"], password=const.sftp[self.brand]["pass"])
-            sftp = paramiko.SFTPClient.from_transport(transport)
-        except Exception as e:
-            debug.debug(self.brand, 1,
-                        f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
-            return
+        host = const.sftp[self.brand]["host"]
+        port = const.sftp[self.brand]["port"]
+        username = const.sftp[self.brand]["user"]
+        password = const.sftp[self.brand]["pass"]
 
-        if fileSrc:
-            try:
-                sftp.get(src, dst)
-                if delete:
-                    sftp.remove(src)
-            except Exception as e:
-                print(e)
-                return True
-
+        if host == "decoratorsbestam.com":
+            self.downloadFileFromLocalSFTP(
+                src=src, dst=dst, fileSrc=fileSrc, delete=delete)
         else:
             try:
-                if src != "":
-                    sftp.chdir(src)
-
-                files = sftp.listdir()
-                for file in files:
-                    if "EDI" in file:
-                        continue
-
-                    sftp.get(file, dst)
-                    if delete:
-                        sftp.remove(file)
+                transport = paramiko.Transport((host, port))
+                transport.connect(username=username, password=password)
+                sftp = paramiko.SFTPClient.from_transport(transport)
             except Exception as e:
-                print(e)
-                return True
+                debug.debug(self.brand, 1,
+                            f"Connection to {self.brand} SFTP Server Failed. Error: {str(e)}")
+                return
 
-        sftp.close()
+            if fileSrc:
+                try:
+                    sftp.get(src, dst)
+                    if delete:
+                        sftp.remove(src)
+                except Exception as e:
+                    print(e)
+                    return True
 
-        debug.debug(self.brand, 0,
-                    f"{dst} downloaded from {self.brand} SFTP")
-        return True
+            else:
+                try:
+                    if src != "":
+                        sftp.chdir(src)
 
-    def downloadFileFromLocalSFTP(self, src, dst, fileSrc=True):
+                    files = sftp.listdir()
+                    for file in files:
+                        if "EDI" in file:
+                            continue
+
+                        sftp.get(file, dst)
+                        if delete:
+                            sftp.remove(file)
+                except Exception as e:
+                    print(e)
+                    return True
+
+            sftp.close()
+
+            debug.debug(self.brand, 0,
+                        f"{dst} downloaded from {self.brand} SFTP")
+            return True
+
+    def downloadFileFromLocalSFTP(self, src, dst, fileSrc=True, delete=True):
         src = f"/var/sftp/{const.sftp[self.brand]['user']}{src}"
 
         if fileSrc:
             copyfile(src, dst)
+            if delete:
+                os.remove(src)
         else:
             files = os.listdir(src)
             for file in files:
                 copyfile(f"{src}/{file}", dst)
+                if delete:
+                    os.remove(file)
 
         debug.debug(self.brand, 0,
                     f"{dst} downloaded from {self.brand} SFTP")
