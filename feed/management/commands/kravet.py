@@ -12,6 +12,8 @@ import requests
 import xlrd
 import time
 from bs4 import BeautifulSoup
+from shutil import copyfile
+import glob
 
 from library import database, debug, common
 
@@ -750,10 +752,22 @@ class Processor:
         csr.close()
 
     def hires(self):
-        products = Kravet.objects.all()
-        for product in products:
-            if not product.productId or not product.thumbnail:
-                continue
+        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
+            fpath, ext = os.path.splitext(infile)
+            fname = os.path.basename(fpath)
 
-            self.databaseManager.downloadImage(
-                productId=product.productId, thumbnail="", roomsets=[], hires=product.thumbnail)
+            mpn = f"{fname.replace('_', '.')}.0"
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+
+                if product.productId:
+                    copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                             f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
+                    debug.debug(
+                        BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
+
+                os.remove(
+                    f"{FILEDIR}/images/kravet/{fname}{ext}")
+            except Kravet.DoesNotExist:
+                continue

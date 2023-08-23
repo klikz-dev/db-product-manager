@@ -62,6 +62,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
 
 class Processor:
     def __init__(self):
@@ -227,3 +231,23 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def hires(self):
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{BRAND}'")
+
+        hasImage = []
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        csr.close()
+
+        products = Seabrook.objects.all()
+        for product in products:
+            if not product.productId or product.productId in hasImage:
+                continue
+
+            common.hiresdownload(
+                product.thumbnail, f"{product.productId}_20.jpg")

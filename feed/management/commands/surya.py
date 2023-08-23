@@ -319,7 +319,8 @@ class Processor:
             if missingOnly and product.productId in hasImage:
                 continue
 
-            hiresImage = product.thumbnail.replace("512x512", "RAW")
+            hiresImage = product.thumbnail.replace(
+                "512x512", "RAW").replace(" ", "%20")
 
             common.hiresdownload(hiresImage, f"{product.productId}_20.jpg")
 

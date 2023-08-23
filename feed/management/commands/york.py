@@ -437,21 +437,35 @@ class Processor:
                     )
 
     def hires(self):
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{BRAND}'")
+
+        hasImage = []
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        csr.close()
+
         dnames = [
-            "Artistic Abstracts",
-            "Vintage Florals"
+            "RoomMates Murals",
+            "Aussie",
+            "EttaVee",
+            "Vintage Florals",
+            "Artistic Abstracts"
         ]
 
         for dname in dnames:
             fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
             for fname in fnames:
-                print(fname)
-
                 if "_" not in fname:
                     mpn = fname.split(".")[0]
 
                     try:
                         product = York.objects.get(mpn=mpn)
+                        if not product.productId or product.productId in hasImage:
+                            continue
                     except York.DoesNotExist:
                         continue
 

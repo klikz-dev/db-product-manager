@@ -62,6 +62,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
@@ -454,12 +458,13 @@ class Processor:
 
         hasImage = []
 
-        self.csr = self.con.cursor()
-        self.csr.execute(
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
             f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{BRAND}'")
-        for row in self.csr.fetchall():
+        for row in csr.fetchall():
             hasImage.append(str(row[0]))
-        self.csr.close()
+        csr.close()
 
         products = Brewster.objects.all()
         for product in products:
@@ -548,3 +553,46 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{BRAND}'")
+
+        hasImage = []
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        csr.close()
+
+        products = Brewster.objects.all()
+        for product in products:
+            if not product.productId or product.productId in hasImage:
+                continue
+
+            collection = product.collection
+            mpn = product.mpn
+            productId = product.productId
+
+            try:
+                originalBrand = product.custom['originalBrand']
+                if originalBrand != "Advantage" and collection != "Eijffinger Web Only":
+                    collection = collection.replace(originalBrand, "").strip()
+
+                try:
+                    self.imageServer.chdir(
+                        path=f"/WallpaperBooks/{collection}/Images/300dpi")
+                except:
+                    continue
+
+                files = self.imageServer.listdir()
+
+                if f"{mpn}.jpg" in files:
+                    self.imageServer.get(
+                        f"{mpn}.jpg", f"{FILEDIR}/../../../images/hires/{productId}_20.jpg")
+                    debug.debug(
+                        BRAND, 0, f"downloaded product image {productId}_20.jpg")
+
+            except:
+                continue

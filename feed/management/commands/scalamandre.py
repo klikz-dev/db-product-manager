@@ -75,9 +75,9 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
-        if "image-manual" in options['functions']:
+        if "hires" in options['functions']:
             processor = Processor()
-            processor.imageManual()
+            processor.hires()
 
         if "sample" in options['functions']:
             processor = Processor()
@@ -327,20 +327,28 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def imageManual(self):
+    def hires(self):
         fnames = os.listdir(f"{FILEDIR}/images/scalamandre/")
         for fname in fnames:
             if "_" in fname:
-                mpn = f'{fname.split("_")[0]}{fname.split("_")[1]}'
+                prefix = fname.split("_")[0]
+                number = fname.split("_")[1]
+
+                if prefix == "SC":
+                    mpn = f'SC {number}'
+                elif prefix == "WSB":
+                    mpn = f'WSB{number}'
+                else:
+                    mpn = f'{prefix}{number}'
 
                 try:
                     product = Scalamandre.objects.get(mpn=mpn)
 
                     if product.productId:
                         copyfile(f"{FILEDIR}/images/scalamandre/{fname}",
-                                 f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+                                 f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg")
                         debug.debug(
-                            BRAND, 0, f"Copied {fname} to {product.productId}.jpg")
+                            BRAND, 0, f"Copied {fname} to {product.productId}_20.jpg")
 
                     os.remove(f"{FILEDIR}/images/scalamandre/{fname}")
                 except Scalamandre.DoesNotExist:

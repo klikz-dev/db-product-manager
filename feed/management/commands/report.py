@@ -95,8 +95,8 @@ class Processor:
             imageURL = row[7]
 
             # JL Rug images doesn't look good
-            if brand == "Jaipur Living":
-                continue
+            # if brand == "Jaipur Living":
+            #     continue
 
             # Type
             if productTypeId == 2:
@@ -107,9 +107,6 @@ class Processor:
                 type = "Wall Art"
             else:
                 continue
-
-            # if (type == "Wallpaper" and wallpaperAdded > 9999) or (type == "Area Rug" and rugAdded > 9999) or (type == "Wall Art" and wallArtAdded > 9999):
-            #     continue
 
             if "Rug Pad" in title:
                 continue
@@ -158,13 +155,17 @@ class Processor:
                     z = height
                     y = length
 
-                if type == "Wall Art" and not z:
-                    continue
+                # if type == "Wall Art" and not z:
+                #     continue
             else:
                 y = height or length
 
             if not y:
                 y = rollLength
+
+            # Write Row
+            # if not x and not y:
+            #     continue
 
             # Variants
             v1 = ""
@@ -226,10 +227,6 @@ class Processor:
 
             debug.debug(
                 PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {title}")
-
-            # Write Row
-            if not x and not y:
-                continue
 
             col_availability.append('Yes')
             col_sku.append(sku)

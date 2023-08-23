@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         if "hires" in options['functions']:
             processor = Processor()
-            processor.hires(missingOnly=True)
+            processor.hires()
 
         if "sample" in options['functions']:
             processor = Processor()
@@ -283,20 +283,21 @@ class Processor:
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
 
-    def hires(self, missingOnly=False):
-        products = JaipurLiving.objects.all()
+    def hires(self):
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{BRAND}'")
 
         hasImage = []
-
-        self.csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(self.brand))
-        for row in self.csr.fetchall():
+        for row in csr.fetchall():
             hasImage.append(str(row[0]))
 
-        for product in products:
-            if not product.productId:
-                continue
+        csr.close()
 
-            if missingOnly and product.productId in hasImage:
+        products = JaipurLiving.objects.all()
+        for product in products:
+            if not product.productId or product.productId in hasImage:
                 continue
 
             common.hiresdownload(str(product.thumbnail).strip().replace(
