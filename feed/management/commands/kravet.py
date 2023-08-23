@@ -508,7 +508,7 @@ class Processor:
 
                 # Status
                 statusP = True
-                statusS = True
+                statusS = False
                 if str(sh.cell_value(i, 4)) != "Active":
                     statusP = False
 
