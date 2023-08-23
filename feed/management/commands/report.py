@@ -71,9 +71,10 @@ class Processor:
 
         self.csr = self.con.cursor()
         self.csr.execute(f"""
-            SELECT P.ProductID, P.SKU, P.Handle, P.Title, P.BodyHTML, P.ProductTypeId, M.Brand, PI.imageURL
-            FROM ProductImage PI 
+            SELECT P.ProductID, P.SKU, P.Handle, P.Title, P.BodyHTML, P.ProductTypeId, M.Brand, PI.imageURL, T.Name
+            FROM ProductImage PI
             JOIN Product P ON PI.ProductID = P.ProductID 
+            JOIN Type T ON P.ProductTypeId = T.TypeId
             JOIN ProductManufacturer PM ON P.SKU = PM.SKU 
             JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID 
             WHERE PI.ImageIndex = 20 AND P.Published = 1
@@ -93,19 +94,33 @@ class Processor:
             productTypeId = row[5]
             brand = row[6]
             imageURL = row[7]
+            type = row[8]
 
             # JL Rug images doesn't look good
             # if brand == "Jaipur Living":
             #     continue
 
             # Type
-            if productTypeId == 2:
-                type = "Wallpaper"
-            elif productTypeId == 4:
-                type = "Area Rug"
-            elif productTypeId == 41:
-                type = "Wall Art"
-            else:
+            # if productTypeId == 2:
+            #     type = "Wallpaper"
+            # elif productTypeId == 4:
+            #     type = "Area Rug"
+            # elif productTypeId == 41:
+            #     type = "Wall Art"
+            # else:
+            #     continue
+
+            types = [
+                "Wallpaper",
+                "Rug",
+                "Wall Art",
+                "Wall Mirrors",
+                "Wall Hangings",
+                "Wall Accent",
+                "Mirrors"
+            ]
+
+            if type not in types:
                 continue
 
             if "Rug Pad" in title:
@@ -161,7 +176,8 @@ class Processor:
                 y = height or length
 
             if not y:
-                y = rollLength
+                y = float(rollLength.replace("yards", "").strip()) * 36
+                y = f"{y} in"
 
             # Write Row
             # if not x and not y:
