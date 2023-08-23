@@ -216,9 +216,9 @@ class Processor:
                         statusP = True
                         statusS = False
                 elif type == "Wallpaper" or type == "Fabric" or type == "Trim":
-                    statusS = False
-                else:
                     statusS = True
+                else:
+                    statusS = False
 
                 if mpn in discontinuedSamples:
                     statusS = False
