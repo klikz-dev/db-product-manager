@@ -760,14 +760,14 @@ class Processor:
 
             try:
                 product = Kravet.objects.get(mpn=mpn)
-
-                if product.productId:
-                    copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
-                             f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
-                    debug.debug(
-                        BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
-
-                os.remove(
-                    f"{FILEDIR}/images/kravet/{fname}{ext}")
             except Kravet.DoesNotExist:
                 continue
+
+            if product.productId:
+                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                         f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
+                debug.debug(
+                    BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
+
+            os.remove(
+                f"{FILEDIR}/images/kravet/{fname}{ext}")

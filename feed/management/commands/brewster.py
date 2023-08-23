@@ -566,33 +566,31 @@ class Processor:
 
         csr.close()
 
-        products = Brewster.objects.all()
-        for product in products:
-            if not product.productId or product.productId in hasImage:
-                continue
+        self.imageServer.chdir(path='/WallpaperBooks')
+        collections = self.imageServer.listdir()
 
-            collection = product.collection
-            mpn = product.mpn
-            productId = product.productId
-
+        for collection in collections:
             try:
-                originalBrand = product.custom['originalBrand']
-                if originalBrand != "Advantage" and collection != "Eijffinger Web Only":
-                    collection = collection.replace(originalBrand, "").strip()
-
-                try:
-                    self.imageServer.chdir(
-                        path=f"/WallpaperBooks/{collection}/Images/300dpi")
-                except:
-                    continue
-
+                self.imageServer.chdir(
+                    path=f"/WallpaperBooks/{collection}/Images/300dpi")
                 files = self.imageServer.listdir()
 
-                if f"{mpn}.jpg" in files:
-                    self.imageServer.get(
-                        f"{mpn}.jpg", f"{FILEDIR}/../../../images/hires/{productId}_20.jpg")
-                    debug.debug(
-                        BRAND, 0, f"downloaded product image {productId}_20.jpg")
+                for file in files:
+                    mpn = file.split(".")[0]
 
-            except:
+                    try:
+                        product = Brewster.objects.get(mpn=mpn)
+                    except Brewster.DoesNotExist:
+                        continue
+
+                    productId = product.productId
+                    if productId in hasImage:
+                        continue
+
+                    self.imageServer.get(
+                        file, f"{FILEDIR}/../../../images/hires/{productId}_20.jpg")
+                    debug.debug(
+                        BRAND, 0, f"downloaded hires image {productId}_20.jpg")
+            except Exception as e:
+                print(e)
                 continue
