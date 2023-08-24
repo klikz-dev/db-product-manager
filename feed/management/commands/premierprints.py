@@ -65,17 +65,6 @@ class Command(BaseCommand):
             processor = Processor()
             processor.roomset()
 
-        if "inventory" in options['functions']:
-            while True:
-                with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="inv_export.new.csv", dst=f"{FILEDIR}/premierprints-inventory.csv")
-                    processor.inventory()
-
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
-
 
 class Processor:
     def __init__(self):
