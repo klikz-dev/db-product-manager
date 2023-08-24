@@ -63,7 +63,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx")
+                        src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
