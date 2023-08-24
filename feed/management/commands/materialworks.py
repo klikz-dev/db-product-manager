@@ -259,4 +259,4 @@ class Processor:
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(stocks=stocks, stockType=2)
+        self.databaseManager.updateStock(stocks=stocks, stockType=3)
