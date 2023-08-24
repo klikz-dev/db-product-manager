@@ -71,9 +71,9 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/mindthegap/inventory/MINDTHEGAP STOCK cushions.xlsx", dst=f"{FILEDIR}/mindthegap-pillow-inventory.xlsx", fileSrc=True, delete=False)
+                        src="/mindthegap/Inventory/MINDTHEGAP STOCK cushions.xlsx", dst=f"{FILEDIR}/mindthegap-pillow-inventory.xlsx", fileSrc=True, delete=False)
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/mindthegap/inventory/MINDTHEGAP STOCK fabrics.xlsx", dst=f"{FILEDIR}/mindthegap-fabric-inventory.xlsx", fileSrc=True, delete=False)
+                        src="/mindthegap/Inventory/MINDTHEGAP STOCK fabrics.xlsx", dst=f"{FILEDIR}/mindthegap-fabric-inventory.xlsx", fileSrc=True, delete=False)
 
                     processor.inventory()
 
