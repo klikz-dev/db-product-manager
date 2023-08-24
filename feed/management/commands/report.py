@@ -271,7 +271,7 @@ class Processor:
             if type == "Wallpaper":
                 wallpaperAdded = wallpaperAdded + 1
 
-            if type == "Area Rug":
+            if type == "Rug":
                 rugAdded = rugAdded + 1
 
             if type == "Wall Art":
