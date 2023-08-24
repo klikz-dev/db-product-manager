@@ -175,8 +175,9 @@ class Processor:
             else:
                 y = height or length
 
-            if not y:
-                y = float(rollLength.replace("yards", "").strip()) * 36
+            if not y and rollLength:
+                y = float(rollLength.replace(
+                    "yards", "").replace("yds", "").strip()) * 36
                 y = f"{y} in"
 
             # Write Row

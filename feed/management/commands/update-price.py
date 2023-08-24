@@ -1,39 +1,47 @@
 from django.core.management.base import BaseCommand
 
-import os
-import time
-import pymysql
-
-from library import debug, common, shopify
-
 import environ
-env = environ.Env()
+import pymysql
+import time
 
-db_host = env('MYSQL_HOST')
-db_username = env('MYSQL_USER')
-db_password = env('MYSQL_PASSWORD')
-db_name = env('MYSQL_DATABASE')
-db_port = int(env('MYSQL_PORT'))
-aws_access_key = env('aws_access_key')
-aws_secret_key = env('aws_secret_key')
+from library import debug, shopify
 
-debug = debug.debug
-backup = common.backup
+PROCESS = "Price"
 
 
 class Command(BaseCommand):
-    help = 'Update Pending Price'
+    help = f"Run {PROCESS} processor"
+
+    def add_arguments(self, parser):
+        parser.add_argument('functions', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        while True:
-            self.updatePrice()
 
-            debug("Shopify", 0, "Finished Process. Waiting for next run.")
-            time.sleep(60)
+        if "main" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.price()
 
-    def updatePrice(self):
-        con = pymysql.connect(host=db_host, user=db_username,
-                              passwd=db_password, db=db_name, connect_timeout=5)
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    PROCESS, options['functions']))
+                time.sleep(3600)
+
+
+class Processor:
+    def __init__(self):
+        env = environ.Env()
+
+        self.con = pymysql.connect(host=env('MYSQL_HOST'), user=env('MYSQL_USER'), passwd=env(
+            'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.con.close()
+
+    def price(self):
+        con = self.con
         csr = con.cursor()
 
         productIDs = []
@@ -76,10 +84,9 @@ class Command(BaseCommand):
             productID = product[0]
             try:
                 shopify.UpdatePriceToShopify(productID, con)
-                debug("Shopify", 0,
-                      "Updated Price for Product: {}".format(productID))
+                debug.debug(PROCESS, 0,
+                            "Updated Price for Product: {}".format(productID))
             except:
                 continue
 
         csr.close()
-        con.close()
