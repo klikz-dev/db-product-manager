@@ -224,7 +224,7 @@ class Processor:
                 continue
 
     def inventory(self):
-        stocks = []
+        inventories = {}
 
         f = open(f"{FILEDIR}/materialworks-inventory.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
@@ -233,15 +233,30 @@ class Processor:
             if row[0] == "ValdeseMaterial":
                 continue
 
-            mpn = common.formatText(row[0])
-            sku = f"DBM {mpn}"
-            stockP = common.formatInt(row[5])
+            inventories[common.formatText(row[0])] = common.formatInt(row[5])
+
+        stocks = []
+        products = Materialworks.objects.all()
+        for product in products:
+            mpn = product.mpn
+            sku = product.sku
+
+            if product.type == "Pillow":
+                stockP = 5
+                stockNote = "3 weeks"
+            else:
+                if mpn in inventories:
+                    stockP = inventories[mpn]
+                else:
+                    stockP = 0
+
+                stockNote = ""
 
             stock = {
                 'sku': sku,
                 'quantity': stockP,
-                'note': ""
+                'note': stockNote
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(stocks=stocks, stockType=1)
+        self.databaseManager.updateStock(stocks=stocks, stockType=2)
