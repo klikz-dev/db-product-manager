@@ -214,6 +214,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ElaineSmithSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    ExquisiteRugsOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    ExquisiteRugsSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     HubbardtonForgeOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     HubbardtonForgeSample = models.CharField(
@@ -253,6 +257,10 @@ class PORecord(models.Model):
     MindTheGapOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     MindTheGapSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    NOIROrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    NOIRSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     PhillipJeffriesOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
