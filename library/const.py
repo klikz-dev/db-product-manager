@@ -83,6 +83,11 @@ markup = {
         "consumer": 2.44,
         "trade": 1.5,
     },
+    "NOIR": {
+        "useMAP": False,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Phillips": {
         "useMAP": True,
         "consumer": 2,
@@ -235,6 +240,12 @@ sftp = {
         "port": 22,
         "user": "mindthegap",
         "pass": "DecbestMTG123!",
+    },
+    "NOIR": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "noir",
+        "pass": "Noir123!",
     },
     "Poppy": {
         "host": "decoratorsbestam.com",

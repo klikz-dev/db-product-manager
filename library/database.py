@@ -308,10 +308,11 @@ class DatabaseManager:
             elif ptype in manufacturer:
                 manufacturer = str(manufacturer).replace(ptype, "").strip()
 
-        if str(ptype).endswith("es"):
-            ptype = ptype[:-2]
-        elif str(ptype).endswith("s"):
-            ptype = ptype[:-1]
+        if not str(ptype).endswith("ies"):
+            if str(ptype).endswith("es"):
+                ptype = ptype[:-2]
+            elif str(ptype).endswith("s"):
+                ptype = ptype[:-1]
 
         if product.name != "":
             name = " | ".join((manufacturer, product.name))

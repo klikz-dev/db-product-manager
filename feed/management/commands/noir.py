@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from feed.models import ExquisiteRugs
+from feed.models import NOIR
 
 import os
 import environ
@@ -12,7 +12,7 @@ from library import database, debug, common
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
-BRAND = "Exquisite Rugs"
+BRAND = "NOIR"
 
 
 class Command(BaseCommand):
@@ -25,11 +25,10 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
+            processor.databaseManager.downloadFileFromSFTP(
+                src="/noir/NOIR_MASTER.xlsx", dst=f"{FILEDIR}/noir-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
-
-        if "validate" in options['functions']:
-            processor = Processor()
             processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
@@ -42,7 +41,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = ExquisiteRugs.objects.all()
+            products = NOIR.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -61,13 +60,13 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.image()
+            processor.databaseManager.downloadImages(missingOnly=True)
 
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="inventory/Decorators Best Inventory FTP.xlsx", dst=f"{FILEDIR}/exquisiterugs-inventory.xlsx", fileSrc=True, delete=False)
+                        src="inventory/NOIR_INV.csv", dst=f"{FILEDIR}/noir-inventory.csv", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -83,7 +82,7 @@ class Processor:
             'MYSQL_PASSWORD'), db=env('MYSQL_DATABASE'), connect_timeout=5)
 
         self.databaseManager = database.DatabaseManager(
-            con=self.con, brand=BRAND, Feed=ExquisiteRugs)
+            con=self.con, brand=BRAND, Feed=NOIR)
 
     def __enter__(self):
         return self
@@ -97,41 +96,45 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/exquisiterugs-master.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/noir-master.xlsx")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 2)).replace("'", "")
-                sku = f"ER {mpn}"
-
-                pattern = common.formatInt(sh.cell_value(i, 3))
-                color = common.formatText(sh.cell_value(i, 4))
+                mpn = common.formatText(sh.cell_value(i, 2))
+                sku = f"NOIR {mpn}"
 
                 name = common.formatText(sh.cell_value(i, 6))
+                colors = common.formatText(sh.cell_value(i, 20))
+
+                if "," in name:
+                    pattern = name.split(",")[0].strip()
+                    color = name.split(",")[1].strip()
+                else:
+                    pattern = name
+                    color = colors
+
+                if not color:
+                    color = "N/A"
 
                 # Categorization
                 brand = BRAND
-                type = "Rug"
+                type = common.formatText(sh.cell_value(i, 5)).title()
                 manufacturer = brand
-                collection = common.formatText(sh.cell_value(i, 1))
+                collection = f"{brand} {type}"
 
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 19))
-                disclaimer = common.formatText(sh.cell_value(i, 24))
 
-                width = common.formatFloat(sh.cell_value(i, 15))
-                length = common.formatFloat(sh.cell_value(i, 16))
-                height = common.formatFloat(sh.cell_value(i, 17))
-
-                size = f"{round(width / 12, 2)}'X{round(length / 12, 2)}'"
+                width = common.formatFloat(sh.cell_value(i, 16))
+                height = common.formatFloat(sh.cell_value(i, 15))
+                depth = common.formatFloat(sh.cell_value(i, 17))
                 dimension = common.formatText(sh.cell_value(i, 18))
 
                 # Additional Information
                 upc = common.formatInt(sh.cell_value(i, 13))
                 weight = common.formatFloat(sh.cell_value(i, 14))
-                care = common.formatText(sh.cell_value(i, 25))
                 material = common.formatText(sh.cell_value(i, 12))
                 country = common.formatText(sh.cell_value(i, 35))
 
@@ -143,15 +146,14 @@ class Processor:
                 uom = "Per Item"
 
                 # Tagging
-                tags = f"{sh.cell_value(i, 11)}, {material}"
-                colors = color
+                tags = f"{colors}, {material}, {description}, {name}"
 
                 # Image
-                thumbnail = common.formatText(sh.cell_value(i, 51))
+                thumbnail = sh.cell_value(i, 51).replace("dl=0", "dl=1")
 
                 roomsets = []
-                for id in range(52, 58):
-                    roomset = sh.cell_value(i, id)
+                for id in range(52, 65):
+                    roomset = sh.cell_value(i, id).replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
 
@@ -159,13 +161,32 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or length > 107 or height > 107 or weight > 149:
+                if width > 107 or height > 107 or depth > 107 or weight > 149:
                     whiteGlove = True
                 else:
                     whiteGlove = False
 
-                # Name
-                name = f"{name} {size} Rug"
+                # Stock
+                stockNote = f"{common.formatInt(sh.cell_value(i, 38))} days"
+
+                # Type Mapping
+                type_map = {
+                    "Occasional Chairs": "Chairs",
+                    "Ocassional Chairs": "Chairs",
+                    "Sideboards": "Side Tables",
+                    "Cocktail Table": "Cocktail Tables",
+                    "Hutches": "Accessories",
+                    "Bar & Counter": "Bar Stools",
+                    "Bookcase": "Bookcases",
+                    "Sideboard": "Side Tables",
+                    "Console/Accent Tables": "Accent Tables",
+                    "Sconces": "Wall Sconces",
+                }
+                if type in type_map:
+                    type = type_map[type]
+
+                # Rename
+                name = name.replace(",", "")
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -184,14 +205,11 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
-                'disclaimer': disclaimer,
                 'width': width,
-                'length': length,
                 'height': height,
-                'size': size,
+                'depth': depth,
                 'dimension': dimension,
 
-                'care': care,
                 'material': material,
                 'weight': weight,
                 'country': country,
@@ -210,44 +228,18 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
+
+                'stockNote': stockNote,
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def image(self):
-        csr = self.con.cursor()
-        hasImage = []
-        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
-        for row in csr.fetchall():
-            hasImage.append(str(row[0]))
-        csr.close()
-
-        products = ExquisiteRugs.objects.all()
-        for product in products:
-            if product.productId in hasImage:
-                continue
-
-            self.databaseManager.downloadFileFromSFTP(
-                src=f"/exquisiterugs/images/{product.thumbnail}",
-                dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
-                fileSrc=True,
-                delete=False
-            )
-
-            for index, roomset in enumerate(product.roomsets):
-                self.databaseManager.downloadFileFromSFTP(
-                    src=f"/exquisiterugs/images/{roomset}",
-                    dst=f"{FILEDIR}/../../../images/roomset/{product.productId}_{index + 2}.jpg",
-                    fileSrc=True,
-                    delete=False
-                )
-
     def inventory(self):
         stocks = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/exquisiterugs-inventory.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/noir-inventory.csv")
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):

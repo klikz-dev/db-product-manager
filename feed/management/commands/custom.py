@@ -302,11 +302,7 @@ class Processor:
         csr = self.con.cursor()
 
         productIDs = [
-            '6896321724462',
-            '6896322117678',
-            '6896322150446',
-            '6896322183214',
-            '6896322215982',
+            '6898897256494',
         ]
 
         for productID in productIDs:

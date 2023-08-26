@@ -200,6 +200,12 @@ class MindTheGap(Feed):
         verbose_name_plural = "MindTheGap"
 
 
+class NOIR(Feed):
+    class Meta:
+        verbose_name = "NOIR"
+        verbose_name_plural = "NOIR"
+
+
 class PhillipJeffries(Feed):
     class Meta:
         verbose_name = "Phillip Jeffries"

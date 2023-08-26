@@ -16,6 +16,7 @@ from .models import MadcapCottage
 from .models import Materialworks
 from .models import Maxwell
 from .models import MindTheGap
+from .models import NOIR
 from .models import Phillips
 from .models import PhillipJeffries
 from .models import Pindler
@@ -227,6 +228,11 @@ class MaxwellAdmin(FeedAdmin):
 
 @admin.register(MindTheGap)
 class MindTheGapAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(NOIR)
+class NOIRAdmin(FeedAdmin):
     pass
 
 
