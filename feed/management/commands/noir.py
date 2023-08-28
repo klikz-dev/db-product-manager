@@ -6,6 +6,8 @@ import environ
 import pymysql
 import xlrd
 import time
+import csv
+import codecs
 
 from library import database, debug, common
 
@@ -66,7 +68,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="inventory/NOIR_INV.csv", dst=f"{FILEDIR}/noir-inventory.csv", fileSrc=True, delete=False)
+                        src="/noir/inventory/NOIR_INV.csv", dst=f"{FILEDIR}/noir-inventory.csv", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -239,20 +241,20 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/noir-inventory.csv")
-        sh = wb.sheet_by_index(0)
+        f = open(f"{FILEDIR}/noir-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
 
-        for i in range(1, sh.nrows):
-            mpn = common.formatText(sh.cell_value(i, 1)).replace("'", "")
-            sku = f"ER {mpn}"
+        for row in cr:
+            if row[0] == "Item #":
+                continue
 
-            stockP = common.formatInt(sh.cell_value(i, 2))
-            stockNote = common.formatText(sh.cell_value(i, 3))
+            sku = common.formatText(row[0])
+            stockP = common.formatInt(row[2])
 
             stock = {
                 'sku': sku,
                 'quantity': stockP,
-                'note': stockNote,
+                'note': "",
             }
             stocks.append(stock)
 
