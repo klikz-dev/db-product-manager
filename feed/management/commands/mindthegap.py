@@ -297,7 +297,7 @@ class Processor:
 
                 try:
                     product = MindTheGap.objects.get(mpn=mpn)
-                    if not product.productId:
+                    if not product.productId or product.productId in hasImage:
                         continue
                 except MindTheGap.DoesNotExist:
                     continue
