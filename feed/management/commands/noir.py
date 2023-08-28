@@ -248,7 +248,9 @@ class Processor:
             if row[0] == "Item #":
                 continue
 
-            sku = common.formatText(row[0])
+            mpn = common.formatText(row[0])
+            sku = f"NOIR {mpn}"
+
             stockP = common.formatInt(row[2])
 
             stock = {
