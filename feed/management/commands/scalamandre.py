@@ -11,7 +11,7 @@ import json
 import environ
 from shutil import copyfile
 
-from library import database, debug
+from library import database, debug, common
 
 API_ADDRESS = 'http://scala-api.scalamandre.com/api'
 API_USERNAME = 'Decoratorsbest'
@@ -43,9 +43,6 @@ class Command(BaseCommand):
             processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
-
-        if "validate" in options['functions']:
-            processor = Processor()
             processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
@@ -141,15 +138,15 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = row['ITEMID']
-                sku = "SCALA {}".format(row['SKU'])
-                pattern = str(row['PATTERN_DESCRIPTION']).replace(
-                    "PILLOW", "").strip().title()
-                color = str(row['COLOR']).strip().title()
+                sku = f"SCALA {row['SKU']}"
+                pattern = common.formatText(
+                    row['PATTERN_DESCRIPTION'].replace('PILLOW', ''))
+                color = common.formatText(row['COLOR'])
 
                 # Categorization
                 brand = BRAND
 
-                type = row['CATEGORY']
+                type = common.formatText(row['CATEGORY'])
                 if "FABR" in type:
                     type = "Fabric"
                 elif "WALL" in type:
@@ -158,11 +155,8 @@ class Processor:
                     type = "Trim"
                 elif "PILL" in type:
                     type = "Pillow"
-                else:
-                    debug.debug(BRAND, 1, f"Unknown product type: {type}")
-                    continue
 
-                manufacturer = str(row['BRAND']).strip()
+                manufacturer = common.formatText(row['BRAND'])
                 if "Scalamandre" in manufacturer or "Wallquest" in manufacturer or "Scalamandré" in manufacturer:
                     manufacturer = "Scalamandre"
                 elif "Old World Weavers" in manufacturer:
@@ -170,49 +164,32 @@ class Processor:
                 elif "Grey Watkins" in manufacturer:
                     sku = "GWA {}".format(row['SKU'])
 
-                manufacturer = f"{manufacturer} {type}"
-
-                collection = str(row.get('WEB COLLECTION NAME', '')).strip()
+                collection = common.formatText(
+                    row.get('WEB COLLECTION NAME', ''))
 
                 # Main Information
-                description = str(row['DESIGN_INSPIRATION']).strip()
-                usage = str(row['WEARCODE']).title()
-
-                try:
-                    width = round(float(row['WIDTH']), 2)
-                except:
-                    width = 0
-                try:
-                    size = row['PIECE SIZE']
-                except:
-                    size = ""
-                try:
-                    repeatV = round(float(row['PATTERN REPEAT LENGTH']), 2)
-                except:
-                    repeatV = 0
-                try:
-                    repeatH = round(float(row['PATTERN REPEAT WIDTH']), 2)
-                except:
-                    repeatH = 0
+                description = common.formatText(row['DESIGN_INSPIRATION'])
+                usage = common.formatText(row['WEARCODE']).title()
+                width = common.formatFloat(row['WIDTH'])
+                size = common.formatText(row['PIECE SIZE'])
+                repeatV = common.formatFloat(row['PATTERN REPEAT LENGTH'])
+                repeatH = common.formatFloat(row['PATTERN REPEAT WIDTH'])
 
                 # Additional Information
-                content = str(row.get('FIBER CONTENT', "")).strip()
-                features = [str(row.get('WEARCODE', "")).strip()]
-                try:
-                    yards = round(float(row['YARDS PER ROLL']), 2)
-                except:
-                    yards = 0
+                content = common.formatText(row.get('FIBER CONTENT', ''))
+                features = [common.formatText(row.get('WEARCODE', ''))]
+                yards = common.formatFloat(row['YARDS PER ROLL'])
+                material = common.formatText(row.get('MATERIALTYPE', ''))
 
                 # Measurement
-                try:
-                    minimum = int(float(row['MIN ORDER'].split(' ')[0])) if isinstance(
-                        row['MIN ORDER'], str) and ' ' in row['MIN ORDER'] else 0
-                except:
+                if row['MIN ORDER']:
+                    minimum = common.formatInt(row['MIN ORDER'].split(' ')[0])
+                else:
                     minimum = 0
 
-                if str(row['WEB SOLD BY']).isdigit() and int(float(row['WEB SOLD BY'])) > 1:
+                if common.formatInt(row['WEB SOLD BY']) > 1:
                     increment = ",".join(
-                        [str(ii * int(float(row['WEB SOLD BY']))) for ii in range(1, 25)])
+                        [str(ii * common.formatInt(row['WEB SOLD BY'])) for ii in range(1, 25)])
                 else:
                     increment = ""
 
@@ -229,35 +206,23 @@ class Processor:
                     "TL": "Per Tile"
                 }
                 uom = UOM_DICT.get(row['UNITOFMEASURE'], None)
-                if uom is None:
-                    debug.debug(BRAND, 1, f"UOM Error. MPN: {mpn}")
-                    continue
 
                 # Pricing
-                try:
-                    cost = round(float(row['NETPRICE']), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
-                    continue
+                cost = common.formatFloat(row['NETPRICE'])
 
                 # Tagging
-                tags = "{}, {}, {}".format(collection, row.get(
-                    'WEARCODE', ""), row.get('MATERIALTYPE', ""))
+                tags = f"{collection}, {row.get('WEARCODE', '')}, {material}"
 
                 # Image
-                thumbnail = str(row.get('IMAGEPATH', "")).strip()
+                thumbnail = common.formatText(row.get('IMAGEPATH', ''))
 
                 # Stock
                 if row.get('STOCKINVENTORY') != 'N':
-                    available_stock = row.get('AVAILABLE')
-                    if available_stock and str(available_stock).isdigit():
-                        stockP = int(float(available_stock))
-                    else:
-                        stockP = 0
+                    stockP = common.formatInt(row.get('AVAILABLE'))
                 else:
                     stockP = 0
 
-                stockNote = row.get('LEAD TIME', "")
+                stockNote = common.formatText(row.get('LEAD TIME', ''))
                 if type == "Pillow":
                     stockNote = "2-3 Weeks (Custom Order)"
 
@@ -269,15 +234,16 @@ class Processor:
                     statusP = False
                 if row.get('IMAGEVALID', False) != True:
                     statusP = False
-                if str(row['BRAND']).strip() in ["Tassinari & Chatel", "Lelievre", "Nicolette Mayer", "Jean Paul Gaultier"]:
+                if manufacturer in ["Tassinari & Chatel", "Lelievre", "Nicolette Mayer", "Jean Paul Gaultier"]:
                     statusP = False
 
                 statusS = False
-                if row['SAMPLE_STATUS'] == 1:
-                    statusS = True
 
-                # Disable all samples
-                statusS = False
+                # Disable All Samples
+                # if row['SAMPLE_STATUS'] == 1:
+                #     statusS = True
+
+                manufacturer = f"{manufacturer} {type}"
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -304,6 +270,7 @@ class Processor:
                 'content': content,
                 'features': features,
                 'yards': yards,
+                'material': material,
 
                 'minimum': minimum,
                 'increment': increment,
