@@ -155,6 +155,8 @@ class Processor:
                     type = "Trim"
                 elif "PILL" in type:
                     type = "Pillow"
+                else:
+                    continue
 
                 manufacturer = common.formatText(row['BRAND'])
                 if "Scalamandre" in manufacturer or "Wallquest" in manufacturer or "Scalamandré" in manufacturer:

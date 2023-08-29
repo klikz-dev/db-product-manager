@@ -171,7 +171,7 @@ class DatabaseManager:
         uoms = self.Feed.objects.values_list('uom', flat=True).distinct()
         unknownUOMs = []
         for u in uoms:
-            if u not in ['Per Roll', 'Per Yard', 'Per Item', 'Per Panel']:
+            if u not in ['Per Roll', 'Per Yard', 'Per Item', 'Per Panel', 'Per Square Foot', 'Per Set', 'Per Tile']:
                 unknownUOMs.append(u)
 
         if len(unknownUOMs) == 0:
