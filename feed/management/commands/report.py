@@ -269,13 +269,35 @@ class Processor:
                         y = f"{y} in"
 
             # Repeat
-            if "/" in repeat and "in" in repeat:
-                vr = repeat.split("/")[0].replace("in.", "in").strip()
-                if "x" in vr:
-                    vr = round(float(repeat.split("x")[0].replace(
+            if "x" in repeat:
+                repeat = repeat.split("/")[0]
+                if "in" in repeat:
+                    hr = repeat.split("x")[0].strip()
+                    vr = repeat.split("x")[1].strip()
+                else:
+                    hr = round(float(repeat.split("x")[0].replace(
                         "cm", "").replace("W", "").replace("m", "").strip()) / 2.54, 2)
+                    vr = round(float(repeat.split("x")[1].replace(
+                        "cm", "").replace("L", "").replace("m", "").strip()) / 2.54, 2)
+                    hr = f"{hr} in"
                     vr = f"{vr} in"
-                hr = x
+            elif "/" in repeat:
+                repeat = repeat.split("/")[0]
+                if "in" in repeat:
+                    vr = repeat.strip()
+                else:
+                    vr = round(float(repeat.replace(
+                        "cm", "").strip()) / 2.54, 2)
+                    vr = f"{vr} in"
+
+            if brand == "Brewster" and repeat:
+                try:
+                    if float(repeat.replace("in", "")) > 0:
+                        vr = repeat
+                        if "in" not in repeat:
+                            vr = f"{repeat} in"
+                except:
+                    pass
 
             x = x.replace('"', ' in').replace("W", "").replace(
                 "H", "").replace(",", "")
@@ -319,10 +341,10 @@ class Processor:
                 elif "Sample - " in row[0]:
                     v3 = row[1]
 
-            v1 = productId
-            v2 = productId
-            v3 = productId
-            v4 = productId
+            # v1 = productId
+            # v2 = productId
+            # v3 = productId
+            # v4 = productId
 
             # Filters
             categories = []
