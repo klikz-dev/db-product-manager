@@ -243,7 +243,7 @@ class Processor:
 
             if product.type == "Pillow":
                 stockP = 5
-                stockNote = "3 weeks"
+                stockNote = "Ships in 3 weeks"
             else:
                 if mpn in inventories:
                     stockP = inventories[mpn]
