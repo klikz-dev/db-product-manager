@@ -141,7 +141,6 @@ class Processor:
                 finish = common.formatText(sh.cell_value(i, 20))
                 country = common.formatText(sh.cell_value(i, 32))
                 weight = common.formatFloat(sh.cell_value(i, 9))
-                upc = sh.cell_value(i, 0)
 
                 # Pricing
                 cost = common.formatFloat(sh.cell_value(i, 5))
@@ -169,7 +168,10 @@ class Processor:
                     statusP = False
 
                 # Stock
-                stockNote = f"{int(int(sh.cell_value(i, 34)) / 24)} days"
+                if sh.cell_value(i, 34):
+                    stockNote = f"{int(common.formatInt(sh.cell_value(i, 34)) / 24)} days"
+                else:
+                    stockNote = ""
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -197,7 +199,6 @@ class Processor:
                 'country': country,
                 'specs': specs,
                 'weight': weight,
-                'upc': upc,
 
                 'cost': cost,
                 'map': map,
@@ -302,6 +303,8 @@ class Processor:
         for product in products:
             for fname in os.listdir(f"{FILEDIR}/images/danagibson/"):
                 if product.mpn.replace("-", "").lower() in fname.lower():
+                    print(f"{FILEDIR}/images/danagibson/{fname}")
+
                     if "_bak" in fname:
                         copyfile(f"{FILEDIR}/images/danagibson/{fname}",
                                  f"{FILEDIR}/../../../images/roomset/{product.productId}_2.jpg")
