@@ -244,10 +244,10 @@ class EditSizeAdmin(admin.ModelAdmin):
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
-    actions = None
+    # actions = None
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
 
     # def has_add_permission(self, request):
     #     return False
@@ -255,13 +255,14 @@ class ManufacturerAdmin(admin.ModelAdmin):
     # def has_change_permission(self, request, obj=None):
     #     return False
 
-    fields = ['manufacturerId', 'name', 'brand']
+    fields = ['manufacturerId', 'name',
+              'brand', 'note', 'published', 'deleted']
 
     ordering = ['manufacturerId']
 
-    list_display = ('manufacturerId', 'name', 'brand')
+    list_display = ('manufacturerId', 'name', 'brand', 'published', 'deleted')
 
-    list_filter = ['brand']
+    list_filter = ['brand', 'published', 'deleted']
 
     search_fields = ['name', 'brand']
 

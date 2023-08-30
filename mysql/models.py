@@ -101,6 +101,10 @@ class Manufacturer(models.Model):
     manufacturerId = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     brand = models.CharField(max_length=200)
+    note = models.CharField(
+        max_length=5000, default=None, null=True, blank=True)
+    published = models.BooleanField(default=True)
+    deleted = models.BooleanField(default=False)
 
     class Meta:
         managed = True
