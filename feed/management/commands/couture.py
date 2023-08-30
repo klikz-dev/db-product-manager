@@ -222,28 +222,14 @@ class Processor:
         products = Couture.objects.all()
 
         for product in products:
-            foundImage = False
-
-            print(product.mpn, product.pattern)
 
             for fname in os.listdir(f"{FILEDIR}/images/couture/"):
                 if product.mpn.lower() in fname.lower():
                     copyfile(f"{FILEDIR}/images/couture/{fname}",
                              f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
-                    foundImage = True
-                    print(f"{FILEDIR}/images/couture/{fname}")
-                    os.remove(f"{FILEDIR}/images/couture/{fname}")
-                    break
 
-            if foundImage:
-                continue
-
-            for fname in os.listdir(f"{FILEDIR}/images/couture/"):
-                if product.pattern.lower() in fname.lower():
-                    copyfile(f"{FILEDIR}/images/couture/{fname}",
-                             f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
-                    print(f"{FILEDIR}/images/couture/{fname}")
                     os.remove(f"{FILEDIR}/images/couture/{fname}")
+
                     break
 
     def inventory(self):
