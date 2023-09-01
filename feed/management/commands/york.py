@@ -377,15 +377,24 @@ class Processor:
                 continue
 
     def imageFTP(self):
-        dnames = [
-            "Artistic Abstracts",
-            "Vintage Florals"
-        ]
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{BRAND}'")
+
+        hasImage = []
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        csr.close()
+
+        dnames = self.databaseManager.browseSFTP(src=f"/york/")
+
+        print(dnames)
 
         for dname in dnames:
             fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
             for fname in fnames:
-                print(fname)
 
                 if "_" in fname:
                     mpn = fname.split("_")[0]
@@ -393,6 +402,9 @@ class Processor:
                     try:
                         product = York.objects.get(mpn=mpn)
                     except York.DoesNotExist:
+                        continue
+
+                    if not product.productId or product.productId in hasImage:
                         continue
 
                     idx = 13
@@ -430,6 +442,9 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
+                    if not product.productId or product.productId in hasImage:
+                        continue
+
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
                         dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg",
@@ -464,10 +479,11 @@ class Processor:
 
                     try:
                         product = York.objects.get(mpn=mpn)
-                        if not product.productId or product.productId in hasImage:
-                            continue
                     except York.DoesNotExist:
                         continue
+
+                    # if not product.productId or product.productId in hasImage:
+                    #     continue
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
