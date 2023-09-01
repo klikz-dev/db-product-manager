@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=True)
+            processor.databaseManager.downloadImages(missingOnly=False)
 
         if "inventory" in options['functions']:
             while True:
