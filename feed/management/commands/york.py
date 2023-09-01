@@ -404,8 +404,8 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
-                    if not product.productId or product.productId in hasImage:
-                        continue
+                    # if not product.productId or product.productId in hasImage:
+                    #     continue
 
                     idx = 13
 
@@ -442,8 +442,8 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
-                    if not product.productId or product.productId in hasImage:
-                        continue
+                    # if not product.productId or product.productId in hasImage:
+                    #     continue
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
@@ -463,13 +463,7 @@ class Processor:
 
         csr.close()
 
-        dnames = [
-            "RoomMates Murals",
-            "Aussie",
-            "EttaVee",
-            "Vintage Florals",
-            "Artistic Abstracts"
-        ]
+        dnames = self.databaseManager.browseSFTP(src=f"/york/")
 
         for dname in dnames:
             fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
