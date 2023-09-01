@@ -6,6 +6,8 @@ import environ
 import pymysql
 import xlrd
 import time
+import csv
+import codecs
 
 from library import database, debug, common
 
@@ -67,7 +69,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="inventory/Decorators Best Inventory FTP.xlsx", dst=f"{FILEDIR}/exquisiterugs-inventory.xlsx", fileSrc=True, delete=False)
+                        src="/exquisiterugs/decoratorsbestam.csv", dst=f"{FILEDIR}/exquisiterugs-inventory.csv", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -247,20 +249,24 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/exquisiterugs-inventory.xlsx")
-        sh = wb.sheet_by_index(0)
+        f = open(f"{FILEDIR}/exquisiterugs-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            mpn = common.formatText(row[1]).replace("'", "")
 
-        for i in range(1, sh.nrows):
-            mpn = common.formatText(sh.cell_value(i, 1)).replace("'", "")
-            sku = f"ER {mpn}"
+            try:
+                product = ExquisiteRugs.objects.get(mpn=mpn)
+            except ExquisiteRugs.DoesNotExist:
+                continue
 
-            stockP = common.formatInt(sh.cell_value(i, 2))
-            stockNote = common.formatText(sh.cell_value(i, 3))
+            sku = product.sku
+            stockP = common.formatInt(row[2])
+            stockNote = common.formatText(row[3])
 
             stock = {
                 'sku': sku,
                 'quantity': stockP,
-                'note': stockNote,
+                'note': stockNote
             }
             stocks.append(stock)
 
