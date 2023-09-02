@@ -150,6 +150,11 @@ markup = {
         "consumer": 2,
         "trade": 1.5,
     },
+    "Tempaper": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "York": {
         "useMAP": True,
         "consumer": 1.5,

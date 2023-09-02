@@ -28,6 +28,7 @@ from .models import Seabrook
 from .models import StarkStudio
 from .models import Stout
 from .models import Surya
+from .models import Tempaper
 from .models import TresTintas
 from .models import HubbardtonForge
 from .models import York
@@ -288,6 +289,11 @@ class StoutAdmin(FeedAdmin):
 
 @admin.register(Surya)
 class SuryaAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(Tempaper)
+class TempaperAdmin(FeedAdmin):
     pass
 
 

@@ -272,6 +272,12 @@ class Surya(Feed):
         verbose_name_plural = "Surya"
 
 
+class Tempaper(Feed):
+    class Meta:
+        verbose_name = "Tempaper"
+        verbose_name_plural = "Tempaper"
+
+
 class TresTintas(Feed):
     class Meta:
         verbose_name = "Tres Tintas"
