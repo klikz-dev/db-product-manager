@@ -487,92 +487,60 @@ def UploadImageToShopify(src):
 
     for f in glob.glob(f"{src}/*.*"):
         try:
-            if "_" not in f:
-                fpath, ext = os.path.splitext(f)
-                productID = os.path.basename(fpath)
+            fpath, ext = os.path.splitext(f)
+            fname = os.path.basename(fpath)
 
-                if ext == ".jpg":
-                    contentType = 'image/jpeg'
-                elif ext == ".png":
-                    contentType = 'image/png'
-                else:
-                    debug("Shopify", 1, f"Unknow Image Type: {f}")
-                    continue
-
-                csr.execute(
-                    "SELECT NULL FROM ProductImage WHERE ProductID = {} AND ImageIndex = 1".format(productID))
-                s3.upload_file(f, bucket_name, f"{productID}{ext}", ExtraArgs={
-                               'ContentType': contentType, 'ACL': 'public-read'})
-                os.remove(f)
-                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{productID}{ext}"
-
-                # Alt text
-                try:
-                    product = Product.objects.get(productId=productID)
-                    alt = product.title
-                except Product.DoesNotExist:
-                    alt = ''
-
-                rImage = s.put("{}/products/{}.json".format(SHOPIFY_API_URL, productID),
-                               headers=SHOPIFY_PRODUCT_API_HEADER,
-                               json={"product": {"id": productID, "images": [{"src": imgLink, "alt": alt}]}})
-
-                jImage = json.loads(rImage.text)
-                jpImage = jImage["product"]
-                csr.execute("CALL AddToProductImage ({}, 1, {}, '{}')".format(
-                    productID, jpImage['image']['id'], jpImage["image"]["src"]))
-                con.commit()
-
-                debug("Shopify", 0,
-                      f"Uploaded Product Image: {productID}{ext}")
-
-            else:
-                fpath, ext = os.path.splitext(f)
-                fname = os.path.basename(fpath)
+            if "_" in fname:
                 productID = fname.split("_")[0]
                 idx = fname.split("_")[1]
+            else:
+                productID = fname
+                idx = 1
 
-                if ext == ".jpg":
-                    contentType = 'image/jpeg'
-                elif ext == ".png":
-                    contentType = 'image/png'
-                else:
-                    debug("Shopify", 1, f"Unknow Image Type: {f}")
-                    continue
+            if ext == ".jpg":
+                contentType = 'image/jpeg'
+            elif ext == ".png":
+                contentType = 'image/png'
+            else:
+                debug("Shopify", 1, f"Unknow Image Type: {f}")
+                continue
 
-                csr.execute(
-                    f"SELECT ImageID FROM ProductImage WHERE ProductID = {productID} AND ImageIndex = {idx}")
-                temp = csr.fetchone()
-                if temp != None:
-                    imageId = temp[0]
-                    rImage = s.delete(
-                        f"{SHOPIFY_API_URL}/products/{productID}/images/{imageId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
-                    jImage = json.loads(rImage.text)
-
-                s3.upload_file(f, bucket_name, f"{fname}{ext}", ExtraArgs={
-                               'ContentType': contentType, 'ACL': 'public-read'})
-                os.remove(f)
-                imgLink = f"https://s3.amazonaws.com/{bucket_name}/{fname}{ext}"
-
-                # Alt text
-                try:
-                    product = Product.objects.get(productId=productID)
-                    alt = product.title
-                except Product.DoesNotExist:
-                    alt = ''
-
-                rImage = s.post("{}/products/{}/images.json".format(SHOPIFY_API_URL, productID),
-                                headers=SHOPIFY_PRODUCT_API_HEADER,
-                                json={"image": {"position": idx, "src": imgLink, "alt": alt}})
+            csr.execute(
+                f"SELECT ImageID FROM ProductImage WHERE ProductID = {productID} AND ImageIndex = {idx}")
+            temp = csr.fetchone()
+            if temp != None:
+                imageId = temp[0]
+                rImage = s.delete(
+                    f"{SHOPIFY_API_URL}/products/{productID}/images/{imageId}.json", headers=SHOPIFY_PRODUCT_API_HEADER)
                 jImage = json.loads(rImage.text)
 
-                csr.execute("CALL AddToProductImage ({}, {}, {}, '{}')".format(
-                    productID, idx, jImage['image']['id'], jImage["image"]["src"]))
-                con.commit()
+            s3.upload_file(f, bucket_name, f"{fname}{ext}", ExtraArgs={
+                'ContentType': contentType, 'ACL': 'public-read'})
 
-                debug("Shopify", 0, f"Uploaded Product Image: {fname}{ext}")
+            imgLink = f"https://s3.amazonaws.com/{bucket_name}/{fname}{ext}"
 
-        except:
+            # Alt text
+            try:
+                product = Product.objects.get(productId=productID)
+                alt = product.title
+            except Product.DoesNotExist:
+                alt = productID
+
+            rImage = s.post("{}/products/{}/images.json".format(SHOPIFY_API_URL, productID),
+                            headers=SHOPIFY_PRODUCT_API_HEADER,
+                            json={"image": {"position": idx, "src": imgLink, "alt": alt}})
+            jImage = json.loads(rImage.text)
+
+            csr.execute("CALL AddToProductImage ({}, {}, {}, '{}')".format(
+                productID, idx, jImage['image']['id'], jImage["image"]["src"]))
+            con.commit()
+
+            os.remove(f)
+
+            debug("Shopify", 0, f"Uploaded Product Image: {fname}{ext}")
+
+        except Exception as e:
+            print(e)
             continue
 
     csr.close()
