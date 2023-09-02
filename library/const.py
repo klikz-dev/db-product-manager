@@ -289,6 +289,12 @@ sftp = {
         "user": "tempaper",
         "pass": "Tempaper123!",
     },
+    "Walls Republic": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "wallsrepublic",
+        "pass": "Wallsrepublic123!",
+    },
     "York": {
         "host": "decoratorsbestam.com",
         "port": 22,
