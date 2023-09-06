@@ -302,6 +302,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     SuryaSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    TempaperOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    TempaperSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     TresTintasOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     TresTintasSample = models.CharField(

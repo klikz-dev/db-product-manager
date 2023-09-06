@@ -67,6 +67,8 @@ PO_RECORDS = [
     'StoutSample',
     'SuryaOrder',
     'SuryaSample',
+    'TempaperOrder',
+    'TempaperSample',
     'TresTintasOrder',
     'TresTintasSample',
     'ZoffanyOrder',
