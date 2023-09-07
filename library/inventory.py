@@ -35,7 +35,7 @@ def inventory(sku):
                 "sku": sku,
                 "quantity": int(float(onhand_qty)),
                 "type": 1,
-                "note": ""
+                "note": "7-10 days"
             }
         except Exception as e:
             noStock["error"] = str(e)
