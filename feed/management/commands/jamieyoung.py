@@ -74,7 +74,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False)
+                        src="/jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
