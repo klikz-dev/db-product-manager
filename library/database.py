@@ -341,6 +341,10 @@ class DatabaseManager:
             bodyHTML += "Collection: {}<br/><br/>".format(
                 product.collection)
 
+        if len(product.specs) > 0:
+            for spec in product.specs:
+                specKey, specVal = spec
+                bodyHTML += "{}: {}<br/>".format(specKey, specVal)
         if float(product.width) > 0:
             bodyHTML += "Width: {} in<br/>".format(product.width)
         if float(product.length) > 0:
@@ -374,10 +378,6 @@ class DatabaseManager:
         if product.care:
             bodyHTML += "Care Instructions: {}<br/>".format(product.care)
 
-        if len(product.specs) > 0:
-            for spec in product.specs:
-                specKey, specVal = spec
-                bodyHTML += "{}: {}<br/>".format(specKey, specVal)
         if len(product.features) > 0:
             for feature in product.features:
                 bodyHTML += "{}<br/>".format(feature)

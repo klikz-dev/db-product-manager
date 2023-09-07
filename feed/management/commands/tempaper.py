@@ -28,7 +28,7 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
-                src="/tempaper/datasheets/Decorators Best_083123.xlsx", dst=f"{FILEDIR}/tempaper-master.xlsx", fileSrc=True, delete=False)
+                src="/tempaper/datasheets/tempaper-master.xlsx", dst=f"{FILEDIR}/tempaper-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
             processor.databaseManager.validateFeed()
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/tempaper/inventory/Tempaper_INV.csv", dst=f"{FILEDIR}/tempaper-inventory.csv", fileSrc=True, delete=False)
+                        src="/tempaper/datasheets/tempaper-master.xlsx", dst=f"{FILEDIR}/tempaper-master.xlsx", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -111,7 +111,7 @@ class Processor:
                 pattern = common.formatText(sh.cell_value(i, 4))
                 color = common.formatText(sh.cell_value(i, 5))
 
-                name = common.formatText(sh.cell_value(i, 7))
+                name = common.formatText(sh.cell_value(i, 8))
 
                 # Categorization
                 brand = BRAND
@@ -120,39 +120,53 @@ class Processor:
                 collection = common.formatText(sh.cell_value(i, 2))
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 8))
+                description = common.formatText(sh.cell_value(i, 9))
 
-                width = common.formatFloat(sh.cell_value(i, 16))
-                length = common.formatFloat(sh.cell_value(i, 17)) * 12
-                dimension = common.formatText(sh.cell_value(i, 20))
+                width = common.formatFloat(sh.cell_value(i, 17))
+                length = common.formatFloat(sh.cell_value(i, 18)) * 12
+                coverage = common.formatText(sh.cell_value(i, 21))
+
+                specs = [
+                    ("Width", f"{round(width / 36, 2)} yd ({width} in)"),
+                    ("Length", f"{round(length / 36, 2)} yd ({length} in)"),
+                    ("Coverage", coverage),
+                ]
+
+                if type == "Rug":
+                    specs = []
+                    dimension = coverage
+                else:
+                    width = 0
+                    length = 0
+                    dimension = ""
 
                 # Additional Information
-                weight = common.formatFloat(sh.cell_value(i, 21))
-                match = common.formatText(sh.cell_value(i, 24))
-                material = common.formatText(sh.cell_value(i, 26))
-                country = common.formatText(sh.cell_value(i, 32))
+                weight = common.formatFloat(sh.cell_value(i, 22))
+                match = common.formatText(sh.cell_value(i, 25))
+                material = common.formatText(sh.cell_value(i, 27))
+                country = common.formatText(sh.cell_value(i, 33))
                 features = []
-                for id in range(27, 29):
+                for id in range(28, 30):
                     feature = common.formatText(sh.cell_value(i, id))
                     if feature:
                         features.append(feature)
 
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 9))
-                map = common.formatFloat(sh.cell_value(i, 10))
+                cost = common.formatFloat(sh.cell_value(i, 10))
+                map = common.formatFloat(sh.cell_value(i, 11))
 
                 # Measurement
-                uom = f"Per {common.formatText(sh.cell_value(i, 12))}"
+                uom = f"Per {common.formatText(sh.cell_value(i, 13))}"
 
                 # Tagging
                 colors = color
-                tags = f"{material}, {match}, {sh.cell_value(i, 27)}, {sh.cell_value(i, 28)}, {collection}, {pattern}, {description}"
+                tags = f"{material}, {match}, {sh.cell_value(i, 28)}, {sh.cell_value(i, 29)}, {collection}, {pattern}, {description}"
 
                 # Image
-                thumbnail = sh.cell_value(i, 33).replace("dl=0", "dl=1")
+                thumbnail = sh.cell_value(i, 34).replace("dl=0", "dl=1")
 
                 roomsets = []
-                for id in range(34, 38):
+                for id in range(35, 39):
                     roomset = sh.cell_value(i, id).replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
@@ -182,6 +196,7 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
+                'specs': specs,
                 'width': width,
                 'length': length,
                 'dimension': dimension,
@@ -213,23 +228,25 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        f = open(f"{FILEDIR}/tempaper-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+        wb = xlrd.open_workbook(f"{FILEDIR}/tempaper-master.xlsx")
+        sh = wb.sheet_by_index(0)
 
-        for row in cr:
-            if row[0] == "Item #":
+        for i in range(1, sh.nrows):
+            try:
+                # Primary Keys
+                mpn = common.formatText(sh.cell_value(i, 3))
+                sku = f"TP {mpn}"
+
+                stockP = common.formatInt(sh.cell_value(i, 6))
+
+                stock = {
+                    'sku': sku,
+                    'quantity': stockP,
+                    'note': "",
+                }
+                stocks.append(stock)
+            except Exception as e:
+                print(e)
                 continue
-
-            mpn = common.formatText(row[0])
-            sku = f"TP {mpn}"
-
-            stockP = common.formatInt(row[2])
-
-            stock = {
-                'sku': sku,
-                'quantity': stockP,
-                'note': "",
-            }
-            stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
