@@ -726,12 +726,18 @@ class DatabaseManager:
 
         return files
 
-    def updateStock(self, stocks, stockType=1):
+    def updateStock(self, stocks, stockType=1, reset=True):
+        if reset:
+            self.csr.execute(
+                f"DELETE FROM ProductInventory WHERE Brand = '{self.brand}'")
+            self.con.commit()
+
         for stock in stocks:
             try:
                 self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(
                     stock['sku'], stock['quantity'], stockType, stock['note'], self.brand))
                 self.con.commit()
+
                 debug.debug(self.brand, 0,
                             "Updated inventory. {}.".format(stock))
             except Exception as e:

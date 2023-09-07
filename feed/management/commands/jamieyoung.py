@@ -75,6 +75,11 @@ class Command(BaseCommand):
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
                         src="/jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False, delete=False)
+
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
+
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -106,6 +111,13 @@ class Processor:
         for i in range(1, sh.nrows):
             discontinued_mpns.append(str(sh.cell_value(i, 0)).strip())
 
+        # Available Items
+        available_mpns = []
+        f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+        for row in cr:
+            available_mpns.append(row[1])
+
         # Get Product Feed
         products = []
 
@@ -115,9 +127,6 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = str(sh.cell_value(i, 0)).strip()
-                if mpn in discontinued_mpns:
-                    debug.debug(BRAND, 1, f"Item discontinued: {mpn}")
-                    continue
 
                 sku = f"JY {mpn}"
                 try:
@@ -191,8 +200,14 @@ class Processor:
                 ), ", ".join(features), collection, description)
                 colors = color
 
-                statusP = True
+                # Status
+                if mpn in discontinued_mpns or mpn not in available_mpns:
+                    statusP = False
+                else:
+                    statusP = True
                 statusS = False
+
+                # Stock
                 stockNote = "3 days"
                 shipping = str(sh.cell_value(i, 35)).strip()
 
