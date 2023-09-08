@@ -18,12 +18,6 @@ API_USERNAME = 'Decoratorsbest'
 API_PASSWORD = 'EuEc9MNAvDqvrwjgRaf55HCLr8c5B2^Ly%C578Mj*=CUBZ-Y4Q5&Sc_BZE?n+eR^gZzywWphXsU*LNn!'
 
 env = environ.Env()
-SHOPIFY_API_URL = "https://decoratorsbest.myshopify.com/admin/api/{}".format(
-    env('shopify_api_version'))
-SHOPIFY_PRODUCT_API_HEADER = {
-    'X-Shopify-Access-Token': env('shopify_product_token'),
-    'Content-Type': 'application/json'
-}
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -70,7 +64,7 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=True)
+            processor.image(missingOnly=False)
 
         if "hires" in options['functions']:
             processor = Processor()
@@ -215,9 +209,6 @@ class Processor:
                 # Tagging
                 tags = f"{collection}, {row.get('WEARCODE', '')}, {material}"
 
-                # Image
-                thumbnail = common.formatText(row.get('IMAGEPATH', ''))
-
                 # Stock
                 if row.get('STOCKINVENTORY') != 'N':
                     stockP = common.formatInt(row.get('AVAILABLE'))
@@ -240,10 +231,6 @@ class Processor:
                     statusP = False
 
                 statusS = False
-
-                # Disable All Samples
-                # if row['SAMPLE_STATUS'] == 1:
-                #     statusS = True
 
                 manufacturer = f"{manufacturer} {type}"
 
@@ -288,13 +275,55 @@ class Processor:
 
                 'stockP': stockP,
                 'stockNote': stockNote,
-
-                'thumbnail': thumbnail,
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def image(self, missingOnly=True):
+        con = self.con
+        csr = con.cursor()
+        csr.execute(
+            f"SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{BRAND}'")
+
+        hasImage = []
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+
+        csr.close()
+
+        products = Scalamandre.objects.all()
+        for product in products:
+            mpn = product.mpn
+            productId = product.productId
+
+            if missingOnly and productId in hasImage:
+                continue
+
+            thumbnail = ""
+            roomsets = []
+
+            try:
+                r = requests.get(f"{API_ADDRESS}/ScalaFeedAPI/FetchImagesByItemID?ITEMID={mpn}",
+                                 headers={'Authorization': 'Bearer {}'.format(self.token)})
+                images = json.loads(r.text)
+
+                for image in images:
+                    if image["HIGHRESIMAGE"] or image["IMAGEPATH"]:
+                        if image["IMAGETYPE"] == "MAIN":
+                            thumbnail = image["HIGHRESIMAGE"] or image["IMAGEPATH"]
+                        else:
+                            roomsets.append(
+                                image["HIGHRESIMAGE"] or image["IMAGEPATH"])
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            if productId and thumbnail:
+                self.databaseManager.downloadImage(
+                    productId=productId, thumbnail=thumbnail, roomsets=roomsets)
 
     def hires(self):
         fnames = os.listdir(f"{FILEDIR}/images/scalamandre/")
