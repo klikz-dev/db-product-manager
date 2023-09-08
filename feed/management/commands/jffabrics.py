@@ -7,6 +7,7 @@ import environ
 import pymysql
 import xlrd
 import time
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -55,6 +56,10 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "image-manual" in options['functions']:
+            processor = Processor()
+            processor.imageManual()
 
         if "inventory" in options['functions']:
             while True:
@@ -380,6 +385,47 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def imageManual(self):
+        products = JFFabrics.objects.all()
+        images = os.listdir(f"{FILEDIR}/images/jff-iliv-casadeco-caselio/")
+
+        for product in products:
+            mpn = product.mpn
+            pattern = product.pattern
+            manufacturer = product.manufacturer
+            productId = product.productId
+
+            if manufacturer == "ILIV":
+                imageKey1 = pattern.replace(' ', '_')
+                imageKey2 = f"{mpn[-1:]}IL"
+            elif manufacturer == "Casadeco" or manufacturer == "Caselio":
+                imageKey1 = pattern
+                imageKey2 = pattern
+            else:
+                continue
+
+            thumbnail = ""
+            roomsets = []
+            for image in images:
+                if imageKey1 in image.replace(' ', '_') and imageKey2 in image:
+                    if "-" in image:
+                        roomsets.append(image)
+                    else:
+                        thumbnail = image
+
+            if thumbnail:
+                copyfile(f"{FILEDIR}/images/jff-iliv-casadeco-caselio/{thumbnail}",
+                         f"{FILEDIR}/../../../images/product/{productId}.jpg")
+
+                debug.debug(BRAND, 0, "Product Image {}.jpg".format(productId))
+
+            for index, roomset in enumerate(roomsets):
+                copyfile(f"{FILEDIR}/images/jff-iliv-casadeco-caselio/{roomset}",
+                         f"{FILEDIR}/../../../images/roomset/{productId}_{index + 2}.jpg")
+
+                debug.debug(BRAND, 0, "Roomset Image {}_{}.jpg".format(
+                    productId, index + 2))
 
     def inventory(self):
         stocks = []
