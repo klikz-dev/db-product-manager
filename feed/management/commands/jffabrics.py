@@ -28,9 +28,6 @@ class Command(BaseCommand):
             processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
-
-        if "validate" in options['functions']:
-            processor = Processor()
             processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
@@ -203,6 +200,178 @@ class Processor:
                 'colors': colors,
 
                 'thumbnail': thumbnail,
+
+                'statusP': statusP,
+                'statusS': statusS,
+            }
+            products.append(product)
+
+        # Casadeco & Cassilo
+        wb = xlrd.open_workbook(f"{FILEDIR}/jffabrics-casadeco-caselio.xls")
+        sh = wb.sheet_by_index(0)
+        for i in range(2, sh.nrows):
+            try:
+                # Primary Keys
+                mpn = common.formatInt(sh.cell_value(i, 1))
+                sku = f"JF {mpn}"
+
+                pattern = common.formatText(sh.cell_value(i, 0))
+                color = common.formatText(sh.cell_value(i, 3))
+
+                # Categorization
+                brand = BRAND
+                type = "Wallpaper"
+
+                if "Casadeco" in sh.cell_value(i, 8):
+                    manufacturer = "Casadeco"
+                elif "Caselio" in sh.cell_value(i, 8):
+                    manufacturer = "Caselio"
+                else:
+                    continue
+
+                collection = common.formatText(sh.cell_value(i, 70))
+
+                # Main Information
+                width = common.formatFloat(sh.cell_value(i, 22))
+                yards = common.formatFloat(sh.cell_value(i, 23))
+                repeatV = common.formatFloat(sh.cell_value(i, 29))
+
+                # Additional Information
+                content = common.formatText(sh.cell_value(i, 7))
+                match = common.formatText(sh.cell_value(i, 35))
+                features = []
+                for j in [13, 35, 37, 66, 67]:
+                    features.append(common.formatText(sh.cell_value(i, j)))
+                country = common.formatText(sh.cell_value(i, 21))
+
+                # Pricing
+                cost = common.formatFloat(sh.cell_value(i, 76))
+                map = common.formatFloat(sh.cell_value(i, 73))
+
+                # Measurement
+                if common.formatText(sh.cell_value(i, 73)) == "DR":
+                    uom = "Per Roll"
+                else:
+                    uom = "Per Panel"
+
+                # Tagging
+                tags = f"{' '.join(features)} {sh.cell_value(i, 19)} {sh.cell_value(i, 69)}"
+                colors = color
+
+                # Status
+                statusP = True
+                statusS = True
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            product = {
+                'mpn': mpn,
+                'sku': sku,
+                'pattern': pattern,
+                'color': color,
+
+                'brand': brand,
+                'type': type,
+                'manufacturer': manufacturer,
+                'collection': collection,
+
+                'width': width,
+                'yards': yards,
+                'repeatV': repeatV,
+
+                'content': content,
+                'match': match,
+                'country': country,
+                'features': features,
+
+                'cost': cost,
+                'map': map,
+                'uom': uom,
+
+                'tags': tags,
+                'colors': colors,
+
+                'statusP': statusP,
+                'statusS': statusS,
+            }
+            products.append(product)
+
+        # ILIV
+        wb = xlrd.open_workbook(f"{FILEDIR}/jffabrics-iliv.xls")
+        sh = wb.sheet_by_index(0)
+        for i in range(2, sh.nrows):
+            try:
+                # Primary Keys
+                mpn = common.formatInt(sh.cell_value(i, 1))
+                sku = f"JF {mpn}"
+
+                pattern = common.formatText(sh.cell_value(i, 0))
+                color = common.formatText(sh.cell_value(i, 3))
+
+                # Categorization
+                brand = BRAND
+                type = "Fabric"
+                manufacturer = "ILIV"
+                collection = common.formatText(sh.cell_value(i, 70))
+
+                # Main Information
+                width = common.formatFloat(sh.cell_value(i, 22))
+                repeatH = common.formatFloat(sh.cell_value(i, 28))
+                repeatV = common.formatFloat(sh.cell_value(i, 29))
+
+                # Additional Information
+                usage = common.formatText(sh.cell_value(i, 10))
+                content = common.formatText(sh.cell_value(i, 7))
+                country = common.formatText(sh.cell_value(i, 21))
+                weight = common.formatFloat(sh.cell_value(i, 32))
+
+                # Pricing
+                cost = common.formatFloat(sh.cell_value(i, 76))
+                map = common.formatFloat(sh.cell_value(i, 73))
+
+                # Measurement
+                uom = "Per Yard"
+
+                # Tagging
+                tags = f"{sh.cell_value(i, 19)} {sh.cell_value(i, 69)}"
+                colors = color
+
+                # Status
+                statusP = True
+                statusS = True
+
+            except Exception as e:
+                debug.debug(BRAND, 1, str(e))
+                continue
+
+            product = {
+                'mpn': mpn,
+                'sku': sku,
+                'pattern': pattern,
+                'color': color,
+
+                'brand': brand,
+                'type': type,
+                'manufacturer': manufacturer,
+                'collection': collection,
+
+                'width': width,
+                'repeatV': repeatV,
+                'repeatH': repeatH,
+
+                'content': content,
+                'weight': weight,
+                'country': country,
+                'usage': usage,
+
+                'cost': cost,
+                'map': map,
+                'uom': uom,
+
+                'tags': tags,
+                'colors': colors,
 
                 'statusP': statusP,
                 'statusS': statusS,
