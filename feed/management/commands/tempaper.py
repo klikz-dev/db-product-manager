@@ -6,8 +6,7 @@ import environ
 import pymysql
 import xlrd
 import time
-import csv
-import codecs
+from shutil import copyfile
 
 from library import database, debug, common
 
@@ -64,6 +63,10 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
+
+        if "roomset" in options['functions']:
+            processor = Processor()
+            processor.roomset()
 
         if "inventory" in options['functions']:
             while True:
@@ -224,6 +227,68 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def roomset(self):
+        mpn_map = {
+            "BB14034": "BB4034",
+            "BB14035": "BB4035",
+            "BR14137": "BR4137",
+            "BR14138": "BR4138",
+            "BU10633": "BU663",
+            "BU10664": "BU664",
+            "DI534": "DI10534",
+            "DI543": "DI10543",
+            "FE4023": "FE411",
+            "FN14164": "FN4164",
+            "FS14159": "FS4159",
+            "FS14160": "FS4160",
+            "GM10564": "GM564",
+            "GM10565": "GM565",
+            "GR10505": "GR505",
+            "GR10533": "GR533",
+            "GR10589": "GR589",
+            "HG5225": "HG15225",
+            "HG5226": "HG15226",
+            "HG5227": "HG15227",
+            "HG5228": "HG15228",
+            "HG5229": "HG15229",
+            "HG5230": "HG15230",
+            "HG5231": "HG15231",
+            "HG5232": "HG15232",
+            "IN10412": "IN412",
+            "IN14024": "IN4024",
+            "MA10083": "MA083",
+            "MP14163": "MP4163",
+            "MS10579": "MS579",
+            "PE10042": "PE042",
+            "PE10508": "PE508",
+            "PE633": "PE10633",
+            "QE14161": "QE4161",
+            "QE14162": "QE4162",
+            "TR562": "TR529",
+        }
+
+        products = Tempaper.objects.all()
+        images = os.listdir(f"{FILEDIR}/images/tempaper/")
+
+        for product in products:
+            mpn = product.mpn
+            productId = product.productId
+
+            if mpn in mpn_map and mpn_map[mpn]:
+                mpn = mpn_map[mpn]
+
+            roomsets = []
+            for image in images:
+                if mpn.lower() in image.lower() and image.lower() not in product.thumbnail.lower():
+                    roomsets.append(image)
+
+            for index, roomset in enumerate(roomsets):
+                copyfile(f"{FILEDIR}/images/tempaper/{roomset}",
+                         f"{FILEDIR}/../../../images/roomset/{productId}_{index + 2}.jpg")
+
+                debug.debug(BRAND, 0, "Roomset Image {}_{}.jpg".format(
+                    productId, index + 2))
 
     def inventory(self):
         stocks = []
