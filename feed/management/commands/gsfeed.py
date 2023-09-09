@@ -178,7 +178,7 @@ class Processor:
                 desc = title
 
             brand = brand.replace("Covington", "DB By DecoratorsBest").replace("Premier Prints", "DB By DecoratorsBest").replace(
-                "Materialworks", "DB By DecoratorsBest").replace("Tempaper", "DB By DecoratorsBest")
+                "Materialworks", "DB By DecoratorsBest").replace("Tempaper", "DB By DecoratorsBest Wallpaper")
 
             if price > 300:
                 priceRange = "300+"
