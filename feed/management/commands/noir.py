@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = NOIR.objects.all()
+            products = NOIR.objects.filter(type="Hutches")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -177,7 +177,6 @@ class Processor:
                     "Ocassional Chairs": "Chairs",
                     "Sideboards": "Side Tables",
                     "Cocktail Table": "Cocktail Tables",
-                    "Hutches": "Accessories",
                     "Bar & Counter": "Bar Stools",
                     "Bookcase": "Bookcases",
                     "Sideboard": "Side Tables",
