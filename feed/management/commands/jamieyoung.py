@@ -290,7 +290,7 @@ class Processor:
         for row in cr:
             try:
                 mpn = row[1]
-                quantity = int(row[2])
+                quantity = int(row[3])
 
                 product = JamieYoung.objects.get(mpn=mpn)
             except JamieYoung.DoesNotExist:
