@@ -390,8 +390,6 @@ class Processor:
 
         dnames = self.databaseManager.browseSFTP(src=f"/york/")
 
-        print(dnames)
-
         for dname in dnames:
             fnames = self.databaseManager.browseSFTP(src=f"/york/{dname}")
             for fname in fnames:
@@ -404,8 +402,8 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
-                    # if not product.productId or product.productId in hasImage:
-                    #     continue
+                    if not product.productId or product.productId in hasImage:
+                        continue
 
                     idx = 13
 
@@ -442,8 +440,8 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
-                    # if not product.productId or product.productId in hasImage:
-                    #     continue
+                    if not product.productId or product.productId in hasImage:
+                        continue
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
@@ -476,8 +474,8 @@ class Processor:
                     except York.DoesNotExist:
                         continue
 
-                    # if not product.productId or product.productId in hasImage:
-                    #     continue
+                    if not product.productId or product.productId in hasImage:
+                        continue
 
                     self.databaseManager.downloadFileFromSFTP(
                         src=f"/york/{dname}/{fname}",
