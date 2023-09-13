@@ -33,7 +33,7 @@ class Command(BaseCommand):
             processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
-            processor.databaseManager.validateFeed(products=products)
+            processor.databaseManager.validateFeed()
 
         if "validate" in options['functions']:
             processor = Processor()
