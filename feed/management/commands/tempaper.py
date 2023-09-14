@@ -114,7 +114,7 @@ class Processor:
                 pattern = common.formatText(sh.cell_value(i, 4))
                 color = common.formatText(sh.cell_value(i, 5))
 
-                name = common.formatText(sh.cell_value(i, 7))
+                name = common.formatText(sh.cell_value(i, 8))
 
                 # Categorization
                 brand = BRAND
@@ -123,10 +123,10 @@ class Processor:
                 collection = common.formatText(sh.cell_value(i, 2))
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 8))
-                width = common.formatFloat(sh.cell_value(i, 16))
-                length = common.formatFloat(sh.cell_value(i, 17)) * 12
-                coverage = common.formatText(sh.cell_value(i, 20))
+                description = common.formatText(sh.cell_value(i, 9))
+                width = common.formatFloat(sh.cell_value(i, 17))
+                length = common.formatFloat(sh.cell_value(i, 18)) * 12
+                coverage = common.formatText(sh.cell_value(i, 21))
 
                 specs = [
                     ("Width", f"{round(width / 36, 2)} yd ({width} in)"),
@@ -143,34 +143,34 @@ class Processor:
                     dimension = ""
 
                 # Additional Information
-                yards = common.formatInt(sh.cell_value(i, 13))
-                weight = common.formatFloat(sh.cell_value(i, 21))
-                match = common.formatText(sh.cell_value(i, 24))
-                material = common.formatText(sh.cell_value(i, 26))
-                care = common.formatText(sh.cell_value(i, 31))
-                country = common.formatText(sh.cell_value(i, 32))
+                yards = common.formatInt(sh.cell_value(i, 14))
+                weight = common.formatFloat(sh.cell_value(i, 22))
+                match = common.formatText(sh.cell_value(i, 25))
+                material = common.formatText(sh.cell_value(i, 27))
+                care = common.formatText(sh.cell_value(i, 32))
+                country = common.formatText(sh.cell_value(i, 33))
                 features = []
-                for id in range(27, 29):
+                for id in range(28, 30):
                     feature = common.formatText(sh.cell_value(i, id))
                     if feature:
                         features.append(feature)
 
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 9))
-                map = common.formatFloat(sh.cell_value(i, 10))
+                cost = common.formatFloat(sh.cell_value(i, 10))
+                map = common.formatFloat(sh.cell_value(i, 11))
 
                 # Measurement
-                uom = f"Per {common.formatText(sh.cell_value(i, 12))}"
+                uom = f"Per {common.formatText(sh.cell_value(i, 13))}"
 
                 # Tagging
                 colors = color
-                tags = f"{material}, {match}, {sh.cell_value(i, 27)}, {sh.cell_value(i, 28)}, {collection}, {pattern}, {description}"
+                tags = f"{material}, {match}, {sh.cell_value(i, 28)}, {sh.cell_value(i, 29)}, {collection}, {pattern}, {description}"
 
                 # Image
-                thumbnail = sh.cell_value(i, 33).replace("dl=0", "dl=1")
+                thumbnail = sh.cell_value(i, 34).replace("dl=0", "dl=1")
 
                 roomsets = []
-                for id in range(34, 38):
+                for id in range(35, 39):
                     roomset = sh.cell_value(i, id).replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
