@@ -66,6 +66,10 @@ class Command(BaseCommand):
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
                         src="Decorating Best Inventory.xlsx", dst=f"{FILEDIR}/jffabrics-inventory.xlsx", fileSrc=True, delete=False)
+
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -110,6 +114,15 @@ class Processor:
 
             mpn = f"{pattern}_{color}{book}"
             discoMPNs.append(mpn)
+
+        # Stock
+        stocks = {}
+        wb = xlrd.open_workbook(f"{FILEDIR}/jffabrics-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(2, sh.nrows):
+            sku = f"JF {common.formatInt(sh.cell_value(i, 0))}"
+            stockP = common.formatInt(sh.cell_value(i, 3))
+            stocks[sku] = stockP
 
         products = []
 
@@ -171,6 +184,17 @@ class Processor:
                 statusP = True
                 statusS = True
 
+                # Stock
+                if manufacturer in ["Casadeco", "Caselio", "ILIV"]:
+                    stockP = 5
+                    stockNote = "7-10 days"
+                elif sku in stocks:
+                    stockP = stocks[sku]
+                    stockNote = ""
+                else:
+                    stockP = 0
+                    stockNote = ""
+
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
                 continue
@@ -208,6 +232,9 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+
+                'stockP': stockP,
+                'stockNote': stockNote,
             }
             products.append(product)
 
@@ -430,16 +457,13 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/jffabrics-inventory.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(2, sh.nrows):
-            sku = f"JF {common.formatInt(sh.cell_value(i, 0))}"
-            stockP = common.formatInt(sh.cell_value(i, 3))
+        products = JFFabrics.objects.all()
+        for product in products:
 
             stock = {
-                'sku': sku,
-                'quantity': stockP,
-                'note': ""
+                'sku': product.sku,
+                'quantity': product.stockP,
+                'note': product.stockNote
             }
             stocks.append(stock)
 
