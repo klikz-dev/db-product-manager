@@ -105,7 +105,7 @@ class DatabaseManager:
 
                     stockP=product.get('stockP', 0),
                     stockS=product.get('stockS', 0),
-                    stockNote=product.get('stockNote', 0),
+                    stockNote=product.get('stockNote', ""),
 
                     thumbnail=product.get('thumbnail', ""),
                     roomsets=product.get('roomsets', [])
@@ -733,6 +733,9 @@ class DatabaseManager:
             self.con.commit()
 
         for stock in stocks:
+            if "stockType" in stock:
+                stockType = stock['stockType']
+
             try:
                 self.csr.execute("CALL UpdateProductInventory ('{}', {}, {}, '{}', '{}')".format(
                     stock['sku'], stock['quantity'], stockType, stock['note'], self.brand))
