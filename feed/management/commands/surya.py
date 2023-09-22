@@ -74,10 +74,15 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
-        if "shipping" in options['functions']:
+        if "white-glove" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
+
+        if "best-seller" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="bestSeller", tag="Best Selling")
 
         if "inventory" in options['functions']:
             while True:
@@ -116,6 +121,14 @@ class Processor:
         for i in range(1, sh.nrows):
             mpn = formatText(sh.cell_value(i, 0))
             unavailable.append(mpn)
+
+        # Best Sellers
+        bestsellingColors = []
+        wb = xlrd.open_workbook(f"{FILEDIR}/brewster-bestsellers.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            color = common.formatText(sh.cell_value(i, 0))
+            bestsellingColors.append(color)
 
         # Get Product Feed
         products = []
@@ -217,6 +230,11 @@ class Processor:
                 if "white glove" in str(sh.cell_value(i, 17)).lower() or "ltl" in str(sh.cell_value(i, 17)).lower():
                     whiteGlove = True
 
+                if color in bestsellingColors:
+                    bestSeller = True
+                else:
+                    bestSeller = False
+
                 # Image
                 thumbnail = sh.cell_value(i, 25)
 
@@ -266,6 +284,7 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
+                'bestSeller': bestSeller,
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
