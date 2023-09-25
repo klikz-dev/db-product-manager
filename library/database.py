@@ -823,17 +823,33 @@ class DatabaseManager:
         for product in products:
             if product.productId:
                 if getattr(product, key) == logic:
-                    self.csr.execute("CALL AddToProductTag ({}, {})".format(
-                        common.sq(product.sku), common.sq(tag)))
-                    self.con.commit()
-                    debug.debug(self.brand, 0, "{} Tag has been applied to the {} product {}".format(
-                        tag, self.brand, product.sku))
+                    self.csr.execute(f"""SELECT NULL
+                                     FROM ProductTag PT
+                                     JOIN Tag T ON PT.TagID = T.TagID
+                                     WHERE PT.SKU = '{product.sku}'
+                                     AND T.Name = '{tag}'""")
+                    if self.csr.fetchone():
+                        continue
+                    else:
+                        self.csr.execute("CALL AddToProductTag ({}, {})".format(
+                            common.sq(product.sku), common.sq(tag)))
+                        self.con.commit()
+                        debug.debug(self.brand, 0, "{} Tag has been applied to the {} product {}".format(
+                            tag, self.brand, product.sku))
                 else:
-                    self.csr.execute("CALL RemoveFromProductTag ({}, {})".format(
-                        common.sq(product.sku), common.sq(tag)))
-                    self.con.commit()
-                    debug.debug(self.brand, 0, "{} Tag has been removed from the {} product {}".format(
-                        tag, self.brand, product.sku))
+                    self.csr.execute(f"""SELECT NULL
+                                     FROM ProductTag PT
+                                     JOIN Tag T ON PT.TagID = T.TagID
+                                     WHERE PT.SKU = '{product.sku}'
+                                     AND T.Name = '{tag}'""")
+                    if self.csr.fetchone():
+                        self.csr.execute("CALL RemoveFromProductTag ({}, {})".format(
+                            common.sq(product.sku), common.sq(tag)))
+                        self.con.commit()
+                        debug.debug(self.brand, 0, "{} Tag has been removed from the {} product {}".format(
+                            tag, self.brand, product.sku))
+                    else:
+                        continue
 
                 self.csr.execute("CALL AddToPendingUpdateTagBodyHTML ({})".format(
                     product.productId))

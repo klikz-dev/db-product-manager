@@ -124,7 +124,7 @@ class Processor:
 
         # Best Sellers
         bestsellingColors = []
-        wb = xlrd.open_workbook(f"{FILEDIR}/brewster-bestsellers.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/surya-bestsellers.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             color = common.formatText(sh.cell_value(i, 0))
