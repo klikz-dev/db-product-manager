@@ -6,9 +6,8 @@ import pymysql
 import csv
 import pandas
 
-from library import debug
-from shopify.models import Variant, Customer, Address
-from mysql.models import ProductTag, Tag, ProductSubtype, Type
+from library import debug, common
+from shopify.models import Customer, Address
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
@@ -54,6 +53,7 @@ class Processor:
         wallpaper_col_width = []
         wallpaper_col_length = []
         wallpaper_col_height = []
+        wallpaper_col_display = []
         wallpaper_col_horizontal_repeat = []
         wallpaper_col_vertical_repeat = []
         wallpaper_col_image = []
@@ -75,6 +75,7 @@ class Processor:
         rug_col_width = []
         rug_col_length = []
         rug_col_height = []
+        rug_col_display = []
         rug_col_horizontal_repeat = []
         rug_col_vertical_repeat = []
         rug_col_image = []
@@ -96,6 +97,7 @@ class Processor:
         wallart_col_width = []
         wallart_col_length = []
         wallart_col_height = []
+        wallart_col_display = []
         wallart_col_horizontal_repeat = []
         wallart_col_vertical_repeat = []
         wallart_col_image = []
@@ -117,6 +119,7 @@ class Processor:
         col_width = []
         col_length = []
         col_height = []
+        col_display = []
         col_horizontal_repeat = []
         col_vertical_repeat = []
         col_image = []
@@ -192,6 +195,7 @@ class Processor:
             rollLength = ""
             size = ""
             dim = ""
+            sizeDisplay = ""
             hr = ""
             vr = ""
             repeat = ""
@@ -214,6 +218,8 @@ class Processor:
                 if "Dimension:" in line:
                     dim = line.replace("Dimension:", "").replace(
                         "Roll", "").strip()
+                    if "," in dim:
+                        dim = dim.split(",")[0]
                 if "Horizontal Repeat:" in line:
                     hr = line.replace("Horizontal Repeat:", "").strip()
                     layout = "Repeat"
@@ -318,6 +324,25 @@ class Processor:
             if not x or not y:
                 continue
 
+            # Width bug
+            x = f"{common.formatFloat(x)} in"
+
+            # Size display
+            if type == "Area Rug":
+                if brand == "Surya":
+                    if dim:
+                        sizeDisplay = dim
+                    elif size:
+                        sizeDisplay = size
+                elif brand == "Jaipur Living":
+                    if "(" in title and ")" in title:
+                        sizeDisplay = title.split("(")[1].split(")")[0]
+                    else:
+                        sizeDisplay = f"{round(common.formatFloat(x) / 12, 2)}' X {round(common.formatFloat(y) / 12, 2)}'"
+
+            if type == "Wallpaper":
+                sizeDisplay = f"{x} X {round(common.formatFloat(y) / 36, 2)} yds"
+
             # Variants
             v1 = ""
             v2 = ""
@@ -402,6 +427,7 @@ class Processor:
                 wallpaper_col_width.append(x)
                 wallpaper_col_length.append(y)
                 wallpaper_col_height.append(z)
+                wallpaper_col_display.append(sizeDisplay)
                 wallpaper_col_horizontal_repeat.append(hr)
                 wallpaper_col_vertical_repeat.append(vr)
                 wallpaper_col_image.append(imageURL)
@@ -426,6 +452,7 @@ class Processor:
                 rug_col_width.append(x)
                 rug_col_length.append(y)
                 rug_col_height.append(z)
+                rug_col_display.append(sizeDisplay)
                 rug_col_horizontal_repeat.append(hr)
                 rug_col_vertical_repeat.append(vr)
                 rug_col_image.append(imageURL)
@@ -450,6 +477,7 @@ class Processor:
                 wallart_col_width.append(x)
                 wallart_col_length.append(y)
                 wallart_col_height.append(z)
+                wallart_col_display.append(sizeDisplay)
                 wallart_col_horizontal_repeat.append(hr)
                 wallart_col_vertical_repeat.append(vr)
                 wallart_col_image.append(imageURL)
@@ -473,6 +501,7 @@ class Processor:
         col_width = wallpaper_col_width + rug_col_width + wallart_col_width
         col_length = wallpaper_col_length + rug_col_length + wallart_col_length
         col_height = wallpaper_col_height + rug_col_height + wallart_col_height
+        col_display = wallpaper_col_display + rug_col_display + wallart_col_display
         col_horizontal_repeat = wallpaper_col_horizontal_repeat + \
             rug_col_horizontal_repeat + wallart_col_horizontal_repeat
         col_vertical_repeat = wallpaper_col_vertical_repeat + \
@@ -497,6 +526,7 @@ class Processor:
             'Width': col_width[0:27999],
             'Length': col_length[0:27999],
             'Thickness': col_height[0:27999],
+            'Dimension Display': col_display[0:27999],
             'Horizontal Repeat': col_horizontal_repeat[0:27999],
             'Vertical Repeat': col_vertical_repeat[0:27999],
             'Image File Path': col_image[0:27999],
@@ -522,6 +552,7 @@ class Processor:
             'Width': col_width[28000:],
             'Length': col_length[28000:],
             'Thickness': col_height[28000:],
+            'Dimension Display': col_display[28000:],
             'Horizontal Repeat': col_horizontal_repeat[28000:],
             'Vertical Repeat': col_vertical_repeat[28000:],
             'Image File Path': col_image[28000:],
