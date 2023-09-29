@@ -35,6 +35,10 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
@@ -106,6 +110,9 @@ class Processor:
             for row in rows:
                 # Primary Keys
                 mpn = row['sku']
+                if mpn == "OPTIONS":
+                    continue
+
                 sku = f"MW {mpn}"
                 pattern = row['style']
                 color = row['color']
@@ -138,6 +145,8 @@ class Processor:
 
                 # Pricing
                 cost = common.formatFloat(row['price'])
+                if cost == 0:
+                    continue
 
                 # Tagging
                 tags = collection

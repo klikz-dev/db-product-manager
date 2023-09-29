@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = NOIR.objects.filter(type="Hutches")
+            products = NOIR.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -59,6 +59,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
+
+        if "whiteglove" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(key="whiteGlove", tag="White Glove", logic=True)
 
         if "image" in options['functions']:
             processor = Processor()
@@ -136,7 +140,7 @@ class Processor:
 
                 # Additional Information
                 upc = common.formatInt(sh.cell_value(i, 13))
-                weight = common.formatFloat(sh.cell_value(i, 14))
+                weight = common.formatFloat(sh.cell_value(i, 42))
                 material = common.formatText(sh.cell_value(i, 12))
                 country = common.formatText(sh.cell_value(i, 35))
 
@@ -163,7 +167,11 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or height > 107 or depth > 107 or weight > 149:
+                boxHeight = common.formatFloat(sh.cell_value(i, 43))
+                boxWidth = common.formatFloat(sh.cell_value(i, 44))
+                boxDepth = common.formatFloat(sh.cell_value(i, 45))
+
+                if boxWidth > 107 or boxHeight > 107 or boxDepth > 107 or weight > 149:
                     whiteGlove = True
                 else:
                     whiteGlove = False
