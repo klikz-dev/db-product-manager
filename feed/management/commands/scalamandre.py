@@ -216,7 +216,7 @@ class Processor:
                     stockP = 0
 
                 stockNote = common.formatText(row.get('LEAD TIME', ''))
-                if type == "Pillow":
+                if not stockNote and type == "Pillow":
                     stockNote = "2-3 Weeks (Custom Order)"
 
                 # Status
