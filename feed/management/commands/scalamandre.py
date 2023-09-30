@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.image(missingOnly=False)
+            processor.image(missingOnly=True)
 
         if "hires" in options['functions']:
             processor = Processor()
