@@ -41,8 +41,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Schumacher.objects.filter(
-                Q(collection='BACKDROP'))
+            products = Schumacher.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
@@ -71,7 +70,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv")
+                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv", delete=False)
 
                     processor.inventory()
 
@@ -133,12 +132,19 @@ class Processor:
 
                 if type == "Wallcovering":
                     type = "Wallpaper"
+                if type == "Fabric":
+                    type = "Fabric"
                 if type == "Furniture & Accessories":
                     type = "Pillow"
                 if type == "Rugs & Carpets":
                     type = "Rug"
                 if "Throw" in pattern:
                     type = "Throws"
+
+                if type == "Pillow" or type == "Rug" or type == "Throws":
+                    name = pattern
+                else:
+                    name = ""
 
                 pattern = pattern.replace(type, "").strip()
 
@@ -153,26 +159,23 @@ class Processor:
                 # Main Information
                 description = common.formatText(row[17])
 
-                width = common.formatFloat(row[11])
-                length = common.formatFloat(row[21])
-
-                size = ""
-                if width > 0 and length > 0:
-                    if type == "Pillow" or type == "Throw":
-                        size = f'{width}" x {length}"'
-                    elif type == "Rug":
-                        size = f"{common.formatFloat(width / 12)}' x {common.formatFloat(length / 12)}'"
-
-                repeatV = common.formatFloat(row[15])
-                repeatH = common.formatFloat(row[16])
+                specs = [
+                    ("Width", f"{common.formatText(row[11])}"),
+                    ("Length", f"{common.formatText(row[21])}"),
+                    ("Vertical Repeat", f"{common.formatText(row[15])}"),
+                    ("Horizontal Repeat", f"{common.formatText(row[16])}"),
+                ]
 
                 # Additional Information
                 match = str(row[14]).strip()
 
                 yards = common.formatFloat(row[8])
 
-                content = ", ".join(
-                    (str(row[12]).strip(), str(row[13].strip())))
+                content = ""
+                if row[12]:
+                    content = f"{common.formatText(row[12])}"
+                if row[13]:
+                    content = f"{common.formatText(row[12])}, {common.formatText(row[13])}"
 
                 # Measurement
                 uom = str(row[9]).strip().upper()
@@ -199,7 +202,7 @@ class Processor:
                 cost = common.formatFloat(row[7])
 
                 # Tagging
-                tags = ", ".join((collection, row[6], description))
+                tags = ", ".join((collection, row[6], pattern, description))
 
                 # Image
                 thumbnail = str(row[18]).strip()
@@ -223,19 +226,9 @@ class Processor:
                 if mpn in discontinuedSamples:
                     statusS = False
 
-                if width > 107 or length > 107:
-                    whiteGlove = True
-                else:
-                    whiteGlove = False
-
                 # Stock
                 stockP = int(float(row[19]))
 
-                # Custom Name
-                if type == "Rug" and size:
-                    name = f"{pattern} {color} {size} {type}"
-                else:
-                    name = ""
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -254,11 +247,7 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
-                'width': width,
-                'length': length,
-                'repeatV': repeatV,
-                'repeatH': repeatH,
-                'size': size,
+                'specs': specs,
 
                 'match': match,
                 'content': content,
@@ -278,7 +267,6 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
-                'whiteGlove': whiteGlove,
 
                 'stockP': stockP,
             }

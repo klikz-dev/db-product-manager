@@ -344,7 +344,8 @@ class DatabaseManager:
         if len(product.specs) > 0:
             for spec in product.specs:
                 specKey, specVal = spec
-                bodyHTML += "{}: {}<br/>".format(specKey, specVal)
+                if specKey and specVal:
+                    bodyHTML += "{}: {}<br/>".format(specKey, specVal)
         if float(product.width) > 0:
             bodyHTML += "Width: {} in<br/>".format(product.width)
         if float(product.length) > 0:
