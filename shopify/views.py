@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
-from misc.models import Config
 
 from mysql.models import Manufacturer, PORecord, PendingUpdatePublish
 from shopify.models import Address, Customer, Line_Item, Order, Product, ProductImage, Tracking, Variant
@@ -12,7 +11,7 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 
 import pymysql
-from library import common, shopify
+from library import common, shopify, debug
 
 import environ
 env = environ.Env()
@@ -147,7 +146,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         orderRes = shopify.getOrderById(pk)
 
         if orderRes.get('order'):
-            common.importOrder(orderRes['order'])
+            try:
+                common.importOrder(orderRes['order'])
+            except Exception as e:
+                debug.debug("Order", 1, str(e))
 
         orders = Order.objects.all()
         order = get_object_or_404(orders, pk=pk)
