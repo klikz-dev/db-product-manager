@@ -254,7 +254,7 @@ class Processor:
             ET.SubElement(item, "g:condition").text = "new"
             ET.SubElement(item, "g:color").text = f"{color}"
             ET.SubElement(item, "g:pattern").text = f"{style}"
-            ET.SubElement(item, "g:shipping").text = 25
+            ET.SubElement(item, "g:shipping").text = "25.00"
             ET.SubElement(item, "g:shipping_weight").text = f"{weight}"
             ET.SubElement(item, "g:material").text = f"{material}"
             ET.SubElement(item, "g:custom_label_0").text = f"{ptype}"
