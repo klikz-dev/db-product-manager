@@ -27,6 +27,8 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
+            processor.databaseManager.downloadFileFromSFTP(
+                src="/exquisiterugs/datasheets/exquisiterugs-master.xlsx", dst=f"{FILEDIR}/exquisiterugs-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
