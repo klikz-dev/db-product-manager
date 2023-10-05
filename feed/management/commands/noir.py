@@ -60,9 +60,10 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
-        if "whiteglove" in options['functions']:
+        if "white-glove" in options['functions']:
             processor = Processor()
-            processor.databaseManager.customTags(key="whiteGlove", tag="White Glove", logic=True)
+            processor.databaseManager.customTags(
+                key="whiteGlove", tag="White Glove", logic=True)
 
         if "image" in options['functions']:
             processor = Processor()
@@ -171,7 +172,7 @@ class Processor:
                 boxWidth = common.formatFloat(sh.cell_value(i, 44))
                 boxDepth = common.formatFloat(sh.cell_value(i, 45))
 
-                if boxWidth > 107 or boxHeight > 107 or boxDepth > 107 or weight > 149:
+                if boxWidth > 107 or boxHeight > 107 or boxDepth > 107 or weight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False

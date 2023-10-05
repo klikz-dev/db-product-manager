@@ -63,6 +63,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "white-glove" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="whiteGlove", tag="White Glove", logic=True)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
@@ -163,7 +168,7 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or length > 107 or height > 107 or weight > 149:
+                if width > 107 or length > 107 or height > 107 or weight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False

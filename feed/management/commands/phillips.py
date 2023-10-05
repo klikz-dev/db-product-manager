@@ -58,6 +58,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "white-glove" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="whiteGlove", tag="White Glove", logic=True)
+
         if "order" in options['functions']:
             processor = Processor()
             processor.order()
@@ -232,6 +237,11 @@ class Processor:
                         if row['status'] == "ACTIVE":
                             statusP = True
 
+                        if width > 107 or height > 107 or depth > 107 or weight > 40:
+                            whiteGlove = True
+                        else:
+                            whiteGlove = False
+
                         # Assets
                         thumbnail = row['assets']['images']['main']
                         roomsets = []
@@ -279,6 +289,7 @@ class Processor:
                         'map': map,
 
                         'statusP': statusP,
+                        'whiteGlove': whiteGlove,
 
                         'thumbnail': thumbnail,
                         'roomsets': roomsets,
