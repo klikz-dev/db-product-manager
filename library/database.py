@@ -157,7 +157,7 @@ class DatabaseManager:
             try:
                 manufacturer = Manufacturer.objects.get(name=m)
                 if not (manufacturer.name and manufacturer.brand):
-                    unknownManufacturers(m)
+                    unknownManufacturers.append(m)
             except Manufacturer.DoesNotExist:
                 unknownManufacturers.append(m)
 

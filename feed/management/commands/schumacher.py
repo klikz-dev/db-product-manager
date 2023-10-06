@@ -31,6 +31,10 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
@@ -179,7 +183,7 @@ class Processor:
 
                 # Measurement
                 uom = str(row[9]).strip().upper()
-                if "YARD" in uom or "REPEAT" in uom:
+                if "YARD" in uom or "REPEAT" in uom or "YD" in uom:
                     uom = "Per Yard"
                 elif "ROLL" in uom:
                     uom = "Per Roll"
@@ -200,6 +204,8 @@ class Processor:
 
                 # Pricing
                 cost = common.formatFloat(row[7])
+                if cost == 0:
+                    continue
 
                 # Tagging
                 tags = ", ".join((collection, row[6], pattern, description))
@@ -228,7 +234,6 @@ class Processor:
 
                 # Stock
                 stockP = int(float(row[19]))
-
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
