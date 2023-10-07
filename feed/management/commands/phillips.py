@@ -201,7 +201,10 @@ class Processor:
                         width = row['description']['sizew']
                         height = row['description']['sizel']
                         depth = row['description']['sizeh']
-                        weight = row['description']['weight']
+
+                        specs = [
+                            ("Weight", f"{row['description']['weight']} lbs"),
+                        ]
 
                         # Additional Information
                         material = ", ".join(row['description']['material'])
@@ -237,7 +240,12 @@ class Processor:
                         if row['status'] == "ACTIVE":
                             statusP = True
 
-                        if width > 107 or height > 107 or depth > 107 or weight > 40:
+                        packWidth = row['description']['packw']
+                        packHeight = row['description']['packl']
+                        packDepth = row['description']['packh']
+                        packWeight = row['description']['packwght']
+
+                        if packWidth > 107 or packHeight > 107 or packDepth > 107 or packWeight > 40:
                             whiteGlove = True
                         else:
                             whiteGlove = False
@@ -270,13 +278,14 @@ class Processor:
                         'width': width,
                         'height': height,
                         'depth': depth,
-                        'weight': weight,
+                        'specs': specs,
 
                         'material': material,
                         'finish': finish,
                         'care': care,
                         'disclaimer': disclaimer,
                         'country': country,
+                        'weight': packWeight,
 
                         'uom': uom,
                         'minimum': minimum,
