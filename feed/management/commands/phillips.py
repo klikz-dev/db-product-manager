@@ -236,10 +236,14 @@ class Processor:
                         map = row['map']
 
                         # Availability
-                        statusP = False
                         if row['status'] == "ACTIVE":
                             statusP = True
+                        else:
+                            statusP = False
 
+                        statusS = False
+
+                        # Shipping
                         packWidth = row['description']['packw']
                         packHeight = row['description']['packl']
                         packDepth = row['description']['packh']
@@ -298,6 +302,7 @@ class Processor:
                         'map': map,
 
                         'statusP': statusP,
+                        'statusS': statusS,
                         'whiteGlove': whiteGlove,
 
                         'thumbnail': thumbnail,

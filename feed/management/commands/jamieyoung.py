@@ -30,6 +30,10 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
@@ -65,10 +69,10 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
-        if "whiteglove" in options['functions']:
+        if "white-glove" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
-                key="whiteGlove", tag="White Glove")
+                key="whiteGlove", tag="White Glove", logic=True)
 
         if "inventory" in options['functions']:
             while True:
@@ -104,13 +108,6 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
-        # Discontinued
-        discontinued_mpns = []
-        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-discontinued.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            discontinued_mpns.append(str(sh.cell_value(i, 0)).strip())
-
         # Available Items
         available_mpns = []
         f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
@@ -124,118 +121,101 @@ class Processor:
         wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(2, sh.nrows):
-            try:
-                # Primary Keys
-                mpn = str(sh.cell_value(i, 0)).strip()
+            # Primary Keys
+            mpn = common.formatText(sh.cell_value(i, 0))
+            sku = f"JY {mpn}"
+            pattern = common.formatText(sh.cell_value(i, 1))
+            color = common.formatText(
+                sh.cell_value(i, 21)).replace(",", " /")
 
-                sku = f"JY {mpn}"
-                try:
-                    upc = int(sh.cell_value(i, 8))
-                except:
-                    upc = ""
-                pattern = str(sh.cell_value(i, 1)).strip()
-                if "Sideboard" in pattern or "Console" in pattern:
-                    # we won't sell large peices for Jamie Young. 1/25/23 from BK.
-                    continue
-                color = str(sh.cell_value(i, 21)).strip().replace(",", " /")
+            # Categorization
+            brand = BRAND
+            type = common.formatText(sh.cell_value(i, 3)).title()
+            manufacturer = BRAND
+            collection = str(sh.cell_value(i, 2))
 
-                # Categorization
-                brand = BRAND
-                type = str(sh.cell_value(i, 3)).strip().title()
-                if type == "Accessories":
-                    type = "Accents"
-                manufacturer = BRAND
-                collection = str(sh.cell_value(i, 2))
+            # Main Information
+            description = common.formatText(sh.cell_value(i, 14))
+            disclaimer = common.formatText(sh.cell_value(i, 22))
+            upc = common.formatInt(sh.cell_value(i, 8))
 
-                # Main Information
-                description = str(sh.cell_value(i, 14)).strip()
-                disclaimer = str(sh.cell_value(i, 22)).strip()
-                width = common.formatFloat(sh.cell_value(i, 11))
-                height = common.formatFloat(sh.cell_value(i, 10))
-                depth = common.formatFloat(sh.cell_value(i, 12))
+            width = common.formatFloat(sh.cell_value(i, 11))
+            height = common.formatFloat(sh.cell_value(i, 10))
+            depth = common.formatFloat(sh.cell_value(i, 12))
+            dimension = common.formatText(sh.cell_value(i, 13))
 
-                # Additional Information
-                material = str(sh.cell_value(i, 20)).strip()
-                care = str(sh.cell_value(i, 23)).strip()
-                country = str(sh.cell_value(i, 33)).strip()
-                try:
-                    weight = float(sh.cell_value(i, 9))
-                except:
-                    weight = 5
-                features = []
-                for id in range(15, 19):
-                    feature = str(sh.cell_value(i, id)).strip()
-                    if feature != "":
-                        features.append(feature)
-                specs = []
-                for id in range(24, 32):
-                    spec = str(sh.cell_value(i, id)).strip()
-                    if spec != "":
-                        specs.append(spec)
+            weight = common.formatFloat(sh.cell_value(i, 9))
+            specs = [
+                ("Weight", f"{weight} lbs"),
+            ]
 
-                # Measurement
-                uom = "Per Item"
+            # Additional Information
+            material = common.formatText(sh.cell_value(i, 20))
+            care = common.formatText(sh.cell_value(i, 23))
+            country = common.formatText(sh.cell_value(i, 33))
 
-                # Pricing
-                try:
-                    cost = round(float(sh.cell_value(i, 4)), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
-                    continue
+            features = [str(sh.cell_value(i, id)).strip()
+                        for id in range(15, 19) if sh.cell_value(i, id)]
+            features.extend([str(sh.cell_value(i, id)).strip()
+                            for id in range(24, 32) if sh.cell_value(i, id)])
 
-                try:
-                    map = round(float(sh.cell_value(i, 5)), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt MAP error {}".format(mpn))
-                    continue
+            # Measurement
+            uom = "Per Item"
 
-                try:
-                    msrp = round(float(sh.cell_value(i, 6)), 2)
-                except:
-                    debug.debug(BRAND, 1, "Produt MSRP error {}".format(mpn))
-                    msrp = 0
+            # Pricing
+            cost = common.formatFloat(sh.cell_value(i, 4))
+            map = common.formatFloat(sh.cell_value(i, 5))
+            msrp = common.formatFloat(sh.cell_value(i, 6))
 
-                # Tagging
-                tags = "{}, {}, {}, {}".format(str(sh.cell_value(i, 19)).strip(
-                ), ", ".join(features), collection, description)
-                colors = color
+            # Tagging
+            tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
+            colors = color
 
-                # Status
-                if mpn in discontinued_mpns or mpn not in available_mpns:
-                    statusP = False
-                else:
-                    statusP = True
-                statusS = False
+            # Status
+            statusP = True
+            statusS = False
 
-                # Stock
-                stockNote = "3 days"
-                shipping = str(sh.cell_value(i, 35)).strip()
+            if "Sideboard" in pattern or "Console" in pattern:
+                statusP = False
 
-                # Image
-                thumbnail = str(sh.cell_value(
-                    i, 49)).strip().replace("dl=0", "dl=1")
-                roomsets = []
-                for id in range(50, 63):
-                    roomset = str(sh.cell_value(i, id)
-                                  ).strip().replace("dl=0", "dl=1")
-                    if roomset != "":
-                        roomsets.append(roomset)
+            if mpn not in available_mpns:
+                statusP = False
 
-                # Pattern Name
-                ptypeTmp = type
-                if ptypeTmp[len(ptypeTmp) - 1] == "s":
-                    ptypeTmp = ptypeTmp[:-1]
+            # Shipping
+            shippingWidth = common.formatFloat(sh.cell_value(i, 42))
+            shippingLength = common.formatFloat(sh.cell_value(i, 41))
+            shippingHeight = common.formatFloat(sh.cell_value(i, 43))
+            shippingWeight = common.formatFloat(sh.cell_value(i, 40))
 
-                for typeword in ptypeTmp.split(" "):
-                    pattern = pattern.replace(typeword, "")
+            if shippingWidth > 107 or shippingLength > 107 or shippingHeight > 107 or shippingWeight > 40:
+                whiteGlove = True
+            else:
+                whiteGlove = False
 
-                pattern = pattern.replace(
-                    "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
-                ##############
+            # Stock
+            stockNote = "3 days"
 
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
+            # Image
+            thumbnail = common.formatText(
+                sh.cell_value(i, 49)).replace("dl=0", "dl=1")
+            roomsets = []
+            for id in range(50, 63):
+                roomset = common.formatText(
+                    sh.cell_value(i, id)).replace("dl=0", "dl=1")
+                if roomset:
+                    roomsets.append(roomset)
+
+            # Pattern Name
+            ptypeTmp = type
+            if ptypeTmp[len(ptypeTmp) - 1] == "s":
+                ptypeTmp = ptypeTmp[:-1]
+
+            for typeword in ptypeTmp.split(" "):
+                pattern = pattern.replace(typeword, "")
+
+            pattern = pattern.replace(
+                "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
+            ##############
 
             product = {
                 'mpn': mpn,
@@ -254,7 +234,8 @@ class Processor:
                 'width': width,
                 'height': height,
                 'depth': depth,
-                'weight': weight,
+                'dimension': dimension,
+                'specs': specs,
 
                 'material': material,
                 'care': care,
@@ -271,8 +252,11 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'whiteGlove': whiteGlove,
+
+                'weight': shippingWeight,
+
                 'stockNote': stockNote,
-                'shipping': shipping,
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
