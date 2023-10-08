@@ -29,9 +29,13 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
-                src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx")
+                src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
+
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
             processor = Processor()
@@ -135,8 +139,6 @@ class Processor:
                     type = "Accents"
                 if type == "Décor":
                     type = "Decor"
-                if type == "Pillow":
-                    type = "Throw Pillows"
                 if "Throw" in name:
                     type = "Throws"
 
@@ -172,10 +174,6 @@ class Processor:
                 care = common.formatText(sh.cell_value(i, 39))
                 country = common.formatText(sh.cell_value(i, 32))
 
-                weight = common.formatFloat(sh.cell_value(i, 88))
-                if weight == 0:
-                    weight = 5
-
                 # Measurement
                 uom = "Per Item"
 
@@ -205,12 +203,16 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or length > 107 or height > 107 or weight > 40:
+                # Shipping
+                shippingWidth = common.formatFloat(sh.cell_value(i, 86))
+                shippingLength = common.formatFloat(sh.cell_value(i, 85))
+                shippingHeight = common.formatFloat(sh.cell_value(i, 87))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 88))
+
+                if shippingWidth > 107 or shippingLength > 107 or shippingHeight > 107 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
-
-                pass
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -239,7 +241,8 @@ class Processor:
                 'material': material,
                 'care': care,
                 'country': country,
-                'weight': weight,
+
+                'weight': shippingWeight,
 
                 'cost': cost,
                 'map': map,
