@@ -139,9 +139,13 @@ class Processor:
                 depth = common.formatFloat(sh.cell_value(i, 17))
                 dimension = common.formatText(sh.cell_value(i, 18))
 
+                weight = common.formatFloat(sh.cell_value(i, 14))
+                specs = [
+                    ("Weight", f"{weight} lbs"),
+                ]
+
                 # Additional Information
                 upc = common.formatInt(sh.cell_value(i, 13))
-                weight = common.formatFloat(sh.cell_value(i, 42))
                 material = common.formatText(sh.cell_value(i, 12))
                 country = common.formatText(sh.cell_value(i, 35))
 
@@ -171,8 +175,8 @@ class Processor:
                 boxHeight = common.formatFloat(sh.cell_value(i, 43))
                 boxWidth = common.formatFloat(sh.cell_value(i, 44))
                 boxDepth = common.formatFloat(sh.cell_value(i, 45))
-
-                if boxWidth > 107 or boxHeight > 107 or boxDepth > 107 or weight > 40:
+                boxWeight = common.formatFloat(sh.cell_value(i, 42))
+                if boxWidth > 107 or boxHeight > 107 or boxDepth > 107 or boxWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
@@ -219,9 +223,9 @@ class Processor:
                 'height': height,
                 'depth': depth,
                 'dimension': dimension,
+                'specs': specs,
 
                 'material': material,
-                'weight': weight,
                 'country': country,
                 'upc': upc,
 
@@ -238,6 +242,8 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
+
+                'weight': boxWeight,
 
                 'stockNote': stockNote,
             }
