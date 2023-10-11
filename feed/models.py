@@ -224,6 +224,12 @@ class Pindler(Feed):
         verbose_name_plural = "Pindler"
 
 
+class Poppy(Feed):
+    class Meta:
+        verbose_name = "Poppy"
+        verbose_name_plural = "Poppy"
+
+
 class Port68(Feed):
     class Meta:
         verbose_name = "Port 68"

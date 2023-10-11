@@ -103,6 +103,11 @@ markup = {
         "consumer": 1.5,
         "trade": 1,
     },
+    "Poppy": {
+        "useMAP": True,
+        "consumer": 1.8,
+        "trade": 1.5,
+    },
     "Port 68": {
         "useMAP": True,
         "consumer": 2,
