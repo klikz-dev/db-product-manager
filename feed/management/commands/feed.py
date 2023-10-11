@@ -7,6 +7,7 @@ import datetime
 import re
 import boto3
 import xml.etree.ElementTree as ET
+import xml.dom.minidom as MD
 import gzip
 
 from library import debug, inventory
@@ -266,8 +267,12 @@ class Processor:
             debug.debug(
                 PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
 
-        tree = ET.ElementTree(root)
-        tree.write(FEEDDIR, encoding="UTF-8", xml_declaration=True)
+        tree_str = ET.tostring(root, encoding='utf-8')
+        tree_dom = MD.parseString(tree_str)
+        pretty_tree = tree_dom.toprettyxml(indent="\t")
+
+        with open(FEEDDIR, 'w', encoding="UTF-8") as file:
+            file.write(pretty_tree)
 
         return (total, skiped)
 
@@ -295,13 +300,12 @@ class Processor:
             PROCESS, 0, f"Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml")
 
     def uploadToFB(self):
-        self.compress_file(FEEDDIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
-
         self.s3.upload_file(FEEDDIR, self.bucket, "DecoratorsBestFB.xml", ExtraArgs={
                             'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml')
 
+        self.compress_file(FEEDDIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
         self.s3.upload_file(
             f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz", self.bucket, "DecoratorsBestFB.xml.gz", ExtraArgs={'ACL': 'public-read'})
         debug.debug(
