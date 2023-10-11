@@ -7,6 +7,7 @@ import datetime
 import re
 import boto3
 import xml.etree.ElementTree as ET
+import gzip
 
 from library import debug, inventory
 
@@ -14,7 +15,7 @@ from library import debug, inventory
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 FEEDDIR = f"{FILEDIR}/feed/DecoratorsBestGS.xml"
 
-PROCESS = "GS Feed"
+PROCESS = "Feed"
 
 
 class Command(BaseCommand):
@@ -29,7 +30,8 @@ class Command(BaseCommand):
             with Processor() as processor:
                 total, skiped = processor.feed()
                 if skiped < total * 0.3:
-                    processor.upload()
+                    processor.uploadToGS()
+                    processor.uploadToFB()
                 else:
                     debug.debug(
                         PROCESS, 2, f"Ignore uploading the feed because too many items {skiped}/{total} have been skiped")
@@ -269,7 +271,12 @@ class Processor:
 
         return (total, skiped)
 
-    def upload(self):
+    def compress_file(self, input_file, output_file):
+        with open(input_file, 'rb') as f_in:
+            with gzip.open(output_file, 'wb') as f_out:
+                f_out.writelines(f_in)
+
+    def uploadToGS(self):
         now = datetime.datetime.now()
 
         self.s3.upload_file(FEEDDIR, self.bucket, "DecoratorsBestGS.xml", ExtraArgs={
@@ -286,3 +293,16 @@ class Processor:
             FEEDDIR, self.bucket, f"DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml", ExtraArgs={'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, f"Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml")
+
+    def uploadToFB(self):
+        self.compress_file(FEEDDIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
+
+        self.s3.upload_file(FEEDDIR, self.bucket, "DecoratorsBestFB.xml", ExtraArgs={
+                            'ACL': 'public-read'})
+        debug.debug(
+            PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml')
+
+        self.s3.upload_file(
+            f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz", self.bucket, "DecoratorsBestFB.xml.gz", ExtraArgs={'ACL': 'public-read'})
+        debug.debug(
+            PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml.gz')
