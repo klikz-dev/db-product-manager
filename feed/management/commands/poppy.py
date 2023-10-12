@@ -2,6 +2,7 @@ import xlrd
 import pymysql
 import environ
 import os
+import time
 from feed.models import Poppy
 from django.core.management.base import BaseCommand
 
@@ -54,6 +55,17 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
+
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="/poppy/Decorators Best - Poppy Inventory.xlsx", dst=f"{FILEDIR}/poppy-inventory.xlsx", fileSrc=True, delete=False)
+                    processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -189,3 +201,24 @@ class Processor:
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def inventory(self):
+        stocks = []
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/poppy-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 2))
+            sku = f"TP {mpn}"
+
+            stockP = common.formatInt(sh.cell_value(i, 5))
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': ""
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
