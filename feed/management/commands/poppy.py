@@ -137,8 +137,8 @@ class Processor:
 
                 roomsets = []
                 for id in range(31, 35):
-                    roomset = f'https://drive.google.com/u/0/uc?id={sh.cell_value(i, id).replace("https://drive.google.com/file/d/", "").split("/")[0]}&export=download'
-                    if roomset != "":
+                    if sh.cell_value(i, id) != "":
+                        roomset = f'https://drive.google.com/u/0/uc?id={sh.cell_value(i, id).replace("https://drive.google.com/file/d/", "").split("/")[0]}&export=download'
                         roomsets.append(roomset)
 
                 # Status
