@@ -137,6 +137,11 @@ class Processor:
                 size = f"{round(width / 12, 2)}'X{round(length / 12, 2)}'"
                 dimension = common.formatText(sh.cell_value(i, 18))
 
+                weight = common.formatFloat(sh.cell_value(i, 14))
+                specs = [
+                    ("Weight", f"{weight} lbs"),
+                ]
+
                 # Additional Information
                 upc = common.formatInt(sh.cell_value(i, 13))
                 weight = common.formatFloat(sh.cell_value(i, 14))
@@ -168,7 +173,13 @@ class Processor:
                 statusP = True
                 statusS = False
 
-                if width > 107 or length > 107 or height > 107 or weight > 40:
+                # Shipping
+                shippingWidth = common.formatFloat(sh.cell_value(i, 44))
+                shippingLength = common.formatFloat(sh.cell_value(i, 43))
+                shippingHeight = common.formatFloat(sh.cell_value(i, 45))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 42))
+
+                if shippingWidth > 107 or shippingLength > 107 or shippingHeight > 107 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
@@ -199,10 +210,11 @@ class Processor:
                 'height': height,
                 'size': size,
                 'dimension': dimension,
+                'specs': specs,
 
                 'care': care,
                 'material': material,
-                'weight': weight,
+                'weight': shippingWeight,
                 'country': country,
                 'upc': upc,
 
