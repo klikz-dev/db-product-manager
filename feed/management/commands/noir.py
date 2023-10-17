@@ -172,6 +172,10 @@ class Processor:
                 statusP = True
                 statusS = False
 
+                if mpn == "AE-37CHB":  # Disable this specific SKU. From BK on 10/17/2023
+                    statusP = False
+
+                # Shipping
                 boxHeight = common.formatFloat(sh.cell_value(i, 43))
                 boxWidth = common.formatFloat(sh.cell_value(i, 44))
                 boxDepth = common.formatFloat(sh.cell_value(i, 45))
