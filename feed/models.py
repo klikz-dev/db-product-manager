@@ -140,6 +140,12 @@ class ExquisiteRugs(Feed):
         verbose_name_plural = "Exquisite Rugs"
 
 
+class HubbardtonForge(Feed):
+    class Meta:
+        verbose_name = "Hubbardton Forge"
+        verbose_name_plural = "Hubbardton Forge"
+
+
 class JaipurLiving(Feed):
     class Meta:
         verbose_name = "Jaipur Living"
@@ -290,10 +296,10 @@ class TresTintas(Feed):
         verbose_name_plural = "Tres Tintas"
 
 
-class HubbardtonForge(Feed):
+class WallsRepublic(Feed):
     class Meta:
-        verbose_name = "Hubbardton Forge"
-        verbose_name_plural = "Hubbardton Forge"
+        verbose_name = "Walls Republic"
+        verbose_name_plural = "Walls Republic"
 
 
 class York(Feed):

@@ -29,6 +29,11 @@ markup = {
         "consumer": 2,
         "trade": 1.5,
     },
+    "Hubbardton Forge": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Jaipur Living": {
         "useMAP": False,
         "consumer": 2,
@@ -160,15 +165,15 @@ markup = {
         "consumer": 2,
         "trade": 1.5,
     },
+    "Walls Republic": {
+        "useMAP": True,
+        "consumer": 1.4,
+        "trade": 1.2,
+    },
     "York": {
         "useMAP": True,
         "consumer": 1.5,
         "trade": 1.3,
-    },
-    "Hubbardton Forge": {
-        "useMAP": True,
-        "consumer": 2,
-        "trade": 1.5,
     },
     "Zoffany": {
         "useMAP": False,

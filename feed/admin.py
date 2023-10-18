@@ -6,6 +6,7 @@ from .models import Covington
 from .models import DanaGibson
 from .models import ElaineSmith
 from .models import ExquisiteRugs
+from .models import HubbardtonForge
 from .models import JaipurLiving
 from .models import JamieYoung
 from .models import JFFabrics
@@ -31,7 +32,7 @@ from .models import Stout
 from .models import Surya
 from .models import Tempaper
 from .models import TresTintas
-from .models import HubbardtonForge
+from .models import WallsRepublic
 from .models import York
 from .models import Zoffany
 
@@ -183,6 +184,11 @@ class ExquisiteRugsAdmin(FeedAdmin):
     pass
 
 
+@admin.register(HubbardtonForge)
+class HubbardtonForgeAdmin(FeedAdmin):
+    pass
+
+
 @admin.register(JaipurLiving)
 class JaipurLivingAdmin(FeedAdmin):
     pass
@@ -308,8 +314,8 @@ class TresTintasAdmin(FeedAdmin):
     pass
 
 
-@admin.register(HubbardtonForge)
-class HubbardtonForgeAdmin(FeedAdmin):
+@admin.register(WallsRepublic)
+class WallsRepublicAdmin(FeedAdmin):
     pass
 
 
