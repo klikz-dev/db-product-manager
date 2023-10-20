@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=False)
+            processor.databaseManager.downloadImages(missingOnly=True)
 
         if "hires" in options['functions']:
             processor = Processor()
@@ -115,57 +115,68 @@ class Processor:
         for row in cr:
             available_mpns.append(row[1])
 
+        # Promo Prices
+        prices = {}
+        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-price.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
+                sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
+
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master-new.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(2, sh.nrows):
             # Primary Keys
             mpn = common.formatText(sh.cell_value(i, 0))
             sku = f"JY {mpn}"
-            pattern = common.formatText(sh.cell_value(i, 1))
+            pattern = common.formatText(sh.cell_value(i, 2))
             color = common.formatText(
-                sh.cell_value(i, 21)).replace(",", " /")
+                sh.cell_value(i, 35)).replace(",", " /")
 
             # Categorization
             brand = BRAND
-            type = common.formatText(sh.cell_value(i, 3)).title()
+            type = common.formatText(sh.cell_value(i, 7)).title()
             manufacturer = BRAND
-            collection = str(sh.cell_value(i, 2))
+            collection = str(sh.cell_value(i, 4))
 
             # Main Information
-            description = common.formatText(sh.cell_value(i, 14))
-            disclaimer = common.formatText(sh.cell_value(i, 22))
-            upc = common.formatInt(sh.cell_value(i, 8))
+            description = common.formatText(sh.cell_value(i, 26))
+            disclaimer = common.formatText(sh.cell_value(i, 36))
+            upc = common.formatInt(sh.cell_value(i, 1))
 
-            width = common.formatFloat(sh.cell_value(i, 11))
-            height = common.formatFloat(sh.cell_value(i, 10))
-            depth = common.formatFloat(sh.cell_value(i, 12))
-            dimension = common.formatText(sh.cell_value(i, 13))
+            width = common.formatFloat(sh.cell_value(i, 16))
+            height = common.formatFloat(sh.cell_value(i, 14))
+            depth = common.formatFloat(sh.cell_value(i, 18))
+            dimension = common.formatText(sh.cell_value(i, 19))
 
-            weight = common.formatFloat(sh.cell_value(i, 9))
+            weight = common.formatFloat(sh.cell_value(i, 12))
             specs = [
                 ("Weight", f"{weight} lbs"),
             ]
 
             # Additional Information
-            material = common.formatText(sh.cell_value(i, 20))
-            care = common.formatText(sh.cell_value(i, 23))
-            country = common.formatText(sh.cell_value(i, 33))
+            material = common.formatText(sh.cell_value(i, 34))
+            care = common.formatText(sh.cell_value(i, 37))
+            country = common.formatText(sh.cell_value(i, 46))
 
             features = [str(sh.cell_value(i, id)).strip()
-                        for id in range(15, 19) if sh.cell_value(i, id)]
+                        for id in range(28, 33) if sh.cell_value(i, id)]
             features.extend([str(sh.cell_value(i, id)).strip()
-                            for id in range(24, 32) if sh.cell_value(i, id)])
+                            for id in range(38, 45) if sh.cell_value(i, id)])
 
             # Measurement
             uom = "Per Item"
 
             # Pricing
-            cost = common.formatFloat(sh.cell_value(i, 4))
-            map = common.formatFloat(sh.cell_value(i, 5))
-            msrp = common.formatFloat(sh.cell_value(i, 6))
+            cost = common.formatFloat(sh.cell_value(i, 8))
+            map = common.formatFloat(sh.cell_value(i, 9))
+            msrp = common.formatFloat(sh.cell_value(i, 10))
+
+            if mpn in prices:
+                cost, map = prices[mpn]
 
             # Tagging
             tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
@@ -182,10 +193,10 @@ class Processor:
                 statusP = False
 
             # Shipping
-            shippingWidth = common.formatFloat(sh.cell_value(i, 42))
-            shippingLength = common.formatFloat(sh.cell_value(i, 41))
-            shippingHeight = common.formatFloat(sh.cell_value(i, 43))
-            shippingWeight = common.formatFloat(sh.cell_value(i, 40))
+            shippingWidth = common.formatFloat(sh.cell_value(i, 60))
+            shippingLength = common.formatFloat(sh.cell_value(i, 61))
+            shippingHeight = common.formatFloat(sh.cell_value(i, 63))
+            shippingWeight = common.formatFloat(sh.cell_value(i, 60))
 
             if shippingWidth > 107 or shippingLength > 107 or shippingHeight > 107 or shippingWeight > 40:
                 whiteGlove = True
@@ -197,9 +208,9 @@ class Processor:
 
             # Image
             thumbnail = common.formatText(
-                sh.cell_value(i, 49)).replace("dl=0", "dl=1")
+                sh.cell_value(i, 69)).replace("dl=0", "dl=1")
             roomsets = []
-            for id in range(50, 63):
+            for id in range(70, 83):
                 roomset = common.formatText(
                     sh.cell_value(i, id)).replace("dl=0", "dl=1")
                 if roomset:
@@ -236,6 +247,7 @@ class Processor:
                 'depth': depth,
                 'dimension': dimension,
                 'specs': specs,
+                'features': features,
 
                 'material': material,
                 'care': care,
