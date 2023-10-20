@@ -4,10 +4,10 @@ import os
 import environ
 import pymysql
 import csv
-import pandas
 
 from library import debug, common
 from shopify.models import Customer, Address
+from feed.models import Roomvo
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
 
@@ -47,94 +47,6 @@ class Processor:
         self.con.close()
 
     def roomvo(self):
-        wallpaper_col_availability = []
-        wallpaper_col_sku = []
-        wallpaper_col_name = []
-        wallpaper_col_width = []
-        wallpaper_col_length = []
-        wallpaper_col_height = []
-        wallpaper_col_display = []
-        wallpaper_col_horizontal_repeat = []
-        wallpaper_col_vertical_repeat = []
-        wallpaper_col_image = []
-        wallpaper_col_layout = []
-        wallpaper_col_type = []
-        wallpaper_col_link = []
-        wallpaper_col_category = []
-        wallpaper_col_style = []
-        wallpaper_col_color = []
-        wallpaper_col_subtype = []
-        wallpaper_col_v1 = []
-        wallpaper_col_v2 = []
-        wallpaper_col_v3 = []
-        wallpaper_col_v4 = []
-
-        rug_col_availability = []
-        rug_col_sku = []
-        rug_col_name = []
-        rug_col_width = []
-        rug_col_length = []
-        rug_col_height = []
-        rug_col_display = []
-        rug_col_horizontal_repeat = []
-        rug_col_vertical_repeat = []
-        rug_col_image = []
-        rug_col_layout = []
-        rug_col_type = []
-        rug_col_link = []
-        rug_col_category = []
-        rug_col_style = []
-        rug_col_color = []
-        rug_col_subtype = []
-        rug_col_v1 = []
-        rug_col_v2 = []
-        rug_col_v3 = []
-        rug_col_v4 = []
-
-        wallart_col_availability = []
-        wallart_col_sku = []
-        wallart_col_name = []
-        wallart_col_width = []
-        wallart_col_length = []
-        wallart_col_height = []
-        wallart_col_display = []
-        wallart_col_horizontal_repeat = []
-        wallart_col_vertical_repeat = []
-        wallart_col_image = []
-        wallart_col_layout = []
-        wallart_col_type = []
-        wallart_col_link = []
-        wallart_col_category = []
-        wallart_col_style = []
-        wallart_col_color = []
-        wallart_col_subtype = []
-        wallart_col_v1 = []
-        wallart_col_v2 = []
-        wallart_col_v3 = []
-        wallart_col_v4 = []
-
-        col_availability = []
-        col_sku = []
-        col_name = []
-        col_width = []
-        col_length = []
-        col_height = []
-        col_display = []
-        col_horizontal_repeat = []
-        col_vertical_repeat = []
-        col_image = []
-        col_layout = []
-        col_type = []
-        col_link = []
-        col_category = []
-        col_style = []
-        col_color = []
-        col_subtype = []
-        col_v1 = []
-        col_v2 = []
-        col_v3 = []
-        col_v4 = []
-
         self.csr.execute(f"""
             SELECT P.ProductID, P.SKU, P.Handle, P.Title, P.BodyHTML, P.ProductTypeId, M.Brand, PI.imageURL, T.Name
             FROM ProductImage PI
@@ -146,10 +58,6 @@ class Processor:
         """)
         rows = self.csr.fetchall()
 
-        wallpaperAdded = 0
-        rugAdded = 0
-        wallArtAdded = 0
-
         for row in rows:
             productId = row[0]
             sku = row[1]
@@ -160,10 +68,6 @@ class Processor:
             brand = row[6]
             imageURL = row[7]
             type = row[8]
-
-            # JL Rug images doesn't look good
-            # if brand == "Jaipur Living":
-            #     continue
 
             # Type
             types = [
@@ -349,27 +253,22 @@ class Processor:
             v3 = ""
             v4 = ""
 
-            self.csr.execute(f"""
-                SELECT PV.Name, PV.VariantId, PV.IsDefault
-                FROM ProductVariant PV
-                WHERE PV.ProductId='{productId}'
-            """)
-            rows = self.csr.fetchall()
+            # self.csr.execute(f"""
+            #     SELECT PV.Name, PV.VariantId, PV.IsDefault
+            #     FROM ProductVariant PV
+            #     WHERE PV.ProductId='{productId}'
+            # """)
+            # rows = self.csr.fetchall()
 
-            for row in rows:
-                if row[2] == 1:
-                    v1 = row[1]
-                elif "Trade - " in row[0]:
-                    v2 = row[1]
-                elif "Free Sample - " in row[0]:
-                    v4 = row[1]
-                elif "Sample - " in row[0]:
-                    v3 = row[1]
-
-            # v1 = productId
-            # v2 = productId
-            # v3 = productId
-            # v4 = productId
+            # for row in rows:
+            #     if row[2] == 1:
+            #         v1 = row[1]
+            #     elif "Trade - " in row[0]:
+            #         v2 = row[1]
+            #     elif "Free Sample - " in row[0]:
+            #         v4 = row[1]
+            #     elif "Sample - " in row[0]:
+            #         v3 = row[1]
 
             # Filters
             categories = []
@@ -377,199 +276,70 @@ class Processor:
             colors = []
             subtypes = []
 
-            self.csr.execute(f"""
-                SELECT T.Name, T.Description, T.ParentTagId
-                FROM ProductTag PT
-                LEFT JOIN Tag T ON PT.TagId = T.TagId
-                WHERE PT.SKU='{sku}'
-            """)
-            rows = self.csr.fetchall()
+            # self.csr.execute(f"""
+            #     SELECT T.Name, T.Description, T.ParentTagId
+            #     FROM ProductTag PT
+            #     LEFT JOIN Tag T ON PT.TagId = T.TagId
+            #     WHERE PT.SKU='{sku}'
+            # """)
+            # rows = self.csr.fetchall()
 
-            for row in rows:
-                if row[2] == 0:
-                    continue
+            # for row in rows:
+            #     if row[2] == 0:
+            #         continue
 
-                if row[1] == "Category":
-                    categories.append(row[0])
+            #     if row[1] == "Category":
+            #         categories.append(row[0])
 
-                if row[1] == "Style":
-                    styles.append(row[0])
+            #     if row[1] == "Style":
+            #         styles.append(row[0])
 
-                if row[1] == "Color":
-                    colors.append(row[0])
+            #     if row[1] == "Color":
+            #         colors.append(row[0])
 
-            self.csr.execute(f"""
-                SELECT T.Name, T.ParentTypeId
-                FROM ProductSubtype PT
-                LEFT JOIN Type T ON PT.SubTypeId = T.TypeId
-                WHERE PT.SKU='{sku}'
-            """)
-            rows = self.csr.fetchall()
+            # self.csr.execute(f"""
+            #     SELECT T.Name, T.ParentTypeId
+            #     FROM ProductSubtype PT
+            #     LEFT JOIN Type T ON PT.SubTypeId = T.TypeId
+            #     WHERE PT.SKU='{sku}'
+            # """)
+            # rows = self.csr.fetchall()
 
-            for row in rows:
-                if row[1] != 0:
-                    subtypes.append(row[0])
+            # for row in rows:
+            #     if row[1] != 0:
+            #         subtypes.append(row[0])
 
-            categories = ", ".join(categories)
-            styles = ", ".join(styles)
-            colors = ", ".join(colors)
-            subtypes = ", ".join(subtypes)
+            # categories = ", ".join(categories)
+            # styles = ", ".join(styles)
+            # colors = ", ".join(colors)
+            # subtypes = ", ".join(subtypes)
+
+            Roomvo.objects.create(
+                sku=sku,
+                availability='Yes',
+                name=title,
+                width=x,
+                length=y,
+                thickness=z,
+                dimension_display=sizeDisplay,
+                horizontal_repeat=hr,
+                vertical_repeat=vr,
+                image=imageURL,
+                layout=layout,
+                product_type=type,
+                link=f'https://www.decoratorsbest.com/products/{handle}',
+                filter_category=categories,
+                filter_style=styles,
+                filter_color=colors,
+                filter_subtype=subtypes,
+                cart_id=v1,
+                cart_id_trade=v2,
+                cart_id_sample=v3,
+                cart_id_free_sample=v4,
+            )
 
             debug.debug(
-                PROCESS, 0, f"Wallpaper: {wallpaperAdded}, Area Rug: {rugAdded}, Wall Art: {wallArtAdded} -- SKU: {sku}, Name: {title}")
-
-            # Counting
-            if type == "Wallpaper":
-                wallpaperAdded = wallpaperAdded + 1
-                wallpaper_col_availability.append('Yes')
-                wallpaper_col_sku.append(sku)
-                wallpaper_col_name.append(title)
-                wallpaper_col_width.append(x)
-                wallpaper_col_length.append(y)
-                wallpaper_col_height.append(z)
-                wallpaper_col_display.append(sizeDisplay)
-                wallpaper_col_horizontal_repeat.append(hr)
-                wallpaper_col_vertical_repeat.append(vr)
-                wallpaper_col_image.append(imageURL)
-                wallpaper_col_layout.append(layout)
-                wallpaper_col_type.append(type)
-                wallpaper_col_link.append(
-                    'https://www.decoratorsbest.com/products/{}'.format(handle))
-                wallpaper_col_category.append(categories)
-                wallpaper_col_style.append(styles)
-                wallpaper_col_color.append(colors)
-                wallpaper_col_subtype.append(subtypes)
-                wallpaper_col_v1.append(v1)
-                wallpaper_col_v2.append(v2)
-                wallpaper_col_v3.append(v3)
-                wallpaper_col_v4.append(v4)
-
-            if type == "Area Rug":
-                rugAdded = rugAdded + 1
-                rug_col_availability.append('Yes')
-                rug_col_sku.append(sku)
-                rug_col_name.append(title)
-                rug_col_width.append(x)
-                rug_col_length.append(y)
-                rug_col_height.append(z)
-                rug_col_display.append(sizeDisplay)
-                rug_col_horizontal_repeat.append(hr)
-                rug_col_vertical_repeat.append(vr)
-                rug_col_image.append(imageURL)
-                rug_col_layout.append(layout)
-                rug_col_type.append(type)
-                rug_col_link.append(
-                    'https://www.decoratorsbest.com/products/{}'.format(handle))
-                rug_col_category.append(categories)
-                rug_col_style.append(styles)
-                rug_col_color.append(colors)
-                rug_col_subtype.append(subtypes)
-                rug_col_v1.append(v1)
-                rug_col_v2.append(v2)
-                rug_col_v3.append(v3)
-                rug_col_v4.append(v4)
-
-            if type == "Wall Art":
-                wallArtAdded = wallArtAdded + 1
-                wallart_col_availability.append('Yes')
-                wallart_col_sku.append(sku)
-                wallart_col_name.append(title)
-                wallart_col_width.append(x)
-                wallart_col_length.append(y)
-                wallart_col_height.append(z)
-                wallart_col_display.append(sizeDisplay)
-                wallart_col_horizontal_repeat.append(hr)
-                wallart_col_vertical_repeat.append(vr)
-                wallart_col_image.append(imageURL)
-                wallart_col_layout.append(layout)
-                wallart_col_type.append(type)
-                wallart_col_link.append(
-                    'https://www.decoratorsbest.com/products/{}'.format(handle))
-                wallart_col_category.append(categories)
-                wallart_col_style.append(styles)
-                wallart_col_color.append(colors)
-                wallart_col_subtype.append(subtypes)
-                wallart_col_v1.append(v1)
-                wallart_col_v2.append(v2)
-                wallart_col_v3.append(v3)
-                wallart_col_v4.append(v4)
-
-        col_availability = wallpaper_col_availability + \
-            rug_col_availability + wallart_col_availability
-        col_sku = wallpaper_col_sku + rug_col_sku + wallart_col_sku
-        col_name = wallpaper_col_name + rug_col_name + wallart_col_name
-        col_width = wallpaper_col_width + rug_col_width + wallart_col_width
-        col_length = wallpaper_col_length + rug_col_length + wallart_col_length
-        col_height = wallpaper_col_height + rug_col_height + wallart_col_height
-        col_display = wallpaper_col_display + rug_col_display + wallart_col_display
-        col_horizontal_repeat = wallpaper_col_horizontal_repeat + \
-            rug_col_horizontal_repeat + wallart_col_horizontal_repeat
-        col_vertical_repeat = wallpaper_col_vertical_repeat + \
-            rug_col_vertical_repeat + wallart_col_vertical_repeat
-        col_image = wallpaper_col_image + rug_col_image + wallart_col_image
-        col_layout = wallpaper_col_layout + rug_col_layout + wallart_col_layout
-        col_type = wallpaper_col_type + rug_col_type + wallart_col_type
-        col_link = wallpaper_col_link + rug_col_link + wallart_col_link
-        col_category = wallpaper_col_category + rug_col_category + wallart_col_category
-        col_style = wallpaper_col_style + rug_col_style + wallart_col_style
-        col_color = wallpaper_col_color + rug_col_color + wallart_col_color
-        col_subtype = wallpaper_col_subtype + rug_col_subtype + wallart_col_subtype
-        col_v1 = wallpaper_col_v1 + rug_col_v1 + wallart_col_v1
-        col_v2 = wallpaper_col_v2 + rug_col_v2 + wallart_col_v2
-        col_v3 = wallpaper_col_v3 + rug_col_v3 + wallart_col_v3
-        col_v4 = wallpaper_col_v4 + rug_col_v4 + wallart_col_v4
-
-        data1 = {
-            'Availability': col_availability[0:27999],
-            'SKU': col_sku[0:27999],
-            'Name': col_name[0:27999],
-            'Width': col_width[0:27999],
-            'Length': col_length[0:27999],
-            'Thickness': col_height[0:27999],
-            'Dimension Display': col_display[0:27999],
-            'Horizontal Repeat': col_horizontal_repeat[0:27999],
-            'Vertical Repeat': col_vertical_repeat[0:27999],
-            'Image File Path': col_image[0:27999],
-            'Tile / Plank Layout': col_layout[0:27999],
-            'Product Subtype': col_type[0:27999],
-            'Link': col_link[0:27999],
-            'Category (Filter)': col_category[0:27999],
-            'Style (Filter)': col_style[0:27999],
-            'Color (Filter)': col_color[0:27999],
-            'Subtype (Filter)': col_subtype[0:27999],
-            'Add to Cart': col_v1[0:27999],
-            'Add to Cart (Trade)': col_v2[0:27999],
-            'Order Sample': col_v3[0:27999],
-            'Order Sample (Trade)': col_v4[0:27999],
-        }
-        df1 = pandas.DataFrame(data1)
-        df1.to_excel(f"{FILEDIR}/roomvo-1.xlsx", index=False)
-
-        data2 = {
-            'Availability': col_availability[28000:],
-            'SKU': col_sku[28000:],
-            'Name': col_name[28000:],
-            'Width': col_width[28000:],
-            'Length': col_length[28000:],
-            'Thickness': col_height[28000:],
-            'Dimension Display': col_display[28000:],
-            'Horizontal Repeat': col_horizontal_repeat[28000:],
-            'Vertical Repeat': col_vertical_repeat[28000:],
-            'Image File Path': col_image[28000:],
-            'Tile / Plank Layout': col_layout[28000:],
-            'Product Subtype': col_type[28000:],
-            'Link': col_link[28000:],
-            'Category (Filter)': col_category[28000:],
-            'Style (Filter)': col_style[28000:],
-            'Color (Filter)': col_color[28000:],
-            'Subtype (Filter)': col_subtype[28000:],
-            'Add to Cart': col_v1[28000:],
-            'Add to Cart (Trade)': col_v2[28000:],
-            'Order Sample': col_v3[28000:],
-            'Order Sample (Trade)': col_v4[28000:],
-        }
-        df2 = pandas.DataFrame(data2)
-        df2.to_excel(f"{FILEDIR}/roomvo-2.xlsx", index=False)
+                PROCESS, 0, f"SKU: {sku}, Name: {title}")
 
     def customers(self):
         with open(FILEDIR + 'customers.csv', 'w', newline='') as customersFile:

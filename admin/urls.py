@@ -4,6 +4,7 @@ from rest_framework import routers
 from misc.views import ConfigViewSet
 from shopify.views import AddressViewSet, CustomerViewSet, ImageViewSet, LineItemViewSet, OrderViewSet, PORecordViewSet, ProductViewSet, TrakcingViewSet, VariantViewSet
 from mysql.views import InventoryViewSet, ProductTagViewSet
+from feed.views import RoomvoViewSet
 
 from . import views
 
@@ -20,6 +21,7 @@ router.register(r'pos', PORecordViewSet)
 router.register(r'trackings', TrakcingViewSet)
 router.register(r'inventories', InventoryViewSet)
 router.register(r'tags', ProductTagViewSet)
+router.register(r'roomvo', RoomvoViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),

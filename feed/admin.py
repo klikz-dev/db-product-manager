@@ -35,6 +35,7 @@ from .models import TresTintas
 from .models import WallsRepublic
 from .models import York
 from .models import Zoffany
+from .models import Roomvo
 
 
 class FeedAdmin(admin.ModelAdmin):
@@ -327,3 +328,63 @@ class YorkAdmin(FeedAdmin):
 @admin.register(Zoffany)
 class ZoffanyAdmin(FeedAdmin):
     pass
+
+
+@admin.register(Roomvo)
+class RoomvoAdmin(admin.ModelAdmin):
+    fields = [
+        'sku',
+        'availability',
+        'name',
+        'width',
+        'length',
+        'thickness',
+        'dimension_display',
+        'horizontal_repeat',
+        'vertical_repeat',
+        'image',
+        'layout',
+        'product_type',
+        'link',
+        'filter_category',
+        'filter_style',
+        'filter_color',
+        'filter_subtype',
+        'cart_id',
+        'cart_id_trade',
+        'cart_id_sample',
+        'cart_id_free_sample'
+    ]
+
+    list_display = (
+        'sku',
+        'name',
+        'width',
+        'length',
+        'thickness',
+        'dimension_display',
+        'product_type',
+        'link'
+    )
+
+    list_filter = [
+        'availability',
+        'product_type'
+    ]
+
+    search_fields = [
+        'sku',
+        'name',
+        'dimension_display',
+        'layout',
+        'product_type',
+        'link',
+        'filter_category',
+        'filter_style',
+        'filter_color',
+        'filter_subtype',
+        'cart_id',
+        'cart_id_trade',
+        'cart_id_sample',
+        'cart_id_free_sample'
+    ]

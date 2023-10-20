@@ -312,3 +312,51 @@ class Zoffany(Feed):
     class Meta:
         verbose_name = "Zoffany"
         verbose_name_plural = "Zoffany"
+
+
+class Roomvo(models.Model):
+    sku = models.CharField(max_length=200, primary_key=True)
+    availability = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    name = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    width = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    length = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    thickness = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    dimension_display = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    horizontal_repeat = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    vertical_repeat = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    image = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    layout = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    product_type = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    link = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    filter_category = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    filter_style = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    filter_color = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    filter_subtype = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    cart_id = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    cart_id_trade = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    cart_id_sample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    cart_id_free_sample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Roomvo Feed"
+        verbose_name_plural = "Roomvo Feed"
