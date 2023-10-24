@@ -93,12 +93,12 @@ markup = {
         "consumer": 2,
         "trade": 1.5,
     },
-    "Phillips": {
+    "Peninsula Home": {
         "useMAP": True,
-        "consumer": 2,
+        "consumer": 2.3,
         "trade": 1.5,
     },
-    "Peninsula Home": {
+    "Phillips": {
         "useMAP": True,
         "consumer": 2,
         "trade": 1.5,

@@ -26,8 +26,6 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadFileFromSFTP(
-                src="/peninsulahome/datasheets/peninsulahome-master.xlsx", dst=f"{FILEDIR}/peninsulahome-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
             processor.databaseManager.validateFeed()
@@ -59,24 +57,14 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "white-glove" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="whiteGlove", tag="White Glove", logic=True)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
-
-        if "roomset" in options['functions']:
-            processor = Processor()
-            processor.roomset()
-
-        if "inventory" in options['functions']:
-            while True:
-                with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="/peninsulahome/datasheets/peninsulahome-master.xlsx", dst=f"{FILEDIR}/peninsulahome-master.xlsx", fileSrc=True, delete=False)
-                    processor.inventory()
-
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
 
 
 class Processor:
@@ -104,83 +92,84 @@ class Processor:
         wb = xlrd.open_workbook(f"{FILEDIR}/peninsulahome-master.xlsx")
         sh = wb.sheet_by_index(0)
 
-        for i in range(1, sh.nrows):
+        for i in range(2, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 3))
-                sku = f"TP {mpn}"
+                mpn = common.formatText(sh.cell_value(i, 0))
+                sku = f"PH {mpn}"
 
-                pattern = common.formatText(sh.cell_value(i, 4))
-                color = common.formatText(sh.cell_value(i, 5))
+                name = common.formatText(
+                    sh.cell_value(i, 1)).replace(" ,", ",")
 
-                name = common.formatText(sh.cell_value(i, 8))
+                if "," in name:
+                    pattern = name.split(",")[0].strip()
+                    color = name.split(",")[1].strip()
+                elif sh.cell_value(i, 13):
+                    pattern = name
+                    color = common.formatText(sh.cell_value(i, 13))
+                else:
+                    pattern = name
+                    color = name
 
                 # Categorization
                 brand = BRAND
-                type = common.formatText(sh.cell_value(i, 0))
+                type = "Furniture"
                 manufacturer = brand
                 collection = common.formatText(sh.cell_value(i, 2))
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 9))
-                width = common.formatFloat(sh.cell_value(i, 17))
-                length = common.formatFloat(sh.cell_value(i, 18)) * 12
-                coverage = common.formatText(sh.cell_value(i, 21))
+                description = common.formatText(sh.cell_value(i, 12))
+                width = common.formatFloat(sh.cell_value(i, 9))
+                height = common.formatFloat(sh.cell_value(i, 8))
+                depth = common.formatFloat(sh.cell_value(i, 10))
+                dimension = common.formatText(sh.cell_value(i, 11))
 
+                weight = common.formatFloat(sh.cell_value(i, 7))
                 specs = [
-                    ("Width", f"{round(width / 36, 2)} yd ({width} in)"),
-                    ("Length", f"{round(length / 36, 2)} yd ({length} in)"),
-                    ("Coverage", coverage),
+                    ("Weight", f"{weight} lbs"),
                 ]
 
-                if type == "Rug":
-                    specs = []
-                    dimension = coverage
-                else:
-                    width = 0
-                    length = 0
-                    dimension = ""
-
                 # Additional Information
-                yards = common.formatInt(sh.cell_value(i, 14))
-                weight = common.formatFloat(sh.cell_value(i, 22))
-                match = common.formatText(sh.cell_value(i, 25))
-                material = common.formatText(sh.cell_value(i, 27))
-                care = common.formatText(sh.cell_value(i, 32))
-                country = common.formatText(sh.cell_value(i, 33))
+                material = common.formatText(sh.cell_value(i, 13))
+                country = common.formatText(sh.cell_value(i, 15))
                 features = []
-                for id in range(28, 30):
-                    feature = common.formatText(sh.cell_value(i, id))
-                    if feature:
-                        features.append(feature)
+                if sh.cell_value(i, 14):
+                    features.append(
+                        f"Fabric: {common.formatText(sh.cell_value(i, 14))}")
 
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 10))
-                map = common.formatFloat(sh.cell_value(i, 11))
+                cost = common.formatFloat(sh.cell_value(i, 3))
+                map = common.formatFloat(sh.cell_value(i, 4))
 
                 # Measurement
-                uom = f"Per {common.formatText(sh.cell_value(i, 13))}"
+                uom = f"Per Item"
 
                 # Tagging
                 colors = color
-                tags = f"{material}, {match}, {sh.cell_value(i, 28)}, {sh.cell_value(i, 29)}, {collection}, {pattern}, {description}"
+                tags = f"{material}, {name}, {description}"
 
                 # Image
-                thumbnail = sh.cell_value(i, 34).replace("dl=0", "dl=1")
+                thumbnail = sh.cell_value(i, 25).replace("dl=0", "dl=1")
 
                 roomsets = []
-                for id in range(35, 39):
+                for id in range(26, 32):
                     roomset = sh.cell_value(i, id).replace("dl=0", "dl=1")
                     if roomset != "":
                         roomsets.append(roomset)
 
                 # Status
                 statusP = True
+                statusS = False
 
-                if type == "Wallpaper":
-                    statusS = True
+                # Shipping
+                shippingHeight = common.formatFloat(sh.cell_value(i, 20))
+                shippingWidth = common.formatFloat(sh.cell_value(i, 21))
+                shippingDepth = common.formatFloat(sh.cell_value(i, 22))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 19))
+                if shippingWidth > 107 or shippingHeight > 107 or shippingDepth > 107 or shippingWeight > 40:
+                    whiteGlove = True
                 else:
-                    statusS = False
+                    whiteGlove = False
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -199,18 +188,17 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
-                'specs': specs,
                 'width': width,
-                'length': length,
+                'height': height,
+                'depth': depth,
                 'dimension': dimension,
+                'specs': specs,
 
                 'material': material,
-                'yards': yards,
-                'weight': weight,
                 'country': country,
-                'match': match,
-                'care': care,
                 'features': features,
+
+                'weight': shippingWeight,
 
                 'cost': cost,
                 'map': map,
@@ -224,96 +212,10 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+
+                'whiteGlove': whiteGlove
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
-
-    def roomset(self):
-        mpn_map = {
-            "BB14034": "BB4034",
-            "BB14035": "BB4035",
-            "BR14137": "BR4137",
-            "BR14138": "BR4138",
-            "BU10633": "BU663",
-            "BU10664": "BU664",
-            "DI534": "DI10534",
-            "DI543": "DI10543",
-            "FE4023": "FE411",
-            "FN14164": "FN4164",
-            "FS14159": "FS4159",
-            "FS14160": "FS4160",
-            "GM10564": "GM564",
-            "GM10565": "GM565",
-            "GR10505": "GR505",
-            "GR10533": "GR533",
-            "GR10589": "GR589",
-            "HG5225": "HG15225",
-            "HG5226": "HG15226",
-            "HG5227": "HG15227",
-            "HG5228": "HG15228",
-            "HG5229": "HG15229",
-            "HG5230": "HG15230",
-            "HG5231": "HG15231",
-            "HG5232": "HG15232",
-            "IN10412": "IN412",
-            "IN14024": "IN4024",
-            "MA10083": "MA083",
-            "MP14163": "MP4163",
-            "MS10579": "MS579",
-            "PE10042": "PE042",
-            "PE10508": "PE508",
-            "PE633": "PE10633",
-            "QE14161": "QE4161",
-            "QE14162": "QE4162",
-            "TR562": "TR529",
-        }
-
-        products = PeninsulaHome.objects.all()
-        images = os.listdir(f"{FILEDIR}/images/peninsulahome/")
-
-        for product in products:
-            mpn = product.mpn
-            productId = product.productId
-
-            if mpn in mpn_map and mpn_map[mpn]:
-                mpn = mpn_map[mpn]
-
-            roomsets = []
-            for image in images:
-                if mpn.lower() in image.lower() and image.lower() not in product.thumbnail.lower():
-                    roomsets.append(image)
-
-            for index, roomset in enumerate(roomsets):
-                copyfile(f"{FILEDIR}/images/peninsulahome/{roomset}",
-                         f"{FILEDIR}/../../../images/roomset/{productId}_{index + 2}.jpg")
-
-                debug.debug(BRAND, 0, "Roomset Image {}_{}.jpg".format(
-                    productId, index + 2))
-
-    def inventory(self):
-        stocks = []
-
-        wb = xlrd.open_workbook(f"{FILEDIR}/peninsulahome-master.xlsx")
-        sh = wb.sheet_by_index(0)
-
-        for i in range(1, sh.nrows):
-            try:
-                # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 3))
-                sku = f"TP {mpn}"
-
-                stockP = common.formatInt(sh.cell_value(i, 6))
-
-                stock = {
-                    'sku': sku,
-                    'quantity': stockP,
-                    'note': "",
-                }
-                stocks.append(stock)
-            except Exception as e:
-                print(e)
-                continue
-
-        self.databaseManager.updateStock(stocks=stocks, stockType=1)
