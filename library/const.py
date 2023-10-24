@@ -89,11 +89,16 @@ markup = {
         "trade": 1.5,
     },
     "NOIR": {
-        "useMAP": False,
+        "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
     },
     "Phillips": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
+    "Peninsula Home": {
         "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
@@ -261,6 +266,12 @@ sftp = {
         "port": 22,
         "user": "noir",
         "pass": "Noir123!",
+    },
+    "Peninsula Home": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "peninsulahome",
+        "pass": "PeninsulaHome123!",
     },
     "Poppy": {
         "host": "decoratorsbestam.com",

@@ -39,17 +39,17 @@ class Command(BaseCommand):
 
         if "add" in options['functions']:
             processor = Processor()
-            processor.databaseManager.createProducts(formatPrice=True)
+            processor.databaseManager.createProducts(formatPrice=False)
 
         if "update" in options['functions']:
             processor = Processor()
             products = NOIR.objects.all()
             processor.databaseManager.updateProducts(
-                products=products, formatPrice=True)
+                products=products, formatPrice=False)
 
         if "price" in options['functions']:
             processor = Processor()
-            processor.databaseManager.updatePrices(formatPrice=True)
+            processor.databaseManager.updatePrices(formatPrice=False)
 
         if "tag" in options['functions']:
             processor = Processor()

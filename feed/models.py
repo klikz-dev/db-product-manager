@@ -212,6 +212,12 @@ class NOIR(Feed):
         verbose_name_plural = "NOIR"
 
 
+class PeninsulaHome(Feed):
+    class Meta:
+        verbose_name = "Peninsula Home"
+        verbose_name_plural = "Peninsula Home"
+
+
 class PhillipJeffries(Feed):
     class Meta:
         verbose_name = "Phillip Jeffries"
