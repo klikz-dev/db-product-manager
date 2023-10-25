@@ -83,7 +83,7 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove")
 
-        if "quickship" in options['functions']:
+        if "quick-ship" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
                 key="quickShip", tag="Quick Ship")

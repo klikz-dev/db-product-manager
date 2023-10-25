@@ -62,9 +62,23 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
+        if "quick-ship" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship")
+
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
+
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -171,6 +185,12 @@ class Processor:
                 else:
                     whiteGlove = False
 
+                leadtime = common.formatText(sh.cell_value(i, 17))
+                if "days" in leadtime.lower() or "hours" in leadtime.lower() or "1 week" == leadtime.lower():
+                    quickShip = True
+                else:
+                    quickShip = False
+
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
                 continue
@@ -213,9 +233,26 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
 
-                'whiteGlove': whiteGlove
+                'whiteGlove': whiteGlove,
+                'quickShip': quickShip,
+
+                'stockNote': leadtime.title()
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
+
+    def inventory(self):
+        stocks = []
+
+        products = PeninsulaHome.objects.all()
+        for product in products:
+            stock = {
+                'sku': product.sku,
+                'quantity': 5,
+                'note': product.stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=3)
