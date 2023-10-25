@@ -100,8 +100,6 @@ class Processor:
                 LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
             WHERE PI.ImageIndex = 1
                 AND M.Published=1
-                AND M.Brand NOT IN ("Scalamandre")
-                AND M.Name NOT IN ("Aviva Stanoff Wallpaper", "Missoni Wallpaper", "Patina Vie Wallpaper", "Kravet Pillow")
                 AND P.Published = 1
                 AND P.ManufacturerPartNumber <> ''
                 AND P.Name NOT LIKE '%Borders'
