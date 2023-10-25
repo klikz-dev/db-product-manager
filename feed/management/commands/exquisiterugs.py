@@ -71,6 +71,7 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
+            processor.hires()
 
         if "inventory" in options['functions']:
             while True:
@@ -290,3 +291,23 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        csr = self.con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+        csr.close()
+
+        products = ExquisiteRugs.objects.all()
+        for product in products:
+            if product.productId in hasImage:
+                continue
+
+            self.databaseManager.downloadFileFromSFTP(
+                src=f"/exquisiterugs/images/{product.thumbnail}",
+                dst=f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg",
+                fileSrc=True,
+                delete=False
+            )
