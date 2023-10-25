@@ -69,12 +69,17 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
                         src="/noir/inventory/NOIR_INV.csv", dst=f"{FILEDIR}/noir-inventory.csv", fileSrc=True, delete=False)
+
                     processor.inventory()
+
+                    processor.quickShip()
+                    processor.databaseManager.customTags(
+                        key="quickShip", tag="Quick Ship")
 
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
@@ -279,3 +284,25 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def quickShip(self):
+        f = open(f"{FILEDIR}/noir-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+
+        for row in cr:
+            if row[0] == "Item #":
+                continue
+
+            mpn = common.formatText(row[0])
+            try:
+                product = NOIR.objects.get(mpn=mpn)
+            except NOIR.DoesNotExist:
+                continue
+
+            stockP = common.formatInt(row[2])
+            if stockP > 0:
+                product.quickShip = True
+            else:
+                product.quickShip = False
+
+            product.save()
