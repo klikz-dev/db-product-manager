@@ -220,7 +220,11 @@ class Processor:
                         roomsets.append(roomset)
 
                 # Status
-                statusP = True
+                if sh.cell_value(i, 19) == "Swatches":
+                    statusP = False
+                else:
+                    statusP = True
+
                 statusS = False
 
                 # Stock
