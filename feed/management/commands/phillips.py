@@ -31,6 +31,10 @@ class Command(BaseCommand):
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
+
         if "sync" in options['functions']:
             processor = Processor()
             processor.databaseManager.statusSync(fullSync=False)
@@ -62,6 +66,11 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
+
+        if "quick-ship" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship")
 
         if "order" in options['functions']:
             processor = Processor()
@@ -254,6 +263,11 @@ class Processor:
                         else:
                             whiteGlove = False
 
+                        if row['settings']['stocking'] == True and row['qtyavailable'] > 0:
+                            quickShip = True
+                        else:
+                            quickShip = False
+
                         # Assets
                         thumbnail = row['assets']['images']['main']
                         roomsets = []
@@ -304,6 +318,7 @@ class Processor:
                         'statusP': statusP,
                         'statusS': statusS,
                         'whiteGlove': whiteGlove,
+                        'quickShip': quickShip,
 
                         'thumbnail': thumbnail,
                         'roomsets': roomsets,
