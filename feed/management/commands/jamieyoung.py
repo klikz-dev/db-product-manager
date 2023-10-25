@@ -278,32 +278,6 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def inventory(self):
-        stocks = []
-
-        f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
-        for row in cr:
-            try:
-                mpn = row[1]
-                quantity = int(row[3])
-
-                product = JamieYoung.objects.get(mpn=mpn)
-            except JamieYoung.DoesNotExist:
-                continue
-            except Exception as e:
-                print(str(e))
-                continue
-
-            stock = {
-                'sku': product.sku,
-                'quantity': quantity,
-                'note': product.stockNote
-            }
-            stocks.append(stock)
-
-        self.databaseManager.updateStock(stocks=stocks, stockType=1)
-
     def hires(self):
         images = os.listdir(f"{FILEDIR}/images/jamie-young")
 
@@ -325,3 +299,29 @@ class Processor:
                 BRAND, 0, f"Copied {image} to {product.productId}_20.png")
 
             os.remove(f"{FILEDIR}/images/jamie-young/{image}")
+
+    def inventory(self):
+        stocks = []
+
+        f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+        for row in cr:
+            try:
+                mpn = row[1]
+                quantity = int(row[2])
+
+                product = JamieYoung.objects.get(mpn=mpn)
+            except JamieYoung.DoesNotExist:
+                continue
+            except Exception as e:
+                print(str(e))
+                continue
+
+            stock = {
+                'sku': product.sku,
+                'quantity': quantity,
+                'note': product.stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
