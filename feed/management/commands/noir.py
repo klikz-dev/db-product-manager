@@ -73,11 +73,16 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
+                        src="/noir/NOIR_MASTER.xlsx", dst=f"{FILEDIR}/noir-master.xlsx", fileSrc=True, delete=False)
+                    processor.databaseManager.downloadFileFromSFTP(
                         src="/noir/inventory/NOIR_INV.csv", dst=f"{FILEDIR}/noir-inventory.csv", fileSrc=True, delete=False)
+
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
 
                     processor.inventory()
 
-                    processor.quickShip()
                     processor.databaseManager.customTags(
                         key="quickShip", tag="Quick Ship")
 
@@ -105,12 +110,19 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
-        # Get Product Feed
-        products = []
+        # Stocks
+        stocks = {}
+        f = open(f"{FILEDIR}/noir-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+        for row in cr:
+            mpn = common.formatText(row[0])
+            stockP = common.formatInt(row[2])
+            stocks[mpn] = stockP
 
+        # Product Feed
+        products = []
         wb = xlrd.open_workbook(f"{FILEDIR}/noir-master.xlsx")
         sh = wb.sheet_by_index(0)
-
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
@@ -180,6 +192,13 @@ class Processor:
                 if mpn == "AE-37CHB":  # Disable this specific SKU. From BK on 10/17/2023
                     statusP = False
 
+                # Stock
+                if mpn in stocks:
+                    stockP = stocks[mpn]
+                else:
+                    stockP = 0
+                stockNote = f"{common.formatInt(sh.cell_value(i, 38))} days"
+
                 # Shipping
                 boxHeight = common.formatFloat(sh.cell_value(i, 43))
                 boxWidth = common.formatFloat(sh.cell_value(i, 44))
@@ -190,8 +209,10 @@ class Processor:
                 else:
                     whiteGlove = False
 
-                # Stock
-                stockNote = f"{common.formatInt(sh.cell_value(i, 38))} days"
+                if stockP > 0:
+                    quickShip = True
+                else:
+                    quickShip = False
 
                 # Type Mapping
                 type_map = {
@@ -238,6 +259,8 @@ class Processor:
                 'country': country,
                 'upc': upc,
 
+                'weight': boxWeight,
+
                 'cost': cost,
                 'map': map,
                 'uom': uom,
@@ -248,13 +271,13 @@ class Processor:
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
 
+                'stockP': stockP,
+                'stockNote': stockNote,
+
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
-
-                'weight': boxWeight,
-
-                'stockNote': stockNote,
+                'quickShip': quickShip,
             }
             products.append(product)
 
@@ -264,45 +287,13 @@ class Processor:
     def inventory(self):
         stocks = []
 
-        f = open(f"{FILEDIR}/noir-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
-
-        for row in cr:
-            if row[0] == "Item #":
-                continue
-
-            mpn = common.formatText(row[0])
-            sku = f"NOIR {mpn}"
-
-            stockP = common.formatInt(row[2])
-
+        products = NOIR.objects.all()
+        for product in products:
             stock = {
-                'sku': sku,
-                'quantity': stockP,
-                'note': "",
+                'sku': product.sku,
+                'quantity': product.stockP,
+                'note': product.stockNote
             }
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
-
-    def quickShip(self):
-        f = open(f"{FILEDIR}/noir-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
-
-        for row in cr:
-            if row[0] == "Item #":
-                continue
-
-            mpn = common.formatText(row[0])
-            try:
-                product = NOIR.objects.get(mpn=mpn)
-            except NOIR.DoesNotExist:
-                continue
-
-            stockP = common.formatInt(row[2])
-            if stockP > 0:
-                product.quickShip = True
-            else:
-                product.quickShip = False
-
-            product.save()

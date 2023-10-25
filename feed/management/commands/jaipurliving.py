@@ -78,12 +78,22 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
                 with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx", fileSrc=True, delete=False)
                     processor.databaseManager.downloadFileFromFTP(
                         src="Jaipur inventory feed.csv", dst=f"{FILEDIR}/jaipur-living-inventory.csv")
+
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
+
                     processor.inventory()
+
+                    processor.databaseManager.customTags(
+                        key="quickShip", tag="Quick Ship")
 
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
@@ -108,8 +118,18 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
-        products = []
+        # Stocks
+        stocks = {}
+        f = open(f"{FILEDIR}/jaipur-living-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            mpn = common.formatText(row[1])
+            stockP = common.formatInt(row[5])
+            stockNote = common.formatText(row[6])
+            stocks[mpn] = (stockP, stockNote)
 
+        # Feed
+        products = []
         wb = xlrd.open_workbook(f"{FILEDIR}/jaipur-living-master.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
@@ -203,6 +223,12 @@ class Processor:
                 statusP = True
                 statusS = False
 
+                # Stock
+                if mpn in stocks:
+                    stockP, stockNote = stocks[mpn]
+                else:
+                    stockP, stockNote = (0, "")
+
                 # Shipping
                 shippingWidth = common.formatFloat(sh.cell_value(i, 86))
                 shippingLength = common.formatFloat(sh.cell_value(i, 85))
@@ -213,6 +239,11 @@ class Processor:
                     whiteGlove = True
                 else:
                     whiteGlove = False
+
+                if stockP > 0:
+                    quickShip = True
+                else:
+                    quickShip = False
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -256,35 +287,19 @@ class Processor:
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
 
+                'stockP': stockP,
+                'stockNote': stockNote,
+
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
+                'quickShip': quickShip
 
             }
             products.append(product)
 
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
-
-    def inventory(self):
-        stocks = []
-
-        f = open(f"{FILEDIR}/jaipur-living-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            mpn = common.formatText(row[1])
-            sku = f"JL {mpn}"
-
-            stockP = common.formatInt(row[5])
-
-            stock = {
-                'sku': sku,
-                'quantity': stockP,
-                'note': ""
-            }
-            stocks.append(stock)
-
-        self.databaseManager.updateStock(stocks=stocks, stockType=1)
 
     def hires(self):
         con = self.con
@@ -305,3 +320,17 @@ class Processor:
 
             common.hiresdownload(str(product.thumbnail).strip().replace(
                 " ", "%20"), "{}_20.jpg".format(product.productId))
+
+    def inventory(self):
+        stocks = []
+
+        products = JaipurLiving.objects.all()
+        for product in products:
+            stock = {
+                'sku': product.sku,
+                'quantity': product.stockP,
+                'note': product.stockNote
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
