@@ -266,6 +266,14 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     NOIRSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    PeninsulaHomeOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PeninsulaHomeSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    WallsRepublicOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    WallsRepublicSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     PhillipJeffriesOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     PhillipJeffriesSample = models.CharField(
