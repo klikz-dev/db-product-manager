@@ -35,7 +35,7 @@ markup = {
         "trade": 1.5,
     },
     "Jaipur Living": {
-        "useMAP": False,
+        "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
     },
