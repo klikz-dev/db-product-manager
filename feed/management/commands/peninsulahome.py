@@ -71,9 +71,13 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
                 with Processor() as processor:
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
+
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -99,6 +103,21 @@ class Processor:
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
+        # Stocks & discontinued
+        stocks = {}
+        wb = xlrd.open_workbook(f"{FILEDIR}/peninsulahome-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 0))
+            stockP = common.formatFloat(sh.cell_value(i, 1))
+            stocks[mpn] = stockP
+
+        discontinuedMPNs = []
+        sh = wb.sheet_by_index(1)
+        for i in range(1, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 0))
+            discontinuedMPNs.append(mpn)
 
         # Get Product Feed
         products = []
@@ -172,7 +191,10 @@ class Processor:
                         roomsets.append(roomset)
 
                 # Status
-                statusP = True
+                if mpn in discontinuedMPNs:
+                    statusP = False
+                else:
+                    statusP = True
                 statusS = False
 
                 # Shipping
@@ -190,6 +212,12 @@ class Processor:
                     quickShip = True
                 else:
                     quickShip = False
+
+                # Stock
+                if mpn in stocks:
+                    stockP = stocks[mpn]
+                else:
+                    stockP = 0
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -236,6 +264,7 @@ class Processor:
                 'whiteGlove': whiteGlove,
                 'quickShip': quickShip,
 
+                'stockP': stockP,
                 'stockNote': leadtime.title()
             }
             products.append(product)
@@ -250,9 +279,9 @@ class Processor:
         for product in products:
             stock = {
                 'sku': product.sku,
-                'quantity': 5,
+                'quantity': product.stockP,
                 'note': product.stockNote
             }
             stocks.append(stock)
 
-        self.databaseManager.updateStock(stocks=stocks, stockType=3)
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
