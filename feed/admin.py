@@ -142,6 +142,7 @@ class FeedAdmin(admin.ModelAdmin):
         'statusS',
         'whiteGlove',
         'quickShip',
+        'bestSeller',
         'collection',
         'size'
     ]

@@ -69,6 +69,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "best-seller" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="bestSeller", tag="Best Selling")
+
         if "white-glove" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -122,6 +127,47 @@ class Processor:
         for i in range(1, sh.nrows):
             prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
                 sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
+
+        # Best Selling
+        bestSellingPatterns = [
+            "Rectangle Audrey",
+            "Daybreak",
+            "Chester Round Side Table",
+            "Coco Pedestal",
+            "Masonry",
+            "Landslide",
+            "Vapor",
+            "Capital Rectangle",
+            "Audrey Beaded",
+            "Riviera Framed",
+            "Maldives Framed",
+            "Organic Round",
+            "Watercolor",
+            "Gilbert",
+            "Serai",
+            "Vapor Vase",
+            "Kaya",
+            "Agate Slice",
+            "Evergreen Rectangle",
+            "Lagoon",
+            "Basketweave",
+            "Kain Console",
+            "Arch",
+            "Mortar",
+            "Willow",
+            "Studio",
+            "Flowering Lotus",
+            "Oceane Gourd",
+            "Batik",
+            "Napa",
+            "Barley Twist",
+            "Amphora",
+            "Farmhouse Bench",
+            "Concentric",
+            "Mirage Abstract",
+            "Kain Side Table",
+            "Vapor Single",
+        ]
 
         # Get Product Feed
         products = []
@@ -228,6 +274,12 @@ class Processor:
                 "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
             ##############
 
+            # Best Seller
+            if pattern in bestSellingPatterns:
+                bestSeller = True
+            else:
+                bestSeller = False
+
             product = {
                 'mpn': mpn,
                 'sku': sku,
@@ -264,6 +316,8 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'bestSeller': bestSeller,
+
                 'whiteGlove': whiteGlove,
 
                 'weight': shippingWeight,
