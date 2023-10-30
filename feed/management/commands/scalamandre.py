@@ -219,6 +219,9 @@ class Processor:
                 if not stockNote and type == "Pillow":
                     stockNote = "2-3 Weeks (Custom Order)"
 
+                if type == "Pillow" and stockP == 0:
+                    stockP = 5
+
                 # Status
                 statusP = True
                 if row.get('DISCONTINUED', False) != False:
