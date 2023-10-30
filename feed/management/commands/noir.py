@@ -65,6 +65,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
+        if "best-seller" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="bestSeller", tag="Best Selling")
+
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=False)
@@ -109,6 +114,76 @@ class Processor:
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
+        # Best Sellers
+        bestSellers = [
+            'GCHA246T',
+            'GTAB174',
+            'GCHA278T',
+            'GTAB245HB',
+            'GCHA257HB',
+            'AR-162FC',
+            'GTAB235WH',
+            'GTAB235HB',
+            'GTAB245WH',
+            'GCON231WAW-3',
+            'AE-122T-S',
+            'GCHA295T',
+            'SOF202T',
+            'AB-1BR',
+            'AE-129CHB',
+            'GCHA277B',
+            'GCHA278B',
+            'GTAB243WH',
+            'GTAB246HB',
+            'GTAB717WAW-S',
+            'GCON231WAW-2',
+            'GTAB830P',
+            'GCON239-2P',
+            'GCON241WH',
+            'GTAB928WH',
+            'AB-128BR',
+            'GDRE180WAW',
+            'GCHA283T',
+            'GSTOOL118MBS',
+            'GTAB303MTB',
+            'GCON332DM',
+            'GCON287HB',
+            'GCHA220T',
+            'AF-32',
+            'GDRE207CH',
+            'AB-1A-BR',
+            'GTAB641',
+            'AE-17CHBS',
+            'AE-13CHB',
+            'GCHA213T',
+            'GCON241P',
+            'GDRE164P',
+            'GTAB928HB',
+            'GTAB251WH',
+            'GDES174P',
+            'GTAB540WAW',
+            'GCHA126HB',
+            'GCON190',
+            'GTAB690MTB',
+            'GTAB302MTB',
+            'GTAB335WAW',
+            'GTAB885DM',
+            'GSTOOL146MB-S',
+            'GTAB820',
+            'GDES115HB',
+            'GBEN111GW',
+            'GTAB679MB-L',
+            'GTAB1042CB',
+            'GTAB871WAW',
+            'GTAB382DW',
+            'GSTOOL111HBS',
+            'LAMP720AMTB',
+            'GCON301WAW',
+            'GTAB842MB',
+            'AE-12CHB',
+            'GTAB1079DM'
+        ]
 
         # Stocks
         stocks = {}
@@ -191,6 +266,11 @@ class Processor:
 
                 if mpn == "AE-37CHB":  # Disable this specific SKU. From BK on 10/17/2023
                     statusP = False
+
+                if mpn in bestSellers:
+                    bestSeller = True
+                else:
+                    bestSeller = False
 
                 # Stock
                 if mpn in stocks:
@@ -278,6 +358,7 @@ class Processor:
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
                 'quickShip': quickShip,
+                'bestSeller': bestSeller,
             }
             products.append(product)
 

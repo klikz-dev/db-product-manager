@@ -8,6 +8,7 @@ import requests
 import environ
 import json
 import time
+from bs4 import BeautifulSoup
 
 
 from library import debug, shopify, common
@@ -74,6 +75,10 @@ class Command(BaseCommand):
         if "unpublishBrand" in options['functions']:
             processor = Processor()
             processor.unpublishBrand()
+
+        if "pageScrap" in options['functions']:
+            processor = Processor()
+            processor.pageScrap()
 
 
 class Processor:
@@ -474,3 +479,28 @@ class Processor:
             brand, 0, f"Finished unpublishing {brand}. total: {len(rows)}")
 
         csr.close()
+
+    def pageScrap(self):
+        pageURLs = ['https://noirfurniturela.com/tags/Best%20Sellers',
+                    'https://noirfurniturela.com/tags/Best%20Sellers?page=2&sortOn=None&direction=Ascending&filters=UDF16:,UDF17:,UDF18:,UDF19:,UDF20:']
+        targetEle = ".product .py-2 a"
+
+        texts = []
+
+        for pageURL in pageURLs:
+            r = requests.get(pageURL)
+            soup = BeautifulSoup(r.content, "lxml")
+            for element in soup.select(targetEle):
+                texts.append(element.text)
+
+        values = []
+        for text in texts:
+            try:
+                value = text.split("Item ID:")[1].split("\n")[0]
+            except:
+                value = ""
+
+            if value != "" and value not in values:
+                values.append(value)
+
+        print(values)
