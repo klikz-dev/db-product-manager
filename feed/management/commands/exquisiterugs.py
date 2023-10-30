@@ -68,6 +68,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
+        if "quick-ship" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship")
+
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
@@ -103,6 +108,15 @@ class Processor:
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
+        # Quick Ship
+        quickships = []
+        f = open(f"{FILEDIR}/exquisiterugs-quickships.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            mpn = common.formatText(row[2]).replace("'", "")
+            if row[5] == "YES":
+                quickships.append(mpn)
 
         # Get Product Feed
         products = []
@@ -174,6 +188,11 @@ class Processor:
                 statusP = True
                 statusS = False
 
+                if mpn in quickships:
+                    quickShip = True
+                else:
+                    quickShip = False
+
                 # Shipping
                 shippingWidth = common.formatFloat(sh.cell_value(i, 44))
                 shippingLength = common.formatFloat(sh.cell_value(i, 43))
@@ -231,6 +250,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'quickShip': quickShip,
                 'whiteGlove': whiteGlove,
             }
             products.append(product)
