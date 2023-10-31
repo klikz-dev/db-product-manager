@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from feed.models import Zoffany
 
 import os
@@ -45,7 +46,8 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Zoffany.objects.all()
+            products = Zoffany.objects.filter(
+                Q(manufacturer="Sanderson Fabric") | Q(manufacturer="Sanderson Wallpaper"))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
