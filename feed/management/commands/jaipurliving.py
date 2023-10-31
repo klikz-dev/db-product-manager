@@ -78,6 +78,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
+        if "quick-ship" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship", logic=True)
+
         if "main" in options['functions']:
             while True:
                 with Processor() as processor:
@@ -91,9 +96,6 @@ class Command(BaseCommand):
                     processor.databaseManager.statusSync(fullSync=False)
 
                     processor.inventory()
-
-                    processor.databaseManager.customTags(
-                        key="quickShip", tag="Quick Ship")
 
                 print("Finished process. Waiting for next run. {}:{}".format(
                     BRAND, options['functions']))
