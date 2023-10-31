@@ -79,7 +79,7 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
