@@ -5,6 +5,7 @@ import os
 import environ
 import pymysql
 import xlrd
+import time
 from shutil import copyfile
 
 from library import database, debug, common
@@ -63,6 +64,15 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
+
 
 class Processor:
     def __init__(self):
@@ -101,28 +111,34 @@ class Processor:
 
                 color = common.formatText(sh.cell_value(i, 3)).title()
 
+                pattern = name
+
                 # Categorization
                 brand = BRAND
-                type = common.formatText(sh.cell_value(i, 2)).title()
                 manufacturer = BRAND
-                collection = common.formatText(sh.cell_value(i, 2))
 
-                # Reconfigure
+                type = common.formatText(sh.cell_value(i, 2)).title()
+                type_mapping = {
+                    "Bowl": "Bowls",
+                    "Wastebasket": "Wastebaskets",
+                    "Pendant": "Pendants",
+                    "Tray": "Trays",
+                    "Sconce": "Wall Sconces",
+                    "Tablelamp": "Table Lamps",
+                    "Lumbar": "Pillow",
+                    "Boudoir": "Pillow",
+                    "Wastebsaket": "Wastebaskets",
+                    "Waste": "Wastebaskets"
+                }
+                type = type_mapping.get(type, type)
+
                 pattern = name.replace(color, "").replace(
                     type, "").replace("Lamp", "").replace("  ", " ").strip()
 
-                if type == "Bowl":
-                    type = "Bowls"
-                elif type == "Wastebasket":
-                    type = "Wastebaskets"
-                elif type == "Pendant":
-                    type = "Pendants"
-                elif type == "Tray":
-                    type = "Trays"
+                collection = common.formatText(sh.cell_value(i, 2))
 
                 if not pattern or not color or not type:
                     continue
-                #############
 
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 17))
@@ -311,3 +327,24 @@ class Processor:
                     else:
                         copyfile(f"{FILEDIR}/images/danagibson/{fname}",
                                  f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+
+    def inventory(self):
+        stocks = []
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/dana-gibson-inventory.xlsx")
+        sh = wb.sheet_by_index(0)
+
+        for i in range(10, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 1))
+            sku = f"DG {mpn}"
+
+            stockP = common.formatInt(sh.cell_value(i, 3))
+
+            stock = {
+                'sku': sku,
+                'quantity': stockP,
+                'note': "6 days"
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=2)
