@@ -6,7 +6,6 @@ import environ
 import pymysql
 import xlrd
 import time
-from shutil import copyfile
 
 from library import database, debug, common
 
@@ -74,6 +73,9 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             while True:
                 with Processor() as processor:
+                    processor.databaseManager.downloadFileFromSFTP(
+                        src="/peninsulahome/", dst=f"{FILEDIR}/peninsulahome-inventory.xlsx", fileSrc=False, delete=True)
+
                     products = processor.fetchFeed()
                     processor.databaseManager.writeFeed(products=products)
                     processor.databaseManager.statusSync(fullSync=False)
