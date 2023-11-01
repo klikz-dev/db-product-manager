@@ -273,6 +273,9 @@ class Processor:
 
                     # Pricing
                     cost = float(row['DECBESTPRICE'])
+                    if cost == 0:
+                        continue
+
                     msrp = float(row['MSRP'])
                     try:
                         map = float(row['NewMap'])
