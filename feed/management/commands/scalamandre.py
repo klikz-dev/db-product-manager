@@ -37,6 +37,9 @@ class Command(BaseCommand):
             processor = Processor()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
+
+        if "validate" in options['functions']:
+            processor = Processor()
             processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
@@ -153,7 +156,7 @@ class Processor:
                     continue
 
                 manufacturer = common.formatText(row['BRAND'])
-                if "Scalamandre" in manufacturer or "Wallquest" in manufacturer or "Scalamandré" in manufacturer:
+                if "Scalamandre" in manufacturer or "Wallquest" in manufacturer or "Scalamandré" in manufacturer or 'THIRD FLOOR FABRIC' in manufacturer or 'WALLCOVERING' in manufacturer:
                     manufacturer = "Scalamandre"
                 elif "Old World Weavers" in manufacturer:
                     sku = "OWW {}".format(row['SKU'])
@@ -201,7 +204,7 @@ class Processor:
                     "PN": "Per Panel",
                     "TL": "Per Tile"
                 }
-                uom = UOM_DICT.get(row['UNITOFMEASURE'], None)
+                uom = UOM_DICT.get(row['UNITOFMEASURE'], '')
 
                 # Pricing
                 cost = common.formatFloat(row['NETPRICE'])
@@ -224,16 +227,20 @@ class Processor:
 
                 # Status
                 statusP = True
+                statusS = True
+
                 if row.get('DISCONTINUED', False) != False:
                     statusP = False
+                    statusS = False
                 if row.get('WEBENABLED', '') not in ["Y", "S"]:
                     statusP = False
+                    statusS = False
                 if row.get('IMAGEVALID', False) != True:
                     statusP = False
+                    statusS = False
                 if manufacturer in ["Tassinari & Chatel", "Lelievre", "Nicolette Mayer", "Jean Paul Gaultier"]:
                     statusP = False
-
-                statusS = False
+                    statusS = False
 
                 manufacturer = f"{manufacturer} {type}"
 
