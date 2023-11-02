@@ -14,7 +14,8 @@ from library import debug, inventory
 
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
-FEEDDIR = f"{FILEDIR}/feed/DecoratorsBestGS.xml"
+GS_FEED_DIR = f"{FILEDIR}/feed/DecoratorsBestGS.xml"
+FB_FEED_DIR = f"{FILEDIR}/feed/DecoratorsBestFB.xml"
 
 PROCESS = "Feed"
 
@@ -29,13 +30,8 @@ class Command(BaseCommand):
 
         if "main" in options['functions']:
             with Processor() as processor:
-                total, skiped = processor.feed()
-                if skiped < total * 0.3:
-                    processor.uploadToGS()
-                    processor.uploadToFB()
-                else:
-                    debug.debug(
-                        PROCESS, 2, f"Ignore uploading the feed because too many items {skiped}/{total} have been skiped")
+                processor.gsFeed()
+                processor.fbFeed()
 
 
 class Processor:
@@ -65,11 +61,11 @@ class Processor:
         else:
             return ""
 
-    def feed(self):
-        debug.debug(PROCESS, 0, f"Started running {PROCESS} processor.")
+    def gsFeed(self):
+        debug.debug(PROCESS, 0, f"Started running GS {PROCESS} processor.")
 
-        if os.path.isfile(FEEDDIR):
-            os.remove(FEEDDIR)
+        if os.path.isfile(GS_FEED_DIR):
+            os.remove(GS_FEED_DIR)
 
         csr = self.con.cursor()
         csr.execute("""
@@ -112,6 +108,69 @@ class Processor:
         products = csr.fetchall()
         csr.close()
 
+        total, skiped = self.generateXML(products, GS_FEED_DIR)
+        if skiped < total * 0.3:
+            self.uploadToGS()
+        else:
+            debug.debug(
+                PROCESS, 2, f"Ignore uploading the GS feed because too many items {skiped}/{total} have been skiped")
+
+    def fbFeed(self):
+        debug.debug(PROCESS, 0, f"Started running FB {PROCESS} processor.")
+
+        if os.path.isfile(FB_FEED_DIR):
+            os.remove(FB_FEED_DIR)
+
+        csr = self.con.cursor()
+        csr.execute("""
+            SELECT 
+                P.SKU,
+                P.Title AS PName,
+                P.Handle,
+                PI.ImageURL,
+                M.Name as Manufacturer,
+                PV.Price * PV.MinimumQuantity AS Price,
+                T.Name AS Type,
+                (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=2 AND PT.SKU = P.SKU LIMIT 1) AS DesignStyle,
+                (SELECT Name FROM Tag T JOIN ProductTag PT on T.TagID = PT.TagID WHERE T.Published=1 AND T.Deleted=0 AND T.ParentTagID=3 AND PT.SKU = P.SKU LIMIT 1) AS Color,
+                PV.Weight,
+                PV.GTIN,
+                P.ManufacturerPartNumber,
+                P.BodyHTML,
+                PV.Cost,
+                PV.Price as SPrice,
+                P.ProductID,
+                P.Pattern,
+                PV.MinimumQuantity
+            FROM Product P
+                LEFT JOIN ProductImage PI ON P.ProductID = PI.ProductID
+                LEFT JOIN ProductVariant PV ON P.ProductID = PV.ProductID
+                LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU
+                LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+                LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
+            WHERE PI.ImageIndex = 1
+                AND M.Published=1
+                AND P.Published = 1
+                AND P.ManufacturerPartNumber <> ''
+                AND P.Name NOT LIKE '%Borders'
+                AND P.Name NOT LIKE '%Disney'
+                AND PV.IsDefault=1
+                AND PV.Published=1
+                AND PV.Cost != 0
+                AND T.Name IN ("Fabric", "Wallpaper", "Trim", "Pillow")
+            """)
+
+        products = csr.fetchall()
+        csr.close()
+
+        total, skiped = self.generateXML(products, FB_FEED_DIR)
+        if skiped < total * 0.3:
+            self.uploadToFB()
+        else:
+            debug.debug(
+                PROCESS, 2, f"Ignore uploading the FB feed because too many items {skiped}/{total} have been skiped")
+
+    def generateXML(self, products, feed_dir):
         total = len(products)
         skiped = 0
 
@@ -269,7 +328,7 @@ class Processor:
         tree_dom = MD.parseString(tree_str)
         pretty_tree = tree_dom.toprettyxml(indent="\t")
 
-        with open(FEEDDIR, 'w', encoding="UTF-8") as file:
+        with open(feed_dir, 'w', encoding="UTF-8") as file:
             file.write(pretty_tree)
 
         return (total, skiped)
@@ -282,28 +341,29 @@ class Processor:
     def uploadToGS(self):
         now = datetime.datetime.now()
 
-        self.s3.upload_file(FEEDDIR, self.bucket, "DecoratorsBestGS.xml", ExtraArgs={
+        self.s3.upload_file(GS_FEED_DIR, self.bucket, "DecoratorsBestGS.xml", ExtraArgs={
                             'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestGS.xml')
 
         self.s3.upload_file(
-            FEEDDIR, self.bucket, "DecoratorsBestGS-V2.xml", ExtraArgs={'ACL': 'public-read'})
+            GS_FEED_DIR, self.bucket, "DecoratorsBestGS-V2.xml", ExtraArgs={'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestGS-V2.xml')
 
         self.s3.upload_file(
-            FEEDDIR, self.bucket, f"DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml", ExtraArgs={'ACL': 'public-read'})
+            GS_FEED_DIR, self.bucket, f"DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml", ExtraArgs={'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, f"Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestGS-{now.year}-{now.month}-{now.day}.xml")
 
     def uploadToFB(self):
-        self.s3.upload_file(FEEDDIR, self.bucket, "DecoratorsBestFB.xml", ExtraArgs={
+        self.s3.upload_file(FB_FEED_DIR, self.bucket, "DecoratorsBestFB.xml", ExtraArgs={
                             'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml')
 
-        self.compress_file(FEEDDIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
+        self.compress_file(
+            FB_FEED_DIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
         self.s3.upload_file(
             f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz", self.bucket, "DecoratorsBestFB.xml.gz", ExtraArgs={'ACL': 'public-read'})
         debug.debug(
