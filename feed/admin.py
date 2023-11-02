@@ -351,6 +351,7 @@ class RoomvoAdmin(admin.ModelAdmin):
         'vertical_repeat',
         'image',
         'layout',
+        'brand',
         'product_type',
         'link',
         'filter_category',
@@ -370,12 +371,14 @@ class RoomvoAdmin(admin.ModelAdmin):
         'length',
         'thickness',
         'dimension_display',
+        'brand',
         'product_type',
         'link'
     )
 
     list_filter = [
         'availability',
+        'brand',
         'product_type'
     ]
 
@@ -384,6 +387,7 @@ class RoomvoAdmin(admin.ModelAdmin):
         'name',
         'dimension_display',
         'layout',
+        'brand',
         'product_type',
         'link',
         'filter_category',

@@ -342,6 +342,8 @@ class Roomvo(models.Model):
         max_length=200, default=None, null=True, blank=True)
     layout = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    brand = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     product_type = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     link = models.CharField(

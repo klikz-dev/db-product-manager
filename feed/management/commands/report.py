@@ -47,6 +47,8 @@ class Processor:
         self.con.close()
 
     def roomvo(self):
+        Roomvo.objects.all().delete()
+
         self.csr.execute(f"""
             SELECT P.ProductID, P.SKU, P.Handle, P.Title, P.BodyHTML, P.ProductTypeId, M.Brand, PI.imageURL, T.Name
             FROM ProductImage PI
@@ -253,22 +255,22 @@ class Processor:
             v3 = ""
             v4 = ""
 
-            # self.csr.execute(f"""
-            #     SELECT PV.Name, PV.VariantId, PV.IsDefault
-            #     FROM ProductVariant PV
-            #     WHERE PV.ProductId='{productId}'
-            # """)
-            # rows = self.csr.fetchall()
+            self.csr.execute(f"""
+                SELECT PV.Name, PV.VariantId, PV.IsDefault
+                FROM ProductVariant PV
+                WHERE PV.ProductId='{productId}'
+            """)
+            rows = self.csr.fetchall()
 
-            # for row in rows:
-            #     if row[2] == 1:
-            #         v1 = row[1]
-            #     elif "Trade - " in row[0]:
-            #         v2 = row[1]
-            #     elif "Free Sample - " in row[0]:
-            #         v4 = row[1]
-            #     elif "Sample - " in row[0]:
-            #         v3 = row[1]
+            for row in rows:
+                if row[2] == 1:
+                    v1 = row[1]
+                elif "Trade - " in row[0]:
+                    v2 = row[1]
+                elif "Free Sample - " in row[0]:
+                    v4 = row[1]
+                elif "Sample - " in row[0]:
+                    v3 = row[1]
 
             # Filters
             categories = []
@@ -276,43 +278,43 @@ class Processor:
             colors = []
             subtypes = []
 
-            # self.csr.execute(f"""
-            #     SELECT T.Name, T.Description, T.ParentTagId
-            #     FROM ProductTag PT
-            #     LEFT JOIN Tag T ON PT.TagId = T.TagId
-            #     WHERE PT.SKU='{sku}'
-            # """)
-            # rows = self.csr.fetchall()
+            self.csr.execute(f"""
+                SELECT T.Name, T.Description, T.ParentTagId
+                FROM ProductTag PT
+                LEFT JOIN Tag T ON PT.TagId = T.TagId
+                WHERE PT.SKU='{sku}'
+            """)
+            rows = self.csr.fetchall()
 
-            # for row in rows:
-            #     if row[2] == 0:
-            #         continue
+            for row in rows:
+                if row[2] == 0:
+                    continue
 
-            #     if row[1] == "Category":
-            #         categories.append(row[0])
+                if row[1] == "Category":
+                    categories.append(row[0])
 
-            #     if row[1] == "Style":
-            #         styles.append(row[0])
+                if row[1] == "Style":
+                    styles.append(row[0])
 
-            #     if row[1] == "Color":
-            #         colors.append(row[0])
+                if row[1] == "Color":
+                    colors.append(row[0])
 
-            # self.csr.execute(f"""
-            #     SELECT T.Name, T.ParentTypeId
-            #     FROM ProductSubtype PT
-            #     LEFT JOIN Type T ON PT.SubTypeId = T.TypeId
-            #     WHERE PT.SKU='{sku}'
-            # """)
-            # rows = self.csr.fetchall()
+            self.csr.execute(f"""
+                SELECT T.Name, T.ParentTypeId
+                FROM ProductSubtype PT
+                LEFT JOIN Type T ON PT.SubTypeId = T.TypeId
+                WHERE PT.SKU='{sku}'
+            """)
+            rows = self.csr.fetchall()
 
-            # for row in rows:
-            #     if row[1] != 0:
-            #         subtypes.append(row[0])
+            for row in rows:
+                if row[1] != 0:
+                    subtypes.append(row[0])
 
-            # categories = ", ".join(categories)
-            # styles = ", ".join(styles)
-            # colors = ", ".join(colors)
-            # subtypes = ", ".join(subtypes)
+            categories = ", ".join(categories)
+            styles = ", ".join(styles)
+            colors = ", ".join(colors)
+            subtypes = ", ".join(subtypes)
 
             Roomvo.objects.create(
                 sku=sku,
@@ -326,6 +328,7 @@ class Processor:
                 vertical_repeat=vr,
                 image=imageURL,
                 layout=layout,
+                brand=brand,
                 product_type=type,
                 link=f'https://www.decoratorsbest.com/products/{handle}',
                 filter_category=categories,
