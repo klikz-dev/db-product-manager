@@ -39,14 +39,13 @@ class Command(BaseCommand):
 
         if "add" in options['functions']:
             processor = Processor()
-            processor.databaseManager.createProducts(
-                formatPrice=True, private=True)
+            processor.databaseManager.createProducts(formatPrice=True)
 
         if "update" in options['functions']:
             processor = Processor()
             products = Pindler.objects.all()
             processor.databaseManager.updateProducts(
-                products=products, formatPrice=True, private=True)
+                products=products, formatPrice=True)
 
         if "price" in options['functions']:
             processor = Processor()
