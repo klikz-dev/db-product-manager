@@ -82,7 +82,7 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.linkPillowSample()
 
-        if "inventory" in options['functions']:
+        if "main" in options['functions']:
             while True:
                 with Processor() as processor:
                     products = processor.fetchFeed()
