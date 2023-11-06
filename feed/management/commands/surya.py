@@ -276,8 +276,8 @@ class Processor:
                 uom = "Per Item"
 
                 # Pricing
-                cost = formatFloat(sh.cell_value(i, 13))
-                map = formatFloat(sh.cell_value(i, 14))
+                cost = formatFloat(sh.cell_value(i, 13)) * 0.85  # Tmp: Promo
+                map = formatFloat(sh.cell_value(i, 14)) * 0.85  # Tmp: Promo
 
                 if cost == 0:
                     debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))

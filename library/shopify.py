@@ -643,15 +643,33 @@ def UpdatePriceToShopify(productID, con):
     s = requests.Session()
     csr = con.cursor()
     csr.execute(
-        "SELECT VariantID, Cost, Price FROM ProductVariant WHERE ProductID = {} AND Name NOT LIKE '%Sample - %'".format(productID))
+        """
+        SELECT PV.VariantID, PV.Cost, PV.Price, PV.Name, M.Brand 
+        FROM ProductVariant PV
+        LEFT JOIN Product P ON P.ProductID = PV.ProductID
+        LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
+        LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
+        WHERE PV.ProductID = {} AND PV.Name NOT LIKE '%Sample - %'
+        """.format(productID))
     for row in csr.fetchall():
         variantID = row[0]
         cost = float(row[1])
         price = float(row[2])
+        name = row[3]
+        brand = row[4]
+
+        variant = {
+            'id': variantID,
+            'cost': cost,
+            'price': price,
+        }
+
+        if brand == "Surya" and "Trade" not in name:
+            variant['compare_at_price'] = round(price / 0.85, 2)
 
         s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
               headers=SHOPIFY_PRODUCT_API_HEADER,
-              json={"variant": {'id': variantID, 'cost': cost, 'price': price}})
+              json={"variant": variant})
 
         csr.execute(
             "DELETE FROM PendingUpdatePrice WHERE ProductID = {}".format(productID))

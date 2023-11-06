@@ -86,7 +86,8 @@ class Processor:
                 shopify.UpdatePriceToShopify(productID, con)
                 debug.debug(PROCESS, 0,
                             "Updated Price for Product: {}".format(productID))
-            except:
+            except Exception as e:
+                print(e)
                 continue
 
         csr.close()
