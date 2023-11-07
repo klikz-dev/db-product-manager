@@ -177,7 +177,11 @@ class Processor:
                         roomsets.append(sh.cell_value(i, id))
 
                 # Status
-                statusP = True
+                if common.formatText(sh.cell_value(i, 1)).lower() == "oos":
+                    statusP = False
+                else:
+                    statusP = True
+
                 statusS = False
 
                 if mpn in blockMPNs:
