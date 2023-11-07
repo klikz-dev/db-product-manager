@@ -63,6 +63,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "white-glove" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="whiteGlove", tag="White Glove", logic=True)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
@@ -298,11 +303,11 @@ class Processor:
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
 
     def hires(self):
-        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
+        for infile in glob.glob(f"{FILEDIR}/images/kravetdecor/*.*"):
             fpath, ext = os.path.splitext(infile)
             fname = os.path.basename(fpath)
 
-            mpn = f"{fname.replace('_', '.')}.0"
+            mpn = f"{fname.replace('_', '.')}"
 
             try:
                 product = KravetDecor.objects.get(mpn=mpn)
@@ -310,10 +315,10 @@ class Processor:
                 continue
 
             if product.productId:
-                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                copyfile(f"{FILEDIR}/images/kravetdecor/{fname}{ext}",
                          f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
                 debug.debug(
                     BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
 
             os.remove(
-                f"{FILEDIR}/images/kravet/{fname}{ext}")
+                f"{FILEDIR}/images/kravetdecor/{fname}{ext}")

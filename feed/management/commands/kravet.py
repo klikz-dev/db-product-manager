@@ -55,22 +55,26 @@ class Command(BaseCommand):
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
-        if "tag" in options['functions']:
-            processor = Processor()
-            processor.databaseManager.updateTags(category=True)
-
         if "price" in options['functions']:
             processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
-        if "image" in options['functions']:
+        if "tag" in options['functions']:
             processor = Processor()
-            processor.image()
+            processor.databaseManager.updateTags(category=True)
 
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
+
+        if "image" in options['functions']:
+            processor = Processor()
+            processor.image()
+
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
 
         if "inventory" in options['functions']:
             while True:
@@ -393,3 +397,24 @@ class Processor:
                     src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
         csr.close()
+
+    def hires(self):
+        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
+            fpath, ext = os.path.splitext(infile)
+            fname = os.path.basename(fpath)
+
+            mpn = f"{fname.replace('_', '.')}.0"
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            if product.productId:
+                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                         f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
+                debug.debug(
+                    BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
+
+            os.remove(
+                f"{FILEDIR}/images/kravet/{fname}{ext}")
