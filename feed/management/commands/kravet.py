@@ -225,7 +225,7 @@ class Processor:
 
                     sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
 
-                    if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony" or manufacturer == "CLARKE AND CLARKE":
+                    if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony" or manufacturer == "Clarke & Clarke":
                         sku = f"{code_prefix} {keys[0]}"
 
                     if manufacturer == "Winfield Thybony":
