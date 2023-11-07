@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 from feed.models import KravetDecor
 
 import os
@@ -9,6 +8,7 @@ import csv
 import codecs
 import zipfile
 import time
+import glob
 from shutil import copyfile
 
 from library import database, debug, common
@@ -67,9 +67,9 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
-        if "image-manual" in options['functions']:
+        if "hires" in options['functions']:
             processor = Processor()
-            processor.image()
+            processor.hires()
 
         if "inventory" in options['functions']:
             while True:
@@ -297,41 +297,23 @@ class Processor:
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
 
-    def image(self):
-        fnames = os.listdir(f"{FILEDIR}/images/kravetdecor/")
-        for fname in fnames:
-            if "_1" in fname or "_0" in fname:
-                index = 0
-                mpn = fname.replace("_1", "").replace("_0", "")
-            elif "_2" in fname:
-                index = 2
-                mpn = fname.replace("_2", "")
-            else:
-                index = 0
-                mpn = fname
+    def hires(self):
+        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
+            fpath, ext = os.path.splitext(infile)
+            fname = os.path.basename(fpath)
 
-            mpn = f"{mpn.replace('_', '.').replace('.jpg', '').replace('.png', '')}.0".upper(
-            )
-
-            print(mpn)
+            mpn = f"{fname.replace('_', '.')}.0"
 
             try:
                 product = KravetDecor.objects.get(mpn=mpn)
             except KravetDecor.DoesNotExist:
                 continue
 
-            print(product.sku)
+            if product.productId:
+                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                         f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
+                debug.debug(
+                    BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
 
-            productId = product.productId
-
-            if productId:
-                if index == 0:
-                    debug.debug(
-                        BRAND, 0, f"Copying {FILEDIR}/images/kravetdecor/{fname} to {productId}.jpg")
-                    copyfile(f"{FILEDIR}/images/kravetdecor/{fname}",
-                             f"{FILEDIR}/../../../images/product/{productId}.jpg")
-                else:
-                    debug.debug(
-                        BRAND, 0, f"Copying {FILEDIR}/images/kravetdecor/{fname} to {productId}_{index}.jpg")
-                    copyfile(f"{FILEDIR}/images/kravetdecor/{fname}",
-                             f"{FILEDIR}/../../../images/roomset/{productId}_{index}.jpg")
+            os.remove(
+                f"{FILEDIR}/images/kravet/{fname}{ext}")

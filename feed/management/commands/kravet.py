@@ -31,7 +31,6 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
-            processor.downloadFeed()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
 
@@ -68,10 +67,6 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
-        if "hires" in options['functions']:
-            processor = Processor()
-            processor.hires()
-
         if "sample" in options['functions']:
             processor = Processor()
             processor.databaseManager.customTags(
@@ -80,7 +75,7 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
-                    processor.downloadFeed()
+                    processor.downloadInventory()
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -103,7 +98,7 @@ class Processor:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
 
-    def downloadFeed(self):
+    def downloadInventory(self):
         try:
             self.databaseManager.downloadFileFromFTP(
                 src="decbest.zip", dst=f"{FILEDIR}/kravet-master.zip")
@@ -112,14 +107,6 @@ class Processor:
             z.close()
             os.rename(f"{FILEDIR}/item_info.csv",
                       f"{FILEDIR}/kravet-master.csv")
-
-            self.databaseManager.downloadFileFromFTP(
-                src="curated_onhand_info.zip", dst=f"{FILEDIR}/kravet-decor-inventory.zip")
-            z = zipfile.ZipFile(f"{FILEDIR}/kravet-decor-inventory.zip", "r")
-            z.extractall(FILEDIR)
-            z.close()
-            os.rename(f"{FILEDIR}/curated_onhand_info.csv",
-                      f"{FILEDIR}/kravet-decor-inventory.csv")
 
             debug.debug(BRAND, 0, "Download Completed")
             return True
@@ -406,24 +393,3 @@ class Processor:
                     src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
         csr.close()
-
-    def hires(self):
-        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
-            fpath, ext = os.path.splitext(infile)
-            fname = os.path.basename(fpath)
-
-            mpn = f"{fname.replace('_', '.')}.0"
-
-            try:
-                product = Kravet.objects.get(mpn=mpn)
-            except Kravet.DoesNotExist:
-                continue
-
-            if product.productId:
-                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
-                         f"{FILEDIR}/../../../images/hires/{product.productId}_20{ext}")
-                debug.debug(
-                    BRAND, 0, f"Copied {fname}{ext} to {product.productId}_20{ext}")
-
-            os.remove(
-                f"{FILEDIR}/images/kravet/{fname}{ext}")
