@@ -8,10 +8,8 @@ import pymysql
 import csv
 import codecs
 import zipfile
-import requests
 import xlrd
 import time
-from bs4 import BeautifulSoup
 from shutil import copyfile
 import glob
 
@@ -36,6 +34,10 @@ class Command(BaseCommand):
             processor.downloadFeed()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
+
+        if "validate" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.validateFeed()
 
         if "sync" in options['functions']:
             processor = Processor()
@@ -74,11 +76,6 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
-
-        if "shipping" in options['functions']:
-            processor = Processor()
-            processor.databaseManager.customTags(
-                key="whiteGlove", tag="White Glove")
 
         if "inventory" in options['functions']:
             while True:
@@ -141,30 +138,6 @@ class Processor:
         for i in range(1, sh.nrows):
             images[str(sh.cell_value(i, 0))] = str(sh.cell_value(i, 1))
 
-        # Prices
-        prices = {}
-
-        wb = xlrd.open_workbook(f"{FILEDIR}/kravet-prices.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            prices[str(sh.cell_value(i, 0))] = round(
-                float(sh.cell_value(i, 1)), 2)
-
-        # Pillow Stock
-        inventories = {}
-
-        f = open(f"{FILEDIR}/kravet-decor-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            if row[0] == "Item":
-                continue
-            try:
-                inventories[str(row[0]).strip()] = (
-                    int(float(row[1])), int(float(row[2])), str(row[3]).strip())
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
         # Get Product Feed
         products = []
 
@@ -172,15 +145,17 @@ class Processor:
         f = open(f"{FILEDIR}/kravet-master.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
         for row in cr:
-            try:
+            # try:
+            if True:
                 # Primary Keys
-                mpn = row[0].strip()
+                mpn = common.formatText(row[0])
                 keys = mpn.split(".")
                 if len(keys) != 3 or keys[2] != "0":
                     continue
 
-                manufacturer = row[3]
-                collection = row[16]
+                manufacturer = common.formatText(row[3])
+                collection = common.formatText(row[16])
+
                 european = False
                 if "LIZZO" in collection:
                     manufacturer = "LIZZO"
@@ -223,25 +198,10 @@ class Processor:
                 if manufacturer in manufacturer_mapping:
                     manufacturer, code_prefix = manufacturer_mapping[manufacturer]
 
-                    sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
-
                     if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony" or manufacturer == "Clarke & Clarke":
                         sku = f"{code_prefix} {keys[0]}"
-
-                    if manufacturer == "Winfield Thybony":
-                        r = requests.get(
-                            f"http://www.winfieldthybony.com/home/products/details?sku={keys[0]}")
-                        soup = BeautifulSoup(r.content, "lxml")
-                        try:
-                            collection = soup.find(
-                                "span", id="ctl00_mainContent_C001_collectionName").string
-                        except:
-                            pass
-                        try:
-                            picLoc = soup.find(
-                                "a", id="ctl00_mainContent_C001_downloadRoomShotImageUrl2")["href"]
-                        except:
-                            pass
+                    else:
+                        sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
 
                 else:
                     debug.debug(
@@ -250,12 +210,12 @@ class Processor:
 
                 sku = sku.replace("'", "")
 
-                pattern = row[1]
+                pattern = common.formatText(row[1])
                 if pattern == "." or pattern == ".." or pattern == "..." or pattern == "" or pattern.find("KF ") >= 0 or "KRAVET " in pattern:
                     pattern = keys[0]
 
-                color = row[2]
-                if color == "." or color == "" or color == "NONE" or "KRAVET " in pattern:
+                color = common.formatText(row[2])
+                if color == "." or color == "" or color == "NONE" or "KRAVET" in pattern:
                     color = keys[1]
 
                 if pattern == "" or color == "":
@@ -264,6 +224,7 @@ class Processor:
                 # Categorization
                 brand = BRAND
 
+                type = common.formatText(row[17])
                 type_mapping = {
                     "WALLCOVERING": "Wallpaper",
                     "TRIM": "Trim",
@@ -271,93 +232,52 @@ class Processor:
                     "DRAPERY": "Fabric",
                     "MULTIPURPOSE": "Fabric"
                 }
-
-                type = type_mapping.get(row[17])
-                if type is None:
-                    debug.debug(BRAND, 1, f"Unknown product type {row[17]}")
+                type = type_mapping.get(type, type)
 
                 manufacturer = f"{manufacturer} {type}"
 
                 # Main Information
-                usage = row[17]
-                try:
-                    width = float(row[7])
-                except:
-                    width = 0
+                usage = common.formatText(row[17])
+                width = common.formatFloat(row[7])
+                repeatV = common.formatFloat(row[4])
+                repeatH = common.formatFloat(row[5])
 
                 # Additional Information
-                try:
-                    repeatV = float(row[4])
-                except:
-                    repeatV = 0
-
-                try:
-                    repeatH = float(row[5])
-                except:
-                    repeatH = 0
-
-                content = row[12]
-                if content == "LEATHER - 100%":
-                    continue
-
-                try:
-                    yards = float(row[37])
-                except:
-                    yards = 0
+                content = common.formatText(row[12])
+                yards = common.formatFloat(row[37])
 
                 # Measurement
+                uom = common.formatText(row[11]).title()
                 uom_mapping = {
-                    "ROLL": "Roll",
-                    "YARD": "Yard",
-                    "EACH": "Item",
-                    "FOOT": "Square Foot",
-                    "SQUARE FOOT": "Square Foot",
-                    "PANEL": "Panel"
+                    "Each": "Item",
+                    "Foot": "Square Foot",
                 }
+                uom = uom_mapping.get(uom, uom)
+                uom = f"Per {uom}"
 
-                if row[11] in uom_mapping:
-                    uom = "Per " + uom_mapping[row[11]]
-                else:
-                    debug.debug(
-                        BRAND, 1, f"UOM Error for MPN: {mpn}, UOM: {row[11]}")
+                if uom == "Per Hide":
                     continue
 
-                minimum = int(float(row[38])) if row[38] else 1
+                minimum = common.formatInt(row[38])
 
-                if row[39] and int(float(row[39])) > 1:
-                    increment = ",".join(
-                        str(int(float(row[39])) * ii) for ii in range(1, 21))
+                increment = common.formatInt(row[39])
+                if increment > 1:
+                    increment = ",".join(str(increment * ii)
+                                         for ii in range(1, 21))
                 else:
                     increment = ""
 
                 # Pricing
-                try:
-                    cost = float(row[10] or row[32])
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    continue
-
-                try:
-                    map = float(row[49])
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    continue
-
-                if mpn in prices:
-                    cost = prices[mpn]
+                cost = common.formatFloat(row[10])
+                map = common.formatFloat(row[49])
 
                 # Tagging
-                tags = ",".join((row[20], row[21]))
-                if "CLARKE & CLARKE BOTANICAL WONDERS" in collection:
-                    tags = f"{tags}, Floral"
-
-                colors = ",".join((row[26], row[27], row[28]))
+                tags = f"{row[20]}, {row[21]}"
+                colors = f"{row[26]}, {row[27]}, {row[28]}"
 
                 # Image
-                thumbnail = str(row[24] or row[25]).strip()
-                if manufacturer == "Winfield Thybony" and picLoc:
-                    thumbnail = picLoc
-                if mpn in images:
+                thumbnail = common.formatText(row[24] or row[25])
+                if mpn in images and not thumbnail:
                     thumbnail = images[mpn]
 
                 # Status
@@ -368,7 +288,6 @@ class Processor:
                 if str(row[22]).strip() != 'Y':
                     statusP = False
 
-                # 6/9/23 Block collections.
                 blockCollections = [
                     "CANDICE OLSON AFTER EIGHT",
                     "CANDICE OLSON COLLECTION",
@@ -393,14 +312,9 @@ class Processor:
                 if row[31] == "Outlet":
                     outlet = True
 
-                # Stock
-                stockP = int(float(row[46]))
-                stockS = int(float(row[50]))
-                stockNote = f"{str(row[47]).strip()} days"
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
+            # except Exception as e:
+            #     debug.debug(BRAND, 1, str(e))
+            #     continue
 
             product = {
                 'mpn': mpn,
@@ -435,245 +349,6 @@ class Processor:
                 'european': european,
                 'outlet': outlet,
 
-                'stockP': stockP,
-                'stockS': stockS,
-                'stockNote': stockNote,
-
-                'thumbnail': thumbnail,
-            }
-            products.append(product)
-
-        # Pillow
-        wb = xlrd.open_workbook(f"{FILEDIR}/kravet-pillows.xlsx")
-        sh = wb.sheet_by_index(1)
-        for i in range(2, sh.nrows):
-            try:
-                # Primary Keys
-                mpn = str(sh.cell_value(i, 0)).strip()
-                if len(mpn.split(".")) != 3 or mpn.split(".")[2] != "0":
-                    continue
-
-                sku = "K {}".format(mpn)
-
-                pattern = str(sh.cell_value(i, 1)).replace(
-                    "Pillow", "").strip()
-                color = mpn.split(".")[1]
-
-                # Categorization
-                brand = BRAND
-                type = "Pillow"
-                manufacturer = f"{brand} {type}"
-                collection = "Decorative Pillows"
-
-                # Main Information
-                description = str(sh.cell_value(i, 2))
-                usage = "Accessory"
-
-                width = common.formatFloat(sh.cell_value(i, 9))
-                height = common.formatFloat(sh.cell_value(i, 11))
-
-                if width != 0 and height != 0:
-                    size = f'{int(width)}" x {int(height)}"'
-                else:
-                    size = ""
-
-                # Additional Information
-                content = str(sh.cell_value(i, 19))
-                country = str(sh.cell_value(i, 20))
-                care = str(sh.cell_value(i, 23))
-
-                # Measurement
-                uom = "Per Item"
-
-                # Pricing
-                try:
-                    cost = round(float(sh.cell_value(i, 14)), 2)
-                except:
-                    debug.debug(BRAND, 1, f"Pillow price error {mpn}")
-                    continue
-
-                if mpn in prices:
-                    cost = prices[mpn]
-
-                # Tagging
-                tags = str(sh.cell_value(i, 5))
-
-                colors = str(sh.cell_value(i, 7)).replace(";", "/")
-                colors = f"{color} {str(sh.cell_value(i, 7))}"
-
-                # Image
-                thumbnail = str(sh.cell_value(i, 34))
-                roomsets = [str(sh.cell_value(i, 35))]
-
-                if mpn in images:
-                    thumbnail = images[mpn]
-
-                # Status
-                statusP = True
-                statusS = False
-                if str(sh.cell_value(i, 4)) != "Active":
-                    statusP = False
-
-                # Stock
-                stockP = 0
-                stockNote = str(sh.cell_value(i, 17))
-                whiteGlove = False
-
-                if mpn in inventories:
-                    (stockP, leadtime, shipping) = inventories[mpn]
-                    stockNote = f"{leadtime} days"
-                    if "White" in shipping:
-                        whiteGlove = True
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            product = {
-                'mpn': mpn,
-                'sku': sku,
-                'pattern': pattern,
-                'color': color,
-
-                'brand': brand,
-                'type': type,
-                'manufacturer': manufacturer,
-                'collection': collection,
-
-                'description': description,
-                'usage': usage,
-                'width': width,
-                'height': height,
-                'size': size,
-
-                'content': content,
-                'country': country,
-                'care': care,
-
-                'uom': uom,
-
-                'tags': tags,
-                'colors': colors,
-
-                'cost': cost,
-
-                'statusP': statusP,
-                'statusS': statusS,
-
-                'stockP': stockP,
-                'stockNote': stockNote,
-                'whiteGlove': whiteGlove,
-
-                'thumbnail': thumbnail,
-                'roomsets': roomsets,
-            }
-            products.append(product)
-
-        # Wall Art
-        wb = xlrd.open_workbook(f"{FILEDIR}/kravet-wallart-transparent.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            try:
-                # Primary Keys
-                mpn = str(sh.cell_value(i, 0)).strip()
-                if len(mpn.split(".")) != 3 or mpn.split(".")[2] != "0":
-                    continue
-
-                sku = "K {}".format(mpn)
-
-                pattern = str(sh.cell_value(i, 1)).replace(",", "").strip()
-                color = str(sh.cell_value(i, 7)).replace(";", " ").strip()
-
-                if not color:
-                    continue
-
-                # Categorization
-                brand = BRAND
-                type = "Wall Art"
-                manufacturer = f"{brand} {type}"
-                collection = "Wall Decor"
-
-                # Main Information
-                description = str(sh.cell_value(i, 2))
-                usage = "Wall Art"
-
-                width = common.formatFloat(sh.cell_value(i, 10))
-                length = common.formatFloat(sh.cell_value(i, 12))
-                height = common.formatFloat(sh.cell_value(i, 11))
-
-                # Additional Information
-                content = common.formatText(sh.cell_value(i, 20))
-                country = common.formatText(sh.cell_value(i, 21))
-                care = common.formatText(sh.cell_value(i, 24))
-                weight = common.formatFloat(sh.cell_value(i, 14))
-
-                # Measurement
-                uom = "Per Item"
-
-                # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 15))
-
-                # Tagging
-                tags = description
-                colors = color
-
-                # Image
-                thumbnail = str(sh.cell_value(i, 35))
-
-                # Status
-                statusP = True
-                statusS = False
-
-                # Stock
-                stockP = 0
-                stockNote = str(sh.cell_value(i, 18))
-
-                if "White Glove" in sh.cell_value(i, 17):
-                    whiteGlove = True
-                else:
-                    whiteGlove = False
-
-            except Exception as e:
-                debug.debug(BRAND, 1, str(e))
-                continue
-
-            product = {
-                'mpn': mpn,
-                'sku': sku,
-                'pattern': pattern,
-                'color': color,
-
-                'brand': brand,
-                'type': type,
-                'manufacturer': manufacturer,
-                'collection': collection,
-
-                'description': description,
-                'usage': usage,
-
-                'width': width,
-                'length': length,
-                'height': height,
-
-                'content': content,
-                'country': country,
-                'care': care,
-                'weight': weight,
-
-                'uom': uom,
-
-                'tags': tags,
-                'colors': colors,
-
-                'cost': cost,
-
-                'statusP': statusP,
-                'statusS': statusS,
-
-                'stockP': stockP,
-                'stockNote': stockNote,
-                'whiteGlove': whiteGlove,
-
                 'thumbnail': thumbnail,
             }
             products.append(product)
@@ -686,40 +361,21 @@ class Processor:
 
         f = open(f"{FILEDIR}/kravet-master.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+
         for row in cr:
             try:
-                mpn = row[0].strip()
+                mpn = common.formatText(row[0])
                 product = Kravet.objects.get(mpn=mpn)
             except Kravet.DoesNotExist:
                 continue
 
-            stockP = int(float(row[46]))
-            stockNote = f"{str(row[47]).strip()} days"
+            stockP = common.formatInt(row[46])
+            stockNote = f"{common.formatText(row[47])} days"
 
             stock = {
                 'sku': product.sku,
                 'quantity': stockP,
                 'note': stockNote
-            }
-            stocks.append(stock)
-
-        f = open(f"{FILEDIR}/kravet-decor-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            try:
-                mpn = str(row[0]).strip()
-                product = Kravet.objects.get(mpn=mpn)
-            except Kravet.DoesNotExist:
-                continue
-
-            stockP = int(float(row[1]))
-            leadtime = int(float(row[2]))
-            stockNote = f"{leadtime} days"
-
-            stock = {
-                'sku': product.sku,
-                'quantity': stockP,
-                'note': f"{leadtime} days"
             }
             stocks.append(stock)
 
