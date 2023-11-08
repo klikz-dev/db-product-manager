@@ -59,6 +59,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="statusS", tag="NoSample", logic=False)
 
+        if "outlet" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="outlet", tag="Outlet", logic=True)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
@@ -100,6 +105,42 @@ class Processor:
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
+        # Outlet
+        outletMPNs = [
+            "LC40080",
+            "LC40081",
+            "LC40082",
+            "LC40083",
+            "LC40084",
+            "LC40085",
+            "LC40086",
+            "LC40087",
+            "LC40088",
+            "LC40089",
+            "LC40090",
+            "LC40091",
+            "LC40092",
+            "LC40093",
+            "LC40094",
+            "LC40095",
+            "LC40096",
+            "LC40097",
+            "LC40098",
+            "LC40099",
+            "LC40100",
+            "LC40102",
+            "AC00020",
+            "AC00021",
+            "AC00022",
+            "LC40103",
+            "LC40104",
+            "LC40105",
+            "LC40106",
+            "LC40107",
+            "AC00023",
+            "AC00024"
+        ]
 
         # Get Product Feed
         products = []
@@ -181,6 +222,11 @@ class Processor:
                 else:
                     statusS = True
 
+                if mpn in outletMPNs:
+                    outlet = True
+                else:
+                    outlet = False
+
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
                 continue
@@ -216,6 +262,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'outlet': outlet
             }
             products.append(product)
 

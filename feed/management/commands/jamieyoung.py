@@ -79,6 +79,11 @@ class Command(BaseCommand):
             processor.databaseManager.customTags(
                 key="whiteGlove", tag="White Glove", logic=True)
 
+        if "outlet" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="outlet", tag="Outlet", logic=True)
+
         if "main" in options['functions']:
             while True:
                 with Processor() as processor:
@@ -127,6 +132,19 @@ class Processor:
         for i in range(1, sh.nrows):
             prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
                 sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
+
+        # Outlet
+        outletMPNs = [
+            "9CASPWHD131C",
+            "5SHOR-PENA",
+            "20KAI-BECA",
+            "20SHEL-BEDO",
+            "20WATE-CODG",
+            "7LONG-BOGR",
+            "7LONG-BOWH",
+            "7LOTU-SMWH",
+            "7MARB-XLWH"
+        ]
 
         # Best Selling
         bestSellingPatterns = [
@@ -228,21 +246,15 @@ class Processor:
             tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
             colors = color
 
-            # Status
-            statusP = True
-            statusS = False
-
-            if "Sideboard" in pattern or "Console" in pattern:
-                statusP = False
-
-            if mpn not in available_mpns:
-                statusP = False
-
             # Shipping
-            shippingWidth = common.formatFloat(sh.cell_value(i, 60))
-            shippingLength = common.formatFloat(sh.cell_value(i, 61))
-            shippingHeight = common.formatFloat(sh.cell_value(i, 63))
-            shippingWeight = common.formatFloat(sh.cell_value(i, 60))
+            shippingWidth = common.formatFloat(sh.cell_value(
+                i, 58)) + common.formatFloat(sh.cell_value(i, 62))
+            shippingLength = common.formatFloat(sh.cell_value(
+                i, 57)) + common.formatFloat(sh.cell_value(i, 61))
+            shippingHeight = common.formatFloat(sh.cell_value(
+                i, 59)) + common.formatFloat(sh.cell_value(i, 63))
+            shippingWeight = common.formatFloat(sh.cell_value(
+                i, 56)) + common.formatFloat(sh.cell_value(i, 60))
 
             if shippingWidth > 107 or shippingLength > 107 or shippingHeight > 107 or shippingWeight > 40:
                 whiteGlove = True
@@ -274,11 +286,23 @@ class Processor:
                 "**MUST SHIP COMMON CARRIER**", "").replace("  ", " ").strip()
             ##############
 
-            # Best Seller
+            # Status
+            statusS = False
+
+            if "Sideboard" in pattern or "Console" in pattern or mpn not in available_mpns:
+                statusP = False
+            else:
+                statusP = True
+
             if pattern in bestSellingPatterns:
                 bestSeller = True
             else:
                 bestSeller = False
+
+            if mpn in outletMPNs:
+                outlet = True
+            else:
+                outlet = False
 
             product = {
                 'mpn': mpn,
@@ -317,6 +341,7 @@ class Processor:
                 'statusP': statusP,
                 'statusS': statusS,
                 'bestSeller': bestSeller,
+                'outlet': outlet,
 
                 'whiteGlove': whiteGlove,
 
