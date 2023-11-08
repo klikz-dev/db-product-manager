@@ -233,7 +233,7 @@ class Processor:
             title = f"{pName} - {sku}"
 
             desc = self.fmt(bodyHTML.replace(
-                "<br />", "").replace("<br/>", " ").replace("<br>", " "))
+                "<br />", "").replace("<br/>", " ").replace("<br>", " ").replace("\n", " "))
             if not desc:
                 desc = title
 
