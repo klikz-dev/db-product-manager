@@ -28,6 +28,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        if "google" in options['functions']:
+            with Processor() as processor:
+                processor.gsFeed()
+
+        if "facebook" in options['functions']:
+            with Processor() as processor:
+                processor.fbFeed()
+
         if "main" in options['functions']:
             with Processor() as processor:
                 processor.gsFeed()
@@ -306,6 +314,8 @@ class Processor:
                 item, "g:link").text = f"https://www.decoratorsbest.com/products/{handle}"
             ET.SubElement(item, "g:image_link").text = f"{imageURL}"
             ET.SubElement(item, "g:availability").text = "in stock"
+            ET.SubElement(
+                item, "g:quantity_to_sell_on_facebook").text = f"{stock['quantity']}"
             ET.SubElement(item, "g:gtin").text = f"{gtin}"
             ET.SubElement(item, "g:price").text = f"{price}"
             ET.SubElement(item, "g:brand").text = f"{brand}"
