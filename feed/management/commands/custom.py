@@ -304,97 +304,98 @@ class Processor:
         csr.close()
 
     def deleteProducts(self):
-        csr = self.con.cursor()
-
-        productIDs = [
+        productIds = [
             '6898897256494',
         ]
 
-        for productID in productIDs:
-            csr.execute("""SELECT P.ProductID, P.SKU 
-                FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-                WHERE P.ProductID = '{}'""".format(productID))
+        for productId in productIds:
+            self.deleteProduct(productId)
 
-            # try:
-            if True:
-                row = csr.fetchone()
-                productID = row[0]
-                sku = row[1]
-            # except Exception as e:
-            #     print(e)
+    def deleteProduct(self, productId):
+        csr = self.con.cursor()
 
-            # try:
-            if True:
-                shopify.DeleteProductByProductID(productID)
-            # except Exception as e:
-            #     print(e)
+        csr.execute("""SELECT P.ProductID, P.SKU 
+            FROM Product P LEFT JOIN ProductManufacturer PM ON P.SKU = PM.SKU LEFT JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+            WHERE P.ProductID = '{}'""".format(productId))
 
-            try:
-                csr.execute(
-                    "DELETE from Product where productID={}".format(productID))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            row = csr.fetchone()
+            productId = row[0]
+            sku = row[1]
+        except Exception as e:
+            print(e)
 
-            try:
-                csr.execute(
-                    "DELETE from ProductImage where productID='{}';".format(productID))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            shopify.DeleteProductByProductID(productId)
+        except Exception as e:
+            print(e)
 
-            try:
-                csr.execute(
-                    "DELETE from ProductInventory where SKU='{}';".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from Product where productId={}".format(productId))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            try:
-                csr.execute(
-                    "DELETE from ProductManufacturer where SKU='{}';".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from ProductImage where productId='{}';".format(productId))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            try:
-                csr.execute(
-                    "DELETE from ProductSubcategory where SKU='{}';".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from ProductInventory where SKU='{}';".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            try:
-                csr.execute(
-                    "DELETE from ProductSubtype where SKU='{}';".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from ProductManufacturer where SKU='{}';".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            try:
-                csr.execute(
-                    "DELETE from ProductTag where SKU='{}';".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from ProductSubcategory where SKU='{}';".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            try:
-                csr.execute(
-                    "DELETE from ProductVariant where SKU='{}'".format(sku))
-                self.con.commit()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            csr.execute(
+                "DELETE from ProductSubtype where SKU='{}';".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
 
-            debug.debug(
-                "Custom", 0, f"Deleted --- ProductID: {productID}, sku: {sku}")
+        try:
+            csr.execute(
+                "DELETE from ProductTag where SKU='{}';".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
+
+        try:
+            csr.execute(
+                "DELETE from ProductVariant where SKU='{}'".format(sku))
+            self.con.commit()
+        except Exception as e:
+            print(e)
+            pass
+
+        debug.debug(
+            "Custom", 0, f"Deleted --- ProductID: {productId}, sku: {sku}")
 
         csr.close()
 
@@ -462,18 +463,18 @@ class Processor:
         rows = csr.fetchall()
 
         for row in rows:
-            productID = row[0]
+            productId = row[0]
             mpn = row[1]
 
             csr.execute(
-                "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+                "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productId))
             self.con.commit()
             csr.execute(
-                "CALL AddToPendingUpdatePublish ({})".format(productID))
+                "CALL AddToPendingUpdatePublish ({})".format(productId))
             self.con.commit()
 
             debug.debug(
-                brand, 0, f"Disabled product -- Brand: {brand}, ProductID: {productID}, mpn: {mpn}")
+                brand, 0, f"Disabled product -- Brand: {brand}, ProductID: {productId}, mpn: {mpn}")
 
         debug.debug(
             brand, 0, f"Finished unpublishing {brand}. total: {len(rows)}")
