@@ -76,7 +76,7 @@ def formatprice(x, markUp):
 
 
 def formatText(text):
-    return str(text).replace("N/A", "").replace("n/a", "").replace('', '').replace('¥', '').replace('…', '').replace('„', '').strip()
+    return str(text).replace("N/A", "").replace("n/a", "").replace('', '').replace('¥', '').replace('…', '').replace('„', '').replace('', '').strip()
 
 
 def formatFloat(value):

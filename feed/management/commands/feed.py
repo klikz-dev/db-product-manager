@@ -58,6 +58,8 @@ class Processor:
         self.con.close()
 
     def fmt(self, s):
+        s = str(s).replace("N/A", "").replace("n/a", "").replace('', '').replace('¥',
+                                                                                  '').replace('…', '').replace('„', '').replace('', '').strip()
         if s != None and s != "":
             allowedCharaters = [" ", ",", ".", "'", "\"", "*",
                                 "(", ")", "$", "&", ">", "-", "=", "+", "/", "!", "%", "^", "@", ":", ";", "{", "}", "[", "]", "?"]
@@ -241,8 +243,7 @@ class Processor:
             # Refine Information
             title = f"{pName} - {sku}"
 
-            desc = self.fmt(bodyHTML.replace(
-                "<br />", "").replace("<br/>", " ").replace("<br>", " ").replace("\n", " "))
+            desc = self.fmt(re.sub(r'<br\s?/?>|\n', ' ', bodyHTML))
             if not desc:
                 desc = title
 
@@ -266,7 +267,7 @@ class Processor:
             elif price > 10:
                 priceRange = "10-25"
             else:
-                priceRange = "0-10"
+                continue
 
             margin = int((sprice - cost) / cost * 100)
 

@@ -136,6 +136,8 @@ class Processor:
 
                 # Additional Information
                 content = common.formatText(row['content'])
+                if content:
+                    content = content.replace("\n", " ")
 
                 # Measurement
                 if type == "Wallpaper":
