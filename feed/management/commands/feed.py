@@ -8,7 +8,6 @@ import re
 import boto3
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
-import gzip
 
 from library import debug, inventory
 
@@ -345,11 +344,6 @@ class Processor:
 
         return (total, skiped)
 
-    def compress_file(self, input_file, output_file):
-        with open(input_file, 'rb') as f_in:
-            with gzip.open(output_file, 'wb') as f_out:
-                f_out.writelines(f_in)
-
     def uploadToGS(self):
         now = datetime.datetime.now()
 
@@ -373,10 +367,3 @@ class Processor:
                             'ACL': 'public-read'})
         debug.debug(
             PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml')
-
-        self.compress_file(
-            FB_FEED_DIR, f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz")
-        self.s3.upload_file(
-            f"{FILEDIR}/feed/DecoratorsBestFB.xml.gz", self.bucket, "DecoratorsBestFB.xml.gz", ExtraArgs={'ACL': 'public-read'})
-        debug.debug(
-            PROCESS, 0, 'Uploaded to https://decoratorsbestimages.s3.amazonaws.com/DecoratorsBestFB.xml.gz')
