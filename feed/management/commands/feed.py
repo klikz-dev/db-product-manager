@@ -166,6 +166,7 @@ class Processor:
                 AND PV.Published=1
                 AND PV.Cost != 0
                 AND T.Name IN ("Fabric", "Wallpaper", "Trim", "Pillow")
+                AND M.BRAND NOT IN ("Madcap Cottage")
             """)
 
         products = csr.fetchall()
