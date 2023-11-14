@@ -220,7 +220,7 @@ class Processor:
                 map = 0
 
                 if mpn in saleItems:
-                    cost, map = round(cost * 0.75, 2)
+                    cost, map = saleItems[mpn]
 
                 # Tagging
                 tags = f"{collection}, {row.get('WEARCODE', '')}, {material}"
