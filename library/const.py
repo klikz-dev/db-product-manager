@@ -129,7 +129,7 @@ markup = {
         "trade": 2,
     },
     "Scalamandre": {
-        "useMAP": False,
+        "useMAP": True,
         "consumer": 1.5,
         "trade": 1.3,
         "consumer_pillow": 1.4,

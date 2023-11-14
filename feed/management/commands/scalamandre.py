@@ -9,6 +9,7 @@ import requests
 import time
 import json
 import environ
+import xlrd
 from shutil import copyfile
 
 from library import database, debug, common
@@ -119,29 +120,12 @@ class Processor:
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
         # Sale items
-        onSaleMPNs = [
-            "SC 0001RZEBRAPIL",
-            "BI 0003FLURRPILL",
-            "AL 0005BOHEPILL",
-            "EA 0001LSIBERPIL",
-            "A9 0007LLEOPILL",
-            "SC 0001LZEBRAPIL",
-            "BI 0004FLURRPILL",
-            "SC 0001ZEBRAPILL",
-            "SC 0005ZEBRAPILL",
-            "SC 0003TIGRPILL",
-            "AL 0001BOHEPILL",
-            "AL 0001LBOHEPILL",
-            "AL 0004BOHEPILL",
-            "BI 0001FLURRPILL",
-            "SC 0002ALLEPILL",
-            "SC 0001KELMPILL",
-            "SC 0002LTIGRPILL",
-            "SC 0003ANKAPILL",
-            "BI 0005FLURRPILL",
-            "EA 0001SIBERPILL",
-            "SC 0005PALAZPILL",
-        ]
+        saleItems = {}
+        wb = xlrd.open_workbook(f"{FILEDIR}/scalamandre-sale.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
+            saleItems[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
+                sh.cell_value(i, 2)), common.formatFloat(sh.cell_value(i, 4)))
 
         # Get Product Feed
         products = []
@@ -233,8 +217,10 @@ class Processor:
 
                 # Pricing
                 cost = common.formatFloat(row['NETPRICE'])
-                if mpn in onSaleMPNs:
-                    cost = round(cost * 0.75, 2)
+                map = 0
+
+                if mpn in saleItems:
+                    cost, map = round(cost * 0.75, 2)
 
                 # Tagging
                 tags = f"{collection}, {row.get('WEARCODE', '')}, {material}"
@@ -306,6 +292,7 @@ class Processor:
                 'colors': color,
 
                 'cost': cost,
+                'map': map,
 
                 'statusP': statusP,
                 'statusS': statusS,
