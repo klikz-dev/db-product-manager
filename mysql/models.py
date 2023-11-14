@@ -282,6 +282,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     PindlerSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    PoppyOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PoppySample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     Port68Order = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     Port68Sample = models.CharField(
