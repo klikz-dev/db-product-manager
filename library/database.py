@@ -240,6 +240,31 @@ class DatabaseManager:
                     debug.debug(
                         self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
 
+            except:
+                products = self.Feed.objects.filter(sku=sku)
+                for idx, product in enumerate(products, 1):
+                    if idx == 1 and published == 0 and product.statusP == True and product.cost != None:
+                        self.csr.execute(
+                            "UPDATE Product SET Published=1 WHERE ProductID={}".format(productID))
+                        self.con.commit()
+                        self.csr.execute(
+                            "CALL AddToPendingUpdatePublish ({})".format(productID))
+                        self.con.commit()
+                        pb = pb + 1
+                        debug.debug(
+                            self.brand, 0, f"Enabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
+
+                    else:
+                        self.csr.execute(
+                            "UPDATE Product SET Published = 0 WHERE ProductID = {}".format(productID))
+                        self.con.commit()
+                        self.csr.execute(
+                            "CALL AddToPendingUpdatePublish ({})".format(productID))
+                        self.con.commit()
+                        upb = upb + 1
+                        debug.debug(
+                            self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
+
             if fullSync:
                 self.csr.execute(
                     "CALL AddToPendingUpdatePublish ({})".format(productID))
