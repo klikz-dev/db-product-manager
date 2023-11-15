@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from feed.models import ExquisiteRugs
+from django.db.models import Q
 
 import os
 import environ
@@ -46,7 +47,8 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = ExquisiteRugs.objects.all()
+            products = ExquisiteRugs.objects.filter(Q(collection="Antique Loom") | Q(
+                collection="Legacy") | Q(collection="Vintage Looms"))
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 

@@ -72,9 +72,9 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
-        if "hires" in options['functions']:
+        if "manual-hires" in options['functions']:
             processor = Processor()
-            processor.hires()
+            processor.manual_hires()
 
         if "inventory" in options['functions']:
             while True:
@@ -136,176 +136,170 @@ class Processor:
         f = open(f"{FILEDIR}/kravet-master.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
         for row in cr:
-            # try:
-            if True:
-                # Primary Keys
-                mpn = common.formatText(row[0])
-                keys = mpn.split(".")
-                if len(keys) != 3 or keys[2] != "0":
-                    continue
+            # Primary Keys
+            mpn = common.formatText(row[0])
+            keys = mpn.split(".")
+            if len(keys) != 3 or keys[2] != "0":
+                continue
 
-                manufacturer = common.formatText(row[3])
-                collection = common.formatText(row[16])
+            manufacturer = common.formatText(row[3])
+            collection = common.formatText(row[16])
 
-                european = False
-                if "LIZZO" in collection:
-                    manufacturer = "LIZZO"
-                    european = True
-                elif "ANDREW MARTIN" in collection:
-                    manufacturer = "ANDREW MARTIN"
-                    european = True
-                elif "BLITHFIELD" in collection or "JAGTAR" in collection or "JOSEPHINE MUNSEY" in collection or "MISSONI HOME" in collection or "PAOLO MOSCHINO" in collection:
-                    european = True
+            european = False
+            if "LIZZO" in collection:
+                manufacturer = "LIZZO"
+                european = True
+            elif "ANDREW MARTIN" in collection:
+                manufacturer = "ANDREW MARTIN"
+                european = True
+            elif "BLITHFIELD" in collection or "JAGTAR" in collection or "JOSEPHINE MUNSEY" in collection or "MISSONI HOME" in collection or "PAOLO MOSCHINO" in collection:
+                european = True
 
-                manufacturer_mapping = {
-                    "LEE JOFA": ("Lee Jofa", "LJ"),
-                    "LEE JOFA MODERN": ("Lee Jofa", "LJ"),
-                    "FIRED EARTH": ("Lee Jofa", "LJ"),
-                    "MONKWELL": ("Lee Jofa", "LJ"),
-                    "PARKERTEX": ("Lee Jofa", "LJ"),
-                    "SEACLOTH": ("Lee Jofa", "LJ"),
-                    "WARNER LONDON": ("Lee Jofa", "LJ"),
-                    "KRAVET SMART": ("Kravet", "K"),
-                    "KRAVET DESIGN": ("Kravet", "K"),
-                    "KRAVET BASICS": ("Kravet", "K"),
-                    "KRAVET COUTURE": ("Kravet", "K"),
-                    "KRAVET CONTRACT": ("Kravet", "K"),
-                    "BAKER LIFESTYLE": ("Baker Lifestyle", ""),
-                    "MULBERRY": ("Mulberry", ""),
-                    "G P & J BAKER": ("G P & J Baker", "GPJ"),
-                    "COLE & SON": ("Cole & Son", "CS"),
-                    "GROUNDWORKS": ("Groundworks", "GW"),
-                    "THREADS": ("Threads", ""),
-                    "AVONDALE": ("Avondale", "AV"),
-                    "LAURA ASHLEY": ("Laura Ashley", "LA"),
-                    "BRUNSCHWIG & FILS": ("Brunschwig & Fils", "BF"),
-                    "GASTON Y DANIELA": ("Gaston Y Daniela", "GD"),
-                    "WINFIELD THYBONY": ("Winfield Thybony", "WF"),
-                    "CLARKE AND CLARKE": ("Clarke & Clarke", "CC"),
-                    "LIZZO": ("Lizzo", "LI"),
-                    "ANDREW MARTIN": ("Andrew Martin", "AM"),
-                }
+            manufacturer_mapping = {
+                "LEE JOFA": ("Lee Jofa", "LJ"),
+                "LEE JOFA MODERN": ("Lee Jofa", "LJ"),
+                "FIRED EARTH": ("Lee Jofa", "LJ"),
+                "MONKWELL": ("Lee Jofa", "LJ"),
+                "PARKERTEX": ("Lee Jofa", "LJ"),
+                "SEACLOTH": ("Lee Jofa", "LJ"),
+                "WARNER LONDON": ("Lee Jofa", "LJ"),
+                "KRAVET SMART": ("Kravet", "K"),
+                "KRAVET DESIGN": ("Kravet", "K"),
+                "KRAVET BASICS": ("Kravet", "K"),
+                "KRAVET COUTURE": ("Kravet", "K"),
+                "KRAVET CONTRACT": ("Kravet", "K"),
+                "BAKER LIFESTYLE": ("Baker Lifestyle", ""),
+                "MULBERRY": ("Mulberry", ""),
+                "G P & J BAKER": ("G P & J Baker", "GPJ"),
+                "COLE & SON": ("Cole & Son", "CS"),
+                "GROUNDWORKS": ("Groundworks", "GW"),
+                "THREADS": ("Threads", ""),
+                "AVONDALE": ("Avondale", "AV"),
+                "LAURA ASHLEY": ("Laura Ashley", "LA"),
+                "BRUNSCHWIG & FILS": ("Brunschwig & Fils", "BF"),
+                "GASTON Y DANIELA": ("Gaston Y Daniela", "GD"),
+                "WINFIELD THYBONY": ("Winfield Thybony", "WF"),
+                "CLARKE AND CLARKE": ("Clarke & Clarke", "CC"),
+                "LIZZO": ("Lizzo", "LI"),
+                "ANDREW MARTIN": ("Andrew Martin", "AM"),
+            }
 
-                if manufacturer in manufacturer_mapping:
-                    manufacturer, code_prefix = manufacturer_mapping[manufacturer]
+            if manufacturer in manufacturer_mapping:
+                manufacturer, code_prefix = manufacturer_mapping[manufacturer]
 
-                    if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony" or manufacturer == "Clarke & Clarke":
-                        sku = f"{code_prefix} {keys[0]}"
-                    else:
-                        sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
-
+                if manufacturer == "Cole & Son" or manufacturer == "Winfield Thybony" or manufacturer == "Clarke & Clarke":
+                    sku = f"{code_prefix} {keys[0]}"
                 else:
-                    debug.debug(
-                        BRAND, 1, f"Brand Error for MPN: {mpn}, Brand: {manufacturer}")
-                    continue
+                    sku = f"{code_prefix} {keys[0]}-{keys[1]}" if code_prefix else f"{keys[0]}-{keys[1]}"
 
-                sku = sku.replace("'", "")
+            else:
+                debug.debug(
+                    BRAND, 1, f"Brand Error for MPN: {mpn}, Brand: {manufacturer}")
+                continue
 
-                pattern = common.formatText(row[1])
-                if pattern == "." or pattern == ".." or pattern == "..." or pattern == "" or pattern.find("KF ") >= 0 or "KRAVET " in pattern:
-                    pattern = keys[0]
+            sku = sku.replace("'", "")
 
-                color = common.formatText(row[2])
-                if color == "." or color == "" or color == "NONE" or "KRAVET" in pattern:
-                    color = keys[1]
+            pattern = common.formatText(row[1])
+            if pattern == "." or pattern == ".." or pattern == "..." or pattern == "" or pattern.find("KF ") >= 0 or "KRAVET " in pattern:
+                pattern = keys[0]
 
-                if pattern == "" or color == "":
-                    continue
+            color = common.formatText(row[2])
+            if color == "." or color == "" or color == "NONE" or "KRAVET" in pattern:
+                color = keys[1]
 
-                # Categorization
-                brand = BRAND
+            if pattern == "" or color == "":
+                continue
 
-                type = common.formatText(row[17])
-                type_mapping = {
-                    "WALLCOVERING": "Wallpaper",
-                    "TRIM": "Trim",
-                    "UPHOLSTERY": "Fabric",
-                    "DRAPERY": "Fabric",
-                    "MULTIPURPOSE": "Fabric"
-                }
-                type = type_mapping.get(type, type)
+            # Categorization
+            brand = BRAND
 
-                manufacturer = f"{manufacturer} {type}"
+            type = common.formatText(row[17])
+            type_mapping = {
+                "WALLCOVERING": "Wallpaper",
+                "TRIM": "Trim",
+                "UPHOLSTERY": "Fabric",
+                "DRAPERY": "Fabric",
+                "MULTIPURPOSE": "Fabric"
+            }
+            type = type_mapping.get(type, type)
 
-                # Main Information
-                usage = common.formatText(row[17])
-                width = common.formatFloat(row[7])
-                repeatV = common.formatFloat(row[4])
-                repeatH = common.formatFloat(row[5])
+            manufacturer = f"{manufacturer} {type}"
 
-                # Additional Information
-                content = common.formatText(row[12])
-                yards = common.formatFloat(row[37])
+            # Main Information
+            usage = common.formatText(row[17])
+            width = common.formatFloat(row[7])
+            repeatV = common.formatFloat(row[4])
+            repeatH = common.formatFloat(row[5])
 
-                # Measurement
-                uom = common.formatText(row[11]).title()
-                uom_mapping = {
-                    "Each": "Item",
-                    "Foot": "Square Foot",
-                }
-                uom = uom_mapping.get(uom, uom)
-                uom = f"Per {uom}"
+            # Additional Information
+            content = common.formatText(row[12])
+            yards = common.formatFloat(row[37])
 
-                if uom == "Per Hide":
-                    continue
+            # Measurement
+            uom = common.formatText(row[11]).title()
+            uom_mapping = {
+                "Each": "Item",
+                "Foot": "Square Foot",
+            }
+            uom = uom_mapping.get(uom, uom)
+            uom = f"Per {uom}"
 
-                minimum = common.formatInt(row[38])
+            if uom == "Per Hide":
+                continue
 
-                increment = common.formatInt(row[39])
-                if increment > 1:
-                    increment = ",".join(str(increment * ii)
-                                         for ii in range(1, 21))
-                else:
-                    increment = ""
+            minimum = common.formatInt(row[38])
 
-                # Pricing
-                cost = common.formatFloat(row[10])
-                map = common.formatFloat(row[49])
+            increment = common.formatInt(row[39])
+            if increment > 1:
+                increment = ",".join(str(increment * ii)
+                                     for ii in range(1, 21))
+            else:
+                increment = ""
 
-                # Tagging
-                tags = f"{row[20]}, {row[21]}"
-                colors = f"{row[26]}, {row[27]}, {row[28]}"
+            # Pricing
+            cost = common.formatFloat(row[10])
+            map = common.formatFloat(row[49])
 
-                # Image
-                thumbnail = common.formatText(row[24] or row[25])
-                if mpn in images and not thumbnail:
-                    thumbnail = images[mpn]
+            # Tagging
+            tags = f"{row[20]}, {row[21]}"
+            colors = f"{row[26]}, {row[27]}, {row[28]}"
 
-                # Status
-                statusP = True
-                statusS = True
-                outlet = False
+            # Image
+            thumbnail = common.formatText(row[24] or row[25])
+            if mpn in images and not thumbnail:
+                thumbnail = images[mpn]
 
-                if str(row[22]).strip() != 'Y':
-                    statusP = False
+            # Status
+            statusP = True
+            statusS = True
+            outlet = False
 
-                blockCollections = [
-                    "CANDICE OLSON AFTER EIGHT",
-                    "CANDICE OLSON COLLECTION",
-                    "CANDICE OLSON MODERN NATURE 2ND EDITION",
-                    "RONALD REDDING",
-                    "RONALD REDDING ARTS & CRAFTS",
-                    "RONALD REDDING TRAVELER",
-                    "DAMASK RESOURCE LIBRARY",
-                    "MISSONI HOME",
-                    "MISSONI HOME 2020",
-                    "MISSONI HOME 2021",
-                    "MISSONI HOME 2022 INDOOR/OUTDOOR",
-                    "MISSONI HOME WALLCOVERINGS 03",
-                    "MISSONI HOME WALLCOVERINGS 04",
-                ]
-                if collection in blockCollections and type == "Wallpaper":
-                    statusP = False
+            if str(row[22]).strip() != 'Y':
+                statusP = False
 
-                if row[43].strip() != "YES":
-                    statusS = False
+            blockCollections = [
+                "CANDICE OLSON AFTER EIGHT",
+                "CANDICE OLSON COLLECTION",
+                "CANDICE OLSON MODERN NATURE 2ND EDITION",
+                "RONALD REDDING",
+                "RONALD REDDING ARTS & CRAFTS",
+                "RONALD REDDING TRAVELER",
+                "DAMASK RESOURCE LIBRARY",
+                "MISSONI HOME",
+                "MISSONI HOME 2020",
+                "MISSONI HOME 2021",
+                "MISSONI HOME 2022 INDOOR/OUTDOOR",
+                "MISSONI HOME WALLCOVERINGS 03",
+                "MISSONI HOME WALLCOVERINGS 04",
+            ]
+            if collection in blockCollections and type == "Wallpaper":
+                statusP = False
 
-                if row[31] == "Outlet":
-                    outlet = True
+            if row[43].strip() != "YES":
+                statusS = False
 
-            # except Exception as e:
-            #     debug.debug(BRAND, 1, str(e))
-            #     continue
+            if row[31] == "Outlet":
+                outlet = True
 
             product = {
                 'mpn': mpn,
@@ -376,29 +370,37 @@ class Processor:
         csr = self.con.cursor()
 
         hasImage = []
+        hasHiresImage = []
 
         csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
         for row in csr.fetchall():
             hasImage.append(str(row[0]))
+
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasHiresImage.append(str(row[0]))
+
+        csr.close()
 
         products = Kravet.objects.all()
         for product in products:
             if not product.productId or not product.thumbnail:
                 continue
 
-            if product.productId in hasImage:
-                continue
+            if product.productId not in hasImage:
+                if "http" in product.thumbnail:
+                    self.databaseManager.downloadImage(product.productId,
+                                                       product.thumbnail, product.roomsets)
+                else:
+                    self.databaseManager.downloadFileFromFTP(
+                        src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
 
-            if "http" in product.thumbnail:
-                self.databaseManager.downloadImage(product.productId,
-                                                   product.thumbnail, product.roomsets)
-            else:
-                self.databaseManager.downloadFileFromFTP(
-                    src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+            if product.productId not in hasHiresImage:
+                if "http" not in product.thumbnail and "HIRES" in product.thumbnail:
+                    self.databaseManager.downloadFileFromFTP(
+                        src=product.thumbnail, dst=f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg")
 
-        csr.close()
-
-    def hires(self):
+    def manual_hires(self):
         for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
             fpath, ext = os.path.splitext(infile)
             fname = os.path.basename(fpath)
