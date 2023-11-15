@@ -55,7 +55,8 @@ class Command(BaseCommand):
 
         if "price" in options['functions']:
             processor = Processor()
-            processor.databaseManager.updatePrices(formatPrice=False)
+            processor.databaseManager.updatePrices(
+                formatPrice=False, fullSync=True)
 
         if "tag" in options['functions']:
             processor = Processor()
@@ -276,8 +277,10 @@ class Processor:
                 uom = "Per Item"
 
                 # Pricing
-                cost = formatFloat(sh.cell_value(i, 13)) * 0.8  # Tmp: Promo
-                map = formatFloat(sh.cell_value(i, 14)) * 0.8  # Tmp: Promo
+                cost = round(formatFloat(sh.cell_value(i, 13))
+                             * 0.8, 2)  # Tmp: Promo
+                map = round(formatFloat(sh.cell_value(i, 14))
+                            * 0.8, 2)  # Tmp: Promo
 
                 if cost == 0:
                     debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))

@@ -668,7 +668,7 @@ def UpdatePriceToShopify(productID, con):
         if brand == "Surya" and "Trade" not in name:
             variant['compare_at_price'] = round(price / 0.8, 2)
         if brand == "Exquisite Rugs" and "Trade" not in name:
-            variant['compare_at_price'] = round(price / 0.85, 2)
+            variant['compare_at_price'] = round(price / 0.8, 2)
 
         s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
               headers=SHOPIFY_PRODUCT_API_HEADER,

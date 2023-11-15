@@ -532,7 +532,7 @@ class DatabaseManager:
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
 
-    def updatePrices(self, formatPrice=True):
+    def updatePrices(self, formatPrice=True, fullSync=False):
         updatedProducts = []
 
         self.csr.execute(f"""
@@ -594,6 +594,11 @@ class DatabaseManager:
                 else:
                     debug.debug(
                         self.brand, 0, f"{index}/{total}: Prices are already updated. ProductId: {productId}. COST: {product.cost}, Price: {price}, Trade Price: {priceTrade}, Checked: {type}")
+
+                    if fullSync:
+                        self.csr.execute(
+                            "CALL AddToPendingUpdatePrice ({})".format(productId))
+                        self.con.commit()
 
             except Exception as e:
                 debug.debug(self.brand, 1, str(e))
