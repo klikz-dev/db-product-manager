@@ -644,7 +644,7 @@ def UpdatePriceToShopify(productID, con):
     csr = con.cursor()
     csr.execute(
         """
-        SELECT PV.VariantID, PV.Cost, PV.Price, PV.Name, M.Brand 
+        SELECT PV.VariantID, PV.Cost, PV.Price, PV.Name, M.Brand, P.ManufacturerPartNumber
         FROM ProductVariant PV
         LEFT JOIN Product P ON P.ProductID = PV.ProductID
         LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
@@ -657,6 +657,7 @@ def UpdatePriceToShopify(productID, con):
         price = float(row[2])
         name = row[3]
         brand = row[4]
+        mpn = row[5]
 
         variant = {
             'id': variantID,
@@ -664,11 +665,49 @@ def UpdatePriceToShopify(productID, con):
             'price': price,
         }
 
-        # Tmp: Promo
+        ##############################
+        ######## Tmp: Promo ##########
+        ##############################
         if brand == "Surya" and "Trade" not in name:
             variant['compare_at_price'] = round(price / 0.8, 2)
+
         if brand == "Exquisite Rugs" and "Trade" not in name:
             variant['compare_at_price'] = round(price / 0.8, 2)
+
+        scalaPromoMPNs = [
+            "SC 0001RZEBRAPIL",
+            "BI 0003FLURRPILL",
+            "AL 0005BOHEPILL",
+            "EA 0001LSIBERPIL",
+            "A9 0007LLEOPILL",
+            "SC 0001LZEBRAPIL",
+            "BI 0004FLURRPILL",
+            "SC 0001ZEBRAPILL",
+            "SC 0005ZEBRAPILL",
+            "SC 0003TIGRPILL",
+            "AL 0001BOHEPILL",
+            "AL 0001LBOHEPILL",
+            "AL 0004BOHEPILL",
+            "BI 0001FLURRPILL",
+            "SC 0002ALLEPILL",
+            "SC 0001KELMPILL",
+            "SC 0002LTIGRPILL",
+            "SC 0003ANKAPILL",
+            "BI 0005FLURRPILL",
+            "EA 0001SIBERPILL",
+            "SC 0005PALAZPILL",
+        ]
+        if brand == "Scalamandre" and "Trade" not in name and mpn in scalaPromoMPNs:
+            variant['compare_at_price'] = round(price / 0.8, 2)
+
+        if brand == "Jamie Young" and "Trade" not in name:
+            variant['compare_at_price'] = round(price / 0.8, 2)
+
+        if brand == "Hubbardton Forge" and "Trade" not in name:
+            variant['compare_at_price'] = round(price / 0.8, 2)
+        ##############################
+        ######## Tmp: Promo ##########
+        ##############################
 
         s.put("{}/variants/{}.json".format(SHOPIFY_API_URL, variantID),
               headers=SHOPIFY_PRODUCT_API_HEADER,
