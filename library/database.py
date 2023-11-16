@@ -292,17 +292,17 @@ class DatabaseManager:
                 if formatPrice:
                     price = common.formatprice(product.map, 1)
                 else:
-                    price = product.map
+                    price = round(product.map, 2)
             else:
                 if formatPrice:
                     price = common.formatprice(product.cost, consumerMarkup)
                 else:
-                    price = product.cost * consumerMarkup
+                    price = round(product.cost * consumerMarkup, 2)
 
             if formatPrice:
                 priceTrade = common.formatprice(product.cost, tradeMarkup)
             else:
-                priceTrade = product.cost * tradeMarkup
+                priceTrade = round(product.cost * tradeMarkup, 2)
         except Exception as e:
             debug.debug(self.brand, 1,
                         f"Price Error. Check if markups are defined properly. {str(e)}")

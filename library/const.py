@@ -155,11 +155,6 @@ markup = {
         "consumer": 1.5,
         "trade": 1,
     },
-    "Tres Tintas": {
-        "useMAP": True,
-        "consumer": 2.99,
-        "trade": 1.4,
-    },
     "Surya": {
         "useMAP": True,
         "consumer": 2,
@@ -169,6 +164,11 @@ markup = {
         "useMAP": True,
         "consumer": 2,
         "trade": 1.5,
+    },
+    "Tres Tintas": {
+        "useMAP": True,
+        "consumer": 2.99,
+        "trade": 1.4,
     },
     "Walls Republic": {
         "useMAP": True,
