@@ -55,8 +55,7 @@ class Command(BaseCommand):
 
         if "price" in options['functions']:
             processor = Processor()
-            processor.databaseManager.updatePrices(
-                formatPrice=False, fullSync=True)
+            processor.databaseManager.updatePrices(formatPrice=False)
 
         if "tag" in options['functions']:
             processor = Processor()
