@@ -125,13 +125,13 @@ class Processor:
         for row in cr:
             available_mpns.append(row[1])
 
-        # Promo Prices
+        # Promo Prices 11/21 - 11/27
         prices = {}
-        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-price.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
-                sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
+        # wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-price.xlsx")
+        # sh = wb.sheet_by_index(0)
+        # for i in range(1, sh.nrows):
+        #     prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
+        #         sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
 
         # Outlet
         outletMPNs = [
