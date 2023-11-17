@@ -154,6 +154,36 @@ class ApplyFreeSampleLimit
 end
 
 
+# ================================================================
+# ApplyFreeSampleLimit
+#
+# If customer is trade member, he can order up to 10 free samples.
+# Remove any free samples from cart if he exceeded the maximum 
+# samples. Non-Trade members can't order free samples.
+# To-do: Implement auto-replacement with paid samples
+# ================================================================
+class ApplySampleOnlyDiscounts
+  def initialize(line_items)
+    @sample_discount_code = "5FREE"
+
+    @hasAllSamples = true
+    unless line_items.all? { |line_item| line_item.variant.title.include?("Sample") }
+      @hasAllSamples = false
+    end
+  end
+
+  def apply(cart)
+    return if cart.discount_code.nil?
+
+    if !@hasAllSamples && cart.discount_code.code.upcase == @sample_discount_code
+      cart.discount_code.reject(message: "This discount applies exclusively to samples.")
+    end
+
+  end
+end
+
+
+
 if !Input.cart.customer.nil?
   CAMPAIGNS = [
     DisableDiscountCodesForProductsCampaign.new(REJECT_DISCOUNT_CODE_FOR_PRODUCTS),
@@ -167,6 +197,10 @@ end
 
 freeSampleLimit = ApplyFreeSampleLimit.new(Input.cart.customer)
 freeSampleLimit.apply(Input.cart.line_items)
+
+
+sampleOnlyDiscounts = ApplySampleOnlyDiscounts.new(Input.cart.line_items)
+sampleOnlyDiscounts.apply(Input.cart)
 
 
 Output.cart = Input.cart
