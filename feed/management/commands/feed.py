@@ -112,6 +112,7 @@ class Processor:
                 AND PV.IsDefault=1
                 AND PV.Published=1
                 AND PV.Cost != 0
+                AND T.NAME NOT IN ("Furniture", "Trim")
             """)
 
         products = csr.fetchall()
