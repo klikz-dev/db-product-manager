@@ -232,7 +232,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['productId', 'manufacturerPartNumber',
                      'sku', 'pattern', 'color', 'name', 'title']
 
-    list_filter = ['isOutlet', 'published', 'deleted']
+    list_filter = ['isOutlet', 'published', 'deleted', 'productTypeId']
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

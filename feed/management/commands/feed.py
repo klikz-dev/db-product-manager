@@ -104,7 +104,7 @@ class Processor:
                 LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
                 LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
             WHERE PI.ImageIndex = 1
-                AND M.Published=1
+                AND M.Published = 1
                 AND P.Published = 1
                 AND P.ManufacturerPartNumber <> ''
                 AND P.Name NOT LIKE '%Borders'
@@ -158,7 +158,7 @@ class Processor:
                 LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
                 LEFT JOIN Type T ON P.ProductTypeID = T.TypeID
             WHERE PI.ImageIndex = 1
-                AND M.Published=1
+                AND M.Published = 1
                 AND P.Published = 1
                 AND P.ManufacturerPartNumber <> ''
                 AND P.Name NOT LIKE '%Borders'
