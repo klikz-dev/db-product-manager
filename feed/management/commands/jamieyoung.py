@@ -125,14 +125,6 @@ class Processor:
         for row in cr:
             available_mpns.append(row[1])
 
-        # Promo Prices 11/21 - 11/27
-        prices = {}
-        # wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-price.xlsx")
-        # sh = wb.sheet_by_index(0)
-        # for i in range(1, sh.nrows):
-        #     prices[common.formatText(sh.cell_value(i, 0))] = (common.formatFloat(
-        #         sh.cell_value(i, 11)), common.formatFloat(sh.cell_value(i, 13)))
-
         # Outlet
         outletMPNs = [
             "9CASPWHD131C",
@@ -239,8 +231,10 @@ class Processor:
             map = common.formatFloat(sh.cell_value(i, 9))
             msrp = common.formatFloat(sh.cell_value(i, 10))
 
-            if mpn in prices:
-                cost, map = prices[mpn]
+            # Promo Prices 11/21 - 11/27
+            cost = round(cost * 0.8, 2)
+            map = round(map * 0.8, 2)
+            msrp = round(msrp * 0.8, 2)
 
             # Tagging
             tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
