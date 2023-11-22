@@ -32,6 +32,8 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
+            processor.databaseManager.downloadFileFromSFTP(
+                src="/surya/surya_masterlist_dbest.xlsx", dst=f"{FILEDIR}/surya-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products)
 
@@ -133,7 +135,7 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f'{FILEDIR}/surya-master-new.xlsx')
+        wb = xlrd.open_workbook(f'{FILEDIR}/surya-master.xlsx')
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             try:
