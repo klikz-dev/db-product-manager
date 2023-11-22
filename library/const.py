@@ -68,11 +68,6 @@ markup = {
         "consumer": 1.75,
         "trade": 1.5,
     },
-    "Madcap Cottage": {
-        "useMAP": True,
-        "consumer": 2.3,
-        "trade": 1,
-    },
     "Materialworks": {
         "useMAP": True,
         "consumer": 1.5,

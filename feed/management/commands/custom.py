@@ -451,7 +451,7 @@ class Processor:
         csr.close()
 
     def unpublishBrand(self):
-        brand = "Tres Tintas"
+        brand = "Madcap Cottage"
 
         debug.debug(brand, 0, f"Started unpublishing {brand}")
 

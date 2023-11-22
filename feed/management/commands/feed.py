@@ -113,6 +113,7 @@ class Processor:
                 AND PV.Published=1
                 AND PV.Cost != 0
                 AND T.NAME NOT IN ("Furniture", "Trim")
+                AND M.BRAND NOT IN ("Madcap Cottage", "Jaipur Living", "Phillips", "NOIR")
             """)
 
         products = csr.fetchall()
@@ -168,7 +169,7 @@ class Processor:
                 AND PV.Published=1
                 AND PV.Cost != 0
                 AND T.Name IN ("Fabric", "Wallpaper", "Trim", "Pillow")
-                AND M.BRAND NOT IN ("Madcap Cottage")
+                AND M.BRAND NOT IN ("Madcap Cottage", "Jaipur Living", "Phillips", "NOIR")
             """)
 
         products = csr.fetchall()

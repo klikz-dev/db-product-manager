@@ -39,8 +39,6 @@ PO_RECORDS = [
     'KasmirSample',
     'KravetDecorOrder',
     'KravetDecorSample',
-    'MadcapCottageOrder',
-    'MadcapCottageSample',
     'MaterialworksOrder',
     'MaterialworksSample',
     'MaxwellOrder',
