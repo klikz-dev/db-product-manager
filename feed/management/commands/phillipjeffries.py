@@ -8,7 +8,7 @@ import requests
 import json
 import xlrd
 
-from library import database, debug
+from library import database, debug, common
 
 API_BASE_URL = "https://www.phillipjeffries.com/api/products/skews"
 
@@ -54,11 +54,12 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=True)
+            processor.databaseManager.downloadImages(missingOnly=False)
 
-        if "cutfee" in options['functions']:
+        if "quick-ship" in options['functions']:
             processor = Processor()
-            processor.databaseManager.customTags(key="cutFee", tag="Cut Fee")
+            processor.databaseManager.customTags(
+                key="quickShip", tag="Quick Ship")
 
 
 class Processor:
@@ -82,89 +83,69 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/pj-master-2023.04.05.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/phillipjeffries-master.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                try:
-                    mpn = int(sh.cell_value(i, 0))
-                except:
-                    mpn = str(sh.cell_value(i, 0))
+                mpn = sh.cell_value(i, 0)
+                sku = 'PJ {}'.format(mpn)
 
                 debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
                 response = requests.get("{}/{}.json".format(API_BASE_URL, mpn))
                 data = json.loads(response.text)
 
-                sku = 'PJ {}'.format(mpn)
-                pattern = str(data["collection"]["name"]
-                              ).replace("NEW - ", "").strip()
-                color = str(data["name"]).replace(
-                    pattern, "").replace("-", "").replace(pattern, "").strip()
-
-                if pattern == "" or color == "":
-                    continue
+                pattern = common.formatText(data['collection']['name'])
+                color = common.formatText(data['specs']['color'])
 
                 # Categorization
                 brand = BRAND
                 type = "Wallpaper"
-                manufacturer = "{} {}".format(brand, type)
-                if "collection" in data and "binders" in data["collection"] and len(data["collection"]["binders"]) > 0:
-                    collection = str(data["collection"]["binders"][0]["name"])
-                else:
-                    collection = ""
+                manufacturer = f"{brand} {type}"
+
+                collection = ""
+                for binder in data['collection']['binders']:
+                    if binder['name']:
+                        collection = common.formatText(binder['name'])
+                        break
 
                 # Main Information
-                description = str(data["collection"]["description"])
-                usage = "Wallcovering"
+                description = common.formatText(
+                    data['collection']['description'])
 
                 # Additional Information
-                specs = [
-                    ("Width", str(data["specs"]["width"])),
-                    ("Horizontal Repeat", str(
-                        data["specs"]["horizontal_repeat"])),
-                    ("Vertical Repeat", str(data["specs"]["vertical_repeat"])),
-                ]
-                features = [data["specs"]["maintenance"]]
+                specs = []
+                for key, value in data['specs'].items():
+                    if value:
+                        specs.append((key.replace("_", " ").title(), value))
 
                 # Measurement
-                try:
-                    uom = data["order"]["wallcovering"]["price"]["unit_of_measure"]
-                    if "YARD" == uom:
-                        uom = "Per Yard"
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    continue
-
-                try:
-                    minimum = int(
-                        data["order"]["wallcovering"]["minimum_order"])
-                    incre = data["order"]["wallcovering"]["order_increment"]
-                    if int(float(incre)) > 1:
-                        increment = ",".join(
-                            [str(ii * int(float(incre))) for ii in range(1, 21)])
-                    else:
-                        increment = ""
-                except Exception as e:
-                    debug.debug(BRAND, 1, str(e))
-                    continue
+                uom = "Per Yard"
+                minimum = common.formatInt(sh.cell_value(i, 4).split(" ")[0])
+                incre = common.formatInt(sh.cell_value(i, 7).split(" ")[0])
+                increment = ",".join([str(i * incre) for i in range(1, 21)])
 
                 # Pricing
-                cost = float(str(sh.cell_value(i, 2)).replace("$", ""))
+                cost = common.formatFloat(sh.cell_value(i, 2))
 
                 # Tagging
-                tags = "{}, {}".format(collection, description)
+                tags = f"{collection}, {description}, {pattern}"
                 colors = color
 
                 # Assets
-                thumbnail = data["assets"]["about_header_src"]
+                thumbnail = data['assets']['download_src']
 
-                # Availability
+                # Status
                 statusP = True
                 statusS = True
 
+                if sh.cell_value(i, 8) == "NJ, USA":
+                    quickShip = True
+                else:
+                    quickShip = False
+
             except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+                print(e)
                 continue
 
             product = {
@@ -179,10 +160,8 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
-                'usage': usage,
 
                 'specs': specs,
-                'features': features,
 
                 'uom': uom,
                 'minimum': minimum,
@@ -197,6 +176,7 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
+                'quickShip': quickShip
             }
             products.append(product)
 
