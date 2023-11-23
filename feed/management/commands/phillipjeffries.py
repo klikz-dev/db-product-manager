@@ -133,7 +133,7 @@ class Processor:
                 colors = color
 
                 # Assets
-                thumbnail = data['assets']['download_src']
+                thumbnail = f"https://www.phillipjeffries.com{data['assets']['download_src']}"
 
                 # Status
                 statusP = True
