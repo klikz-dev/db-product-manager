@@ -37,13 +37,13 @@ class Command(BaseCommand):
         if "add" in options['functions']:
             processor = Processor()
             processor.databaseManager.createProducts(
-                formatPrice=True, private=True)
+                formatPrice=True, private=False)
 
         if "update" in options['functions']:
             processor = Processor()
             products = Kasmir.objects.all()
             processor.databaseManager.updateProducts(
-                products=products, formatPrice=True, private=True)
+                products=products, formatPrice=True, private=False)
 
         if "price" in options['functions']:
             processor = Processor()
