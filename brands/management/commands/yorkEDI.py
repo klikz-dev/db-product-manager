@@ -436,42 +436,42 @@ class Command(BaseCommand):
             return False
 
         # Check Stock
-        stockStatus = True
-        csr.execute("""SELECT P.ManufacturerPartNumber AS Item, CASE WHEN PV.Name LIKE '%Sample - %' THEN 'Sample' ELSE REPLACE(PV.Pricing, 'Per ', '') END AS UOM, OS.Quantity, P.SKU
-                        FROM Orders O JOIN Orders_ShoppingCart OS ON O.ShopifyOrderID = OS.ShopifyOrderID JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Product P ON P.ProductID = PV.ProductID
-                        WHERE PV.SKU IN (SELECT SKU
-                                                FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
-                                                WHERE M.Brand = 'York')
-                        AND O.OrderNumber = {}""".format(orderNumber))
+        # stockStatus = True
+        # csr.execute("""SELECT P.ManufacturerPartNumber AS Item, CASE WHEN PV.Name LIKE '%Sample - %' THEN 'Sample' ELSE REPLACE(PV.Pricing, 'Per ', '') END AS UOM, OS.Quantity, P.SKU
+        #                 FROM Orders O JOIN Orders_ShoppingCart OS ON O.ShopifyOrderID = OS.ShopifyOrderID JOIN ProductVariant PV ON OS.VariantID = PV.VariantID JOIN Product P ON P.ProductID = PV.ProductID
+        #                 WHERE PV.SKU IN (SELECT SKU
+        #                                         FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID
+        #                                         WHERE M.Brand = 'York')
+        #                 AND O.OrderNumber = {}""".format(orderNumber))
 
-        rows = csr.fetchall()
-        for row in rows:
-            uom = row[1]
-            qty = row[2]
-            sku = row[3]
-            if "Sample" != uom:
-                csr.execute(
-                    "SELECT Quantity FROM ProductInventory WHERE SKU = '{}'".format(sku))
-                stockData = csr.fetchone()
-                if stockData:
-                    stock = stockData[0]
-                else:
-                    stock = 0
+        # rows = csr.fetchall()
+        # for row in rows:
+        #     uom = row[1]
+        #     qty = row[2]
+        #     sku = row[3]
+        #     if "Sample" != uom:
+        #         csr.execute(
+        #             "SELECT Quantity FROM ProductInventory WHERE SKU = '{}'".format(sku))
+        #         stockData = csr.fetchone()
+        #         if stockData:
+        #             stock = stockData[0]
+        #         else:
+        #             stock = 0
 
-                if stock < qty:
-                    stockStatus = False
+        #         if stock < qty:
+        #             stockStatus = False
 
-        if stockStatus != True:
-            emailer.send_email_html("York EDI",
-                                    recipient,
-                                    "PO {} need manual process (York)".format(
-                                        orderNumber),
-                                    "Hi, <br><br>PO# {} has not been processed by York EDI because ALL York items in it have inventory problem. \
-                                    Please contact the client and process it manually for ALL York items. <br><br>Best, <br>Murrell".format(orderNumber))
+        # if stockStatus != True:
+        #     emailer.send_email_html("York EDI",
+        #                             recipient,
+        #                             "PO {} need manual process (York)".format(
+        #                                 orderNumber),
+        #                             "Hi, <br><br>PO# {} has not been processed by York EDI because ALL York items in it have inventory problem. \
+        #                             Please contact the client and process it manually for ALL York items. <br><br>Best, <br>Murrell".format(orderNumber))
 
-            csr.close()
-            con.close()
-            return False
+        #     csr.close()
+        #     con.close()
+        #     return False
 
         csr.close()
         con.close()
