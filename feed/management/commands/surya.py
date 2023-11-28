@@ -116,22 +116,6 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
 
-        # Invalid images
-        unavailable = []
-        wb = xlrd.open_workbook(f'{FILEDIR}/surya-unavailable.xlsx')
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            mpn = formatText(sh.cell_value(i, 0))
-            unavailable.append(mpn)
-
-        # Best Sellers
-        bestsellingColors = []
-        wb = xlrd.open_workbook(f"{FILEDIR}/surya-bestsellers.xlsx")
-        sh = wb.sheet_by_index(0)
-        for i in range(1, sh.nrows):
-            color = common.formatText(sh.cell_value(i, 0))
-            bestsellingColors.append(color)
-
         # Get Product Feed
         products = []
 
@@ -140,137 +124,132 @@ class Processor:
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = formatText(sh.cell_value(i, 4))
+                mpn = formatText(sh.cell_value(i, 2))
                 debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
 
                 sku = f"SR {mpn}"
-                pattern = formatText(sh.cell_value(i, 1))
+                pattern = formatText(sh.cell_value(i, 5))
                 color = formatText(sh.cell_value(i, 3))
 
-                if sh.cell_value(i, 8):
-                    name = formatText(sh.cell_value(i, 8))
+                if sh.cell_value(i, 4):
+                    name = formatText(sh.cell_value(i, 4))
                 else:
                     name = ""
 
                 # Categorization
                 brand = BRAND
 
-                typeText = formatText(sh.cell_value(
-                    i, 6)) or formatText(sh.cell_value(i, 5))
-                typeText = typeText.title()
+                typeText = formatText(sh.cell_value(i, 0))
                 if not typeText or "Swatch" in typeText:
                     continue
 
-                type_mapping = {
-                    "Decorative Object/Sculpture": "Sculpture",
-                    "Vase": "Vases",
-                    "Candleholder": "Candleholders",
-                    "Decorative Tray": "Trays",
-                    "Decorative Bowl": "Decorative Bowls",
-                    "Box": "Boxes",
-                    "Jar": "Ginger Jar",
-                    "Planter": "Planters",
-                    "Lantern": "Accents",
-                    "Bookend": "Bookends",
-                    "Basket": "Baskets",
-                    "Coffee Table": "Coffee Tables",
-                    "Ottoman": "Ottomans",
-                    "End Table": "End Tables",
-                    "Stool": "Stools",
-                    "Bench": "Benches",
-                    "Console Table": "Consoles",
-                    "Dining Table": "Dining Tables",
-                    "Dining Chair": "Dining Chairs",
-                    "Bookcase": "Bookcases",
-                    "Nightstand": "Furniture",
-                    "Cabinet": "Cabinets",
-                    "Swivel Chair": "Furniture",
-                    "Sideboard": "Furniture",
-                    "Lounger": "Furniture",
-                    "Bar Cart": "Furniture",
-                    "Modular Chair": "Chairs",
-                    "Platform Bed": "Beds",
-                    "Dining Bench": "Benches",
-                    "Pendant": "Pendants",
-                    "Accent Table Lamp": "Table Lamps",
-                    "Accent Floor Lamp": "Floor Lamps",
-                    "Chandelier": "Chandeliers",
-                    "Wall Sconce": "Wall Sconces",
-                    "Task Table Lamp": "Table Lamps",
-                    "Buffet Table Lighting": "Lighting",
-                    "Task Floor Lighting": "Lighting",
-                    "Globe Table Lamp": "Table Lamps",
-                    "Globe Floor Lighting": "Lighting",
-                    "Tray Table Floor Lighting": "Lighting",
-                    "Hand Made Rug": "Rug",
-                    "Machine Woven Rug": "Rug",
-                    "Rug Pad For Hard Surfaces - Roll": "Rug",
-                    "Rug Pad For Hard Surfaces": "Rug",
-                    "Rug Pad For Outdoor Hard Surfaces": "Rug",
-                    "Rug Pad For Outdoor Hard Surfaces - Roll": "Rug",
-                    "Rug Pad For Hard Surfaces And Carpet": "Rug",
-                    "Rug Pad For Hard Surfaces And Carpet - Roll": "Rug",
-                    "Lumbar Pillow": "Pillow",
-                    "Accent Pillow": "Pillow",
-                    "Sham": "Pillow",
-                    "Duvet": "Accents",
-                    "Throw": "Throws",
-                    "Bedskirt": "Accents",
-                    "Quilt": "Pillow",
-                    "Floor Pillow": "Pillow",
-                    "Bedding Runner": "Accents",
-                    "Bolster Pillow": "Pillow",
-                    "Mirror": "Mirrors",
-                    "Overmantel Mirror": "Mirrors",
-                    "Accent Mirror": "Mirrors",
-                    "Framed Art": "Wall Art",
-                    "Wall Hanging": "Wall Art",
-                    "Full Length Mirror": "Mirrors",
-                    "Canvas Art": "Wall Art",
-                    "Sofa": "Sofas",
-                    "Dresser": "Dressers",
-                    "Chair And A Half": "Accent Chairs",
-                    "Upholstered Bed": "Beds",
-                    "Decorative Accent": "Decorative Accents",
-                    "Textiles": "Pillow",
-                    "Wall Decor": "Wall Art"
-                }
+                type = typeText
 
-                if typeText in type_mapping:
-                    type = type_mapping[typeText]
-                else:
-                    type = typeText
+                # type_mapping = {
+                #     "Decorative Object/Sculpture": "Sculpture",
+                #     "Vase": "Vases",
+                #     "Candleholder": "Candleholders",
+                #     "Decorative Tray": "Trays",
+                #     "Decorative Bowl": "Decorative Bowls",
+                #     "Box": "Boxes",
+                #     "Jar": "Ginger Jar",
+                #     "Planter": "Planters",
+                #     "Lantern": "Accents",
+                #     "Bookend": "Bookends",
+                #     "Basket": "Baskets",
+                #     "Coffee Table": "Coffee Tables",
+                #     "Ottoman": "Ottomans",
+                #     "End Table": "End Tables",
+                #     "Stool": "Stools",
+                #     "Bench": "Benches",
+                #     "Console Table": "Consoles",
+                #     "Dining Table": "Dining Tables",
+                #     "Dining Chair": "Dining Chairs",
+                #     "Bookcase": "Bookcases",
+                #     "Nightstand": "Furniture",
+                #     "Cabinet": "Cabinets",
+                #     "Swivel Chair": "Furniture",
+                #     "Sideboard": "Furniture",
+                #     "Lounger": "Furniture",
+                #     "Bar Cart": "Furniture",
+                #     "Modular Chair": "Chairs",
+                #     "Platform Bed": "Beds",
+                #     "Dining Bench": "Benches",
+                #     "Pendant": "Pendants",
+                #     "Accent Table Lamp": "Table Lamps",
+                #     "Accent Floor Lamp": "Floor Lamps",
+                #     "Chandelier": "Chandeliers",
+                #     "Wall Sconce": "Wall Sconces",
+                #     "Task Table Lamp": "Table Lamps",
+                #     "Buffet Table Lighting": "Lighting",
+                #     "Task Floor Lighting": "Lighting",
+                #     "Globe Table Lamp": "Table Lamps",
+                #     "Globe Floor Lighting": "Lighting",
+                #     "Tray Table Floor Lighting": "Lighting",
+                #     "Hand Made Rug": "Rug",
+                #     "Machine Woven Rug": "Rug",
+                #     "Rug Pad For Hard Surfaces - Roll": "Rug",
+                #     "Rug Pad For Hard Surfaces": "Rug",
+                #     "Rug Pad For Outdoor Hard Surfaces": "Rug",
+                #     "Rug Pad For Outdoor Hard Surfaces - Roll": "Rug",
+                #     "Rug Pad For Hard Surfaces And Carpet": "Rug",
+                #     "Rug Pad For Hard Surfaces And Carpet - Roll": "Rug",
+                #     "Lumbar Pillow": "Pillow",
+                #     "Accent Pillow": "Pillow",
+                #     "Sham": "Pillow",
+                #     "Duvet": "Accents",
+                #     "Throw": "Throws",
+                #     "Bedskirt": "Accents",
+                #     "Quilt": "Pillow",
+                #     "Floor Pillow": "Pillow",
+                #     "Bedding Runner": "Accents",
+                #     "Bolster Pillow": "Pillow",
+                #     "Mirror": "Mirrors",
+                #     "Overmantel Mirror": "Mirrors",
+                #     "Accent Mirror": "Mirrors",
+                #     "Framed Art": "Wall Art",
+                #     "Wall Hanging": "Wall Art",
+                #     "Full Length Mirror": "Mirrors",
+                #     "Canvas Art": "Wall Art",
+                #     "Sofa": "Sofas",
+                #     "Dresser": "Dressers",
+                #     "Chair And A Half": "Accent Chairs",
+                #     "Upholstered Bed": "Beds",
+                #     "Decorative Accent": "Decorative Accents",
+                #     "Textiles": "Pillow",
+                #     "Wall Decor": "Wall Art"
+                # }
+
+                # if typeText in type_mapping:
+                #     type = type_mapping[typeText]
+                # else:
+                #     type = typeText
 
                 manufacturer = BRAND
                 collection = pattern
 
                 # Main Information
-                description = formatText(sh.cell_value(i, 9))
+                description = formatText(sh.cell_value(i, 6))
                 usage = typeText
-                width = formatFloat(sh.cell_value(i, 25))
-                height = formatFloat(sh.cell_value(i, 26))
-                depth = formatFloat(sh.cell_value(i, 24))
+                width = formatFloat(sh.cell_value(i, 19))
+                height = formatFloat(sh.cell_value(i, 20))
+                depth = formatFloat(sh.cell_value(i, 18))
 
                 if height == 0 and depth != 0:
                     height = depth
                     depth = 0
 
-                if "D" in sh.cell_value(i, 22):
-                    size = ""
-                    dimension = formatText(sh.cell_value(i, 22))
-                else:
-                    size = formatText(sh.cell_value(i, 22))
-                    dimension = ""
+                size = formatText(sh.cell_value(i, 16))
 
                 # Additional Information
-                material = formatText(sh.cell_value(i, 18))
-                care = f"{formatText(sh.cell_value(i, 41))}, {formatText(sh.cell_value(i, 42))}"
-                country = formatText(sh.cell_value(i, 33))
-                upc = formatInt(sh.cell_value(i, 11))
+                material = formatText(sh.cell_value(i, 13))
+                care = formatText(sh.cell_value(i, 71))
+                country = formatText(sh.cell_value(i, 28))
+                upc = formatInt(sh.cell_value(i, 8))
 
-                weight = formatFloat(sh.cell_value(i, 27)) or 5
+                weight = formatFloat(sh.cell_value(i, 21)) or 5
                 specs = [
-                    ("Colors", formatText(sh.cell_value(i, 15))),
+                    ("Colors", formatText(sh.cell_value(i, 12))),
                     ("Weight", f"{weight} lbs"),
                 ]
 
@@ -278,9 +257,9 @@ class Processor:
                 uom = "Per Item"
 
                 # Pricing
-                cost = round(formatFloat(sh.cell_value(i, 13))
+                cost = round(formatFloat(sh.cell_value(i, 9))
                              * 0.8, 2)  # Tmp: Promo
-                map = round(formatFloat(sh.cell_value(i, 14))
+                map = round(formatFloat(sh.cell_value(i, 10))
                             * 0.8, 2)  # Tmp: Promo
 
                 if cost == 0:
@@ -288,40 +267,35 @@ class Processor:
                     continue
 
                 # Tagging
-                tags = f"{formatText(sh.cell_value(i, 19))}, {formatText(sh.cell_value(i, 20))}"
-                if formatText(sh.cell_value(i, 37)) == "Yes":
+                tags = f"{formatText(sh.cell_value(i, 14))}, {formatText(sh.cell_value(i, 41))}"
+                if formatText(sh.cell_value(i, 31)) == "Yes":
                     tags = "{}, Outdoor".format(tags)
                 tags = f"{tags}, {type}, {collection}, {pattern}"
 
-                colors = formatText(sh.cell_value(i, 15))
+                colors = formatText(sh.cell_value(i, 12))
 
                 # Status
                 statusP = True
                 statusS = False
 
-                if mpn in unavailable:
-                    debug.debug(
-                        BRAND, 1, "Product Image is unavailable for MPN: {}".format(mpn))
-                    statusP = False
-
-                if color in bestsellingColors:
+                if formatText(sh.cell_value(i, 30)) == "Yes":
                     bestSeller = True
                 else:
                     bestSeller = False
 
                 # Image
-                thumbnail = sh.cell_value(i, 120)
+                thumbnail = sh.cell_value(i, 92)
 
                 roomsets = []
-                for id in range(121, 126):
+                for id in range(93, 99):
                     if sh.cell_value(i, id) != "":
                         roomsets.append(sh.cell_value(i, id))
 
                 # Shipping
-                shippingHeight = common.formatFloat(sh.cell_value(i, 30))
-                shippingWidth = common.formatFloat(sh.cell_value(i, 29))
-                shippingDepth = common.formatFloat(sh.cell_value(i, 28))
-                shippingWeight = common.formatFloat(sh.cell_value(i, 31))
+                shippingHeight = common.formatFloat(sh.cell_value(i, 24))
+                shippingWidth = common.formatFloat(sh.cell_value(i, 25))
+                shippingDepth = common.formatFloat(sh.cell_value(i, 23))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 22))
                 if shippingWidth > 107 or shippingHeight > 107 or shippingDepth > 107 or shippingWeight > 40:
                     whiteGlove = True
                 else:
@@ -350,7 +324,6 @@ class Processor:
                 'height': height,
                 'depth': depth,
                 'size': size,
-                'dimension': dimension,
                 'specs': specs,
 
                 'material': material,
