@@ -231,11 +231,6 @@ class Processor:
             map = common.formatFloat(sh.cell_value(i, 9))
             msrp = common.formatFloat(sh.cell_value(i, 10))
 
-            # Promo Prices 11/21 - 11/27
-            cost = round(cost * 0.8, 2)
-            map = round(map * 0.8, 2)
-            msrp = round(msrp * 0.8, 2)
-
             # Tagging
             tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
             colors = color
