@@ -232,7 +232,7 @@ class Processor:
             msrp = common.formatFloat(sh.cell_value(i, 10))
 
             # Tagging
-            tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {description}"
+            tags = f"{sh.cell_value(i, 19)}, {','.join(features)}, {collection}, {pattern}, {description}"
             colors = color
 
             # Shipping
