@@ -222,7 +222,7 @@ class Processor:
             size = row[1].lower()
             isLumbar = True
             for key in const.sizeDict.keys():
-                if common.check_exact_word(key, size):
+                if key in size:
                     csr.execute("CALL AddToProductTag ({}, {})".format(
                         common.sq(sku), common.sq(const.sizeDict[key])))
                     self.con.commit()
