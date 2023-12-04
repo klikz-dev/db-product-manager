@@ -168,9 +168,9 @@ class Processor:
 
                 # Pricing
                 cost = round(common.formatFloat(
-                    sh.cell_value(i, 7)) * 0.8, 2)  # Tmp: Promo
+                    sh.cell_value(i, 7)) * 0.85, 2)  # Tmp: Promo
                 map = round(common.formatFloat(sh.cell_value(i, 8))
-                            * 0.8, 2)  # Tmp: Promo
+                            * 0.85, 2)  # Tmp: Promo
 
                 # Measurement
                 uom = "Per Item"
