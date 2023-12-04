@@ -158,11 +158,6 @@ class Processor:
                 map = common.formatFloat(sh.cell_value(i, 18))
                 msrp = common.formatFloat(sh.cell_value(i, 19))
 
-                # Promo 11/20 - 12/4
-                cost = round(cost * 0.8, 2)
-                map = round(map * 0.8, 2)
-                msrp = round(msrp * 0.8, 2)
-
                 # Measurement
                 uom = "Per Item"
 
