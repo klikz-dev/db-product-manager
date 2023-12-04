@@ -145,85 +145,20 @@ class Processor:
 
                 type = typeText
 
-                # type_mapping = {
-                #     "Decorative Object/Sculpture": "Sculpture",
-                #     "Vase": "Vases",
-                #     "Candleholder": "Candleholders",
-                #     "Decorative Tray": "Trays",
-                #     "Decorative Bowl": "Decorative Bowls",
-                #     "Box": "Boxes",
-                #     "Jar": "Ginger Jar",
-                #     "Planter": "Planters",
-                #     "Lantern": "Accents",
-                #     "Bookend": "Bookends",
-                #     "Basket": "Baskets",
-                #     "Coffee Table": "Coffee Tables",
-                #     "Ottoman": "Ottomans",
-                #     "End Table": "End Tables",
-                #     "Stool": "Stools",
-                #     "Bench": "Benches",
-                #     "Console Table": "Consoles",
-                #     "Dining Table": "Dining Tables",
-                #     "Dining Chair": "Dining Chairs",
-                #     "Bookcase": "Bookcases",
-                #     "Nightstand": "Furniture",
-                #     "Cabinet": "Cabinets",
-                #     "Swivel Chair": "Furniture",
-                #     "Sideboard": "Furniture",
-                #     "Lounger": "Furniture",
-                #     "Bar Cart": "Furniture",
-                #     "Modular Chair": "Chairs",
-                #     "Platform Bed": "Beds",
-                #     "Dining Bench": "Benches",
-                #     "Pendant": "Pendants",
-                #     "Accent Table Lamp": "Table Lamps",
-                #     "Accent Floor Lamp": "Floor Lamps",
-                #     "Chandelier": "Chandeliers",
-                #     "Wall Sconce": "Wall Sconces",
-                #     "Task Table Lamp": "Table Lamps",
-                #     "Buffet Table Lighting": "Lighting",
-                #     "Task Floor Lighting": "Lighting",
-                #     "Globe Table Lamp": "Table Lamps",
-                #     "Globe Floor Lighting": "Lighting",
-                #     "Tray Table Floor Lighting": "Lighting",
-                #     "Hand Made Rug": "Rug",
-                #     "Machine Woven Rug": "Rug",
-                #     "Rug Pad For Hard Surfaces - Roll": "Rug",
-                #     "Rug Pad For Hard Surfaces": "Rug",
-                #     "Rug Pad For Outdoor Hard Surfaces": "Rug",
-                #     "Rug Pad For Outdoor Hard Surfaces - Roll": "Rug",
-                #     "Rug Pad For Hard Surfaces And Carpet": "Rug",
-                #     "Rug Pad For Hard Surfaces And Carpet - Roll": "Rug",
-                #     "Lumbar Pillow": "Pillow",
-                #     "Accent Pillow": "Pillow",
-                #     "Sham": "Pillow",
-                #     "Duvet": "Accents",
-                #     "Throw": "Throws",
-                #     "Bedskirt": "Accents",
-                #     "Quilt": "Pillow",
-                #     "Floor Pillow": "Pillow",
-                #     "Bedding Runner": "Accents",
-                #     "Bolster Pillow": "Pillow",
-                #     "Mirror": "Mirrors",
-                #     "Overmantel Mirror": "Mirrors",
-                #     "Accent Mirror": "Mirrors",
-                #     "Framed Art": "Wall Art",
-                #     "Wall Hanging": "Wall Art",
-                #     "Full Length Mirror": "Mirrors",
-                #     "Canvas Art": "Wall Art",
-                #     "Sofa": "Sofas",
-                #     "Dresser": "Dressers",
-                #     "Chair And A Half": "Accent Chairs",
-                #     "Upholstered Bed": "Beds",
-                #     "Decorative Accent": "Decorative Accents",
-                #     "Textiles": "Pillow",
-                #     "Wall Decor": "Wall Art"
-                # }
+                type_mapping = {
+                    "Accent and Lounge Chairs": "Accent Chairs",
+                    "Bedding": "Beds",
+                    "Ceiling Lighting": "Lighting",
+                    "Made to Order Rugs": "Rug",
+                    "Rug Blanket": "Rug",
+                    "Rugs": "Rug",
+                    "Wall Art - Stock": "Wall Art"
+                }
 
-                # if typeText in type_mapping:
-                #     type = type_mapping[typeText]
-                # else:
-                #     type = typeText
+                if typeText in type_mapping:
+                    type = type_mapping[typeText]
+                else:
+                    type = typeText
 
                 manufacturer = BRAND
                 collection = pattern
@@ -257,10 +192,8 @@ class Processor:
                 uom = "Per Item"
 
                 # Pricing
-                cost = round(formatFloat(sh.cell_value(i, 9))
-                             * 0.8, 2)  # Tmp: Promo
-                map = round(formatFloat(sh.cell_value(i, 10))
-                            * 0.8, 2)  # Tmp: Promo
+                cost = formatFloat(sh.cell_value(i, 9))
+                map = formatFloat(sh.cell_value(i, 10))
 
                 if cost == 0:
                     debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
