@@ -6,6 +6,7 @@ import environ
 import pymysql
 import xlrd
 import time
+import datetime
 
 from library import database, debug, common
 
@@ -73,8 +74,12 @@ class Command(BaseCommand):
         if "main" in options['functions']:
             while True:
                 with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="/peninsulahome/", dst=f"{FILEDIR}/peninsulahome-inventory.xlsx", fileSrc=False, delete=True)
+                    files = processor.databaseManager.browseSFTP(
+                        src="/peninsulahome/")
+                    for file in files:
+                        if "xlsx" in file:
+                            processor.databaseManager.downloadFileFromSFTP(
+                                src=f"/peninsulahome/{file}", dst=f"{FILEDIR}/peninsulahome-inventory.xlsx", fileSrc=True, delete=True)
 
                     products = processor.fetchFeed()
                     processor.databaseManager.writeFeed(products=products)
@@ -113,7 +118,14 @@ class Processor:
         for i in range(1, sh.nrows):
             mpn = common.formatText(sh.cell_value(i, 0))
             stockP = common.formatFloat(sh.cell_value(i, 1))
-            stocks[mpn] = stockP
+
+            stockNote = sh.cell_value(i, 2)
+            if stockNote:
+                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
+                date_obj = datetime.datetime(*date_tuple)
+                stockNote = date_obj.date()
+
+            stocks[mpn] = (stockP, stockNote)
 
         discontinuedMPNs = []
         sh = wb.sheet_by_index(1)
@@ -217,9 +229,10 @@ class Processor:
 
                 # Stock
                 if mpn in stocks:
-                    stockP = stocks[mpn]
+                    stockP, stockNote = stocks[mpn]
                 else:
                     stockP = 0
+                    stockNote = ""
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -267,7 +280,7 @@ class Processor:
                 'quickShip': quickShip,
 
                 'stockP': stockP,
-                'stockNote': leadtime.title()
+                'stockNote': stockNote
             }
             products.append(product)
 
