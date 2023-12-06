@@ -88,7 +88,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False, delete=False)
+                        src="/jamieyoung", dst=f"{FILEDIR}/jamieyoung-inventory.csv", fileSrc=False, delete=True)
 
                     products = processor.fetchFeed()
                     processor.databaseManager.writeFeed(products=products)
@@ -250,9 +250,6 @@ class Processor:
             else:
                 whiteGlove = False
 
-            # Stock
-            stockNote = "3 days"
-
             # Image
             thumbnail = common.formatText(
                 sh.cell_value(i, 69)).replace("dl=0", "dl=1")
@@ -336,8 +333,6 @@ class Processor:
 
                 'weight': shippingWeight,
 
-                'stockNote': stockNote,
-
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
             }
@@ -374,21 +369,22 @@ class Processor:
         f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
         for row in cr:
-            try:
-                mpn = row[1]
-                quantity = int(row[2])
+            mpn = common.formatText(row[1])
+            if not mpn:
+                continue
 
-                product = JamieYoung.objects.get(mpn=mpn)
-            except JamieYoung.DoesNotExist:
-                continue
-            except Exception as e:
-                print(str(e))
-                continue
+            sku = f"JY {mpn}"
+
+            stockP = common.formatInt(row[2])
+
+            stockNote = common.formatText(row[4])
+            if "-" in stockNote:
+                stockNote = ""
 
             stock = {
-                'sku': product.sku,
-                'quantity': quantity,
-                'note': product.stockNote
+                'sku': sku,
+                'quantity': stockP,
+                'note': stockNote
             }
             stocks.append(stock)
 
