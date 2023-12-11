@@ -255,6 +255,9 @@ class Processor:
                     statusP = False
                     statusS = False
 
+                if type == "Pillow":
+                    statusS = False
+
                 manufacturer = f"{manufacturer} {type}"
 
             except Exception as e:
