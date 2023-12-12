@@ -168,7 +168,7 @@ class Processor:
                 AND PV.IsDefault=1
                 AND PV.Published=1
                 AND PV.Cost != 0
-                AND T.Name IN ("Fabric", "Wallpaper", "Trim", "Pillow")
+                AND T.Name IN ("Wallpaper", "Pillow")
                 AND M.BRAND NOT IN ("Madcap Cottage", "Jaipur Living", "Phillips", "NOIR")
             """)
 
