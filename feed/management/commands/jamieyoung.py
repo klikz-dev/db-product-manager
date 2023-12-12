@@ -123,7 +123,8 @@ class Processor:
         f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
         cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
         for row in cr:
-            available_mpns.append(row[1])
+            if common.formatInt(row[2]) > 0:
+                available_mpns.append(row[1])
 
         # Outlet
         outletMPNs = [
