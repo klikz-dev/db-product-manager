@@ -319,8 +319,12 @@ class DatabaseManager:
 
         ptype = product.type
 
-        if private:
+        if product.brand == "Jamie Young" and product.collection == "LIFESTYLE":
+            manufacturer == "DecoratorsBest Decor"
+
+        elif private:
             manufacturer = "DecoratorsBest"
+
         else:
             manufacturer = product.manufacturer
 
@@ -484,10 +488,6 @@ class DatabaseManager:
                 continue
 
             try:
-                # Jamie Young Lifestyle is private
-                if product.manufacturer == "Jamie Young" and product.collection == "LIFESTYLE":
-                    private = True
-
                 createdInDatabase = self.createProduct(
                     product, formatPrice, private=private)
                 if not createdInDatabase:
@@ -517,10 +517,6 @@ class DatabaseManager:
                 continue
 
             try:
-                # Jamie Young Lifestyle is private
-                if product.manufacturer == "Jamie Young" and product.collection == "LIFESTYLE":
-                    private = True
-
                 createdInDatabase = self.createProduct(
                     product, formatPrice, private=private)
                 if not createdInDatabase:
