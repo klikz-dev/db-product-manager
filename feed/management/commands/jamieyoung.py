@@ -183,7 +183,7 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master-new.xlsx")
+        wb = xlrd.open_workbook(f"{FILEDIR}/jamieyoung-master.xlsx")
         sh = wb.sheet_by_index(0)
         for i in range(2, sh.nrows):
             # Primary Keys
@@ -197,7 +197,7 @@ class Processor:
             brand = BRAND
             type = common.formatText(sh.cell_value(i, 7)).title()
             manufacturer = BRAND
-            collection = str(sh.cell_value(i, 4))
+            collection = common.formatText(sh.cell_value(i, 4))
 
             # Main Information
             description = common.formatText(sh.cell_value(i, 26))
