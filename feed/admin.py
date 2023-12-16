@@ -21,6 +21,7 @@ from .models import PeninsulaHome
 from .models import Phillips
 from .models import PhillipJeffries
 from .models import Pindler
+from .models import PKaufmann
 from .models import Poppy
 from .models import Port68
 from .models import PremierPrints
@@ -258,6 +259,11 @@ class PhillipsAdmin(FeedAdmin):
 
 @admin.register(Pindler)
 class PindlerAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(PKaufmann)
+class PKaufmannAdmin(FeedAdmin):
     pass
 
 
