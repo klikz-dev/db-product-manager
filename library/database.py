@@ -320,7 +320,7 @@ class DatabaseManager:
         ptype = product.type
 
         if product.brand == "Jamie Young" and product.collection == "LIFESTYLE":
-            manufacturer == "DecoratorsBest Decor"
+            manufacturer = "DecoratorsBest Decor"
 
         elif private:
             manufacturer = "DecoratorsBest"
