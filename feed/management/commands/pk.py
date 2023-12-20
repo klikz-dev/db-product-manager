@@ -100,6 +100,8 @@ class Processor:
 
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 8))
+                description = description.replace("*", "<br>*")
+
                 width = common.formatFloat(sh.cell_value(i, 16))
                 length = common.formatFloat(sh.cell_value(i, 17)) * 12
                 size = common.formatText(sh.cell_value(i, 18))
