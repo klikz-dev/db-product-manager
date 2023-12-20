@@ -36,7 +36,7 @@
 REJECT_DISCOUNT_CODE_FOR_PRODUCTS = [
   {
     discount_code_match_type: :partial,
-    discount_codes: ["DBWELCOME1", "QUIZ20", "RAF", "THANKS23", "GIFT23"],
+    discount_codes: ["DBWELCOME1", "QUIZ20", "RAF", "THANKS23", "GIFT23", "HOLIDAY23"],
     customer_tag_match_type: :include,
     customer_tags: ["trade"],
     rejection_message: "Trade members cannot use this code."
