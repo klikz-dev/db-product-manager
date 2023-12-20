@@ -2,7 +2,8 @@ import xlrd
 import pymysql
 import environ
 import os
-import time
+from shutil import copyfile
+
 from feed.models import PKaufmann
 from django.core.management.base import BaseCommand
 
@@ -54,18 +55,7 @@ class Command(BaseCommand):
 
         if "image" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadImages(missingOnly=True)
-
-        if "inventory" in options['functions']:
-            while True:
-                with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="/pk/pk-inventory.xlsx", dst=f"{FILEDIR}/pk-inventory.xlsx", fileSrc=True, delete=False)
-                    processor.inventory()
-
-                print("Finished process. Waiting for next run. {}:{}".format(
-                    BRAND, options['functions']))
-                time.sleep(86400)
+            processor.image()
 
 
 class Processor:
@@ -191,23 +181,19 @@ class Processor:
         debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
-    def inventory(self):
-        stocks = []
+    def image(self):
+        products = PKaufmann.objects.all()
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/pk-inventory.xlsx")
-        sh = wb.sheet_by_index(0)
-
-        for i in range(1, sh.nrows):
-            mpn = common.formatText(sh.cell_value(i, 2))
-            sku = f"TP {mpn}"
-
-            stockP = common.formatInt(sh.cell_value(i, 5))
-
-            stock = {
-                'sku': sku,
-                'quantity': stockP,
-                'note': ""
-            }
-            stocks.append(stock)
-
-        self.databaseManager.updateStock(stocks=stocks, stockType=1)
+        for product in products:
+            for fname in os.listdir(f"{FILEDIR}/images/pk/"):
+                roomidx = 2
+                if product.mpn in fname:
+                    if product.mpn == fname.split(".")[0]:
+                        copyfile(f"{FILEDIR}/images/pk/{fname}",
+                                 f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+                        copyfile(f"{FILEDIR}/images/pk/{fname}",
+                                 f"{FILEDIR}/../../../images/hires/{product.productId}_20.jpg")
+                    else:
+                        copyfile(f"{FILEDIR}/images/pk/{fname}",
+                                 f"{FILEDIR}/../../../images/roomset/{product.productId}_{roomidx}.jpg")
+                        roomidx = roomidx + 1
