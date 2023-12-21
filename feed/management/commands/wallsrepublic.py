@@ -26,7 +26,7 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
-                src="/wallsrepublic/Wallpaper Datasheet Batch 1.xlsx", dst=f"{FILEDIR}/wallsrepublic-master.xlsx", fileSrc=True, delete=False)
+                src="/wallsrepublic/wallsrepublic-master.xlsx", dst=f"{FILEDIR}/wallsrepublic-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
             processor.databaseManager.validateFeed()
@@ -66,7 +66,7 @@ class Command(BaseCommand):
                     for file in files:
                         if "Inventory" in file:
                             processor.databaseManager.downloadFileFromSFTP(
-                                src=f"/wallsrepublic/{file}", dst=f"{FILEDIR}/wallsrepublic-inventory.xlsx", fileSrc=True, delete=False)
+                                src=f"/wallsrepublic/{file}", dst=f"{FILEDIR}/wallsrepublic-inventory.xlsx", fileSrc=True, delete=True)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -136,6 +136,7 @@ class Processor:
             material = common.formatText(sh.cell_value(i, 24))
             washability = common.formatText(sh.cell_value(i, 25))
             removability = common.formatText(sh.cell_value(i, 26))
+
             features = [
                 f"Match: {match}",
                 f"Paste: {paste}",
@@ -143,6 +144,10 @@ class Processor:
                 f"Washability: {washability}",
                 f"Removability: {removability}",
             ]
+            for id in range(30, 34):
+                feature = common.formatText(sh.cell_value(i, id))
+                if feature:
+                    features.append(feature)
 
             # Pricing
             cost = common.formatFloat(sh.cell_value(i, 9))
@@ -156,10 +161,10 @@ class Processor:
             tags = f"{match}, {paste}, {material}, {washability}, {removability}, {common.formatText(sh.cell_value(i, 27))}, {collection}, {pattern}, {description}"
 
             # Image
-            thumbnail = sh.cell_value(i, 30)
+            thumbnail = sh.cell_value(i, 34)
 
             roomsets = []
-            for id in range(31, 35):
+            for id in range(35, 39):
                 roomset = sh.cell_value(i, id)
                 if roomset != "":
                     roomsets.append(roomset)
