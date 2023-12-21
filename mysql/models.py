@@ -290,6 +290,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     PremierPrintsSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    PKaufmannOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    PKaufmannSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     RalphLaurenOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     RalphLaurenSample = models.CharField(

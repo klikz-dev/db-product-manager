@@ -222,7 +222,7 @@ class LineItemViewSet(viewsets.ModelViewSet):
         poRecord = PORecord.objects.values()
         lastPO = None
 
-        brandName = brand.replace(' ', '')
+        brandName = brand.replace(' ', '').replace('/', '')
         if type == "o":
             typeName = "Order"
         else:

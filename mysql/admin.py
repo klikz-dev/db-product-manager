@@ -61,6 +61,8 @@ PO_RECORDS = [
     'Port68Sample',
     'PremierPrintsOrder',
     'PremierPrintsSample',
+    'PKaufmannOrder',
+    'PKaufmannSample',
     'RalphLaurenOrder',
     'RalphLaurenSample',
     'SeabrookOrder',
