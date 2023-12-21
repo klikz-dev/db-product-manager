@@ -126,7 +126,7 @@ markup = {
     "P/Kaufmann": {
         "useMAP": True,
         "consumer": 1.6,
-        "trade": 1.2,
+        "trade": 1.3,
     },
     "Scalamandre": {
         "useMAP": True,
