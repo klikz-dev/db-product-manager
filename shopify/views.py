@@ -261,6 +261,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         products = Product.objects.all()
 
         productId = self.request.query_params.get('id')
+        sku = self.request.query_params.get('sku')
         pattern = self.request.query_params.get('pattern')
         color = self.request.query_params.get('color')
         type = self.request.query_params.get('type')
@@ -268,6 +269,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if productId:
             products = products.filter(productId=productId)
+
+        if sku:
+            products = products.filter(sku=sku)
 
         if pattern:
             products = products.filter(pattern=pattern)
