@@ -332,8 +332,13 @@ class VariantViewSet(viewsets.ModelViewSet):
         variants = Variant.objects.all()
 
         variantID = self.request.query_params.get('id')
-        if variantID is not None:
+        productId = self.request.query_params.get('productid')
+
+        if variantID:
             variants = variants.filter(VariantID=variantID)
+
+        if productId:
+            variants = variants.filter(productId=productId)
 
         page = self.paginate_queryset(variants)
         if page is not None:
