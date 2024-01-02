@@ -668,39 +668,39 @@ def UpdatePriceToShopify(productID, con):
         ##############################
         ######## Tmp: Promo ##########
         ##############################
-        variant['compare_at_price'] = None
+        # variant['compare_at_price'] = None
 
-        if brand == "Exquisite Rugs" and "Trade" not in name:
-            variant['compare_at_price'] = round(price / 0.85, 2)
+        # if brand == "Exquisite Rugs" and "Trade" not in name:
+        #     variant['compare_at_price'] = round(price / 0.85, 2)
 
-        if brand == "Surya" and "Trade" not in name:
-            variant['compare_at_price'] = round(price / 0.85, 2)
+        # if brand == "Surya" and "Trade" not in name:
+        #     variant['compare_at_price'] = round(price / 0.85, 2)
 
-        scalaPromoMPNs = [
-            "SC 0001RZEBRAPIL",
-            "BI 0003FLURRPILL",
-            "AL 0005BOHEPILL",
-            "EA 0001LSIBERPIL",
-            "A9 0007LLEOPILL",
-            "SC 0001LZEBRAPIL",
-            "BI 0004FLURRPILL",
-            "SC 0001ZEBRAPILL",
-            "SC 0005ZEBRAPILL",
-            "SC 0003TIGRPILL",
-            "AL 0001BOHEPILL",
-            "AL 0001LBOHEPILL",
-            "AL 0004BOHEPILL",
-            "BI 0001FLURRPILL",
-            "SC 0002ALLEPILL",
-            "SC 0001KELMPILL",
-            "SC 0002LTIGRPILL",
-            "SC 0003ANKAPILL",
-            "BI 0005FLURRPILL",
-            "EA 0001SIBERPILL",
-            "SC 0005PALAZPILL",
-        ]
-        if brand == "Scalamandre" and "Trade" not in name and mpn in scalaPromoMPNs:
-            variant['compare_at_price'] = round(price / 0.8, 2)
+        # scalaPromoMPNs = [
+        #     "SC 0001RZEBRAPIL",
+        #     "BI 0003FLURRPILL",
+        #     "AL 0005BOHEPILL",
+        #     "EA 0001LSIBERPIL",
+        #     "A9 0007LLEOPILL",
+        #     "SC 0001LZEBRAPIL",
+        #     "BI 0004FLURRPILL",
+        #     "SC 0001ZEBRAPILL",
+        #     "SC 0005ZEBRAPILL",
+        #     "SC 0003TIGRPILL",
+        #     "AL 0001BOHEPILL",
+        #     "AL 0001LBOHEPILL",
+        #     "AL 0004BOHEPILL",
+        #     "BI 0001FLURRPILL",
+        #     "SC 0002ALLEPILL",
+        #     "SC 0001KELMPILL",
+        #     "SC 0002LTIGRPILL",
+        #     "SC 0003ANKAPILL",
+        #     "BI 0005FLURRPILL",
+        #     "EA 0001SIBERPILL",
+        #     "SC 0005PALAZPILL",
+        # ]
+        # if brand == "Scalamandre" and "Trade" not in name and mpn in scalaPromoMPNs:
+        #     variant['compare_at_price'] = round(price / 0.8, 2)
         ##############################
         ######## Tmp: Promo ##########
         ##############################

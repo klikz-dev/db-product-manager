@@ -195,10 +195,6 @@ class Processor:
                 cost = formatFloat(sh.cell_value(i, 9))
                 map = formatFloat(sh.cell_value(i, 10))
 
-                # Sale
-                cost = round(cost * 0.85, 2)
-                map = round(map * 0.85, 2)
-
                 if cost == 0:
                     debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
                     continue

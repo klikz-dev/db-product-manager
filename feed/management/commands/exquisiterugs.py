@@ -167,10 +167,8 @@ class Processor:
                 country = common.formatText(sh.cell_value(i, 35))
 
                 # Pricing
-                cost = round(common.formatFloat(
-                    sh.cell_value(i, 7)) * 0.85, 2)  # Tmp: Promo
-                map = round(common.formatFloat(sh.cell_value(i, 8))
-                            * 0.85, 2)  # Tmp: Promo
+                cost = common.formatFloat(sh.cell_value(i, 7))
+                map = common.formatFloat(sh.cell_value(i, 8))
 
                 # Measurement
                 uom = "Per Item"
