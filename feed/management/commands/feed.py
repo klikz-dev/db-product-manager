@@ -165,11 +165,15 @@ class Processor:
                 AND P.ManufacturerPartNumber <> ''
                 AND P.Name NOT LIKE '%Borders'
                 AND P.Name NOT LIKE '%Disney'
+                AND P.Name NOT LIKE '%Grasscloth Natural%' 
+                AND P.Name NOT LIKE '%Natural Grasscloth%'
+                AND PV.MinimumQuantity = 1
+                AND PV.RestrictedQuantities = ""
                 AND PV.IsDefault=1
                 AND PV.Published=1
                 AND PV.Cost != 0
                 AND T.Name IN ("Wallpaper", "Pillow")
-                AND M.BRAND NOT IN ("Madcap Cottage", "Jaipur Living", "Phillips", "NOIR")
+                AND M.BRAND IN ("Brewster", "Tempaper", "Elaine Smith", "Jaipur Living", "Kravet", "P/Kaufmann", "Poppy", "Schumacher", "Seabrook", "Surya")
             """)
 
         products = csr.fetchall()
