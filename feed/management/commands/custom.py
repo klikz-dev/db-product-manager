@@ -104,7 +104,7 @@ class Processor:
                 typeId = sample.product.productTypeId
 
                 if typeId == 1 or typeId == 2 or typeId == 5:
-                    newPrice = 7
+                    newPrice = 5
                 elif typeId == 4:
                     newPrice = 15
                 else:
