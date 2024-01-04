@@ -2,6 +2,9 @@ import xlrd
 import pymysql
 import environ
 import os
+import csv
+import codecs
+import time
 from shutil import copyfile
 
 from feed.models import PKaufmann
@@ -56,6 +59,15 @@ class Command(BaseCommand):
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
+
+        if "inventory" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.inventory()
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(86400)
 
 
 class Processor:
@@ -199,3 +211,27 @@ class Processor:
                         copyfile(f"{FILEDIR}/images/pk/{fname}",
                                  f"{FILEDIR}/../../../images/roomset/{product.productId}_{roomidx}.jpg")
                         roomidx = roomidx + 1
+
+    def inventory(self):
+        stocks = []
+
+        f = open(f"{FILEDIR}/pk-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+
+        for row in cr:
+            try:
+                mpn = common.formatText(row[0])
+                product = PKaufmann.objects.get(mpn=mpn)
+            except PKaufmann.DoesNotExist:
+                continue
+
+            stockP = common.formatInt(row[1])
+
+            stock = {
+                'sku': product.sku,
+                'quantity': stockP,
+                'note': ""
+            }
+            stocks.append(stock)
+
+        self.databaseManager.updateStock(stocks=stocks, stockType=1)
