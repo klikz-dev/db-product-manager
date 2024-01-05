@@ -96,7 +96,7 @@ class Processor:
 
     def updateSamplePrices(self):
         samples = Variant.objects.filter(
-            name__icontains='Sample - ').exclude(name__icontains='Free Sample -').filter(price=5)
+            name__icontains='Sample - ').exclude(name__icontains='Free Sample -').filter(price=7)
 
         total = len(samples)
         for index, sample in enumerate(samples):
