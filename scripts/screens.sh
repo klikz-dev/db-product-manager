@@ -1,3 +1,4 @@
+screen -dmS feed
 screen -dmS product
 screen -dmS status
 screen -dmS price
