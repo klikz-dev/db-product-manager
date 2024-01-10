@@ -196,29 +196,21 @@ class Processor:
                     manufacturer = str(row['CategoryName']).strip()
                     collectionName = str(row['CollectionName']).strip()
 
-                    if manufacturer == "Ron Redding Designs":
-                        manufacturer = "Ronald Redding Designs"
-                    if manufacturer == "Inspired by Color":
-                        manufacturer = "York"
-                    if manufacturer == "Florance Broadhurst":
-                        manufacturer = "Florence Broadhurst"
-                    if manufacturer == "York Style Makers":
-                        manufacturer = "York Stylemakers"
-                    if manufacturer == "YorkPa":
-                        manufacturer = "York"
-                    if manufacturer == "Cary Lind Designs":
-                        manufacturer = "Carey Lind Designs"
-                    if manufacturer == "York Designers Series":
-                        manufacturer = "York Designer Series"
-                    if "RoomMates" in collectionName:
-                        manufacturer = "RoomMates"
-                    if "Rifle Paper Co." in collectionName:  # 11/29 request from Barbara. Set Rifle collection to manufacturer
-                        manufacturer = "Rifle Paper Co."
-                    # 4/6/22 from Barbara. Set Dazzling Dimensions and Bohemian Luxe collections to Antonina Vella Brand
-                    if "Dazzling Dimensions" in collectionName or "Bohemian Luxe" in collectionName:
-                        manufacturer = "Antonina Vella"
+                    manufacturer_map = {
+                        "Ron Redding Designs": "Ronald Redding Designs",
+                        "Roommates": "RoomMates",
+                        "CatCoq": "RoomMates",
+                        "Rose Lindo": "RoomMates",
+                        "Waverly": "RoomMates",
+                        "Jane Dixon": "RoomMates",
+                        "Nikki Chu": "RoomMates",
+                        "Rifle": "Rifle Paper Co.",
+                        "Cary Lind Designs": "Carey Lind Designs",
+                    }
 
-                    manufacturer = "{} {}".format(manufacturer, type)
+                    manufacturer = manufacturer_map.get(
+                        manufacturer, manufacturer)
+                    manufacturer = f"{manufacturer} {type}"
 
                     # Main Information
                     if str(row['AdvertisingCopyIII']) != "":
