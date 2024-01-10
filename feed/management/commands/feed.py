@@ -172,7 +172,7 @@ class Processor:
                 AND PV.Published=1
                 AND PV.Cost != 0
                 AND T.Name IN ("Wallpaper", "Pillow")
-                AND M.BRAND IN ("Brewster", "Tempaper", "Elaine Smith", "Jaipur Living", "Kravet", "P/Kaufmann", "Poppy", "Schumacher", "Seabrook", "Surya")
+                AND M.BRAND IN ("Brewster", "Tempaper", "Elaine Smith", "Jaipur Living", "Kravet", "Kravet Decor", "P/Kaufmann", "Poppy", "Schumacher", "Seabrook", "Surya")
             """)
 
         products = csr.fetchall()
