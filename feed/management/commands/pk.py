@@ -52,6 +52,11 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.updatePrices(formatPrice=True)
 
+        if "sample" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
+
         if "tag" in options['functions']:
             processor = Processor()
             processor.databaseManager.updateTags(category=True)
@@ -151,7 +156,7 @@ class Processor:
 
                 # Status
                 statusP = True
-                statusS = True
+                statusS = False
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
