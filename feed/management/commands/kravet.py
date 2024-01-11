@@ -182,6 +182,7 @@ class Processor:
                 "CLARKE AND CLARKE": ("Clarke & Clarke", "CC"),
                 "LIZZO": ("Lizzo", "LI"),
                 "ANDREW MARTIN": ("Andrew Martin", "AM"),
+                "DONGHIA": ("Donghia", "K"),
             }
 
             if manufacturer in manufacturer_mapping:
