@@ -126,6 +126,26 @@ class Processor:
                 mpn = str(row[3]).strip().replace("'", "")
                 sku = f"SCH {mpn}"
 
+                # Temp: Block incorrectly priced Sch Rugs 1/12/24
+                blockMPNs = [
+                    "R83366",
+                    "R83379",
+                    "R83382",
+                    "R8339402",
+                    "R8339401",
+                    "R83388",
+                    "R73070",
+                    "R73064",
+                    "R73066",
+                    "R73058",
+                    "R73062",
+                    "R73068",
+                    "R73011"
+                ]
+
+                if mpn in blockMPNs:
+                    continue
+
                 pattern = common.formatText(row[4]).title()
                 color = common.formatText(row[5]).title()
 
