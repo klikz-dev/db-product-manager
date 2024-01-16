@@ -673,8 +673,8 @@ def UpdatePriceToShopify(productID, con):
         # if brand == "Exquisite Rugs" and "Trade" not in name:
         #     variant['compare_at_price'] = round(price / 0.85, 2)
 
-        if brand == "Surya" and "Trade" not in name:
-            variant['compare_at_price'] = round(price / 0.85, 2)
+        # if brand == "Surya" and "Trade" not in name:
+        #     variant['compare_at_price'] = round(price / 0.85, 2)
 
         # scalaPromoMPNs = [
         #     "SC 0001RZEBRAPIL",
