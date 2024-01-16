@@ -72,6 +72,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "manual-hires" in options['functions']:
             processor = Processor()
             processor.manual_hires()
@@ -275,9 +279,6 @@ class Processor:
             statusS = True
             outlet = False
 
-            if str(row[22]).strip() != 'Y':
-                statusP = False
-
             blockCollections = [
                 "CANDICE OLSON AFTER EIGHT",
                 "CANDICE OLSON COLLECTION",
@@ -371,15 +372,10 @@ class Processor:
         csr = self.con.cursor()
 
         hasImage = []
-        hasHiresImage = []
 
         csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 1 AND M.Brand = '{}'".format(BRAND))
         for row in csr.fetchall():
             hasImage.append(str(row[0]))
-
-        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(BRAND))
-        for row in csr.fetchall():
-            hasHiresImage.append(str(row[0]))
 
         csr.close()
 
@@ -395,6 +391,22 @@ class Processor:
                 else:
                     self.databaseManager.downloadFileFromFTP(
                         src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+
+    def hires(self):
+        csr = self.con.cursor()
+
+        hasHiresImage = []
+
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasHiresImage.append(str(row[0]))
+
+        csr.close()
+
+        products = Kravet.objects.all()
+        for product in products:
+            if not product.productId or not product.thumbnail:
+                continue
 
             if product.productId not in hasHiresImage:
                 if "http" not in product.thumbnail and "HIRES" in product.thumbnail:
