@@ -88,7 +88,12 @@ class Processor:
         for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = sh.cell_value(i, 0)
+                mpn = common.formatInt(sh.cell_value(i, 0))
+                if mpn == 0:
+                    continue
+                if mpn < 100:
+                    mpn = f"0{mpn}"
+
                 sku = 'PJ {}'.format(mpn)
 
                 debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
@@ -121,12 +126,15 @@ class Processor:
 
                 # Measurement
                 uom = "Per Yard"
-                minimum = common.formatInt(sh.cell_value(i, 4).split(" ")[0])
-                incre = common.formatInt(sh.cell_value(i, 7).split(" ")[0])
+                minimum = common.formatInt(
+                    data['order']['wallcovering']['minimum_order'])
+                incre = common.formatInt(
+                    data['order']['wallcovering']['order_increment'])
                 increment = ",".join([str(i * incre) for i in range(1, 21)])
 
                 # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 2))
+                cost = common.formatFloat(
+                    data['order']['wallcovering']['price']['amount'])
 
                 # Tagging
                 tags = f"{collection}, {description}, {pattern}"
@@ -139,7 +147,7 @@ class Processor:
                 statusP = True
                 statusS = True
 
-                if sh.cell_value(i, 8) == "NJ, USA":
+                if data['order']['wallcovering']['purcode'] == "NJSTOCKED":
                     quickShip = True
                 else:
                     quickShip = False
