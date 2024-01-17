@@ -136,11 +136,11 @@ class Processor:
                 else:
                     continue
 
+                self.uploadTracking(
+                    brand=brand, orderNumber=orderNumber, trackingNumber=trackingNumber)
+
             except Exception as e:
                 debug.debug("Tracking", 1, str(e))
-
-            self.uploadTracking(
-                brand=brand, orderNumber=orderNumber, trackingNumber=trackingNumber)
 
         f.close()
         os.remove(file)
