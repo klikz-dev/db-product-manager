@@ -120,7 +120,7 @@ class Processor:
             stockP = common.formatFloat(sh.cell_value(i, 1))
 
             stockNote = sh.cell_value(i, 2)
-            if stockNote:
+            if str(stockNote).strip():
                 date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
                 date_obj = datetime.datetime(*date_tuple)
                 stockNote = date_obj.date()
