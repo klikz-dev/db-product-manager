@@ -305,6 +305,7 @@ class Processor:
                 'quantity': 5,
                 'note': ""
             }
+            stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=2)
 
