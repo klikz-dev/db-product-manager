@@ -82,17 +82,23 @@ class UpdateShippingRates
 
   def sample_shipping(shipping_rates)
     if @hasAllSamples
-      if @cartNum < 6
-        shipping_rates.delete_if do |shipping_rate| 
-          shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 1' and shipping_rate.name != 'Overnight Shipping for Samples - 1'
-        end
-      elsif @cartNum < 11
-        shipping_rates.delete_if do |shipping_rate| 
-          shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 2' and shipping_rate.name != 'Overnight Shipping for Samples - 2'
+      if @hasEuropeanBrand or @hasMultiBrand
+        shipping_rates.delete_if do |shipping_rate|
+          shipping_rate.name != 'Free Shipping for Samples'
         end
       else
-        shipping_rates.delete_if do |shipping_rate| 
-          shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 3' and shipping_rate.name != 'Overnight Shipping for Samples - 3'
+        if @cartNum < 6
+          shipping_rates.delete_if do |shipping_rate| 
+            shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 1' and shipping_rate.name != 'Overnight Shipping for Samples - 1'
+          end
+        elsif @cartNum < 11
+          shipping_rates.delete_if do |shipping_rate| 
+            shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 2' and shipping_rate.name != 'Overnight Shipping for Samples - 2'
+          end
+        else
+          shipping_rates.delete_if do |shipping_rate| 
+            shipping_rate.name != 'Free Shipping for Samples' and shipping_rate.name != '2nd Day Shipping for Samples - 3' and shipping_rate.name != 'Overnight Shipping for Samples - 3'
+          end
         end
       end
     else
