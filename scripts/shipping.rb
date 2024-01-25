@@ -51,7 +51,7 @@ class UpdateShippingRates
   
   def white_glove_shipping(shipping_rates)
     if @isWhileGlove
-      # shipping_rates.delete_if { |shipping_rate| shipping_rate.name != 'White Glove Shipping'}
+      shipping_rates.delete_if { |shipping_rate| shipping_rate.name != 'White Glove Shipping'}
     else
       shipping_rates.delete_if { |shipping_rate| shipping_rate.name == 'White Glove Shipping'}
     end
