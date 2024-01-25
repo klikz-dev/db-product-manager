@@ -255,7 +255,7 @@ class Processor:
                     statusP = False
                     statusS = False
 
-                if type == "Pillow":
+                if type == "Pillow" or pattern == "NOBEL":
                     statusS = False
 
                 manufacturer = f"{manufacturer} {type}"
