@@ -8,6 +8,7 @@ import pymysql
 import xlrd
 import requests
 import json
+import time
 
 from library import database, debug, common
 
@@ -64,6 +65,19 @@ class Command(BaseCommand):
         if "pillow" in options['functions']:
             processor = Processor()
             processor.databaseManager.linkPillowSample()
+
+        if "main" in options['functions']:
+            while True:
+                with Processor() as processor:
+                    processor.databaseManager.downloadFileFromLink(
+                        "https://www.stouttextiles.com/downloads/Online_Retail_Items.xlsx", f"{FILEDIR}/stout-master.xlsx")
+                    products = processor.fetchFeed()
+                    processor.databaseManager.writeFeed(products=products)
+                    processor.databaseManager.statusSync(fullSync=False)
+
+                print("Finished process. Waiting for next run. {}:{}".format(
+                    BRAND, options['functions']))
+                time.sleep(60 * 60 * 24 * 7)
 
 
 class Processor:
