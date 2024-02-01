@@ -121,7 +121,7 @@ class Processor:
         # Available Items
         available_mpns = []
         f = open(f"{FILEDIR}/jamieyoung-inventory.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, 'utf-8'))
+        cr = csv.reader(codecs.iterdecode(f, 'ISO-8859-1'))
         for row in cr:
             if common.formatInt(row[2]) > 0:
                 available_mpns.append(row[1])
@@ -190,8 +190,8 @@ class Processor:
             mpn = common.formatText(sh.cell_value(i, 0))
             sku = f"JY {mpn}"
             pattern = common.formatText(sh.cell_value(i, 2))
-            color = common.formatText(
-                sh.cell_value(i, 35)).replace(",", " /")
+            color = common.formatText(sh.cell_value(i, 35))
+            name = common.formatText(sh.cell_value(i, 3))
 
             # Categorization
             brand = BRAND
@@ -297,6 +297,7 @@ class Processor:
                 'upc': upc,
                 'pattern': pattern,
                 'color': color,
+                'name': name,
 
                 'brand': brand,
                 'type': type,
