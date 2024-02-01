@@ -295,6 +295,8 @@ class Processor:
                     else:
                         quickShip = False
 
+                    statusS = False  # BK: Disable all Brewster and York Samples 2/1/24
+
                 except Exception as e:
                     debug.debug(BRAND, 1, str(e))
                     continue

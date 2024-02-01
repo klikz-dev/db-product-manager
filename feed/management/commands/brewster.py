@@ -58,6 +58,11 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.updateTags(category=True)
 
+        if "sample" in options['functions']:
+            processor = Processor()
+            processor.databaseManager.customTags(
+                key="statusS", tag="NoSample", logic=False)
+
         if "image" in options['functions']:
             processor = Processor()
             processor.image()
@@ -402,7 +407,7 @@ class Processor:
                     else:
                         statusP = True
 
-                    statusS = True
+                    statusS = False  # BK: Disable all Brewster and York Samples 2/1/24
 
                     if mpn in bestsellingMPNs:
                         bestSeller = True
