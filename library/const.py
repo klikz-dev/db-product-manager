@@ -230,6 +230,12 @@ sftp = {
         "user": "exquisiterugs",
         "pass": "ExquisiteRugs123!",
     },
+    "Galerie": {
+        "host": "decoratorsbestam.com",
+        "port": 22,
+        "user": "galerie",
+        "pass": "Galerie123!",
+    },
     "Hubbardton Forge": {
         "host": "decoratorsbestam.com",
         "port": 22,
