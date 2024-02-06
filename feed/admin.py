@@ -6,6 +6,7 @@ from .models import Covington
 from .models import DanaGibson
 from .models import ElaineSmith
 from .models import ExquisiteRugs
+from .models import Galerie
 from .models import HubbardtonForge
 from .models import JaipurLiving
 from .models import JamieYoung
@@ -184,6 +185,11 @@ class ElaineSmithAdmin(FeedAdmin):
 
 @admin.register(ExquisiteRugs)
 class ExquisiteRugsAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(Galerie)
+class GalerieAdmin(FeedAdmin):
     pass
 
 

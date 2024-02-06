@@ -140,6 +140,12 @@ class ExquisiteRugs(Feed):
         verbose_name_plural = "Exquisite Rugs"
 
 
+class Galerie(Feed):
+    class Meta:
+        verbose_name = "Galerie"
+        verbose_name_plural = "Galerie"
+
+
 class HubbardtonForge(Feed):
     class Meta:
         verbose_name = "Hubbardton Forge"

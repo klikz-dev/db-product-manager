@@ -14,6 +14,7 @@ screen -dmS couture
 screen -dmS danagibson
 screen -dmS elainesmith
 screen -dmS exquisiterugs
+screen -dmS galerie
 screen -dmS jaipurliving
 screen -dmS jamieyoung
 screen -dmS jffabrics
@@ -27,6 +28,7 @@ screen -dmS noir
 screen -dmS peninsulahome
 screen -dmS phillipjeffries
 screen -dmS phillips
+screen -dmS pk
 screen -dmS poppy
 screen -dmS port68
 screen -dmS premierprints
