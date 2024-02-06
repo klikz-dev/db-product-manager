@@ -96,7 +96,7 @@ class Processor:
             try:
                 # Primary Keys
                 mpn = common.formatText(sh.cell_value(i, 2))
-                sku = f"TP {mpn}"
+                sku = f"G {mpn}"
 
                 pattern = common.formatText(sh.cell_value(i, 3))
                 color = common.formatText(sh.cell_value(i, 4))
@@ -210,7 +210,7 @@ class Processor:
 
         for i in range(1, sh.nrows):
             mpn = common.formatText(sh.cell_value(i, 2))
-            sku = f"TP {mpn}"
+            sku = f"G {mpn}"
 
             stockP = common.formatInt(sh.cell_value(i, 5))
 

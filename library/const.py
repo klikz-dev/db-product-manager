@@ -31,8 +31,8 @@ markup = {
     },
     "Galerie": {
         "useMAP": True,
-        "consumer": 2,
-        "trade": 1.5,
+        "consumer": 1.5,
+        "trade": 1.15,
     },
     "Hubbardton Forge": {
         "useMAP": True,

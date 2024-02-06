@@ -184,7 +184,7 @@ class DatabaseManager:
         debug.debug(self.brand, 0, f"Started status sync for {self.brand}")
 
         self.csr.execute(f"""
-                    SELECT P.ProductID, P.SKU, P.Published
+                    SELECT P.ProductID, P.ManufacturerPartNumber, P.SKU, P.Published
                     FROM Product P
                     WHERE P.ManufacturerPartNumber<>'' AND P.ProductID IS NOT NULL AND P.ProductID != 0
                     AND P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = '{self.brand}')
@@ -195,11 +195,12 @@ class DatabaseManager:
 
         for row in rows:
             productID = row[0]
-            sku = row[1]
-            published = row[2]
+            mpn = row[1]
+            sku = row[2]
+            published = row[3]
 
             try:
-                product = self.Feed.objects.get(sku=sku)
+                product = self.Feed.objects.get(mpn=mpn)
                 product.productId = productID
                 product.save()
 
@@ -241,7 +242,7 @@ class DatabaseManager:
                         self.brand, 0, f"Disabled product -- Brand: {self.brand}, ProductID: {productID}, sku: {sku}")
 
             except:
-                products = self.Feed.objects.filter(sku=sku)
+                products = self.Feed.objects.filter(mpn=mpn)
                 for idx, product in enumerate(products, 1):
                     if idx == 1 and published == 0 and product.statusP == True and product.cost != None:
                         self.csr.execute(
