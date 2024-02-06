@@ -215,12 +215,12 @@ class Processor:
                 tags = f"{pattern} {color} {sh.cell_value(i, 13)} {material} {finish} {description}"
 
                 # Status
-                statusP = True
-
-                if type == "Pillow":
-                    statusS = False
+                if type == "Fabric":
+                    statusP = False
                 else:
-                    statusS = True
+                    statusP = True
+
+                statusS = False
 
                 if mpn in outletMPNs:
                     outlet = True
