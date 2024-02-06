@@ -145,12 +145,12 @@ class Processor:
                 tags = f"{match}, {paste}, {material}, {washability}, {removability}, {common.formatText(sh.cell_value(i, 27))}, {collection}, {pattern}, {description}"
 
                 # Image
-                thumbnail = f'https://drive.google.com/u/0/uc?id={sh.cell_value(i, 30).replace("https://drive.google.com/file/d/", "").split("/")[0]}&export=download'
+                thumbnail = sh.cell_value(i, 30)
 
                 roomsets = []
                 for id in range(31, 35):
                     if sh.cell_value(i, id) != "":
-                        roomset = f'https://drive.google.com/u/0/uc?id={sh.cell_value(i, id).replace("https://drive.google.com/file/d/", "").split("/")[0]}&export=download'
+                        roomset = sh.cell_value(i, id)
                         roomsets.append(roomset)
 
                 # Status
