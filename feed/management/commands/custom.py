@@ -68,6 +68,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.deleteProducts()
 
+        if "deleteBrand" in options['functions']:
+            processor = Processor()
+            processor.deleteBrand()
+
         if "syncHandle" in options['functions']:
             processor = Processor()
             processor.syncHandle()
@@ -329,7 +333,27 @@ class Processor:
         for productId in productIds:
             self.deleteProduct(productId)
 
+    def deleteBrand(self):
+        productIds = []
+        csr = self.con.cursor()
+        csr.execute(f"""
+            SELECT P.ProductID
+            FROM Product P
+            WHERE P.SKU IN (SELECT SKU FROM ProductManufacturer PM JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE M.Brand = 'Galerie')
+        """)
+        products = csr.fetchall()
+
+        for product in products:
+            productIds.append(product[0])
+        csr.close()
+
+        for productId in productIds:
+            self.deleteProduct(productId)
+
     def deleteProduct(self, productId):
+        if not productId:
+            return
+
         csr = self.con.cursor()
 
         csr.execute("""SELECT P.ProductID, P.SKU 
