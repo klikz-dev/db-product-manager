@@ -120,7 +120,8 @@ class Processor:
                 brand = BRAND
                 type = common.formatText(sh.cell_value(i, 0))
                 manufacturer = brand
-                collection = common.formatText(sh.cell_value(i, 2))
+                collection = common.formatText(
+                    sh.cell_value(i, 2).replace("Tempaper", ""))
 
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 9))
@@ -177,11 +178,7 @@ class Processor:
 
                 # Status
                 statusP = True
-
-                if type == "Wallpaper":
-                    statusS = True
-                else:
-                    statusS = False
+                statusS = False
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
