@@ -218,6 +218,12 @@ class PeninsulaHome(Feed):
         verbose_name_plural = "Peninsula Home"
 
 
+class OliviaQuinn(Feed):
+    class Meta:
+        verbose_name = "Olivia & Quinn"
+        verbose_name_plural = "Olivia & Quinn"
+
+
 class PhillipJeffries(Feed):
     class Meta:
         verbose_name = "Phillip Jeffries"

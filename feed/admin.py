@@ -18,6 +18,7 @@ from .models import Materialworks
 from .models import Maxwell
 from .models import MindTheGap
 from .models import NOIR
+from .models import OliviaQuinn
 from .models import PeninsulaHome
 from .models import Phillips
 from .models import PhillipJeffries
@@ -245,6 +246,11 @@ class MindTheGapAdmin(FeedAdmin):
 
 @admin.register(NOIR)
 class NOIRAdmin(FeedAdmin):
+    pass
+
+
+@admin.register(OliviaQuinn)
+class OliviaQuinnAdmin(FeedAdmin):
     pass
 
 

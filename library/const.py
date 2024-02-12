@@ -93,6 +93,11 @@ markup = {
         "consumer": 2,
         "trade": 1.5,
     },
+    "Olivia & Quinn": {
+        "useMAP": True,
+        "consumer": 2,
+        "trade": 1.5,
+    },
     "Peninsula Home": {
         "useMAP": True,
         "consumer": 2.3,
