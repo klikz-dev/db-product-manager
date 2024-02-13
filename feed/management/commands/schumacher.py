@@ -8,6 +8,7 @@ import pymysql
 import csv
 import codecs
 import time
+import requests
 
 from library import database, debug, common
 
@@ -26,8 +27,7 @@ class Command(BaseCommand):
 
         if "feed" in options['functions']:
             processor = Processor()
-            processor.databaseManager.downloadFileFromSFTP(
-                src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv", delete=False)
+            processor.downloadFeed()
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
@@ -73,9 +73,7 @@ class Command(BaseCommand):
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
-                    processor.databaseManager.downloadFileFromSFTP(
-                        src="../daily_feed/Assortment-DecoratorsBest.csv", dst=f"{FILEDIR}/schumacher-master.csv", delete=False)
-
+                    processor.downloadFeed()
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -97,6 +95,21 @@ class Processor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.con.close()
+
+    def downloadFeed(self):
+        url = "https://schumapi.azurewebsites.net/api/products/get-product-assort-byid?type=1"
+
+        headers = {
+            'apiKey': '69ab187b-9cc8-4d07-8b09-23b1699d4d23'
+        }
+
+        response = requests.request("GET", url, headers=headers)
+
+        if response.status_code == 200:
+            with open(f"{FILEDIR}/schumacher-master.csv", 'w', encoding='utf-8') as csv_file:
+                csv_file.write(response.text)
+        else:
+            print(f"Failed to fetch data: {response.status_code}")
 
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
@@ -125,26 +138,6 @@ class Processor:
                 # Primary Keys
                 mpn = str(row[3]).strip().replace("'", "")
                 sku = f"SCH {mpn}"
-
-                # Temp: Block incorrectly priced Sch Rugs 1/12/24
-                blockMPNs = [
-                    "R83366",
-                    "R83379",
-                    "R83382",
-                    "R8339402",
-                    "R8339401",
-                    "R83388",
-                    "R73070",
-                    "R73064",
-                    "R73066",
-                    "R73058",
-                    "R73062",
-                    "R73068",
-                    "R73011"
-                ]
-
-                if mpn in blockMPNs:
-                    continue
 
                 pattern = common.formatText(row[4]).title()
                 color = common.formatText(row[5]).title()
