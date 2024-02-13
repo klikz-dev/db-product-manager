@@ -3,6 +3,7 @@ import pymysql
 import environ
 import os
 import time
+import datetime
 from feed.models import Galerie
 from django.core.management.base import BaseCommand
 
@@ -60,7 +61,7 @@ class Command(BaseCommand):
             while True:
                 with Processor() as processor:
                     processor.databaseManager.downloadFileFromSFTP(
-                        src="/galerie/Galerie Inventory.xlsx", dst=f"{FILEDIR}/galerie-inventory.xlsx", fileSrc=True, delete=False)
+                        src="/galerie/GalerieStock.xlsx", dst=f"{FILEDIR}/galerie-inventory.xlsx", fileSrc=True, delete=False)
                     processor.inventory()
 
                 print("Finished process. Waiting for next run. {}:{}".format(
@@ -209,15 +210,22 @@ class Processor:
         sh = wb.sheet_by_index(0)
 
         for i in range(1, sh.nrows):
-            mpn = common.formatText(sh.cell_value(i, 2))
+            mpn = common.formatText(sh.cell_value(i, 0)).replace(
+                "âˆ’", "-").replace(".0", "")
             sku = f"G {mpn}"
 
-            stockP = common.formatInt(sh.cell_value(i, 5))
+            stockP = common.formatInt(sh.cell_value(i, 3))
+
+            stockNote = common.formatInt(sh.cell_value(i, 2))
+            if str(stockNote).strip():
+                date_tuple = xlrd.xldate_as_tuple(stockNote, wb.datemode)
+                date_obj = datetime.datetime(*date_tuple)
+                stockNote = date_obj.date()
 
             stock = {
                 'sku': sku,
                 'quantity': stockP,
-                'note': ""
+                'note': stockNote
             }
             stocks.append(stock)
 
