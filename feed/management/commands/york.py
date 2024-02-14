@@ -49,8 +49,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = York.objects.filter(
-                manufacturer="York Designer Series Wallpaper")
+            products = York.objects.filter(pattern="Threaded Jute")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
