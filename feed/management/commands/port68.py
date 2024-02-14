@@ -126,6 +126,8 @@ class Processor:
                     manufacturer = "Scalamandre Maison"
                 elif collection == "Madcap Cottage":
                     manufacturer = "Madcap Cottage Décor"
+                elif collection == "Williamsburg":
+                    manufacturer = "Williamsburg"
                 else:
                     debug.debug(BRAND, 1, f"Unknown manufacturer {collection}")
 
@@ -155,6 +157,8 @@ class Processor:
                     type = "Accent Lamps"
                 elif type == "Chandelier":
                     type = "Chandeliers"
+                elif type == "Box":
+                    type = "Boxes"
 
                 # Main Information
                 description = common.formatText(sh.cell_value(i, 19))
