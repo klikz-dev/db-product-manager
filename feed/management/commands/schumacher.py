@@ -45,7 +45,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Schumacher.objects.filter(pattern="Balloons")
+            products = Schumacher.objects.filter(pattern="Chiang Mai Dragon")
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
