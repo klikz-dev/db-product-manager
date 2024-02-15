@@ -447,7 +447,7 @@ class DatabaseManager:
             return False
 
         if rootProductType in ["Fabric", "Wallpaper", "Pillow"]:
-            priceSample = 7
+            priceSample = 5
         elif rootProductType == "Rug":
             priceSample = 15
 
