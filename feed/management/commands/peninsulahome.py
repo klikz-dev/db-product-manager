@@ -216,7 +216,7 @@ class Processor:
                 shippingWidth = common.formatFloat(sh.cell_value(i, 21))
                 shippingDepth = common.formatFloat(sh.cell_value(i, 22))
                 shippingWeight = common.formatFloat(sh.cell_value(i, 19))
-                if shippingWidth > 107 or shippingHeight > 107 or shippingDepth > 107 or shippingWeight > 40:
+                if shippingWidth > 95 or shippingHeight > 95 or shippingDepth > 95 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
