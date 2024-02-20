@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = Stout.objects.filter(pattern="WINDY")
+            products = Stout.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
