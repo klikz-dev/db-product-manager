@@ -222,6 +222,10 @@ class PORecord(models.Model):
         max_length=200, default=None, null=True, blank=True)
     ExquisiteRugsSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
+    GalerieOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    GalerieSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
     HubbardtonForgeOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     HubbardtonForgeSample = models.CharField(
@@ -269,6 +273,10 @@ class PORecord(models.Model):
     WallsRepublicOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     WallsRepublicSample = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    OliviaQuinnOrder = models.CharField(
+        max_length=200, default=None, null=True, blank=True)
+    OliviaQuinnSample = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     PhillipJeffriesOrder = models.CharField(
         max_length=200, default=None, null=True, blank=True)
