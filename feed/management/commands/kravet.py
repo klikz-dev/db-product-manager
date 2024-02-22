@@ -307,10 +307,6 @@ class Processor:
             if row[31] == "Outlet":
                 outlet = True
 
-            # Temp.  Disable Donghia until the image issues are fixed
-            if manufacturer == "Donghia Fabric" or manufacturer == "Donghia Wallpaper":
-                statusP = False
-
             product = {
                 'mpn': mpn,
                 'sku': sku,
