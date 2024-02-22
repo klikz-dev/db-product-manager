@@ -72,6 +72,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.image()
 
+        if "manual-image" in options['functions']:
+            processor = Processor()
+            processor.manual_image()
+
         if "hires" in options['functions']:
             processor = Processor()
             processor.hires()
@@ -395,6 +399,27 @@ class Processor:
                 else:
                     self.databaseManager.downloadFileFromFTP(
                         src=product.thumbnail, dst=f"{FILEDIR}/../../../images/product/{product.productId}.jpg")
+
+    def manual_image(self):
+        for infile in glob.glob(f"{FILEDIR}/images/kravet/*.*"):
+            fpath, ext = os.path.splitext(infile)
+            fname = os.path.basename(fpath)
+
+            mpn = f"{fname.replace('_', '.')}.0"
+
+            try:
+                product = Kravet.objects.get(mpn=mpn)
+            except Kravet.DoesNotExist:
+                continue
+
+            if product.productId:
+                copyfile(f"{FILEDIR}/images/kravet/{fname}{ext}",
+                         f"{FILEDIR}/../../../images/product/{product.productId}{ext}")
+                debug.debug(
+                    BRAND, 0, f"Copied {fname}{ext} to {product.productId}{ext}")
+
+            os.remove(
+                f"{FILEDIR}/images/kravet/{fname}{ext}")
 
     def hires(self):
         csr = self.con.cursor()
