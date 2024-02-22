@@ -178,7 +178,10 @@ class Processor:
 
                 # Status
                 statusP = True
-                statusS = False
+                if collection == "Authentic Grasscloth":
+                    statusS = True
+                else:
+                    statusS = False
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
