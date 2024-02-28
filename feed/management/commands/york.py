@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
         if "update" in options['functions']:
             processor = Processor()
-            products = York.objects.filter(pattern="Threaded Jute")
+            products = York.objects.all()
             processor.databaseManager.updateProducts(
                 products=products, formatPrice=True)
 
