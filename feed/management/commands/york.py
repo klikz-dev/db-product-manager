@@ -197,6 +197,7 @@ class Processor:
                     collectionName = str(row['CollectionName']).strip()
 
                     manufacturer_map = {
+                        "Ronald Redding": "Ronald Redding Designs",
                         "Ron Redding Designs": "Ronald Redding Designs",
                         "Roommates": "RoomMates",
                         "CatCoq": "RoomMates",
