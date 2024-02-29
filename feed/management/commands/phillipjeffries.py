@@ -145,7 +145,7 @@ class Processor:
 
                 # Status
                 statusP = True
-                statusS = True
+                statusS = False  # Remove All samples. 2/28/24 from BK
 
                 if data['order']['wallcovering']['purcode'] == "NJSTOCKED":
                     quickShip = True
