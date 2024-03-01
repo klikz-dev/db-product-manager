@@ -1,3 +1,9 @@
+# Reset File Permission on Windows
+
+icacls .\db-backend.pem /reset
+icacls .\db-backend.pem /grant:r "$($env:username):(r)"
+icacls .\db-backend.pem /inheritance:r
+
 # Create FTP Account
 
 1. Create an user, set password
