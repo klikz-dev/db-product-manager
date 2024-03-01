@@ -87,6 +87,22 @@ class Processor:
     def fetchFeed(self):
         debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
 
+        # Price & Discontinued
+        prices = {}
+
+        wb = xlrd.open_workbook(f"{FILEDIR}/hubbardton-forge-price.xlsx")
+        sh = wb.sheet_by_index(2)
+        for i in range(3, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 3))
+
+            cost = common.formatFloat(sh.cell_value(i, 5))
+            map = common.formatFloat(sh.cell_value(i, 6))
+
+            prices[mpn] = {
+                'cost': cost,
+                'map': map,
+            }
+
         # Get Product Feed
         products = []
 
@@ -157,6 +173,10 @@ class Processor:
                 cost = common.formatFloat(sh.cell_value(i, 17))
                 map = common.formatFloat(sh.cell_value(i, 18))
                 msrp = common.formatFloat(sh.cell_value(i, 19))
+
+                if mpn in prices:
+                    cost = prices[mpn]['cost']
+                    map = prices[mpn]['map']
 
                 # Measurement
                 uom = "Per Item"
