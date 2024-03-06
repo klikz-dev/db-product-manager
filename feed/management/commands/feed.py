@@ -242,6 +242,34 @@ class Processor:
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. 'Get' word in the description")
                 skiped += 1
                 continue
+
+            nonMAPSurya = [
+                "Collection: Rodos",
+                "Collection: Roma",
+                "Collection: San Diego",
+                "Collection: Santana",
+                "Collection: Serapi",
+                "Collection: Skagen",
+                "Collection: Solana",
+                "Collection: Soldado",
+                "Collection: St Tropez",
+                "Collection: Sunderland",
+                "Collection: Tahmis",
+                "Collection: Taza Shag",
+                "Collection: Tevazu",
+                "Collection: Tuareg",
+                "Collection: Ustad",
+                "Collection: Venezia",
+                "Collection: Veranda",
+                "Collection: Wanderlust",
+                "Collection: West Palm",
+                "Collection: Zidane",
+            ]
+            if brand == "Surya" and any(collection in bodyHTML for collection in nonMAPSurya):
+                debug.debug(
+                    PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Non-MAP Surya collection")
+                skipped += 1
+                continue
             ################
 
             # Refine Information
