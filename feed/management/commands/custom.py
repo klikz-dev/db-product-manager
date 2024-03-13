@@ -15,7 +15,44 @@ from library import debug, shopify, common
 
 from shopify.models import Variant, Product
 from mysql.models import ProductSubtype, Type
+from feed.models import Brewster
+from feed.models import Couture
+from feed.models import Covington
+from feed.models import DanaGibson
+from feed.models import ElaineSmith
+from feed.models import ExquisiteRugs
+from feed.models import Galerie
+from feed.models import HubbardtonForge
+from feed.models import JaipurLiving
+from feed.models import JamieYoung
+from feed.models import JFFabrics
+from feed.models import Kasmir
+from feed.models import Kravet
+from feed.models import KravetDecor
+from feed.models import Materialworks
+from feed.models import Maxwell
+from feed.models import MindTheGap
+from feed.models import NOIR
+from feed.models import OliviaQuinn
+from feed.models import PeninsulaHome
+from feed.models import Phillips
+from feed.models import PhillipJeffries
+from feed.models import Pindler
+from feed.models import PKaufmann
+from feed.models import Poppy
+from feed.models import Port68
+from feed.models import PremierPrints
+from feed.models import Scalamandre
 from feed.models import Schumacher
+from feed.models import Seabrook
+from feed.models import StarkStudio
+from feed.models import Stout
+from feed.models import Surya
+from feed.models import Tempaper
+from feed.models import TresTintas
+from feed.models import WallsRepublic
+from feed.models import York
+from feed.models import Zoffany
 
 FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
@@ -83,6 +120,10 @@ class Command(BaseCommand):
         if "pageScrap" in options['functions']:
             processor = Processor()
             processor.pageScrap()
+
+        if "feedCleanup" in options['functions']:
+            processor = Processor()
+            processor.feedCleanup()
 
 
 class Processor:
@@ -547,3 +588,48 @@ class Processor:
                 values.append(value)
 
         print(values)
+
+    def feedCleanup(self):
+        allFeeds = [
+            Brewster,
+            Couture,
+            Covington,
+            DanaGibson,
+            ElaineSmith,
+            ExquisiteRugs,
+            Galerie,
+            HubbardtonForge,
+            JaipurLiving,
+            JamieYoung,
+            JFFabrics,
+            Kasmir,
+            Kravet,
+            KravetDecor,
+            Materialworks,
+            Maxwell,
+            MindTheGap,
+            NOIR,
+            OliviaQuinn,
+            PeninsulaHome,
+            Phillips,
+            PhillipJeffries,
+            Pindler,
+            PKaufmann,
+            Poppy,
+            Port68,
+            PremierPrints,
+            Scalamandre,
+            Schumacher,
+            Seabrook,
+            StarkStudio,
+            Stout,
+            Surya,
+            Tempaper,
+            TresTintas,
+            WallsRepublic,
+            York,
+            Zoffany,
+        ]
+        for feedModel in allFeeds:
+            feedModel.objects.all().delete()
+            print("Done")

@@ -5,7 +5,7 @@ from django.db.models import Q
 import os
 import environ
 import pymysql
-import xlrd
+import openpyxl
 import time
 import csv
 import codecs
@@ -109,108 +109,95 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
-        debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
-
-        # Quick Ship
-        quickships = []
-        f = open(f"{FILEDIR}/exquisiterugs-quickships.csv", "rb")
-        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
-        for row in cr:
-            mpn = common.formatText(row[2]).replace("'", "")
-            if row[5] == "YES":
-                quickships.append(mpn)
-
         # Get Product Feed
         products = []
 
-        wb = xlrd.open_workbook(f"{FILEDIR}/exquisiterugs-master.xlsx")
-        sh = wb.sheet_by_index(0)
+        wb = openpyxl.load_workbook(
+            f"{FILEDIR}/exquisiterugs-master.xlsx", data_only=True)
+        sh = wb.worksheets[0]
 
-        for i in range(1, sh.nrows):
+        for row in sh.iter_rows(min_row=2, values_only=True):
             try:
                 # Primary Keys
-                mpn = common.formatText(sh.cell_value(i, 2)).replace("'", "")
+                mpn = common.toText(row[2]).replace("'", "")
                 sku = f"ER {mpn}"
 
-                pattern = common.formatInt(sh.cell_value(i, 3))
-                color = common.formatText(sh.cell_value(i, 4))
+                pattern = common.toInt(row[3])
+                color = common.toText(row[4])
 
-                name = common.formatText(sh.cell_value(i, 6))
+                name = common.toText(row[6])
 
                 # Categorization
                 brand = BRAND
                 type = "Rug"
-                manufacturer = brand
-                collection = common.formatText(sh.cell_value(i, 1))
+                manufacturer = BRAND
+                collection = common.toText(row[1])
 
                 # Main Information
-                description = common.formatText(sh.cell_value(i, 19))
-                disclaimer = common.formatText(sh.cell_value(i, 24))
+                description = common.toText(row[19])
 
-                width = common.formatFloat(sh.cell_value(i, 15))
-                length = common.formatFloat(sh.cell_value(i, 16))
-                height = common.formatFloat(sh.cell_value(i, 17))
+                width = common.toFloat(row[15])
+                length = common.toFloat(row[16])
+                height = common.toFloat(row[17])
 
-                size = f"{round(width / 12, 2)}'X{round(length / 12, 2)}'"
-                dimension = common.formatText(sh.cell_value(i, 18))
-
-                weight = common.formatFloat(sh.cell_value(i, 14))
-                specs = [
-                    ("Weight", f"{weight} lbs"),
-                ]
+                size = f"{common.toFloat(width / 12)}' x {common.toFloat(length / 12)}'"
 
                 # Additional Information
-                upc = common.formatInt(sh.cell_value(i, 13))
-                weight = common.formatFloat(sh.cell_value(i, 14))
-                care = common.formatText(sh.cell_value(i, 25))
-                material = common.formatText(sh.cell_value(i, 12))
-                country = common.formatText(sh.cell_value(i, 35))
+                material = common.toText(row[12])
+                care = common.toText(row[25])
+                disclaimer = common.toText(row[24])
+                country = common.toText(row[35])
+                upc = common.toInt(row[13])
+                weight = common.toFloat(row[14])
 
-                # Pricing
-                cost = common.formatFloat(sh.cell_value(i, 7))
-                map = common.formatFloat(sh.cell_value(i, 8))
+                specs = [
+                    ("Dimension", common.toText(row[18])),
+                ]
 
                 # Measurement
-                uom = "Per Item"
+                uom = "Item"
+
+                # Pricing
+                cost = common.toFloat(row[7])
+                map = common.toFloat(row[8])
 
                 # Tagging
-                tags = f"{sh.cell_value(i, 11)}, {material}"
+                keywords = f"{row[11]}, {material}"
                 colors = color
 
                 # Image
-                thumbnail = common.formatText(sh.cell_value(i, 51))
+                thumbnail = common.toText(row[51])
 
                 roomsets = []
                 for id in range(52, 58):
-                    roomset = sh.cell_value(i, id)
-                    if roomset != "":
-                        roomsets.append(roomset)
+                    if row[id]:
+                        roomsets.append(row[id])
 
                 # Status
                 statusP = True
                 statusS = False
 
-                if mpn in quickships:
-                    quickShip = True
-                else:
-                    quickShip = False
-
                 # Shipping
-                shippingWidth = common.formatFloat(sh.cell_value(i, 44))
-                shippingLength = common.formatFloat(sh.cell_value(i, 43))
-                shippingHeight = common.formatFloat(sh.cell_value(i, 45))
-                shippingWeight = common.formatFloat(sh.cell_value(i, 42))
+                shippingWidth = common.toFloat(row[44])
+                shippingLength = common.toFloat(row[43])
+                shippingHeight = common.toFloat(row[45])
+                shippingWeight = common.toFloat(row[42])
 
                 if shippingWidth > 95 or shippingLength > 95 or shippingHeight > 95 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
 
-                # Name
-                name = f"{name} {size} Rug"
+                # Fine-tuning
+                name = f"{name.replace('Area Rug', '')}{size} Area Rug".replace(
+                    color, f"{pattern} {color}")
+
+                # Exceptions
+                if cost == 0 or not pattern or not color or not type:
+                    continue
 
             except Exception as e:
-                debug.debug(BRAND, 1, str(e))
+                debug.warn(BRAND, str(e))
                 continue
 
             product = {
@@ -226,25 +213,26 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
-                'disclaimer': disclaimer,
                 'width': width,
                 'length': length,
                 'height': height,
                 'size': size,
-                'dimension': dimension,
+
+                'material': material,
+                'care': care,
+                'country': country,
+                'weight': weight,
+                'upc': upc,
+                'disclaimer': disclaimer,
+
                 'specs': specs,
 
-                'care': care,
-                'material': material,
-                'weight': shippingWeight,
-                'country': country,
-                'upc': upc,
+                'uom': uom,
 
                 'cost': cost,
                 'map': map,
-                'uom': uom,
 
-                'tags': tags,
+                'keywords': keywords,
                 'colors': colors,
 
                 'thumbnail': thumbnail,
@@ -252,12 +240,10 @@ class Processor:
 
                 'statusP': statusP,
                 'statusS': statusS,
-                'quickShip': quickShip,
                 'whiteGlove': whiteGlove,
             }
             products.append(product)
 
-        debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
     def image(self):
