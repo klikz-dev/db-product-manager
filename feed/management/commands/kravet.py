@@ -307,11 +307,14 @@ class Processor:
             if row[31] == "Outlet":
                 outlet = True
 
+            name = f"{pattern} {color} {type}"
+
             product = {
                 'mpn': mpn,
                 'sku': sku,
                 'pattern': pattern,
                 'color': color,
+                'name': name,
 
                 'brand': brand,
                 'type': type,
