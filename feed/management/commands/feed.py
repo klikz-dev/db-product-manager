@@ -118,12 +118,12 @@ class Processor:
         products = csr.fetchall()
         csr.close()
 
-        total, skiped = self.generateXML(products, GS_FEED_DIR)
-        if skiped < total * 0.3:
+        total, skipped = self.generateXML(products, GS_FEED_DIR)
+        if skipped < total * 0.3:
             self.uploadToGS()
         else:
             debug.debug(
-                PROCESS, 2, f"Ignore uploading the GS feed because too many items {skiped}/{total} have been skiped")
+                PROCESS, 2, f"Ignore uploading the GS feed because too many items {skipped}/{total} have been skipped")
 
     def fbFeed(self):
         debug.debug(PROCESS, 0, f"Started running FB {PROCESS} processor.")
@@ -178,16 +178,16 @@ class Processor:
         products = csr.fetchall()
         csr.close()
 
-        total, skiped = self.generateXML(products, FB_FEED_DIR)
-        if skiped < total * 0.3:
+        total, skipped = self.generateXML(products, FB_FEED_DIR)
+        if skipped < total * 0.3:
             self.uploadToFB()
         else:
             debug.debug(
-                PROCESS, 2, f"Ignore uploading the FB feed because too many items {skiped}/{total} have been skiped")
+                PROCESS, 2, f"Ignore uploading the FB feed because too many items {skipped}/{total} have been skipped")
 
     def generateXML(self, products, feed_dir):
         total = len(products)
-        skiped = 0
+        skipped = 0
 
         root = ET.Element("rss")
         root.set("xmlns:g", "http://base.google.com/ns/1.0")
@@ -228,19 +228,19 @@ class Processor:
             if stock["quantity"] < minQty:
                 debug.debug(
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Out of stock")
-                skiped += 1
+                skipped += 1
                 continue
 
             if (brand == "A-Street Prints Wallpaper" or brand == "Brewster Home Fashions Wallpaper") and "Peel & Stick" in pName:
                 debug.debug(
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. Brewster Peel & Stick")
-                skiped += 1
+                skipped += 1
                 continue
 
             if bool(re.search(r'\bget\b', f"{pName}, {bodyHTML}", re.IGNORECASE)):
                 debug.debug(
                     PROCESS, 0, f"{index}/{total}: IGNORED SKU {sku}. 'Get' word in the description")
-                skiped += 1
+                skipped += 1
                 continue
 
             nonMAPSurya = [
@@ -366,7 +366,7 @@ class Processor:
             ET.SubElement(item, "g:custom_label_3").text = f"{margin}"
 
             debug.debug(
-                PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. Skiped {skiped} SKUs")
+                PROCESS, 0, f"{index}/{total}: Success for SKU {sku}. skipped {skipped} SKUs")
 
         tree_str = ET.tostring(root, encoding='utf-8')
         tree_dom = MD.parseString(tree_str)
@@ -375,7 +375,7 @@ class Processor:
         with open(feed_dir, 'w', encoding="UTF-8") as file:
             file.write(pretty_tree)
 
-        return (total, skiped)
+        return (total, skipped)
 
     def uploadToGS(self):
         now = datetime.datetime.now()
