@@ -85,7 +85,7 @@ class ImageViewSet(viewsets.ModelViewSet):
 
         productId = self.request.query_params.get('product')
         if productId is not None:
-            images = images.filter(productId=productId, imageIndex=1)
+            images = images.filter(productId=productId)
 
         page = self.paginate_queryset(images)
         if page is not None:
