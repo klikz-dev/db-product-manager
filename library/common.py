@@ -154,7 +154,7 @@ def importOrder(shopifyOrder):
     customer.state = shopifyCustomer['state']
     customer.note = shopifyCustomer['note']
     customer.tags = shopifyCustomer['tags']
-    customer.acceptsMarketing = shopifyCustomer['accepts_marketing']
+    customer.acceptsMarketing = shopifyCustomer['email_marketing_consent']['state'] == 'subscribed'
     customer.createdAt = shopifyCustomer['created_at']
 
     customer.save()
