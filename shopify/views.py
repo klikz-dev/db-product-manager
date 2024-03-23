@@ -261,14 +261,17 @@ class ProductViewSet(viewsets.ModelViewSet):
         products = Product.objects.all()
 
         productId = self.request.query_params.get('id')
+        mpn = self.request.query_params.get('mpn')
         sku = self.request.query_params.get('sku')
         pattern = self.request.query_params.get('pattern')
         color = self.request.query_params.get('color')
         type = self.request.query_params.get('type')
-        vendor = self.request.query_params.get('vendor')
 
         if productId:
             products = products.filter(productId=productId)
+
+        if mpn:
+            products = products.filter(manufacturerPartNumber=mpn)
 
         if sku:
             products = products.filter(sku=sku)
@@ -281,9 +284,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if type:
             products = products.filter(productTypeId=type)
-
-        if vendor:
-            products = products.filter(vendor=vendor)
 
         page = self.paginate_queryset(products)
         if page is not None:
