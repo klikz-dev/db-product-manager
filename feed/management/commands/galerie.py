@@ -57,6 +57,10 @@ class Command(BaseCommand):
             processor = Processor()
             processor.databaseManager.downloadImages(missingOnly=True)
 
+        if "hires" in options['functions']:
+            processor = Processor()
+            processor.hires()
+
         if "inventory" in options['functions']:
             while True:
                 with Processor() as processor:
@@ -230,3 +234,19 @@ class Processor:
             stocks.append(stock)
 
         self.databaseManager.updateStock(stocks=stocks, stockType=1)
+
+    def hires(self):
+        csr = self.con.cursor()
+        hasImage = []
+        csr.execute("SELECT P.ProductID FROM ProductImage PI JOIN Product P ON PI.ProductID = P.ProductID JOIN ProductManufacturer PM ON P.SKU = PM.SKU JOIN Manufacturer M ON PM.ManufacturerID = M.ManufacturerID WHERE PI.ImageIndex = 20 AND M.Brand = '{}'".format(BRAND))
+        for row in csr.fetchall():
+            hasImage.append(str(row[0]))
+        csr.close()
+
+        products = Galerie.objects.all()
+        for product in products:
+            if product.productId in hasImage:
+                continue
+
+            self.databaseManager.downloadImage(
+                productId=product.productId, thumbnail="", roomsets=[], hires=product.thumbnail)
