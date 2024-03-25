@@ -5,7 +5,9 @@ from feed.models import HubbardtonForge
 import os
 import environ
 import pymysql
-import openpyxl
+import xlrd
+import requests
+import json
 
 from library import database, debug, common
 
@@ -83,17 +85,18 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
+        debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
         # Price & Discontinued
         prices = {}
 
-        wb = openpyxl.load_workbook(
-            f"{FILEDIR}/hubbardtonforge-price.xlsx", data_only=True)
-        sh = wb.worksheets[2]
-        for row in sh.iter_rows(min_row=3, values_only=True):
-            mpn = common.toText(row[3])
+        wb = xlrd.open_workbook(f"{FILEDIR}/hubbardton-forge-price.xlsx")
+        sh = wb.sheet_by_index(2)
+        for i in range(3, sh.nrows):
+            mpn = common.formatText(sh.cell_value(i, 3))
 
-            cost = common.toFloat(row[5])
-            map = common.toFloat(row[6])
+            cost = common.formatFloat(sh.cell_value(i, 5))
+            map = common.formatFloat(sh.cell_value(i, 6))
 
             prices[mpn] = {
                 'cost': cost,
@@ -103,95 +106,94 @@ class Processor:
         # Get Product Feed
         products = []
 
-        wb = openpyxl.load_workbook(
-            f"{FILEDIR}/hubbardtonforge-master.xlsx", data_only=True)
-        sh = wb.worksheets[0]
+        wb = xlrd.open_workbook(f"{FILEDIR}/hubbardton-forge-master.xlsx")
+        sh = wb.sheet_by_index(0)
 
-        for row in sh.iter_rows(min_row=2, values_only=True):
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.toText(row[1])
+                mpn = common.formatText(sh.cell_value(i, 1))
                 sku = f"HF {mpn}"
 
-                pattern = common.toInt(row[3])
+                pattern = common.formatInt(sh.cell_value(i, 3))
 
-                colorOptions = [9, 10, 11, 12, 13]
-                color = ' '.join(common.toText(
-                    row[i]) for i in colorOptions if common.toText(row[i]))
+                color = f"{common.formatText(sh.cell_value(i, 9))}"
+                if sh.cell_value(i, 10):
+                    color = f"{color} {sh.cell_value(i, 10)}"
 
-                name = f"{color} {common.toText(row[2])}"
+                name = f"{color} {common.formatText(sh.cell_value(i, 2))}"
 
                 # Categorization
                 brand = BRAND
-                type = common.toText(row[4])
-                manufacturer = BRAND
-                collection = common.toText(row[7])
+
+                type = common.formatText(sh.cell_value(i, 4))
+                if "Chandelier" in name:
+                    type = "Chandeliers"
+                elif "Pendant" in name:
+                    type = "Pendants"
+                elif "Mount" in name:
+                    type = "Flush Mounts"
+                elif "Semi-Flush" in name:
+                    type = "Semi-Flush Mounts"
+                elif "Sconce" in name:
+                    type = "Wall Sconces"
+                elif "Side Table" in name:
+                    type = "Side Tables"
+                elif "Console" in name:
+                    type = "Consoles"
+                elif "Accent Table" in name:
+                    type = "Accent Tables"
+                else:
+                    type = "Accessories"
+
+                manufacturer = brand
+                collection = common.formatText(sh.cell_value(i, 7))
 
                 # Main Information
-                description = f"{common.toText(row[72])} {common.toText(row[73])}"
+                description = f"{common.formatText(sh.cell_value(i, 72))} {common.formatText(sh.cell_value(i, 73))}"
 
-                width = common.toFloat(row[21])
-                length = common.toFloat(row[22])
-                height = common.toFloat(row[20])
+                width = common.formatFloat(sh.cell_value(i, 21))
+                height = common.formatFloat(sh.cell_value(i, 20))
+                length = common.formatFloat(sh.cell_value(i, 22))
 
                 # Additional Information
-                finish = ', '.join(common.toText(
-                    row[i]) for i in colorOptions if common.toText(row[i]))
+                weight = common.formatFloat(sh.cell_value(i, 26))
 
-                weight = common.toFloat(row[26])
+                finish = common.formatText(sh.cell_value(i, 9))
+                if common.formatText(sh.cell_value(i, 10)):
+                    finish = f"{finish}, {common.formatText(sh.cell_value(i, 10))}"
 
                 features = []
                 for id in range(74, 79):
-                    if row[id]:
-                        features.append(common.toText(row[id]))
-
-                # Measurement
-                uom = "Item"
+                    feature = common.formatText(sh.cell_value(i, id))
+                    if feature:
+                        features.append(feature)
 
                 # Pricing
-                cost = common.toFloat(row[17])
-                map = common.toFloat(row[18])
-                msrp = common.toFloat(row[19])
+                cost = common.formatFloat(sh.cell_value(i, 17))
+                map = common.formatFloat(sh.cell_value(i, 18))
+                msrp = common.formatFloat(sh.cell_value(i, 19))
 
                 if mpn in prices:
                     cost = prices[mpn]['cost']
                     map = prices[mpn]['map']
 
+                # Measurement
+                uom = "Per Item"
+
                 # Tagging
-                keywords = f"{row[79]}, {row[80]}, {row[89]}, {type}, {name}, {finish}"
+                tags = f"{sh.cell_value(i, 79)}, {sh.cell_value(i, 80)}, {sh.cell_value(i, 89)}, {type}, {name}"
                 colors = color
 
                 # Image
-                thumbnail = row[90]
+                thumbnail = sh.cell_value(i, 90)
 
                 # Status
                 statusP = True
                 statusS = False
 
-                # Fine-tuning
-                type_mapping = {
-                    "Chandeliers": "Chandelier",
-                    "Kitchen Pendants": "Pendant",
-                    "Pendants": "Pendant",
-                    "Semi-Flush": "Semi-Flush Mount",
-                    "Large Scale Fixtures": "Accessory",
-                    "Sconces - Direct": "Wall Sconce",
-                    "Floor Lamps": "Floor Lamp",
-                    "Torchieres": "Torchier",
-                    "Table Lamps": "Table Lamp",
-                    "Sconces - Pinup": "Wall Sconce",
-                    "Outdoor": "Accessory",
-                    "Home Accessories": "Accessory"
-                }
-                if type in type_mapping:
-                    type = type_mapping[type]
-
-                # Exceptions
-                if cost == 0 or not pattern or not color or not type:
-                    continue
-
             except Exception as e:
-                debug.warn(BRAND, str(e))
+                debug.debug(BRAND, 1, str(e))
                 continue
 
             product = {
@@ -201,27 +203,27 @@ class Processor:
                 'color': color,
                 'name': name,
 
-                'brand': brand,
+                'brand': BRAND,
                 'type': type,
                 'manufacturer': manufacturer,
                 'collection': collection,
 
-                'description': description,
                 'width': width,
-                'length': length,
+                'description': description,
                 'height': height,
+                'length': length,
 
                 'finish': finish,
                 'weight': weight,
                 'features': features,
 
-                'uom': uom,
-
                 'cost': cost,
                 'map': map,
                 'msrp': msrp,
 
-                'keywords': keywords,
+                'uom': uom,
+
+                'tags': tags,
                 'colors': colors,
 
                 'thumbnail': thumbnail,
@@ -231,6 +233,7 @@ class Processor:
             }
             products.append(product)
 
+        debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
     def image(self):

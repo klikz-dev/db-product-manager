@@ -5,7 +5,7 @@ from django.db.models import Q
 import os
 import environ
 import pymysql
-import openpyxl
+import xlrd
 import csv
 import codecs
 import time
@@ -16,7 +16,7 @@ formatText = common.formatText
 formatInt = common.formatInt
 formatFloat = common.formatFloat
 
-FILEDIR = "{}/files".format(os.path.dirname(
+FILEDIR = "{}/files/".format(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
 BRAND = "Surya"
@@ -114,124 +114,125 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
+        debug.debug(BRAND, 0, "Started fetching data from {}".format(BRAND))
+
         # Get Product Feed
         products = []
 
-        wb = openpyxl.load_workbook(
-            f"{FILEDIR}/surya-master.xlsx", data_only=True)
-        sh = wb.worksheets[0]
-
-        for row in sh.iter_rows(min_row=2, values_only=True):
+        wb = xlrd.open_workbook(f'{FILEDIR}/surya-master.xlsx')
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.toText(row[2])
+                mpn = formatText(sh.cell_value(i, 2))
+                debug.debug(BRAND, 0, "Fetching Product MPN: {}".format(mpn))
+
                 sku = f"SR {mpn}"
+                pattern = formatText(sh.cell_value(i, 5))
+                color = formatText(sh.cell_value(i, 3))
 
-                pattern = common.toText(row[3])
-                color = ' '.join(common.toText(row[12]).split(', ')[:2])
-
-                name = common.toText(row[4])
+                if sh.cell_value(i, 4):
+                    name = formatText(sh.cell_value(i, 4))
+                else:
+                    name = ""
 
                 # Categorization
                 brand = BRAND
-                type = common.toText(row[0])
+
+                typeText = formatText(sh.cell_value(i, 0))
+                if not typeText or "Swatch" in typeText:
+                    continue
+
+                type = typeText
+
+                type_mapping = {
+                    "Accent and Lounge Chairs": "Accent Chairs",
+                    "Bedding": "Beds",
+                    "Ceiling Lighting": "Lighting",
+                    "Made to Order Rugs": "Rug",
+                    "Rug Blanket": "Rug",
+                    "Rugs": "Rug",
+                    "Wall Art - Stock": "Wall Art"
+                }
+
+                if typeText in type_mapping:
+                    type = type_mapping[typeText]
+                else:
+                    type = typeText
+
                 manufacturer = BRAND
-                collection = common.toText(row[5])
+                collection = pattern
 
                 # Main Information
-                description = common.toText(row[6])
+                description = formatText(sh.cell_value(i, 6))
+                usage = typeText
+                width = formatFloat(sh.cell_value(i, 19))
+                height = formatFloat(sh.cell_value(i, 20))
+                depth = formatFloat(sh.cell_value(i, 18))
 
-                width = common.toFloat(row[19])
-                length = common.toFloat(row[20])
-                height = common.toFloat(row[18])
+                if height == 0 and depth != 0:
+                    height = depth
+                    depth = 0
 
-                if length == 0 and height != 0:
-                    length = height
-                    height = 0
-
-                size = common.toText(row[16])
+                size = formatText(sh.cell_value(i, 16))
 
                 # Additional Information
-                material = common.toText(row[13])
-                care = common.toText(row[71])
-                country = common.toText(row[28])
-                upc = common.toInt(row[8])
-                weight = common.toFloat(row[21]) or 5
+                material = formatText(sh.cell_value(i, 13))
+                care = formatText(sh.cell_value(i, 71))
+                country = formatText(sh.cell_value(i, 28))
+                upc = formatInt(sh.cell_value(i, 8))
 
+                weight = formatFloat(sh.cell_value(i, 21)) or 5
                 specs = [
-                    ("Colors", common.toText(row[12])),
+                    ("Colors", formatText(sh.cell_value(i, 12))),
+                    ("Weight", f"{weight} lbs"),
                 ]
 
                 # Measurement
-                uom = "Item"
+                uom = "Per Item"
 
                 # Pricing
-                cost = common.toFloat(row[9])
-                map = common.toFloat(row[10])
+                cost = formatFloat(sh.cell_value(i, 9))
+                map = formatFloat(sh.cell_value(i, 10))
+
+                if cost == 0:
+                    debug.debug(BRAND, 1, "Produt Cost error {}".format(mpn))
+                    continue
 
                 # Tagging
-                keywords = f"{common.toText(row[14])}, {common.toText(row[41])}, {type}, {collection}, {pattern}"
-                if common.toText(row[31]) == "Yes":
-                    keywords = f"{keywords}, Outdoor"
+                tags = f"{formatText(sh.cell_value(i, 14))}, {formatText(sh.cell_value(i, 41))}"
+                if formatText(sh.cell_value(i, 31)) == "Yes":
+                    tags = "{}, Outdoor".format(tags)
+                tags = f"{tags}, {type}, {collection}, {pattern}"
 
-                colors = common.toText(row[12])
-
-                # Image
-                thumbnail = row[92]
-
-                roomsets = []
-                for id in range(93, 99):
-                    if row[id] != "":
-                        roomsets.append(row[id])
+                colors = formatText(sh.cell_value(i, 12))
 
                 # Status
-                if "Swatch" in type:
-                    statusP = False
-                else:
-                    statusP = True
+                statusP = True
                 statusS = False
 
-                if common.toText(row[30]) == "Yes":
+                if formatText(sh.cell_value(i, 30)) == "Yes":
                     bestSeller = True
                 else:
                     bestSeller = False
 
+                # Image
+                thumbnail = sh.cell_value(i, 92)
+
+                roomsets = []
+                for id in range(93, 99):
+                    if sh.cell_value(i, id) != "":
+                        roomsets.append(sh.cell_value(i, id))
+
                 # Shipping
-                shippingHeight = common.toFloat(row[24])
-                shippingWidth = common.toFloat(row[25])
-                shippingDepth = common.toFloat(row[23])
-                shippingWeight = common.toFloat(row[22])
+                shippingHeight = common.formatFloat(sh.cell_value(i, 24))
+                shippingWidth = common.formatFloat(sh.cell_value(i, 25))
+                shippingDepth = common.formatFloat(sh.cell_value(i, 23))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 22))
                 if shippingWidth > 95 or shippingHeight > 95 or shippingDepth > 95 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
-
-                # Fine-tuning
-                type_mapping = {
-                    "Rugs": "Rug",
-                    "Wall Hangings": "Wall Hanging",
-                    "Mirrors": "Mirror",
-                    "Bedding": "Bed",
-                    "Wall Art - Stock": "Wall Art",
-                    "Throws": "Throw",
-                    "Ceiling Lighting": "Lighting",
-                    "Accent and Lounge Chairs": "Accent Chair",
-                    "Decorative Accents": "Decorative Accent",
-                    "Sofas": "Sofa",
-                    "Wall Sconces": "Wall Sconce",
-                    "Rug Blanket": "Rug",
-                    "Bedding Inserts": "Bed",
-                    "Made to Order Rugs": "Rug",
-                    "Printed Rug Set (3pc)": "Rug",
-                }
-                if type in type_mapping:
-                    type = type_mapping[type]
-
-                name = f"{collection} {pattern} {color} {size} {type}"
-
-                # Exceptions
-                if cost == 0 or not pattern or not color or not type:
-                    continue
 
             except Exception as e:
                 debug.debug(BRAND, 1, str(e))
@@ -240,6 +241,7 @@ class Processor:
             product = {
                 'mpn': mpn,
                 'sku': sku,
+                'upc': upc,
                 'pattern': pattern,
                 'color': color,
                 'name': name,
@@ -250,37 +252,38 @@ class Processor:
                 'collection': collection,
 
                 'description': description,
+                'usage': usage,
                 'width': width,
-                'length': length,
                 'height': height,
+                'depth': depth,
                 'size': size,
+                'specs': specs,
 
                 'material': material,
                 'care': care,
                 'country': country,
-                'weight': weight,
-                'upc': upc,
 
-                'specs': specs,
+                'weight': shippingWeight,
 
                 'uom': uom,
+
+                'tags': tags,
+                'colors': colors,
 
                 'cost': cost,
                 'map': map,
 
-                'keywords': keywords,
-                'colors': colors,
-
-                'thumbnail': thumbnail,
-                'roomsets': roomsets,
-
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
-                'bestSeller': bestSeller
+                'bestSeller': bestSeller,
+
+                'thumbnail': thumbnail,
+                'roomsets': roomsets,
             }
             products.append(product)
 
+        debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
     def inventory(self):

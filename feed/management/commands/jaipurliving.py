@@ -5,7 +5,9 @@ from feed.models import JaipurLiving
 import os
 import environ
 import pymysql
-import openpyxl
+import xlrd
+import csv
+import codecs
 import time
 
 from library import database, debug, common
@@ -27,7 +29,7 @@ class Command(BaseCommand):
         if "feed" in options['functions']:
             processor = Processor()
             processor.databaseManager.downloadFileFromSFTP(
-                src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipurliving-master.xlsx", fileSrc=True, delete=False)
+                src="/jaipur/Jaipur Living Master Data Template.xlsx", dst=f"{FILEDIR}/jaipur-living-master.xlsx", fileSrc=True, delete=False)
             products = processor.fetchFeed()
             processor.databaseManager.writeFeed(products=products)
 
@@ -116,48 +118,74 @@ class Processor:
         self.con.close()
 
     def fetchFeed(self):
-        # Get Product Feed
+        debug.debug(BRAND, 0, f"Started fetching data from {BRAND}")
+
+        # Stocks
+        stocks = {}
+        f = open(f"{FILEDIR}/jaipur-living-inventory.csv", "rb")
+        cr = csv.reader(codecs.iterdecode(f, encoding="ISO-8859-1"))
+        for row in cr:
+            mpn = common.formatText(row[1])
+            stockP = common.formatInt(row[5])
+            stockNote = common.formatText(row[6])
+            stocks[mpn] = (stockP, stockNote)
+
+        # Feed
         products = []
-
-        wb = openpyxl.load_workbook(
-            f"{FILEDIR}/jaipurliving-master.xlsx", data_only=True)
-        sh = wb.worksheets[0]
-
-        for row in sh.iter_rows(min_row=2, values_only=True):
+        wb = xlrd.open_workbook(f"{FILEDIR}/jaipur-living-master.xlsx")
+        sh = wb.sheet_by_index(0)
+        for i in range(1, sh.nrows):
             try:
                 # Primary Keys
-                mpn = common.toText(row[7])
+                mpn = common.formatText(sh.cell_value(i, 7))
                 sku = f"JL {mpn}"
 
-                pattern = common.toText(row[13])
-                if common.toText(row[53]):
-                    pattern = f"{pattern} {common.toText(row[53])}"
+                pattern = common.formatText(sh.cell_value(i, 13))
+                if common.formatText(sh.cell_value(i, 53)):
+                    pattern = f"{pattern} {common.formatText(sh.cell_value(i, 53))}"
 
-                color = common.toText(row[56])
-                if common.toText(row[57]):
-                    color = f"{color} / {common.toText(row[57])}"
+                color = common.formatText(sh.cell_value(i, 56))
+                if common.formatText(sh.cell_value(i, 57)):
+                    color = f"{color} / {common.formatText(sh.cell_value(i, 57))}"
 
-                name = common.toText(row[9]).title().replace(BRAND, "").strip()
+                upc = common.formatInt(sh.cell_value(i, 6))
+
+                name = common.formatText(sh.cell_value(i, 9)).title()
+                name = name.replace(BRAND, "").strip()
 
                 # Categorization
-                brand = BRAND
                 manufacturer = BRAND
-                type = common.toText(row[0]).title()
-                collection = common.toText(row[12])
+
+                type = common.formatText(sh.cell_value(i, 0)).title()
+                if type == "Accent Furniture":
+                    type = "Accents"
+                if type == "Décor":
+                    type = "Decor"
+                if "Throw" in name:
+                    type = "Throws"
+
+                collection = common.formatText(sh.cell_value(i, 12))
 
                 # Main Information
-                description = row[25]
-                width = common.toFloat(row[21])
-                length = common.toFloat(row[22])
-                height = common.toFloat(row[24])
+                description = sh.cell_value(i, 25)
+                width = common.formatFloat(sh.cell_value(i, 21))
+                length = common.formatFloat(sh.cell_value(i, 22))
+                height = common.formatFloat(sh.cell_value(i, 24))
 
-                size = common.toText(row[18]).replace("X", " x ").replace(
+                size = common.formatText(sh.cell_value(i, 18))
+                size = size.replace("X", " x ").replace(
                     "Folded", "").replace("BOX", "").replace("  ", " ").strip()
 
                 # Additional Information
-                front = common.toText(row[35])
-                back = common.toText(row[36])
-                filling = common.toText(row[37])
+                features = []
+                for id in range(26, 32):
+                    feature = common.formatText(sh.cell_value(i, id))
+                    if feature:
+                        features.append(feature)
+
+                front = common.formatText(sh.cell_value(i, 35))
+                back = common.formatText(sh.cell_value(i, 36))
+                filling = common.formatText(sh.cell_value(i, 37))
 
                 material = f"Front: {front}"
                 if back:
@@ -165,72 +193,66 @@ class Processor:
                 if filling:
                     material += f", Filling: {filling}"
 
-                care = common.toText(row[39])
-                country = common.toText(row[32])
-                upc = common.toInt(row[6])
-                weight = common.toFloat(row[88])
-
-                features = []
-                for id in range(26, 32):
-                    if row[id]:
-                        features.append(common.toText(row[id]))
+                care = common.formatText(sh.cell_value(i, 39))
+                country = common.formatText(sh.cell_value(i, 32))
 
                 # Measurement
-                uom = "Item"
+                uom = "Per Item"
 
                 # Pricing
-                cost = common.toFloat(row[15])
-                map = common.toFloat(row[16])
-                msrp = common.toFloat(row[17])
+                cost = common.formatFloat(sh.cell_value(i, 15))
+                map = common.formatFloat(sh.cell_value(i, 16))
+                msrp = common.formatFloat(sh.cell_value(i, 17))
 
                 # Tagging
-                keywords = ", ".join(
-                    (row[19], row[50], row[51], pattern, name, description, type, ", ".join(features)))
+                featuresText = ", ".join(features)
+                tags = ", ".join((sh.cell_value(i, 19), sh.cell_value(i, 50), sh.cell_value(
+                    i, 51), pattern, name, description, type, featuresText))
                 colors = color
 
                 # Image
-                thumbnail = row[89]
+                thumbnail = sh.cell_value(i, 89)
                 if thumbnail == "http://cdn1-media.s3.us-east-1.amazonaws.com/product_links/Product_Images/":
-                    thumbnail = f"{thumbnail}{str(row[8]).strip()}.jpg"
+                    thumbnail = f"{thumbnail}{str(sh.cell_value(i, 8)).strip()}.jpg"
 
                 roomsets = []
                 for id in range(90, 104):
-                    if row[id]:
-                        roomsets.append(row[id])
+                    roomset = sh.cell_value(i, id)
+                    if roomset != "":
+                        roomsets.append(roomset)
 
                 # Status
-                if row[19] == "Swatches":
+                if sh.cell_value(i, 19) == "Swatches":
                     statusP = False
                 else:
                     statusP = True
+
                 statusS = False
 
+                # Stock
+                if mpn in stocks:
+                    stockP, stockNote = stocks[mpn]
+                else:
+                    stockP, stockNote = (0, "")
+
                 # Shipping
-                shippingWidth = common.toFloat(row[86])
-                shippingLength = common.toFloat(row[85])
-                shippingHeight = common.toFloat(row[87])
-                shippingWeight = common.toFloat(row[88])
+                shippingWidth = common.formatFloat(sh.cell_value(i, 86))
+                shippingLength = common.formatFloat(sh.cell_value(i, 85))
+                shippingHeight = common.formatFloat(sh.cell_value(i, 87))
+                shippingWeight = common.formatFloat(sh.cell_value(i, 88))
+
                 if shippingWidth > 95 or shippingLength > 95 or shippingHeight > 95 or shippingWeight > 40:
                     whiteGlove = True
                 else:
                     whiteGlove = False
 
-                # Fine-tuning
-                name = f"{collection} {pattern} {color} {size} {type}"
-
-                type_mapping = {
-                    "Accent Furniture": "Furniture",
-                    "Décor": "Throw",
-                }
-                if type in type_mapping:
-                    type = type_mapping[type]
-
-                # Exceptions
-                if cost == 0 or not pattern or not color or not type:
-                    continue
+                if stockP > 0:
+                    quickShip = True
+                else:
+                    quickShip = False
 
             except Exception as e:
-                debug.warn(BRAND, str(e))
+                debug.debug(BRAND, 1, str(e))
                 continue
 
             product = {
@@ -238,9 +260,10 @@ class Processor:
                 'sku': sku,
                 'pattern': pattern,
                 'color': color,
+                'upc': upc,
                 'name': name,
 
-                'brand': brand,
+                'brand': BRAND,
                 'type': type,
                 'manufacturer': manufacturer,
                 'collection': collection,
@@ -251,32 +274,37 @@ class Processor:
                 'height': height,
                 'size': size,
 
+                'features': features,
                 'material': material,
                 'care': care,
                 'country': country,
-                'weight': weight,
-                'upc': upc,
 
-                'features': features,
-
-                'uom': uom,
+                'weight': shippingWeight,
 
                 'cost': cost,
                 'map': map,
                 'msrp': msrp,
 
-                'keywords': keywords,
+                'uom': uom,
+
+                'tags': tags,
                 'colors': colors,
 
                 'thumbnail': thumbnail,
                 'roomsets': roomsets,
 
+                'stockP': stockP,
+                'stockNote': stockNote,
+
                 'statusP': statusP,
                 'statusS': statusS,
                 'whiteGlove': whiteGlove,
+                'quickShip': quickShip
+
             }
             products.append(product)
 
+        debug.debug(BRAND, 0, "Finished fetching data from the supplier")
         return products
 
     def hires(self):

@@ -9,7 +9,7 @@ class Feed(models.Model):
     color = models.CharField(
         max_length=200, default=None, null=True, blank=True)
     name = models.CharField(
-        max_length=200, unique=True, default=None, null=True, blank=True)
+        max_length=200, default=None, null=True, blank=True)
     productId = models.CharField(
         max_length=200, default=None, null=True, blank=True)
 
