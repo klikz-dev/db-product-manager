@@ -333,7 +333,7 @@ def importOrder(shopifyOrder):
                 weight = 453.592
 
             variantTitle = line_item['variant_title'].split('/')[0].strip()
-            if 'Sample -' in variantTitle:
+            if 'Sample' in variantTitle:
                 if 'Sample' not in orderTypes:
                     orderTypes.append('Sample')
             else:
