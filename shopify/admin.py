@@ -206,6 +206,7 @@ class ProductAdmin(admin.ModelAdmin):
             'manufacturerPartNumber',
             'pattern',
             'color',
+            'productTypeId',
         ]}),
         ("Content", {'fields': [
             'title',
