@@ -53,7 +53,7 @@ class Processor:
             csr.execute(
                 "UPDATE ProductVariant SET Price = 19.99 WHERE ProductID = {} AND IsDefault = 1".format(productID))
             csr.execute(
-                "UPDATE ProductVariant SET Price = 16.99 WHERE ProductID = {} AND Name LIKE 'Trade - %'".format(productID))
+                "UPDATE ProductVariant SET Price = 16.99 WHERE ProductID = {} AND Name LIKE 'Trade%'".format(productID))
             con.commit()
             try:
                 csr.execute(
@@ -63,7 +63,7 @@ class Processor:
                 continue
 
         variantIDs = []
-        csr.execute("SELECT VariantID FROM Product P JOIN ProductVariant PV ON P.ProductID = PV.ProductID WHERE PV.Name LIKE 'Trade - %' AND PV.Published = 1 AND P.IsOutlet = 1 AND P.Published = 1")
+        csr.execute("SELECT VariantID FROM Product P JOIN ProductVariant PV ON P.ProductID = PV.ProductID WHERE PV.Name LIKE 'Trade%' AND PV.Published = 1 AND P.IsOutlet = 1 AND P.Published = 1")
         for row in csr.fetchall():
             variantIDs.append(row[0])
 

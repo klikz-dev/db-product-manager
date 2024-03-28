@@ -266,11 +266,11 @@ class Processor:
                 for row in rows:
                     if row[2] == 1:
                         v1 = row[1]
-                    elif "Trade - " in row[0]:
+                    elif "Trade" in row[0]:
                         v2 = row[1]
-                    elif "Free Sample - " in row[0]:
+                    elif "Free Sample" in row[0]:
                         v4 = row[1]
-                    elif "Sample - " in row[0]:
+                    elif "Sample" in row[0]:
                         v3 = row[1]
 
                 # Filters

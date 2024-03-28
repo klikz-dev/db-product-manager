@@ -198,10 +198,10 @@ class LineItemViewSet(viewsets.ModelViewSet):
         type = self.request.query_params.get('type')
         if type == 's':
             lineItems = lineItems.filter(
-                orderedProductVariantTitle__icontains='Sample -')
+                orderedProductVariantTitle__icontains='Sample')
         if type == 'o':
             lineItems = lineItems.exclude(
-                orderedProductVariantTitle__icontains='Sample -')
+                orderedProductVariantTitle__icontains='Sample')
         ###########################
 
         # Filter by Status

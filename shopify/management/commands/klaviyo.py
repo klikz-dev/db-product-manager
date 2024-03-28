@@ -70,7 +70,7 @@ class Processor:
 
             item = None
             for lineItem in lineItems:
-                if "Sample -" in lineItem.orderedProductVariantTitle and not "Free Sample -" in lineItem.orderedProductVariantTitle:
+                if "Sample" in lineItem.orderedProductVariantTitle and not "Free Sample" in lineItem.orderedProductVariantTitle:
                     item = lineItem
 
             if not item:
@@ -89,9 +89,9 @@ class Processor:
             variant = None
             try:
                 variants = Variant.objects.filter(productId=product.productId).exclude(
-                    Q(name__startswith='Sample -') |
-                    Q(name__startswith='Trade -') |
-                    Q(name__startswith='Free sample -')
+                    Q(name__startswith='Sample') |
+                    Q(name__startswith='Trade') |
+                    Q(name__startswith='Free Sample')
                 )
                 if len(variants) > 0:
                     variant = variants[0]

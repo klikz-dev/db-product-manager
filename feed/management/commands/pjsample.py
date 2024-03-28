@@ -61,7 +61,7 @@ class Command(BaseCommand):
             orderedProductManufacturer="Phillip Jeffries Wallpaper")
 
         lineItems = lineItems.filter(
-            orderedProductVariantTitle__icontains='Sample -')
+            orderedProductVariantTitle__icontains='Sample')
 
         lineItems = lineItems.exclude(
             Q(order__status__icontains='Processed') |

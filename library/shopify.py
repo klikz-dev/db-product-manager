@@ -279,7 +279,7 @@ class ProductData:
                 {"key": "Published", "value": vPublished,
                     "namespace": "inventory", "type": "single_line_text_field"}
             ]
-            if "Sample - " not in vName:
+            if "Sample" not in vName:
                 if minimum != None and minimum != 1:
                     vMeta.append({"key": "MinimumQuantity", "value": minimum,
                                  "namespace": "inventory", "type": "single_line_text_field"})
@@ -302,7 +302,7 @@ class ProductData:
                 "weight_unit": "lb",
                 "metafields": vMeta,
             }
-            if "Sample - " in vName:
+            if "Sample" in vName:
                 variant.update({"taxable": False})
             if gtin != None and gtin != "":
                 variant.update({"barcode": gtin})
@@ -341,7 +341,7 @@ class ProductData:
             {"key": "Published", "value": vPublished,
                 "namespace": "inventory", "type": "single_line_text_field"}
         ]
-        if "Sample - " not in vName:
+        if "Sample" not in vName:
             if minimum != None and minimum != 1:
                 vMeta.append({"key": "MinimumQuantity", "value": minimum,
                              "namespace": "inventory", "type": "single_line_text_field"})
@@ -364,7 +364,7 @@ class ProductData:
             "weight_unit": "lb",
             "metafields": vMeta,
         }
-        if "Sample - " in vName:
+        if "Sample" in vName:
             variant.update({"taxable": False})
         if gtin != None and gtin != "":
             variant.update({"barcode": gtin})
@@ -405,7 +405,7 @@ def NewProductBySku(sku, con):
 
     # Product Cost
     cost = pd.cost
-    if "Sample - " in title:
+    if "Sample" in title:
         cost = 0
 
     # Product Variants
@@ -649,7 +649,7 @@ def UpdatePriceToShopify(productID, con):
         LEFT JOIN Product P ON P.ProductID = PV.ProductID
         LEFT JOIN ProductManufacturer PM ON PM.SKU = P.SKU
         LEFT JOIN Manufacturer M ON M.ManufacturerID = PM.ManufacturerID
-        WHERE PV.ProductID = {} AND PV.Name NOT LIKE '%Sample - %'
+        WHERE PV.ProductID = {} AND PV.Name NOT LIKE '%Sample%'
         """.format(productID))
     for row in csr.fetchall():
         variantID = row[0]
