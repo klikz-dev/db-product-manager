@@ -186,8 +186,11 @@ class LineItemViewSet(viewsets.ModelViewSet):
         # Filter by Brand Name
         brand = self.request.query_params.get('brand')
         manufacturers = []
+        manufacturers.append(brand)
         for m in Manufacturer.objects.filter(brand=brand):
-            manufacturers.append(m)
+            manufacturers.append(m.name)
+            manufacturers.append(m.name.replace("Wallpaper", "").replace(
+                "Fabric", "").replace("Trim", "").replace("Pillow", "").strip())
 
         if brand is not None and len(manufacturers) > 0:
             lineItems = lineItems.filter(
