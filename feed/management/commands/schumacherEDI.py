@@ -256,7 +256,7 @@ class Command(BaseCommand):
                             'HDR_SHIP_PHONE': phone,
                             'HDR_SHIP_METHOD': shippingMethod,
                             'HDR_SHIP_INSTRUCTIONS': shipInstruction,
-                            'HDR_PACK_INSTRUCTIONS': '',
+                            'HDR_PACK_INSTRUCTIONS': packInstruction,
                             'ACK_EMAIL_ADDRESS': ack_email_address,
                         })
 
