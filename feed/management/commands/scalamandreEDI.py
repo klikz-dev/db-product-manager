@@ -68,7 +68,8 @@ class Command(BaseCommand):
 
         print(token)
 
-        try:
+        # try:
+        if True:
             con = pymysql.connect(host=db_host, user=db_username,
                                   passwd=db_password, db=db_name, connect_timeout=5)
             csr = con.cursor()
@@ -265,10 +266,12 @@ class Command(BaseCommand):
                               "Scalamandre EDI ERROR: PO: {} <br/>Payload: {}".format(orderNumber, json.dumps(payload)))
                         continue
 
-                    self.getRef(orderNumber, data[0]['ORDER_NO'])
+                    orderRef = data[0]['SAMPLEORDERITEMS'][0]['ORDER_NO']
+
+                    self.getRef(orderNumber, orderRef)
 
                     debug("Scalamandre EDI", 0, "Successfully Submit the Scalamandre Samples. PO: {}, REF: {}".format(
-                        orderNumber, data[0]['ORDER_NO']))
+                        orderNumber, orderRef))
 
                 if len(orders) > 0:
                     url = "http://scala-api.scalamandre.com/api/ScalaFeedAPI/SubmitOrder"
@@ -357,9 +360,9 @@ class Command(BaseCommand):
             csr.close()
             con.close()
 
-        except Exception as e:
-            debug("Scalamandre EDI", 2,
-                  "Scalamandre EDI ERROR: {}".format(str(e)))
+        # except Exception as e:
+        #     debug("Scalamandre EDI", 2,
+        #           "Scalamandre EDI ERROR: {}".format(str(e)))
 
     def getRef(self, PONumber, refNumber):
         con = pymysql.connect(host=db_host, user=db_username,
