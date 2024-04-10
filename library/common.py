@@ -119,6 +119,7 @@ def backup():
 
 
 def importOrder(shopifyOrder):
+    print(shopifyOrder['order_number'])
     shopifyCustomer = shopifyOrder['customer']
 
     if shopifyOrder['total_price'] == 0 and "trade" not in shopifyCustomer['tags']:
@@ -154,7 +155,8 @@ def importOrder(shopifyOrder):
     customer.state = shopifyCustomer['state']
     customer.note = shopifyCustomer['note']
     customer.tags = shopifyCustomer['tags']
-    customer.acceptsMarketing = shopifyCustomer['email_marketing_consent']['state'] == 'subscribed'
+    customer.acceptsMarketing = shopifyCustomer['email_marketing_consent'][
+        'state'] == 'subscribed' if shopifyCustomer['email_marketing_consent'] else False
     customer.createdAt = shopifyCustomer['created_at']
 
     customer.save()
