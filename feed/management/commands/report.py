@@ -4,9 +4,11 @@ import os
 import environ
 import pymysql
 import csv
+from django.utils import timezone
+import datetime
 
 from library import debug, common
-from shopify.models import Customer, Address
+from shopify.models import Customer, Address, Order
 from feed.models import Roomvo
 
 FILEDIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/files"
@@ -349,7 +351,7 @@ class Processor:
                 debug.debug(PROCESS, 1, str(e))
 
     def customers(self):
-        with open(FILEDIR + 'customers.csv', 'w', newline='') as customersFile:
+        with open(FILEDIR + '/customers.csv', 'w', newline='') as customersFile:
             csvWriter = csv.DictWriter(customersFile, fieldnames=[
                 'email',
                 'fname',
@@ -380,10 +382,16 @@ class Processor:
                 'total': 'Total Spent',
             })
 
-            customers = Customer.objects.all()
+            # parse the date string to a date object
+            date_filter = datetime.datetime.strptime(
+                "2024-04-10", "%Y-%m-%d").date()
+            datetime_filter = timezone.make_aware(
+                datetime.datetime.combine(date_filter, datetime.time.min))
+            orders = Order.objects.filter(orderDate__gte=datetime_filter)
 
-            total = len(customers)
-            for index, customer in enumerate(customers):
+            for index, order in enumerate(orders):
+                customer = order.customer
+
                 try:
                     address = Address.objects.get(
                         addressId=customer.defaultAddressId)
@@ -405,4 +413,5 @@ class Processor:
                     'total': customer.totalSpent,
                 })
 
-                debug.debug(PROCESS, 0, f"{index+1}/{total}: {customer.email}")
+                debug.debug(
+                    PROCESS, 0, f"{index+1}/{len(orders)}: {customer.email}")
